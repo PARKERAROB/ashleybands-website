@@ -13,6 +13,7 @@ export default function SiteNav() {
         <Link href="/info/the-band-folder">Resources</Link>
         <Link href="/info/marching-band-2026">Marching Band</Link>
         <Link href="/info/corporate-sponsorship">Support</Link>
+        <Link href="/sitemap-page">All Pages</Link>
         <Link href="/assistant">Assistant</Link>
         <Link href="/members">Members</Link>
       </nav>

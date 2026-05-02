@@ -472,3 +472,48 @@ h2 {
     max-width: 92%;
   }
 }
+
+.sitemap-section {
+  margin-top: 40px;
+}
+
+.sitemap-section h2 {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.sitemap-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sitemap-list li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sitemap-list a {
+  font-weight: 600;
+  color: var(--garnet);
+  text-decoration: none;
+}
+
+.sitemap-list a:hover {
+  text-decoration: underline;
+}
+
+.sitemap-summary {
+  font-size: 14px;
+  color: var(--muted);
+}
