@@ -54,10 +54,12 @@ export default function HomePage() {
         <div className="chat-hero-inner">
           <p className="chat-hero-eyebrow">Eugene Ashley High School · Wilmington, NC</p>
           <h1 className="chat-hero-headline">
-            Bands of<br />Ashley High School
+            <span className="chat-hero-the">The Bands of</span>
+            <span className="chat-hero-name">Ashley High School</span>
+            <span className="chat-hero-ensembles">Concert Bands · Marching Band · Percussion Ensemble · Jazz Band · Colorguard · Pep Band</span>
           </h1>
           <p className="chat-hero-sub">
-            Ask anything about the band program — dates, attire, marching band, trips, and more.
+            Ask anything about the program — dates, attire, trips, marching band, and more.
           </p>
           <form className="chat-hero-form" onSubmit={handleSubmit}>
             <input
