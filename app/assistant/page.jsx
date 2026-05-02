@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import ChatAssistant from "@/components/ChatAssistant";
 
 export const metadata = {
@@ -15,7 +16,9 @@ export default function AssistantPage() {
           family-specific, or financial-account questions should go directly to Mr. Parker.
         </p>
       </section>
-      <ChatAssistant />
+      <Suspense fallback={<div className="chat-shell" />}>
+        <ChatAssistant />
+      </Suspense>
     </main>
   );
 }
