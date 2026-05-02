@@ -64,8 +64,8 @@ a {
 nav {
   display: flex;
   align-items: center;
-  gap: 18px;
-  font-size: 14px;
+  gap: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 
