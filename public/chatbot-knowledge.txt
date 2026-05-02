@@ -1,0 +1,928 @@
+ASHLEY HIGH SCHOOL BAND PUBLIC KNOWLEDGE BASE
+
+The Google Calendar is the official source of truth for dates and times. If a date conflicts with another source, tell families to use the calendar or contact Mr. Parker.
+
+**Eugene Ashley High School Band Program**
+555 Halyburton Memorial Parkway · Wilmington, NC 28412
+Phone: (910) 790-2360
+
+Nearly 100 student musicians per semester.
+2025 marks the 25th Anniversary of music at Ashley High School.
+
+**Mission:** Empowering students to reach their fullest musical and personal potential while serving our school and community through performance, leadership, and a shared pursuit of excellence.
+
+**Ensembles:** Concert Bands · Marching Band (Screaming Eagle Regiment) · Percussion Ensemble · Jazz Band · Colorguard · Pep Band
+
+Ashley proudly hosts the **NCBA Eastern District MPA South** each March.
+
+---
+| Name | Role | Email | Phone |
+|------|------|-------|-------|
+| Robert Parker | Director of Bands, Ashley HS | robert.parker@nhcs.net | (910) 790-2360 |
+| Jessica Meade | Murray MS Director | jessica.meade@nhcs.net | — |
+| Mattie Pennington | Myrtle Grove MS Director | mattie.pennington@nhcs.net | — |
+| Dakota Pittsley | UNCW Intern | dakota.pittsley@nhcs.net | — |
+| Peyton Chitty | 504 Coordinator, Ashley HS | peyton.chitty@nhcs.net | — |
+| Angela Gaines | Payroll, Ashley HS | — | — |
+
+Rob's current title: **Director of Bands, Ashley High School** and **South MPA Chair, NCBAED**.
+"President NCBA Eastern District" is a past role — do not use unless Rob confirms it's current.
+
+| Jake Wentzek | President, NCBA Eastern District | jake_wentzek@pender.k12.nc.us | — |
+
+---
+**President:** Carrie Lewis — carrielewis425@yahoo.com
+**Board members:** Jenny Heglar, Sarah Hardee, Rachel Zizzamia, Hannah Hales, Liz Hicks
+
+The Ashley High School Band Boosters is a **501(c)(3) nonprofit**.
+Tax ID: **20-5605218** — all donations tax-deductible.
+Payment: Check payable to "Ashley High School Band Boosters" or online payment.
+
+---
+Google Calendar remains the official source of truth.
+
+| Event | Date / Time | Notes |
+|---|---|---|
+| Fall Concert | October 22, 2026 at 7:00 PM | Added to Bands of AHS calendar |
+| Winter Concert | December 8, 2026 at 7:00 PM | Confirmed |
+| Conductor's Clinic and Concert (CCC) | February 22-27, 2027; weekend clinic Feb 26-27; concert Feb 27, 2027 at 3:00 PM | Added to Bands of AHS calendar |
+| MPA | March 18-19, 2027 | Added to Bands of AHS calendar |
+| Spring Concert | May 11, 2027 at 7:00 PM | Confirmed by Rob Apr 24, 2026 |
+
+---
+### Google Calendar
+**Official source of truth for all band events.** If there is a date conflict, always assume the Google Calendar is correct.
+
+Subscribe (.ics): `https://calendar.google.com/calendar/ical/nhcs.net_3olclj1g9acb2qp851rgq826to@group.calendar.google.com/public/basic.ics`
+
+- **iPhone/iPad:** Settings → Calendar → Accounts → Add Account → Other → Add Subscribed Calendar → paste link
+- **Android/Google Calendar:** Click "Add to Google Calendar" on band website → click "+ Google Calendar"
+- Always subscribe (don't download) for automatic real-time updates.
+
+### My Music Office (MMO)
+Every student AND at least one parent must have an active account at https://www.mymusicoffice.com/
+
+Used for: student info, communications, instrument/music databases, payments, booster records.
+
+Login: Username provided by Mr. Parker. First login prompts password reset.
+Forgot password: Click "Forgot Your Login Information" on MMO login page.
+Still having trouble: Email Mr. Parker at robert.parker@nhcs.net
+
+In MMO: update contact info · view/pay financial account · print statements · view locker assignments · check instrument/uniform/equipment assignments · access band calendar · message Mr. Parker directly.
+
+Multiple students: Link Family Access Accounts via Control Panel → "Link Family Access Accounts" (same email must be on all accounts).
+
+### Gmail — Staff Listserv
+Ashley-wide teacher/staff communications sent via Gmail staff listserv. Used when Rob needs to reach all 2nd period (or all) teachers — e.g., guest visitor notices.
+
+### FOCUS
+FOCUS happens on Tuesdays and Thursdays at the end of the period, during the last 30 minutes.
+
+For schoolwide FOCUS objectives assigned to Rob, default to 2nd period unless Rob says otherwise. Treat these as calendar blocks, not generic next-action tasks, because the work has to happen during the FOCUS window.
+
+Current 2025-2026 Ashley bell schedule:
+
+| Block | Time |
+|---|---|
+| 1st Block | 8:30-10:05 |
+| 2nd Block | 10:11-11:46 |
+| 3rd Block | 11:52-1:57 |
+| A Lunch | 11:52-12:17 |
+| B Lunch | 12:42-1:07 |
+| C Lunch | 1:32-1:57 |
+| 4th Block | 2:03-3:40 |
+
+2nd-period FOCUS window: **11:16-11:46 AM**.
+
+Source: Ashley official Daily Schedule page, `https://ashley.nhcs.net/about-us/daily-schedule`; image archived at `knowledge/assets/BellSchedule-Revised25-2026.png`.
+
+### NHCS School Calendars / Annual Schedule Maintenance
+
+Official NHCS school-year calendar page: `https://www.nhcs.net/about-us/calendar/print-calendars`
+
+Traditional school calendar anchors:
+
+| School year | First teacher/workday setup anchor | First student day | Source |
+|---|---|---|---|
+| 2025-2026 | Aug 15, 2025 undesignated teacher workday; Aug 18-25 designated teacher workdays | Aug 26, 2025 | `knowledge/assets/nhcs-calendars/2025-2026-traditional.pdf` |
+| 2026-2027 | Aug 13-14, 2026 undesignated teacher workdays; Aug 17-21 designated teacher workdays | Aug 24, 2026 | `knowledge/assets/nhcs-calendars/2026-2027-traditional.pdf` |
+
+Annual PKA trigger: at the first teacher workday / school-year setup window, verify Ashley's official Daily Schedule page, archive the current bell-schedule image, update this bell/FOCUS section, and update any FOCUS calendar assumptions. Apple Reminders has a 2026-08-13 trigger for the 2026-2027 update.
+
+### Google Chat
+Students receive invitations to class-specific Google Chat groups (school-managed, NHCS accounts only, all messages archived).
+
+---
+
+Reference moved to `knowledge/student-required-items.md`.
+
+---
+
+Reference moved to `knowledge/instrument-reference.md`.
+
+---
+All students wear all-black for concerts. No colors, logos, or patterns.
+
+- **Tops:** All-black shirts/blouses/dresses. No sleeveless, strapless, halter, or crop tops. Cap, 3/4, or full-length sleeves.
+- **Bottoms:** Solid black dress pants/slacks or knee-length+ skirts/dresses. No jeans, leggings, yoga pants, sweatpants, or shorts.
+- **Footwear:** Black dress shoes or flats. No sneakers, flip-flops, or athletic shoes.
+- **Socks/tights:** Must be black. No bare legs or colored hosiery.
+- **Accessories/jewelry:** Minimal, non-reflective. Nothing shiny under stage lights.
+
+---
+### Corporate Levels
+| Level | Amount | Key Benefits |
+|-------|--------|--------------|
+| Friend of the Band | $100 | Program/website listing, sponsor shirt (if by Aug 5), certificate |
+| Patron of the Band | $500 | Friend benefits + framed band photo + business logo in programs |
+| Community Sponsor | $750 | Patron benefits + 10"x10" banner + student thank-you letter + PA recognition |
+| Premier Sponsor | $1,250 | Community benefits + 2 apparel items + digital program ad |
+| Legacy Sponsor | $5,000 | Premier benefits + 4 apparel items total + Conductor's Clinic and Concert recognition + social media + Legacy Plaque |
+
+### Family Giving Levels
+| Level | Amount | Key Benefits |
+|-------|--------|--------------|
+| Band Friend | $50 | Name in programs/website + certificate |
+| Band Supporter | $100 | Friend benefits + Ashley Band supporter shirt (if by Aug 5) |
+| Band Patron | $250 | Supporter benefits + framed band photo + donor wall |
+| Band Champion | $500 | Patron benefits + student thank-you card signed by the band |
+| Legacy Family | $1,000+ | Champion benefits + legacy plaque + CCC recognition + social media post |
+
+To sponsor: robert.parker@nhcs.net or (910) 790-2360.
+
+---
+Seaside Bagels · Jeff Rifkin Portraits · Berkshire Hathaway · Carolina Beach Firefighters Association · Sheetz · U-Haul
+
+---
+
+Operational snapshot moved to `superprojects/spring-2026-calendar-snapshot.md`.
+
+---
+
+2026-2027 BAND INFORMATION
+## 2026-2027 Band Information
+
+This page collects the general next-year information normally covered at open house.
+
+The Google Calendar is the official source of truth for dates and times.
+
+## Major Dates
+
+Fall Concert  
+October 22, 2026 at 7:00 PM
+
+Winter Concert  
+December 8, 2026 at 7:00 PM
+
+Conductor's Clinic and Concert  
+Working Week February 22-27, 2027  
+Weekend Clinic - Feb 26/27  
+Concert Feb 27, 2027 at 3:00 PM
+
+MPA  
+March 18-19, 2027
+
+Spring Concert  
+May 11, 2027 at 7:00 PM
+
+## Marching Band / Fall Dates
+
+Families should also review the Marching Band 2026 page for fall dates and expectations.
+
+Working dates include:
+
+- July 28, 2026 - leadership week begins
+- August 4, 2026 - band camp
+- August 11, 2026 - band camp
+- September 26, 2026 - mattress fundraiser
+- October 17, 2026 - Pirate Classic, confirmed / registered
+
+## Communication
+
+### Google Calendar
+
+The Google Calendar is the official source of truth for band events.
+
+Subscribe to the calendar instead of downloading a one-time copy. Subscribing allows updates to appear automatically.
+
+Calendar subscription link:  
+https://calendar.google.com/calendar/ical/nhcs.net_3olclj1g9acb2qp851rgq826to@group.calendar.google.com/public/basic.ics
+
+### My Music Office
+
+Every student and at least one parent should have an active My Music Office account.
+
+My Music Office is used for:
+
+- student information
+- parent contact information
+- financial accounts
+- instrument / music / equipment records
+- band communication
+
+Website: https://www.mymusicoffice.com/
+
+If you have trouble logging in, email Mr. Parker.
+
+### Google Chat
+
+Students may be added to class-specific Google Chat groups using their school-managed NHCS accounts.
+
+Google Chat is for students only. Parents do not have access to student Google Chat groups.
+
+Important note: with the change from Google to Microsoft, we may transition to Microsoft Teams this year.
+
+## Student Materials
+
+The Band Folder is the main resource page for everything students need.
+
+Students should have:
+
+- instrument in working condition
+- reeds, valve oil, cork grease, sticks/mallets, or other instrument-specific supplies
+- pencil
+- black binder or organized folder system
+- music brought to class consistently
+
+Percussionists should have a personal stick bag and required sticks/mallets as assigned.
+
+## Concert Attire
+
+Concert attire is musician black.
+
+All students wear all black for concerts. No colors, logos, or patterns.
+
+Tops: black shirt, blouse, dress shirt, or dress-appropriate top. No sleeveless, strapless, halter, or crop tops.
+
+Bottoms: black dress pants/slacks or knee-length-or-longer skirt/dress. No jeans, leggings, yoga pants, sweatpants, or shorts.
+
+Shoes: black dress shoes or flats. No sneakers, flip-flops, or athletic shoes.
+
+Socks/tights: black.
+
+## Red Band Shirt
+
+All band members need the official red band shirt.
+
+The red band shirt is used for pep rallies, community performances, parades, and informal events.
+
+It can be purchased through the Band Shirts Store.
+
+## Parent Involvement
+
+Parents are part of the success of the program.
+
+Useful ways to help include:
+
+- attend concerts and events
+- help students keep dates on the family calendar
+- encourage consistent practice
+- support fundraising when possible
+- volunteer for events, trips, hospitality, equipment, or booster work
+
+All parents are connected to the Band Boosters simply by being part of the program.
+
+## Questions
+
+For band questions, email Mr. Parker.
+
+For booster-specific questions, contact the Band Boosters.
+
+SPRING TRIP
+## Spring Trip - Williamsburg / Busch Gardens
+
+Friday-Saturday, May 15-16, 2026
+
+The Ashley Bands spring trip includes a Friday evening festival performance and a Saturday at Busch Gardens Williamsburg.
+
+## Cost and Payment
+
+Cost: $300 per person  
+Full payment due: May 1
+
+The trip cost is not expected to change.
+
+Payment may be made through the normal band payment process (MMO/PayPal). Families may also bring cash or check to the April 28 parent meeting.
+
+If the cost is a direct barrier, contact Mr. Parker privately as early as possible. All conversations will be kept confidential.
+
+## What Is Included
+
+The $300 cost includes:
+
+- transportation
+- hotel
+- festival/performance participation
+- Busch Gardens admission
+- one Busch Gardens Platinum Dining Certificate
+
+The dining certificate includes one entree, two sides, and one non-alcoholic beverage at any Busch Gardens Williamsburg restaurant. There is no assigned meal time or assigned restaurant.
+
+## What Students Need To Bring
+
+Students should bring food or money for dinner on the road Friday and Saturday. Depending on the student, they may wish to eat a second time in the park. Park meals will be more expensive.
+
+Beyond that, students should only need spending money for souvenirs or optional purchases.
+
+## Basic Itinerary
+
+Friday, May 15
+
+- Depart Ashley around 3:00 PM
+- Dinner on the road to VA
+- Arrive at Denbigh High School around 9:20 PM
+- Warm up at 9:50 PM
+- Perform at 10:15 PM
+- Travel to hotel after the performance
+
+Saturday, May 16
+
+- Busch Gardens at park opening
+- Awards ceremony at 3:30 PM at the Globe Theater
+- Dinner on the road home
+- Return to Ashley around 11:00 PM
+
+Final times will be confirmed in the final trip communication.
+
+## Festival Performance
+
+Location: Denbigh High School  
+259 Denbigh Blvd  
+Newport News, VA 23608
+
+Performance: 10:15 PM, Denbigh HS Auditorium
+
+## Hotel Rooms
+
+Students choose their room groups.
+
+Room groups may have up to 4 students. All students in the group must be present together when the room assignment is recorded.
+
+Groups of 3 may have a 4th student added for cost and logistics reasons.
+
+Rooms of 5 are not allowed.
+
+## Park Groups
+
+Students must stay in groups of 3 or more at all times in the park.
+
+Students may not be alone or in pairs.
+
+Students will check in with their assigned chaperone:
+
+- when entering the park
+- once during the day
+- when leaving the park
+
+## Behavior Expectations
+
+Students will have some independence, with clear expectations.
+
+If a student does not follow expectations, they may lose independence and be required to stay with a chaperone.
+
+If the issue is more serious, the student may be required to remain directly with Mr. Parker for the remainder of the trip.
+
+For severe issues, parents will be contacted and the family and director will determine next steps together.
+
+## Private Concerns
+
+If your family has a private concern, email Mr. Parker directly as early as possible.
+
+Private concerns are much easier to address before the final trip week.
+
+MARCHING BAND 2026
+## Marching Band 2026
+
+The April 28 parent meeting will include a conversation about what marching band should look like next year.
+
+This is not a question about whether marching band has value. It does.
+
+The question is whether the current structure is the best fit for our students, families, and program goals.
+
+## The Main Conversation
+
+We need to talk directly about:
+
+- competitive marching band
+- noncompetitive fall participation
+- Friday night football games
+- pep rallies
+- parades
+- funding
+- what it takes to make a competitive season truly competitive
+- what our community wants this part of the program to be
+
+As it stands now, students are in favor of a competitive marching band season and have a basic understanding of what it requires to produce a show they are proud of and have a legitimate opportunity for competitive success.
+
+## Competitive Marching Band
+
+A truly competitive marching band season requires more than just signing up for contests.
+
+It requires:
+
+- consistent attendance
+- summer preparation
+- field rehearsal time
+- instructional staff
+- drill/design support
+- transportation
+- equipment and logistics
+- family and booster support
+- clear funding
+
+Competition can be a strong experience for students, but it has to be supported at a level that matches the goal.
+
+In marching band, success is not only about placement or trophies. Bands are evaluated against a performance standard and also ranked in comparison to the other groups at each event. Scores and placements can change from week to week based on the contest, the judges, the timing of the season, and the other bands in attendance.
+
+For us, success means students are prepared, supported, and able to perform at the highest level they are capable of achieving. That requires the instruction, equipment, design, transportation, staffing, rehearsal time, and family support needed to help them reach that level.
+
+## Noncompetitive Fall Participation
+
+One of the questions for next year is how to include more students in the visible fall life of the band program, even if they are not doing the full competitive marching band commitment.
+
+This includes:
+
+- Friday night football games
+- pep rallies
+- parades
+- school/community performances
+- stands music
+- school spirit events
+
+At this point, the goal is to move toward a strongly encouraged model.
+
+That means if there is a real reason a student needs to miss, that can be communicated and discussed. Otherwise, the expectation is that band students participate in these visible school events.
+
+This is not being presented as a full requirement yet.
+
+## Why This Matters
+
+Concert band and the concert season remain the center of the Ashley Band program.
+
+The fall structure should support the full program, not drain it.
+
+At the same time, fall events are one of the most visible ways the band serves the school community. Students who are not in competitive marching band can still contribute to that part of the program, and we encourage them to do so.
+
+## Known / Working 2026 Dates
+
+These dates are provided for family planning. The Google Calendar remains the official source of truth.
+
+Summer / Preseason
+
+- July 28-July 31, 2026 - leadership week
+- August 4-8, 2026 - band camp
+- August 11-15, 2026 - band camp
+
+Fall
+
+- September 26, 2026 - mattress fundraiser
+- October 1, 2026 - likely competition date (Northside HS or Raleigh, NC)
+- October 10, 2026 - likely competition date (White Oak HS)
+- October 17, 2026 - Pirate Classic, Topsail HS - confirmed / registered
+- October 24, 2026 - tentative competition date (Swansboro HS or other)
+- October 31, 2026 - tentative competition date (Halloween) (Havelock HS or Midway HS)
+
+Families should treat Saturdays from September 26 through October 31 as likely band activity days. We will participate in 3-4 competitions and will likely have rehearsal on Saturdays where we do not have a show.
+
+The final competition may be on Halloween. Current student leadership and staff are in open talks about this decision.
+
+## Football Games
+
+The band attends Ashley home football games and in-county away games against Hoggard, New Hanover, and Laney.
+
+The full Fall 2026 football schedule has not been publicly confirmed yet.
+
+## Funding
+
+Competitive marching band has real costs.
+
+Those costs include instructional staff, design, color guard equipment and uniforms, wind/percussion uniform tops, UDB/BEAM drill and music app access, props, equipment, transportation, competition-related logistics, meals, water, maintenance, and replacement items.
+
+Part of the April 28 conversation is whether our community wants to support a competitive season at the level required to make it strong.
+
+The known/likely core estimate for a 60-student competitive season is about **$35,350**, or about **$589 per student in actual per-pupil cost**, including transportation but before variable props and equipment.
+
+Props and equipment are the largest unknowns right now. We would typically plan around **$2,000-$4,000** for props and **$1,000-$5,000** for equipment needs such as instruments, wheels, sound, and front ensemble equipment. With those variable needs included, the realistic full estimate is closer to **$38,000-$44,000**, or about **$640-$740 per student in actual per-pupil cost**.
+
+NHCS has covered transportation for the past two years, and at this point we believe that coverage will continue. If so, the shared funding goal for the band may be closer to **$32,000-$38,000**, or about **$540-$640 per student**, depending on props and equipment needs.
+
+That number is not a participation requirement for any individual student. Our model is to set **Fair-Share Funding Goals** and strongly encourage families to help meet those goals through fundraiser participation, sponsorship acquisition, booster support, school/district support where available, optional family contributions when families choose that option, or some combination of those.
+
+Separate student clothing orders, such as shoes, socks, show shirts, jackets, optional sweatshirts, and additional family shirts, would be handled separately because those needs vary by student and by family.
+
+Suggested related page: **2026 Competitive Marching Band Funding**
+
+## What Happens Next
+
+More specific registration/intent information will follow after the April 28 meeting.
+
+The goal is to complete fall marching band registration by May 15 with a firm understanding on how we plan to move forward.
+
+COMPETITIVE MARCHING BAND FUNDING
+## 2026 Competitive Marching Band Funding
+
+The purpose of this page is to give families a clear picture of what a competitive marching band season actually costs and how we can responsibly support it if this is the direction our community wants to continue.
+
+This is a working estimate, not a final Fair-Share Funding Goal.
+
+## Current Working Estimate
+
+For a projected group of about **60 students**, the known/likely core estimate before variable props and equipment is approximately **$35,350 total**.
+
+That equals about **$589 per student in actual per-pupil cost**.
+
+The largest unknowns right now are props and equipment.
+
+Typical planning ranges:
+
+- props: **$2,000-$4,000**
+- equipment, including instruments, wheels, sound, and front ensemble needs: **$1,000-$5,000**
+
+One current example is a synth cart for the front ensemble, estimated around **$2,500**.
+
+With props and equipment included, the realistic full estimate is closer to **about $38,000-$44,000 total**, or **about $640-$740 per student in actual per-pupil cost**.
+
+## What the Estimate Includes
+
+A competitive marching band season includes more than performances at football games. A true competitive season requires:
+
+- custom music
+- drill design
+- body choreography
+- instructional staff
+- color guard uniforms and equipment
+- percussion support
+- wind/percussion uniform tops
+- UDB/BEAM drill and music app access
+- props
+- equipment, including instruments, wheels, sound, and front ensemble needs
+- transportation
+- competition-related logistics
+- meals, water, maintenance, and replacement items
+
+## Transportation
+
+Transportation is included in this estimate at **$6,000**, based on three trips at about **$2,000** each.
+
+NHCS has covered transportation for the past two years, and at this point we believe that coverage will continue.
+
+Transportation is still shown in the full estimate because it is part of the true cost of the season. Including it helps us avoid surprises and gives a more accurate picture of the real per-pupil spending required for competitive marching band.
+
+If NHCS continues covering transportation, the shared funding goal for the band may be closer to **$32,000-$38,000 total**, or **about $540-$640 per student**, depending on props and equipment needs.
+
+## How This Compares
+
+This estimate is large, but it is not out of line with what competitive marching band requires.
+
+Public information from other band programs shows a wide range of family contribution structures. In the research sample:
+
+- North Carolina public examples ranged from about **$350-$1,450** per student
+- the broader multi-state sample ranged from about **$80-$1,600** per student
+- local/state competitive programs without major overnights often landed around **$350-$600**
+- higher-travel, staff-heavy, or national-level programs often landed around **$900-$1,600+**
+
+The biggest cost drivers are usually not contest entry alone. The larger costs are staff, custom music, drill design, choreography, transportation, props, equipment, meals, and production needs.
+
+That is why our estimate is not just a number being guessed. It is connected to the same cost categories that show up in other competitive marching band programs.
+
+## Separate Student Clothing Orders
+
+Some items are not part of the shared competitive-season estimate because they vary by student and by family.
+
+These may include:
+
+- marching shoes
+- socks
+- show shirt
+- jacket
+- optional sweatshirts
+- optional additional shirts for family members
+
+For planning, we should assume that about **30 students may need shoe replacements** at around **$40 each**. That would be about **$1,200 total**, but it should be handled through the clothing order process rather than folded into the shared competitive-season estimate.
+
+Clothing may be handled through individual orders from the clothing store or through a bulk band order.
+
+## Fair-Share Funding Goals
+
+The per-student number is not a participation requirement for any individual student.
+
+Our model is to set **Fair-Share Funding Goals** and strongly encourage families to help meet those goals through:
+
+- fundraiser participation
+- sponsorship acquisition
+- booster support
+- school/district support where available
+- optional family contributions when families choose that option
+- some combination of those sources
+
+The goal is to be transparent about the real cost while also working together to reduce the direct burden on individual families.
+
+## Funding Approach
+
+The research also shows that programs use different funding models. Some rely more heavily on direct family contribution, while others reduce that burden through fundraising, sponsorships, booster-hosted events, school support, and hardship support.
+
+That is the conversation we need to have as a community: not just what the season costs, but how we want to responsibly support it.
+
+## The Question for Our Community
+
+Competitive marching band can be a strong and meaningful experience for students, but it has to be supported at the level required to make it successful.
+
+The question in front of us is:
+
+**Do we want to offer a competitive marching band season, and if so, how do we want to share the responsibility of funding it responsibly?**
+
+INSTARAISE FUNDRAISER
+## InstaRaise Fundraiser
+
+The Ashley Bands InstaRaise fundraiser is live.
+
+Campaign dates: now through May 14  
+Program goal: $15,000
+
+Campaign page:  
+https://instaraise.com/ashleyhighschoolband/support1?a=17&at=1777304529877&as=k
+
+## Use Your Student's Personal Link
+
+The general campaign page is useful, but each student has a personal fundraising link.
+
+Families should share the student's personal link whenever possible.
+
+That is where the fundraising actually connects back to the student.
+
+## Who To Share With
+
+This fundraiser works best when families share beyond the immediate household.
+
+Good people to share with:
+
+- grandparents
+- aunts and uncles
+- family friends
+- neighbors
+- former Ashley Band families
+- local supporters
+- anyone who wants to support music education at Ashley
+
+## Suggested Message
+
+You may copy and adapt this:
+
+Our student is part of the Ashley High School Band program, and the band is running an InstaRaise fundraiser through May 14. Donations help support student opportunities, travel, equipment, and the overall program.
+
+If you are able to help, here is the link:
+
+[PASTE STUDENT PERSONAL LINK]
+
+Thank you for supporting the Ashley Bands.
+
+## Why This Matters
+
+The band program has real costs across the full year:
+
+- student travel
+- instruments and equipment
+- repairs
+- instructional support
+- event costs
+- marching band needs
+- concert band needs
+
+Fundraising helps reduce the direct burden on families and makes more opportunities possible for students.
+
+## Questions
+
+If you have a question about your student's personal link or how the fundraiser works, contact Mr. Parker.
+
+REQUIRED ITEMS
+# Student Required Items
+
+Reference material for standard student equipment, materials, and baseline program expectations.
+
+## Required Items — All Band Students
+
+- **Instrument** (personal, rental, or school-owned — see `knowledge/instrument-reference.md`)
+- **Concert Attire:** Musician Black (all-black — see `facts/bandsofahs-facts.md`)
+- **Spirit Wear:** Official Red Band Shirt (required)
+- **Band Folder:** 1-inch BLACK 3-ring binder, sheet protectors, pencil pouch with pencils/scissors/eraser
+- **Tuner/Metronome:** TM-60/CM-200 combo provided; recommend owning TM-70/CM-400
+- **Band Methods** (provided but recommended to own):
+  - Foundations of Superior Performance (FSP) — correct book for your instrument
+  - 101 Rhythmic Rest Patterns
+- **School Computer:** Google Suite, Microsoft Suite, Infinite Campus, Canvas, Sight Reading Factory
+- **Apps (phone):** TE Tuner, BEAM, Online stand tunes/marching music, Ultimate Drill Book (UDB)
+
+**Percussion students also need:** Snare Sticks · Practice Pad and Stand · Black Hand Towel
+
+THE BAND FOLDER
+# The Band Folder
+
+Everything Needed for Band
+
+## General Information
+
+### Google Calendar - The Official Band Calendar
+
+The Google Calendar is the source of truth for all band events. Always assume the Google Calendar is correct if there is a date conflict.
+
+### My Music Office
+
+Every student and at least one parent must have an active account in My Music Office (MMO). MMO is used to manage student information, communication, instrument and music databases, payments, and booster records for the Ashley High School Bands.
+
+### Google Chat
+
+Students receive invitations to their class-specific chats through their school-managed NHCS student accounts. Google Chat functions like a secure school messaging system, and all messages are archived and viewable by NHCS personnel.
+
+## Required Items
+
+### Instrument
+
+- Personal instruments: case labeled with student name and instrument serial number
+- Rental instruments: available through Music & Arts, 2340 S. 17th Street, Wilmington, NC, (910) 791-4799
+- School-owned instruments: available as inventory allows
+- Marching band instruments: available as inventory allows
+- Percussion: snare sticks, practice pad and stand, black hand towel
+
+### Clothing
+
+- Concert attire: Musician Black
+- Spirit wear / general attire: official Red Band Shirt and other program spirit wear
+
+### Band Folder
+
+- 1-inch black 3-ring binder
+- Sheet protectors
+- Pencil pouch
+- Pencils
+- Scissors
+- Eraser
+- Tuner/metronome: TM-60/CM-200 combo provided; TM-70/CM-400 recommended to own
+
+### Band Methods
+
+- Foundations of Superior Performance (FSP), correct book for the student's instrument
+- 101 Rhythmic Rest Patterns
+
+### School Computer
+
+- Google Suite / Microsoft Suite
+- Infinite Campus
+- Canvas
+- Sight Reading Factory
+
+### Phone Apps
+
+- TE Tuner
+- BEAM for online stand tunes and marching band music
+- Ultimate Drill Book (UDB)
+
+CORPORATE SPONSORSHIP
+# Corporate Sponsorship
+
+Like many public school arts programs, we rely on the generous support of our community and our Band Booster organization to meet the financial needs of the program. Your sponsorship ensures that Ashley band students receive the best music education and performance opportunities possible.
+
+## Why Your Support Matters
+
+Band students embody the best qualities we hope to see in young people. They:
+
+- invest hundreds of hours in rehearsal and performance
+- develop discipline, teamwork, and leadership
+- consistently demonstrate strong academic achievement
+
+Your contribution helps us:
+
+- provide quality uniforms and attire
+- replace and maintain uniforms and performance wear so every student looks and feels their best on the field and on stage
+- hire skilled instructors, clinicians, and specialists
+- purchase and maintain essential equipment
+- repair aging instruments and begin replacing key equipment to keep the program strong and sustainable
+- cover travel expenses for competitions and events
+
+## Screaming Eagle Sponsor Levels
+
+### Friend of the Band - $100
+
+- Listing in concert programs and on the band website
+- Sponsor shirt, if received by August 5
+- Certificate of appreciation and tax receipt
+
+### Patron of the Band - $500
+
+All Friend benefits, plus:
+
+- Framed band photo
+- Business logo in concert programs
+
+### Community Sponsor - $750
+
+All Patron benefits, plus:
+
+- Band banner displayed with our ensemble
+- Student thank-you letter
+- Increased public address recognition at events
+
+### Premier Sponsor - $1,250
+
+All Community benefits, plus:
+
+- Band apparel, 2 items
+- Digital concert program ad
+
+### Legacy Sponsor - $5,000
+
+All Premier benefits, plus:
+
+- Additional band apparel, 4 items total
+- Recognition at our annual Coastal Concert & Clinic performance
+- Dedicated social media thank-you post
+- Custom Legacy Plaque recognizing long-term impact on the Ashley Band Program
+
+## Tax-Deductible Giving
+
+The Ashley High School Band Boosters is a 501(c)(3) nonprofit educational and charitable organization.
+
+- Federal Tax ID: 20-5605218
+- Donations are tax-deductible to the maximum extent allowed by law
+- Payment options may include check payable to Ashley High School Band Boosters and online payment
+
+## Contact
+
+Robert A. Parker, Director of Bands  
+Ashley High School Bands  
+555 Halyburton Memorial Parkway  
+Email: robert.parker@nhcs.net  
+Phone: 910-790-2360
+
+FAMILY SPONSORSHIP
+# Family Sponsorship
+
+## Support Your Student. Support the Band.
+
+Like many public school arts programs, we rely on the generous support of our families and community to meet the financial needs of the Ashley High School Band Program. Your donation directly supports every student's experience by providing high-quality instruction, performance opportunities, and the resources that make our band program possible.
+
+## Why Your Support Matters
+
+Band students represent the best of Ashley High School. They:
+
+- invest hundreds of hours in rehearsal and performance
+- develop discipline, teamwork, and leadership
+- consistently demonstrate strong academic achievement
+
+Your contribution helps us:
+
+- provide quality uniforms and attire
+- keep students looking sharp on the field and stage through maintenance and replacement of essential performance wear
+- hire skilled instructors and clinicians
+- purchase and maintain essential equipment
+- repair aging instruments and replace equipment to ensure longevity and quality
+- cover travel and event expenses
+
+## Screaming Eagle Family Giving Levels
+
+### Band Friend - $50
+
+- Family name listed in concert programs and on the band website
+- Certificate of appreciation
+
+### Band Supporter - $100
+
+All Friend benefits, plus:
+
+- Ashley Band supporter shirt, if received by August 5
+
+### Band Patron - $250
+
+All Supporter benefits, plus:
+
+- Framed band photo
+- Recognition on the Ashley Band room donor wall
+
+### Band Champion - $500
+
+All Patron benefits, plus:
+
+- Student thank-you card signed by the band
+
+### Legacy Family - $1,000+
+
+All Champion benefits, plus:
+
+- Personalized legacy plaque displayed in the band room
+- Recognition at the annual Coastal Concert & Clinic performance
+- Dedicated thank-you post on Ashley Bands social media pages
+
+## Tax-Deductible Giving
+
+The Ashley High School Band Boosters is a 501(c)(3) nonprofit educational and charitable organization.
+
+- Federal Tax ID: 20-5605218
+- Donations are tax-deductible to the maximum extent allowed by law
+- Payment options include check payable to Ashley High School Band Boosters or online payment
+
+## Contact
+
+Robert A. Parker, Director of Bands  
+Ashley High School Bands  
+555 Halyburton Memorial Parkway  
+Email: robert.parker@nhcs.net  
+Phone: 910-790-2360
