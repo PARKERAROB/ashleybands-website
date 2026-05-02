@@ -11,8 +11,8 @@ export default function AssistantPage() {
         <p className="eyebrow">Quick Lookup</p>
         <h1>Band Assistant</h1>
         <p>
-          This assistant uses public Ashley Band information only. Private, student-specific, family-specific, or
-          financial-account questions should go directly to Mr. Parker.
+          This assistant uses public Ashley Band information only. Private, student-specific,
+          family-specific, or financial-account questions should go directly to Mr. Parker.
         </p>
       </section>
       <ChatAssistant />

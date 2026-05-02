@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 const welcome = {
   role: "assistant",
@@ -29,11 +30,13 @@ function parseAssistantContent(data) {
 }
 
 export default function ChatAssistant() {
+  const searchParams = useSearchParams();
   const [messages, setMessages] = useState([welcome]);
   const [question, setQuestion] = useState("");
   const [knowledge, setKnowledge] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const endRef = useRef(null);
+  const autoSubmittedRef = useRef(false);
 
   useEffect(() => {
     fetch("/chatbot-knowledge.txt")
@@ -46,16 +49,20 @@ export default function ChatAssistant() {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  async function submit(event) {
-    event.preventDefault();
-    const trimmed = question.trim();
+  useEffect(() => {
+    const q = searchParams.get("q");
+    if (q && knowledge && !autoSubmittedRef.current) {
+      autoSubmittedRef.current = true;
+      askQuestion(q);
+    }
+  }, [knowledge, searchParams]);
+
+  async function askQuestion(text) {
+    const trimmed = text.trim();
     if (!trimmed || isLoading) return;
 
     const today = new Date().toLocaleDateString("en-US", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric"
+      weekday: "long", year: "numeric", month: "long", day: "numeric"
     });
 
     const systemPrompt = `You are a helpful assistant for the Ashley High School Band Program in Wilmington, NC. Today's date is ${today}.
@@ -73,7 +80,6 @@ Rules:
 5. If the question needs Mr. Parker's personal answer, respond as JSON: {"answer":"your helpful response","flagged":true}
 6. For answerable questions, respond with plain friendly text.`;
 
-    setQuestion("");
     setIsLoading(true);
     setMessages((current) => [...current, { role: "user", content: trimmed }]);
 
@@ -99,6 +105,14 @@ Rules:
     } finally {
       setIsLoading(false);
     }
+  }
+
+  async function submit(event) {
+    event.preventDefault();
+    const trimmed = question.trim();
+    if (!trimmed || isLoading) return;
+    setQuestion("");
+    await askQuestion(trimmed);
   }
 
   return (
