@@ -31,18 +31,31 @@ body {
 /* ── Chat Hero ─────────────────────────────────────── */
 
 .chat-hero {
+  position: relative;
   min-height: calc(100vh - 70px);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: clamp(48px, 10vw, 96px) clamp(18px, 4vw, 48px);
-  background-color: var(--paper);
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
   text-align: center;
+  overflow: hidden;
+}
+
+.chat-hero-bg {
+  z-index: 0;
+}
+
+.chat-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(247, 243, 232, 0.88);
+  z-index: 1;
 }
 
 .chat-hero-inner {
+  position: relative;
+  z-index: 2;
   max-width: 680px;
   width: 100%;
   display: flex;

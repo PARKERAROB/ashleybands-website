@@ -43,6 +43,14 @@ export default function HomePage() {
   return (
     <main>
       <section className="chat-hero">
+        <Image
+          src="/528048622_10108973219927428_7681318735311321118_n.jpg"
+          alt=""
+          fill
+          style={{ objectFit: "cover", objectPosition: "center 40%" }}
+          priority
+          className="chat-hero-bg"
+        />
         <div className="chat-hero-inner">
           <p className="chat-hero-eyebrow">Eugene Ashley High School · Wilmington, NC</p>
           <h1 className="chat-hero-headline">
