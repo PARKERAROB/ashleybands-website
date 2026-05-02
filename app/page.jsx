@@ -76,6 +76,40 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="photo-band">
+        <div className="photo-band-img-wrap">
+          <Image
+            src="/656637421_1325880026241163_8640066925134763727_n.jpg"
+            alt="Ashley High School Wind Ensemble on stage"
+            fill
+            style={{ objectFit: "cover", objectPosition: "center 30%" }}
+            priority
+          />
+          <div className="photo-band-overlay">
+            <p className="photo-band-label">Ashley High School Wind Ensemble</p>
+            <p className="photo-band-sub">Robert A. Parker, Director</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="trophy-strip">
+        <div className="trophy-strip-inner">
+          <div className="trophy-strip-img-wrap">
+            <Image
+              src="/567638942_18535699147058878_8482643743523406198_n.jpg"
+              alt="Ashley marching band students with trophies"
+              fill
+              style={{ objectFit: "cover", objectPosition: "center top" }}
+            />
+          </div>
+          <div className="trophy-strip-copy">
+            <p className="eyebrow">Screaming Eagle Regiment</p>
+            <h2>A program that competes — and wins.</h2>
+            <p>Our students invest hundreds of hours each season in rehearsal, performance, and competition. The results show.</p>
+          </div>
+        </div>
+      </section>
+
       {groups.map((group) => (
         <section className="section" key={group.category}>
           <div className="section-heading">

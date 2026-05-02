@@ -598,6 +598,91 @@ h2 {
   }
 }
 
+/* ── Photo Band ───────────────────────────────────── */
+
+.photo-band {
+  width: 100%;
+  height: clamp(280px, 40vw, 520px);
+}
+
+.photo-band-img-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.photo-band-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 24px clamp(18px, 4vw, 54px);
+  background: linear-gradient(to top, rgba(25, 23, 22, 0.72) 0%, transparent 100%);
+  color: #fff;
+}
+
+.photo-band-label {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 22px;
+  margin: 0 0 2px;
+}
+
+.photo-band-sub {
+  font-size: 13px;
+  margin: 0;
+  opacity: 0.8;
+}
+
+/* ── Trophy Strip ─────────────────────────────────── */
+
+.trophy-strip {
+  padding: clamp(48px, 7vw, 80px) clamp(18px, 4vw, 54px);
+  background: var(--garnet);
+  color: #fff;
+}
+
+.trophy-strip-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+}
+
+.trophy-strip-img-wrap {
+  position: relative;
+  aspect-ratio: 4/3;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.trophy-strip-copy .eyebrow {
+  color: var(--gold);
+}
+
+.trophy-strip-copy h2 {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: clamp(28px, 3.5vw, 42px);
+  font-weight: 400;
+  color: #fff;
+  margin: 8px 0 16px;
+  line-height: 1.15;
+}
+
+.trophy-strip-copy p {
+  color: rgba(255,255,255,0.75);
+  font-size: 16px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+@media (max-width: 700px) {
+  .trophy-strip-inner {
+    grid-template-columns: 1fr;
+  }
+}
+
 .sitemap-section {
   margin-top: 40px;
 }
