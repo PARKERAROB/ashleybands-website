@@ -1,3 +1,11 @@
+@font-face {
+  font-family: 'Qwigley';
+  src: url('/fonts/Qwigley-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --ink: #191716;
   --paper: #f7f3e8;
@@ -84,7 +92,7 @@ body {
 }
 
 .chat-hero-the {
-  font-family: 'Qwigly', 'DM Serif Display', cursive;
+  font-family: 'Qwigley', cursive;
   font-style: normal;
   font-size: clamp(32px, 5vw, 56px);
   color: var(--garnet);
