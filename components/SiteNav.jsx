@@ -12,6 +12,8 @@ export default function SiteNav() {
         <Link href="/info/2026-2027-band-information">Info</Link>
         <Link href="/info/the-band-folder">Resources</Link>
         <Link href="/info/marching-band-2026">Marching Band</Link>
+        <Link href="/repertoire">Repertoire</Link>
+        <Link href="/programs">Programs</Link>
         <Link href="/info/corporate-sponsorship">Support</Link>
         <Link href="/sitemap-page">All Pages</Link>
         <Link href="/assistant">Assistant</Link>

@@ -16,6 +16,8 @@ export default function SitemapPage() {
 
   const staticPages = [
     { title: "Home", href: "/" },
+    { title: "Performed Repertoire", href: "/repertoire" },
+    { title: "Program Archive", href: "/programs" },
     { title: "Band Assistant", href: "/assistant" },
     { title: "Member Area", href: "/members" }
   ];
