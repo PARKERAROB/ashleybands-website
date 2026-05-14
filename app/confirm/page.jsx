@@ -2,7 +2,17 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import PageCard from "@/components/PageCard";
+
+function StatusPanel({ title, children }) {
+  return (
+    <main className="narrow-page">
+      <h1>{title}</h1>
+      <div className="copy-block">
+        {children}
+      </div>
+    </main>
+  );
+}
 
 function ConfirmInner() {
   const params = useSearchParams();
@@ -42,50 +52,50 @@ function ConfirmInner() {
 
   if (state === "loading") {
     return (
-      <PageCard title="Recording your response…">
+      <StatusPanel title="Recording your response…">
         <p>One moment.</p>
-      </PageCard>
+      </StatusPanel>
     );
   }
 
   if (state === "error") {
     return (
-      <PageCard title="Hmm, something went wrong">
+      <StatusPanel title="Hmm, something went wrong">
         <p>{error}</p>
         <p>You can also just reply to Mr. Parker&rsquo;s email directly and he&rsquo;ll take care of it.</p>
         <p><a href="mailto:robert.parker@nhcs.net">robert.parker@nhcs.net</a></p>
-      </PageCard>
+      </StatusPanel>
     );
   }
 
   // success
   if (action === "out") {
     return (
-      <PageCard title="Got it — thanks!">
+      <StatusPanel title="Got it — thanks!">
         <p>Recorded that {friendlyName} won&rsquo;t be in band at Ashley next year. No further follow-up needed.</p>
         <p>The door stays open. If anything changes mid-summer, just send Mr. Parker a note.</p>
         <p style={{ marginTop: "1.5rem" }}>
           <a href="mailto:robert.parker@nhcs.net">robert.parker@nhcs.net</a>
         </p>
-      </PageCard>
+      </StatusPanel>
     );
   }
 
   return (
-    <PageCard title="Thanks — Mr. Parker will reach out">
+    <StatusPanel title="Thanks — Mr. Parker will reach out">
       <p>Recorded that you&rsquo;d like to talk before deciding on band for {friendlyName}.</p>
       <p>Mr. Parker will be in touch within a few days to find a time that works.</p>
       <p>If you want to speed things up, you can email him directly:</p>
       <p>
         <a href="mailto:robert.parker@nhcs.net">robert.parker@nhcs.net</a>
       </p>
-    </PageCard>
+    </StatusPanel>
   );
 }
 
 export default function ConfirmPage() {
   return (
-    <Suspense fallback={<PageCard title="Loading…"><p>One moment.</p></PageCard>}>
+    <Suspense fallback={<StatusPanel title="Loading…"><p>One moment.</p></StatusPanel>}>
       <ConfirmInner />
     </Suspense>
   );
