@@ -1,3 +1,6 @@
+import { getSupabaseEnv } from "@/lib/supabaseEnv";
+import { supabaseHeaders } from "@/lib/supabaseRest";
+
 export async function POST(request) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
@@ -47,17 +50,14 @@ export async function POST(request) {
       flagged = false;
     }
 
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_ANON_KEY;
+    const { url: supabaseUrl, key: supabaseKey } = getSupabaseEnv();
     if (supabaseUrl && supabaseKey) {
       fetch(`${supabaseUrl}/rest/v1/band_questions`, {
         method: "POST",
-        headers: {
+        headers: supabaseHeaders(supabaseKey, {
           "Content-Type": "application/json",
-          apikey: supabaseKey,
-          Authorization: `Bearer ${supabaseKey}`,
           Prefer: "return=minimal"
-        },
+        }),
         body: JSON.stringify({ question, flagged })
       }).catch(() => {});
     }

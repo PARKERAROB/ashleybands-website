@@ -1,3 +1,6 @@
+import { getSupabaseEnv } from "@/lib/supabaseEnv";
+import { supabaseHeaders } from "@/lib/supabaseRest";
+
 /**
  * POST /api/confirm
  * Records a Lane 3 recapture-email response into Supabase.
@@ -18,8 +21,7 @@ export async function POST(request) {
       return Response.json({ error: "invalid action" }, { status: 400 });
     }
 
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_ANON_KEY;
+    const { url: supabaseUrl, key: supabaseKey } = getSupabaseEnv();
     if (!supabaseUrl || !supabaseKey) {
       return Response.json({ error: "Supabase not configured" }, { status: 500 });
     }
@@ -29,12 +31,10 @@ export async function POST(request) {
 
     const res = await fetch(`${supabaseUrl}/rest/v1/band_recapture_2026`, {
       method: "POST",
-      headers: {
+      headers: supabaseHeaders(supabaseKey, {
         "Content-Type": "application/json",
-        apikey: supabaseKey,
-        Authorization: `Bearer ${supabaseKey}`,
         Prefer: "return=minimal"
-      },
+      }),
       body: JSON.stringify({
         student_id: studentId,
         student_name: studentName,
