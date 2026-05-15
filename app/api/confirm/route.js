@@ -3,9 +3,11 @@ import { supabaseHeaders } from "@/lib/supabaseRest";
 
 /**
  * POST /api/confirm
- * Records a Lane 3 recapture-email response into Supabase.
- * Body: { s: student_id, a: 'out' | 'talk', n?: student_name, p?: parent_name }
+ * Records one-click band planning responses into Supabase.
+ * Body: { s: student_id, a: action, n?: student_name, p?: parent_name }
  */
+const VALID_ACTIONS = new Set(["out", "talk", "band_only", "mb_info"]);
+
 export async function POST(request) {
   try {
     const body = await request.json();
@@ -17,7 +19,7 @@ export async function POST(request) {
     if (!studentId) {
       return Response.json({ error: "missing student id" }, { status: 400 });
     }
-    if (action !== "out" && action !== "talk") {
+    if (!VALID_ACTIONS.has(action)) {
       return Response.json({ error: "invalid action" }, { status: 400 });
     }
 
