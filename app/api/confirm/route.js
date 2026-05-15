@@ -4,7 +4,7 @@ import { supabaseHeaders } from "@/lib/supabaseRest";
 /**
  * POST /api/confirm
  * Records one-click band planning responses into Supabase.
- * Body: { s: student_id, a: action, n?: student_name, p?: parent_name }
+ * Body: { s: student_id, a: action, n?: student_name, p?: parent_name, e?: responder_email, note?: response_note }
  */
 const VALID_ACTIONS = new Set(["out", "talk", "band_only", "mb_info"]);
 
@@ -15,12 +15,17 @@ export async function POST(request) {
     const action = (body.a || "").toString();
     const studentName = (body.n || "").toString().slice(0, 200);
     const parentName = (body.p || "").toString().slice(0, 200);
+    const responderEmail = (body.e || body.responder_email || "").toString().trim().slice(0, 200);
+    const responseNote = (body.note || body.response_note || "").toString().trim().slice(0, 500);
 
     if (!studentId) {
       return Response.json({ error: "missing student id" }, { status: 400 });
     }
     if (!VALID_ACTIONS.has(action)) {
       return Response.json({ error: "invalid action" }, { status: 400 });
+    }
+    if (responderEmail && !responderEmail.includes("@")) {
+      return Response.json({ error: "invalid email" }, { status: 400 });
     }
 
     const { url: supabaseUrl, key: supabaseKey } = getSupabaseEnv();
@@ -41,6 +46,8 @@ export async function POST(request) {
         student_id: studentId,
         student_name: studentName,
         parent_name: parentName,
+        responder_email: responderEmail,
+        response_note: responseNote,
         action,
         user_agent: ua.slice(0, 500),
         ip: ip.slice(0, 100)
