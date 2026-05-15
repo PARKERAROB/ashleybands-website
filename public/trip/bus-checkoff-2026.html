@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bus Checkoff - Spring Trip 2026</title>
+  <style>
+    :root { --ink:#171717; --muted:#5f6673; --line:#d4dae3; --soft:#f5f7fa; --accent:#7b1829; --gold:#c5a028; --ok:#0f766e; --warn:#9f1239; --paper:#fff; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:#eef1f5; color:var(--ink); font-family:Arial, Helvetica, sans-serif; line-height:1.32; }
+    main { max-width:1040px; margin:0 auto; padding:16px; min-height:100vh; background:var(--paper); }
+    header { border-bottom:4px solid var(--accent); padding:8px 0 12px; margin-bottom:14px; }
+    h1 { margin:0 0 6px; font-size:28px; }
+    h2 { margin:22px 0 10px; font-size:20px; border-bottom:1px solid var(--line); padding-bottom:4px; }
+    .meta, .small { color:var(--muted); font-size:13px; }
+    .toplinks { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    .toplinks a, button { border:1px solid var(--line); background:var(--soft); color:var(--ink); border-radius:6px; padding:9px 11px; text-decoration:none; font-size:14px; min-height:40px; }
+    button { cursor:pointer; }
+    button.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+    .panel { border:1px solid var(--line); border-radius:8px; padding:12px; background:#fff; margin:10px 0; }
+    .controls { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    label { font-weight:700; }
+    input[type="text"] { width:100%; min-height:42px; border:1px solid var(--line); border-radius:6px; padding:8px; font-size:16px; margin-top:4px; }
+    .counts { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:10px; }
+    .count { border:1px solid var(--line); border-radius:8px; padding:12px; text-align:center; background:var(--soft); }
+    .count strong { display:block; font-size:26px; }
+    .count.good strong { color:var(--ok); }
+    .count.warn strong { color:var(--warn); }
+    table { width:100%; border-collapse:collapse; font-size:14px; }
+    th, td { border-bottom:1px solid var(--line); padding:8px 6px; text-align:left; vertical-align:middle; }
+    th { position:sticky; top:0; background:var(--soft); z-index:1; }
+    tr.checked { background:#ecfdf5; }
+    tr.adult { background:#fef9e7; }
+    tr.adult.checked { background:#ecfdf5; }
+    .name { font-weight:700; }
+    .detail { color:var(--muted); font-size:12px; }
+    .badge { display:inline-block; font-size:11px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; padding:2px 6px; border-radius:4px; margin-right:6px; background:var(--gold); color:#3a2c00; }
+    .badge.director { background:var(--accent); color:#fff; }
+    .badge.minor { background:#6b7280; color:#fff; }
+    input[type="checkbox"] { width:26px; height:26px; accent-color:var(--ok); }
+    .center { text-align:center; width:56px; }
+    .missing { background:#fff1f2; }
+    .toolbar { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0; }
+    @media (max-width:760px) {
+      main { padding:12px; }
+      h1 { font-size:24px; }
+      .controls, .counts { grid-template-columns:1fr; }
+      table { font-size:13px; }
+      th:nth-child(3), td:nth-child(3) { display:none; }
+      .center { width:48px; }
+    }
+    @media print {
+      body { background:#fff; }
+      main { max-width:none; padding:0.35in; }
+      .toplinks, .toolbar, .panel.controls-panel { display:none; }
+      th { position:static; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Bus Checkoff</h1>
+      <div class="meta">Ashley Bands Spring Trip · CharterUP bus count: 56 riders</div>
+      <div class="meta">Reservation 1468976 · Driver: Antwan S. · <a href="tel:+12522140712">(252) 214-0712</a></div>
+      <div class="toplinks">
+        <a href="/trip/">Hub</a>
+        <a href="/trip/chaperone-field-guide-2026.html">Chaperone Guide</a>
+        <button type="button" id="printButton">Print</button>
+      </div>
+    </header>
+
+    <section class="panel controls-panel">
+      <div class="controls">
+        <div>
+          <label for="transitionName">Transition</label>
+          <input id="transitionName" type="text" placeholder="Example: Load at Ashley, Depart Denbigh, Park departure">
+        </div>
+        <div>
+          <label for="confirmedBy">Confirmed by</label>
+          <input id="confirmedBy" type="text" placeholder="Name">
+        </div>
+      </div>
+      <div class="toolbar">
+        <button type="button" data-preset="Load at Ashley">Load at Ashley</button>
+        <button type="button" data-preset="Depart Denbigh">Depart Denbigh</button>
+        <button type="button" data-preset="Hotel departure">Hotel departure</button>
+        <button type="button" data-preset="Park departure">Park departure</button>
+        <button type="button" class="primary" id="clearChecks">Clear Checks</button>
+      </div>
+      <p class="small">Checks save only on this device. Use this for field accountability, then verbally confirm counts with Rob/Jenny.</p>
+    </section>
+
+    <section class="counts">
+      <div class="count" id="onCount"><span>On / Present</span><strong>0 / 56</strong></div>
+      <div class="count" id="offCount"><span>Off / Clear</span><strong>0 / 56</strong></div>
+      <div class="count" id="missingCount"><span>Still Needed</span><strong>56</strong></div>
+    </section>
+
+    <section>
+      <h2>Bus Riders</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Role / Details</th>
+            <th class="center">On</th>
+            <th class="center">Off</th>
+          </tr>
+        </thead>
+        <tbody id="riderRows"></tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Separate Travelers</h2>
+      <p class="small">Not part of the 56-rider bus count, but still part of full-trip accountability.</p>
+      <table>
+        <thead><tr><th>Name</th><th>Status</th><th class="center">Confirmed</th></tr></thead>
+        <tbody>
+          <tr><td class="name">Randall Langley</td><td>Separate transportation. Mason Langley traveling with him.</td><td class="center"><input type="checkbox" data-extra="randall"></td></tr>
+          <tr><td class="name">Mason Langley</td><td>Separate transportation with Randall Langley.</td><td class="center"><input type="checkbox" data-extra="mason"></td></tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script>
+    const riders = [
+      ["Robert Parker", "Director", "Director", "director"],
+      ["Ali Cray", "Chaperone", "Adult", "adult"],
+      ["Carrie Lewis", "Chaperone", "Adult", "adult"],
+      ["Danielle Cray", "Chaperone", "Adult", "adult"],
+      ["Jenny Heglar", "Chaperone", "Adult; attendance/bus captain", "adult"],
+      ["Karry Eckler", "Chaperone", "Adult", "adult"],
+      ["Lesley Neil", "Chaperone", "Adult", "adult"],
+      ["Rachel Zizzamia", "Chaperone", "Adult; groups captain", "adult"],
+      ["Tatiana Miller", "Chaperone / AHS teacher", "Adult; Calvin Miller traveling with her", "adult"],
+      ["Troy Sutton", "Chaperone", "Adult", "adult"],
+      ["Aaron Lescalleet", "Student", "Group 2 · Lesley Neil · Room 2", "student"],
+      ["Adam Boyle", "Student", "Group 2 · Lesley Neil · Room 4", "student"],
+      ["Addisyn Lewis", "Student", "Group 1 · Carrie Lewis · Room 17", "student"],
+      ["Aidan Ballas", "Student", "Group 8 · Jenny Heglar · Room 4", "student"],
+      ["Alexander Sutton", "Student", "Group 3 · Troy Sutton · Room 3", "student"],
+      ["Ashley Hicks", "Student", "Group 9 · Randall Langley · Room 14", "student"],
+      ["Ava Braswell", "Student", "Group 5 · Danielle Cray · Room 15", "student"],
+      ["Avery Eckler", "Student", "Group 7 · Karry Eckler · Room 7", "student"],
+      ["Brady Clamme", "Student", "Group 4 · Rachel Zizzamia · Room 6", "student"],
+      ["Brandon Parks", "Student", "Group 6 · Ali Cray · Room 10", "student"],
+      ["Brennaugh Coppinger", "Student", "Group 5 · Danielle Cray · Room 14", "student"],
+      ["Caitlyn McCullah", "Student", "Group 10 · Tatiana Miller · Room 14", "student"],
+      ["Caleb Pritchard", "Student", "Group 8 · Jenny Heglar · Room 12", "student"],
+      ["Caleigh Pritchard", "Student", "Group 5 · Danielle Cray · Room 15", "student"],
+      ["Cameron DeSorbo", "Student", "Group 4 · Rachel Zizzamia · Room 8", "student"],
+      ["Claire Costner", "Student", "Group 5 · Danielle Cray · Room 15", "student"],
+      ["Dan Gregory", "Student", "Group 6 · Ali Cray · Room 10", "student"],
+      ["Dixon Gullett", "Student", "Group 6 · Ali Cray · Room 10", "student"],
+      ["Dylan Heglar", "Student", "Group 4 · Rachel Zizzamia · Room 8", "student"],
+      ["Lizzy Littlejohn", "Student", "Group 1 · Carrie Lewis", "student"],
+      ["Emma Buchanan", "Student", "Group 9 · Randall Langley · Room 18", "student"],
+      ["Gio Lopez Martinez", "Student", "Group 2 · Lesley Neil · Room 2", "student"],
+      ["Heather Morrison", "Student", "Group 1 · Carrie Lewis · Room 17", "student"],
+      ["Jordan Mirek", "Student", "Group 4 · Rachel Zizzamia · Room 4", "student"],
+      ["JT Damstetter", "Student", "Group 6 · Ali Cray · Room 10", "student"],
+      ["Justin Naklicki", "Student", "Group 7 · Karry Eckler · Room 6", "student"],
+      ["Kade Rathgeber", "Student", "Group 6 · Ali Cray · Room 4", "student"],
+      ["Kaelyn Larson", "Student", "Group 1 · Carrie Lewis · Room 18", "student"],
+      ["Kaiden Thompson", "Student", "Group 2 · Lesley Neil · Room 2", "student"],
+      ["Katelyn Hill", "Student", "Group 6 · Ali Cray · Room 20", "student"],
+      ["Leah Park", "Student", "Group 7 · Karry Eckler · Room 18", "student"],
+      ["Lily Cray", "Student", "Group 5 · Danielle Cray · Room 20", "student"],
+      ["Louis Neill Martinez", "Student", "Group 2 · Lesley Neil · Room 5", "student"],
+      ["Lyla Franklin", "Student", "Group 1 · Carrie Lewis · Room 17", "student"],
+      ["Mackenzie Stoner", "Student", "Group 8 · Jenny Heglar · Room 20", "student"],
+      ["Maël Ferigo", "Student", "Room 6 · chaperone assignment needs verification", "student"],
+      ["Mercedes Tejeda Trejo", "Student", "Group 9 · Randall Langley · Room 18", "student"],
+      ["Noah Moffitt", "Student", "Group 4 · Rachel Zizzamia · Room 8", "student"],
+      ["Noah Powers", "Student", "Group 8 · Jenny Heglar · Room 12", "student"],
+      ["Piper Williams", "Student", "Group 9 · Randall Langley · Room 20", "student"],
+      ["Robbe Sears", "Student", "Group 8 · Jenny Heglar · Room 12", "student"],
+      ["Cyrus Hill", "Student", "Group 7 · Karry Eckler · Room 6", "student"],
+      ["Skylar Lockhart", "Student", "Group 8 · Jenny Heglar · Room 14", "student"],
+      ["Tyler Shook", "Student", "Group 2 · Lesley Neil · Room 2", "student"],
+      ["Tyler Zizzamia", "Student", "Group 4 · Rachel Zizzamia · Room 8", "student"],
+      ["Calvin Miller", "Minor traveler", "Group 10 · Tatiana Miller (mom) · bus rider", "minor"]
+    ];
+
+    const key = "spring-trip-bus-checkoff-2026";
+    const state = JSON.parse(localStorage.getItem(key) || "{}");
+    const tbody = document.getElementById("riderRows");
+
+    function save() {
+      state.transitionName = document.getElementById("transitionName").value;
+      state.confirmedBy = document.getElementById("confirmedBy").value;
+      localStorage.setItem(key, JSON.stringify(state));
+      updateCounts();
+    }
+
+    function updateCounts() {
+      const on = riders.filter((_, i) => state["on-" + i]).length;
+      const off = riders.filter((_, i) => state["off-" + i]).length;
+      const needed = riders.length - on;
+      document.querySelector("#onCount strong").textContent = on + " / " + riders.length;
+      document.querySelector("#offCount strong").textContent = off + " / " + riders.length;
+      document.querySelector("#missingCount strong").textContent = String(needed);
+      document.getElementById("onCount").className = "count " + (on === riders.length ? "good" : "");
+      document.getElementById("offCount").className = "count " + (off === riders.length ? "good" : "");
+      document.getElementById("missingCount").className = "count " + (needed === 0 ? "good" : "warn");
+      Array.from(tbody.querySelectorAll("tr")).forEach((row, i) => {
+        const isAdult = row.dataset.role && row.dataset.role !== "student";
+        const status = state["on-" + i] ? "checked" : "missing";
+        row.className = (isAdult ? "adult " : "") + status;
+      });
+    }
+
+    const badgeLabel = { director: "Director", adult: "Adult", minor: "Minor" };
+    riders.forEach((rider, index) => {
+      const role = rider[3];
+      const tr = document.createElement("tr");
+      if (role !== "student") tr.classList.add("adult");
+      tr.dataset.role = role;
+      const badge = role === "student" ? "" : `<span class="badge ${role}">${badgeLabel[role]}</span>`;
+      tr.innerHTML = `
+        <td>${index + 1}</td>
+        <td>${badge}<span class="name">${rider[0]}</span></td>
+        <td><div>${rider[1]}</div><div class="detail">${rider[2]}</div></td>
+        <td class="center"><input type="checkbox" data-key="on-${index}"></td>
+        <td class="center"><input type="checkbox" data-key="off-${index}"></td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    document.querySelectorAll("input[type='checkbox']").forEach(box => {
+      const boxKey = box.dataset.key || "extra-" + box.dataset.extra;
+      box.checked = Boolean(state[boxKey]);
+      box.addEventListener("change", () => {
+        state[boxKey] = box.checked;
+        save();
+      });
+    });
+
+    document.getElementById("transitionName").value = state.transitionName || "";
+    document.getElementById("confirmedBy").value = state.confirmedBy || "";
+    document.getElementById("transitionName").addEventListener("input", save);
+    document.getElementById("confirmedBy").addEventListener("input", save);
+
+    document.querySelectorAll("[data-preset]").forEach(button => {
+      button.addEventListener("click", () => {
+        document.getElementById("transitionName").value = button.dataset.preset;
+        save();
+      });
+    });
+
+    document.getElementById("clearChecks").addEventListener("click", () => {
+      Object.keys(state).forEach(stateKey => {
+        if (stateKey.startsWith("on-") || stateKey.startsWith("off-") || stateKey.startsWith("extra-")) {
+          state[stateKey] = false;
+        }
+      });
+      document.querySelectorAll("input[type='checkbox']").forEach(box => { box.checked = false; });
+      save();
+    });
+
+    document.getElementById("printButton").addEventListener("click", () => window.print());
+    updateCounts();
+
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/trip/trip-sw.js").catch(function () {});
+    }
+  </script>
+</body>
+</html>

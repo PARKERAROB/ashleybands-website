@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Percussion Lead Checklist - Music in the Parks</title>
+  <style>
+    :root {
+      --ink: #161616;
+      --muted: #5d6470;
+      --line: #cfd5dd;
+      --soft: #f4f6f8;
+      --accent: #0f766e;
+      --danger: #9f1239;
+      --paper: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #e9edf2;
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.35;
+    }
+
+    main {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 20px;
+      background: var(--paper);
+      min-height: 100vh;
+    }
+
+    header {
+      border-bottom: 3px solid var(--ink);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 28px;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin: 24px 0 8px;
+      font-size: 20px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 4px;
+    }
+
+    h3 {
+      margin: 18px 0 8px;
+      font-size: 16px;
+    }
+
+    p {
+      margin: 0 0 10px;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 14px 0 4px;
+    }
+
+    button {
+      min-height: 40px;
+      border: 1px solid var(--line);
+      background: var(--soft);
+      color: var(--ink);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      border-color: var(--accent);
+    }
+
+    .note {
+      padding: 10px 12px;
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      border-radius: 6px;
+      margin: 10px 0 16px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .check-item {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 8px;
+      align-items: start;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 6px;
+      padding: 10px;
+      min-height: 58px;
+    }
+
+    .check-item input[type="checkbox"] {
+      width: 24px;
+      height: 24px;
+      margin: 2px 0 0;
+      accent-color: var(--accent);
+    }
+
+    .check-item strong {
+      display: block;
+      font-size: 15px;
+    }
+
+    .check-item span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 2px;
+    }
+
+    .do-not .check-item {
+      border-color: #fecdd3;
+      background: #fff1f2;
+    }
+
+    .do-not .check-item strong {
+      color: var(--danger);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      font-size: 14px;
+    }
+
+    th,
+    td {
+      border: 1px solid var(--line);
+      padding: 8px;
+      vertical-align: top;
+      text-align: left;
+    }
+
+    th {
+      background: var(--soft);
+      font-weight: 700;
+    }
+
+    .name-cell {
+      min-width: 150px;
+      height: 38px;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 720px) {
+      main {
+        padding: 14px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      table {
+        font-size: 13px;
+      }
+    }
+
+    @media print {
+      body {
+        background: #fff;
+      }
+
+      main {
+        max-width: none;
+        padding: 0.4in;
+      }
+
+      .toolbar {
+        display: none;
+      }
+
+      .check-item {
+        break-inside: avoid;
+      }
+
+      h2 {
+        break-after: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Percussion Lead Checklist</h1>
+      <div class="meta">
+        Ashley High School Symphonic Band · Music in the Parks / Busch Gardens Williamsburg · Friday, May 15, 2026
+      </div>
+      <div class="meta">
+        Pieces: at dawn, We Ride! · Salvation Is Created
+      </div>
+      <div class="toolbar">
+        <button type="button" id="print-button">Print</button>
+        <button type="button" id="clear-button">Clear Checks</button>
+      </div>
+    </header>
+
+    <section>
+      <h2>Your Job</h2>
+      <div class="grid">
+        <label class="check-item"><input type="checkbox"><span><strong>Assign parts</strong>Confirm who plays each part at 2:00.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Account for instruments</strong>Every required instrument is either site-provided or loaded from Ashley.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Check small gear</strong>Mallets, sticks, stands, triangle gear, and trap tables are confirmed.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Load only the list</strong>Nothing extra gets loaded unless Mr. Parker approves it.</span></label>
+      </div>
+    </section>
+
+    <section>
+      <h2>Site-Provided Equipment</h2>
+      <p class="note">No timpani key needed. Check this equipment when you arrive at the performance site.</p>
+      <div class="grid">
+        <label class="check-item"><input type="checkbox"><span><strong>Timpani: 24", 27", 30", 33"</strong>Needed for both pieces.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>40" bass drum</strong>Needed for at dawn, We Ride!</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>4-octave xylophone</strong>Needed for at dawn, We Ride!</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Yamaha orchestra bells</strong>Needed for at dawn, We Ride!</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Chimes / tubular chimes</strong>Needed for Salvation Is Created.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Vibraphone</strong>Needed for at dawn, We Ride!</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Marimba</strong>Needed for at dawn, We Ride!</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Gong / tam-tam</strong>Needed for at dawn, We Ride!</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Wenger podium</strong>Director podium.</span></label>
+      </div>
+      <p class="small">Not needed unless plans change: upright piano, microphone.</p>
+    </section>
+
+    <section>
+      <h2>Bring From Ashley</h2>
+      <div class="grid">
+        <label class="check-item"><input type="checkbox"><span><strong>China cymbal</strong>at dawn, We Ride!</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Cabasa</strong>at dawn, We Ride!</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Brake drum</strong>at dawn, We Ride!</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Snare drum</strong>at dawn, We Ride!</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Snare stand</strong>For snare drum.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Brake drum stand</strong>Use a snare drum stand for brake drum.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Suspended cymbal</strong>at dawn, We Ride!</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Suspended cymbal stand</strong>For suspended cymbal.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Crash cymbals</strong>Both pieces.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Crash cymbal stand</strong>Required setup item.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Triangle</strong>at dawn, We Ride!</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Triangle clip</strong>For triangle.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Triangle beaters</strong>For triangle.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Sizzle cymbal</strong>at dawn, We Ride!</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>3 concert toms</strong>at dawn, We Ride!</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Tom stands / mounts</strong>For concert toms.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Two trap tables</strong>For small accessories.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Pencils</strong>All parts.</span></label>
+      </div>
+    </section>
+
+    <section>
+      <h2>Mallets / Sticks / Accessories</h2>
+      <div class="grid">
+        <label class="check-item"><input type="checkbox"><span><strong>Glock / bell mallets</strong>Orchestra bells.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Xylophone mallets</strong>Xylophone.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Vibe mallets</strong>Vibraphone.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Marimba mallets</strong>Marimba.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Suspended cymbal mallets</strong>Suspended cymbal / sizzle cymbal.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Bass drum mallets</strong>40" bass drum.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Tam-tam mallet</strong>Gong / tam-tam.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Chime hammer</strong>Chimes.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Snare sticks</strong>Snare drum.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Tom mallets / sticks</strong>Concert toms.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Brake drum striker</strong>Brake drum.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Triangle beaters</strong>Triangle.</span></label>
+      </div>
+    </section>
+
+    <section>
+      <h2>Part Assignments</h2>
+      <p class="small">Fill names in at 2:00.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Piece</th>
+            <th>Part</th>
+            <th>Student</th>
+            <th>Instruments</th>
+            <th>Setup Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>at dawn, We Ride!</td><td>Timpani</td><td class="name-cell"></td><td>Site timpani</td><td>Tuning: G-Bb-D-F</td></tr>
+          <tr><td>at dawn, We Ride!</td><td>Percussion 1</td><td class="name-cell"></td><td>China cymbal, orchestra bells, cabasa, xylophone</td><td>Multi-instrument setup</td></tr>
+          <tr><td>at dawn, We Ride!</td><td>Percussion 2</td><td class="name-cell"></td><td>Vibraphone, brake drum, tambourine, suspended cymbal</td><td>Needs brake drum stand</td></tr>
+          <tr><td>at dawn, We Ride!</td><td>Percussion 3</td><td class="name-cell"></td><td>Marimba, suspended cymbal, crash cymbals</td><td>Needs crash cymbal stand</td></tr>
+          <tr><td>at dawn, We Ride!</td><td>Percussion 4</td><td class="name-cell"></td><td>Triangle, snare drum</td><td>Needs triangle clip, snare stand</td></tr>
+          <tr><td>at dawn, We Ride!</td><td>Percussion 5</td><td class="name-cell"></td><td>Bass drum, gong/tam-tam</td><td>Use site equipment</td></tr>
+          <tr><td>at dawn, We Ride!</td><td>Percussion 6</td><td class="name-cell"></td><td>Sizzle cymbal, 3 concert toms</td><td>Confirm tom order</td></tr>
+          <tr><td>Salvation Is Created</td><td>Crash cymbals</td><td class="name-cell"></td><td>Crash cymbals</td><td>Simple setup</td></tr>
+          <tr><td>Salvation Is Created</td><td>Timpani</td><td class="name-cell"></td><td>Site timpani</td><td>Confirm pitches from score</td></tr>
+          <tr><td>Salvation Is Created</td><td>Chimes</td><td class="name-cell"></td><td>Site chimes</td><td>Chime hammer</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="do-not">
+      <h2>Do Not Load</h2>
+      <div class="grid">
+        <label class="check-item"><input type="checkbox"><span><strong>Timpani</strong>Provided on site.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Bass drum</strong>Provided on site.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Xylophone</strong>Provided on site.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Orchestra bells</strong>Provided on site.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Chimes</strong>Provided on site.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Vibraphone</strong>Provided on site.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Marimba</strong>Provided on site.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Gong / tam-tam</strong>Provided on site.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Timpani key</strong>Not needed.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Upright piano</strong>Not needed.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Microphone</strong>Not needed.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Havendance equipment</strong>Havendance is not being performed.</span></label>
+        <label class="check-item"><input type="checkbox"><span><strong>Extra percussion gear</strong>Only load what is on this checklist or approved.</span></label>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      var key = "percussion-lead-checklist-2026-05-15";
+      var boxes = Array.prototype.slice.call(document.querySelectorAll('input[type="checkbox"]'));
+      var saved = {};
+
+      try {
+        saved = JSON.parse(localStorage.getItem(key) || "{}");
+      } catch (error) {
+        saved = {};
+      }
+
+      boxes.forEach(function (box, index) {
+        box.dataset.checkId = String(index);
+        box.checked = Boolean(saved[index]);
+        box.addEventListener("change", function () {
+          saved[index] = box.checked;
+          localStorage.setItem(key, JSON.stringify(saved));
+        });
+      });
+
+      document.getElementById("print-button").addEventListener("click", function () {
+        window.print();
+      });
+
+      document.getElementById("clear-button").addEventListener("click", function () {
+        boxes.forEach(function (box) {
+          box.checked = false;
+          saved[box.dataset.checkId] = false;
+        });
+        localStorage.setItem(key, JSON.stringify(saved));
+      });
+    })();
+  </script>
+</body>
+</html>

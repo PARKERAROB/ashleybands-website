@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hotel Rooms - Spring Trip 2026</title>
+  <style>
+    :root { --ink:#171717; --muted:#5f6673; --line:#d4dae3; --soft:#f5f7fa; --accent:#7b1829; --gold:#c5a028; --ok:#0f766e; --warn:#9f1239; --paper:#fff; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:#eef1f5; color:var(--ink); font-family:Arial, Helvetica, sans-serif; line-height:1.32; }
+    main { max-width:1040px; margin:0 auto; padding:16px; min-height:100vh; background:var(--paper); }
+    header { border-bottom:4px solid var(--accent); padding:8px 0 12px; margin-bottom:14px; }
+    h1 { margin:0 0 6px; font-size:28px; }
+    h2 { margin:22px 0 10px; font-size:20px; border-bottom:1px solid var(--line); padding-bottom:4px; }
+    .meta, .small { color:var(--muted); font-size:13px; }
+    .toplinks { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    .toplinks a, button { border:1px solid var(--line); background:var(--soft); color:var(--ink); border-radius:6px; padding:9px 11px; text-decoration:none; font-size:14px; min-height:40px; }
+    button { cursor:pointer; }
+    button.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+    .counts { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin:10px 0 16px; }
+    .count { border:1px solid var(--line); border-radius:8px; padding:12px; text-align:center; background:var(--soft); }
+    .count strong { display:block; font-size:26px; }
+    .count.good strong { color:var(--ok); }
+    .count.warn strong { color:var(--warn); }
+    .room { border:1px solid var(--line); border-radius:8px; padding:12px; margin:10px 0; background:#fff; }
+    .room.mixed { background:#fef9e7; border-color:#e0c75f; }
+    .room.done { background:#ecfdf5; border-color:#86efac; }
+    .room-head { display:grid; grid-template-columns:1fr 1fr; gap:10px; align-items:end; margin-bottom:10px; }
+    .room-head label { display:block; font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.04em; }
+    .room-code { font-size:18px; font-weight:700; }
+    .room-note { font-size:12px; color:var(--warn); margin-top:4px; }
+    input[type="text"] { width:100%; min-height:42px; border:1px solid var(--line); border-radius:6px; padding:8px; font-size:16px; }
+    .occupants { list-style:none; padding:0; margin:0; }
+    .occupants li { display:flex; align-items:center; gap:10px; padding:8px 4px; border-top:1px solid var(--line); }
+    .occupants li:first-child { border-top:none; }
+    .occupants input[type="checkbox"] { width:26px; height:26px; accent-color:var(--ok); flex:none; }
+    .occupants .name { font-weight:700; flex:1; }
+    .occupants .detail { color:var(--muted); font-size:12px; }
+    .occupants li.checked .name { text-decoration:line-through; color:var(--muted); }
+    .badge { display:inline-block; font-size:11px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; padding:2px 6px; border-radius:4px; margin-right:6px; background:var(--gold); color:#3a2c00; }
+    .badge.director { background:var(--accent); color:#fff; }
+    .badge.minor { background:#6b7280; color:#fff; }
+    .toolbar { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0; }
+    @media (max-width:760px) {
+      main { padding:12px; }
+      h1 { font-size:24px; }
+      .room-head { grid-template-columns:1fr; }
+      .counts { grid-template-columns:1fr; }
+    }
+    @media print {
+      body { background:#fff; }
+      main { max-width:none; padding:0.35in; }
+      .toplinks, .toolbar { display:none; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Hotel Room Check-In</h1>
+      <div class="meta">Wyndham Garden Williamsburg · Late check-in 11:30 PM Friday 2026-05-15</div>
+      <div class="meta">21 rooms held · Master pay on file · Fill in hotel room numbers at front desk</div>
+      <div class="meta">Source: Busch Gardens Google Sheet · Sheet5</div>
+      <div class="toplinks">
+        <a href="/trip/">Hub</a>
+        <a href="/trip/bus-checkoff-2026.html">Bus Checkoff</a>
+        <a href="/trip/chaperone-field-guide-2026.html">Chaperone Guide</a>
+        <button type="button" id="printButton">Print</button>
+      </div>
+    </header>
+
+    <section class="counts">
+      <div class="count" id="checkedCount"><span>Checked In</span><strong>0 / 0</strong></div>
+      <div class="count" id="roomsCount"><span>Rooms w/ Numbers</span><strong>0 / 0</strong></div>
+      <div class="count" id="remainingCount"><span>Still Out</span><strong>0</strong></div>
+    </section>
+
+    <div class="toolbar">
+      <button type="button" class="primary" id="clearAll">Clear All Check-Ins</button>
+    </div>
+
+    <div id="allRooms"></div>
+  </main>
+
+  <script>
+    // Source: Busch Gardens Google Sheet, tab "Sheet5".
+    // Roles: student | adult | director | minor.
+    const rooms = [
+      { id:"r1",  code:"Room 1",  note:"", occupants:[
+        { name:"Robert Parker", role:"director", detail:"Director" }
+      ]},
+      { id:"r2",  code:"Room 2",  occupants:[
+        { name:"Tyler Shook", role:"student", detail:"M" },
+        { name:"Kaiden Thompson", role:"student", detail:"M" },
+        { name:"Aaron Lescalleet", role:"student", detail:"M" },
+        { name:"Gio Lopez Martinez", role:"student", detail:"M" }
+      ]},
+      { id:"r3",  code:"Room 3",  occupants:[
+        { name:"Troy Sutton", role:"adult", detail:"Chaperone (rooming with son)" },
+        { name:"Alexander Sutton", role:"student", detail:"M · Troy's son" }
+      ]},
+      { id:"r4",  code:"Room 4",  occupants:[
+        { name:"Adam Boyle", role:"student", detail:"M" },
+        { name:"Jordan Mirek", role:"student", detail:"M" },
+        { name:"Kade Rathgeber", role:"student", detail:"M" },
+        { name:"Aidan Ballas", role:"student", detail:"M" }
+      ]},
+      { id:"r5",  code:"Room 5",  occupants:[
+        { name:"Lesley Neil", role:"adult", detail:"Chaperone (rooming with son)" },
+        { name:"Louis Neill Martinez", role:"student", detail:"M · Lesley's son" }
+      ]},
+      { id:"r6",  code:"Room 6",  occupants:[
+        { name:"Maël Ferigo", role:"student", detail:"M" },
+        { name:"Justin Naklicki", role:"student", detail:"M" },
+        { name:"Cyrus Hill", role:"student", detail:"M" },
+        { name:"Brady Clamme", role:"student", detail:"M" }
+      ]},
+      { id:"r7",  code:"Room 7",  occupants:[
+        { name:"Karry Eckler", role:"adult", detail:"Chaperone (rooming with son)" },
+        { name:"Avery Eckler", role:"student", detail:"M · Karry's son" }
+      ]},
+      { id:"r8",  code:"Room 8",  occupants:[
+        { name:"Cameron DeSorbo", role:"student", detail:"M" },
+        { name:"Dylan Heglar", role:"student", detail:"M" },
+        { name:"Noah Moffitt", role:"student", detail:"M" },
+        { name:"Tyler Zizzamia", role:"student", detail:"M" }
+      ]},
+      { id:"r9",  code:"Room 9",  occupants:[
+        { name:"Rachel Zizzamia", role:"adult", detail:"Chaperone" }
+      ]},
+      { id:"r10", code:"Room 10", occupants:[
+        { name:"Dan Gregory", role:"student", detail:"M" },
+        { name:"Dixon Gullett", role:"student", detail:"M" },
+        { name:"Brandon Parks", role:"student", detail:"M" },
+        { name:"JT Damstetter", role:"student", detail:"M" }
+      ]},
+      { id:"r11", code:"Room 11", occupants:[
+        { name:"Danielle Cray", role:"adult", detail:"Chaperone" },
+        { name:"Ali Cray", role:"adult", detail:"Chaperone" }
+      ]},
+      { id:"r12", code:"Room 12", occupants:[
+        { name:"Noah Powers", role:"student", detail:"M" },
+        { name:"Robbe Sears", role:"student", detail:"M" },
+        { name:"Caleb Pritchard", role:"student", detail:"M" }
+      ]},
+      { id:"r13", code:"Room 13", occupants:[
+        { name:"Tatiana Miller", role:"adult", detail:"Chaperone / AHS teacher (rooming with son)" },
+        { name:"Calvin Miller", role:"minor", detail:"Tatiana's son · rooming together" }
+      ]},
+      { id:"r14", code:"Room 14", occupants:[
+        { name:"Skylar Lockhart", role:"student", detail:"F" },
+        { name:"Ashley Hicks", role:"student", detail:"F" },
+        { name:"Brennaugh Coppinger", role:"student", detail:"F" },
+        { name:"Caitlyn McCullah", role:"student", detail:"F" }
+      ]},
+      { id:"r15", code:"Room 15", occupants:[
+        { name:"Caleigh Pritchard", role:"student", detail:"F" },
+        { name:"Claire Costner", role:"student", detail:"F" },
+        { name:"Ava Braswell", role:"student", detail:"F" }
+      ]},
+      { id:"r16", code:"Room 16", occupants:[
+        { name:"Jenny Heglar", role:"adult", detail:"Chaperone · attendance/bus captain" }
+      ]},
+      { id:"r17", code:"Room 17", occupants:[
+        { name:"Addisyn Lewis", role:"student", detail:"F" },
+        { name:"Lyla Franklin", role:"student", detail:"F" },
+        { name:"Heather Morrison", role:"student", detail:"F" },
+        { name:"Lizzy Littlejohn", role:"student", detail:"F" }
+      ]},
+      { id:"r18", code:"Room 18", occupants:[
+        { name:"Emma Buchanan", role:"student", detail:"F" },
+        { name:"Kaelyn Larson", role:"student", detail:"F" },
+        { name:"Leah Park", role:"student", detail:"F" },
+        { name:"Mercedes Tejeda Trejo", role:"student", detail:"F" }
+      ]},
+      { id:"r19", code:"Room 19", occupants:[
+        { name:"Carrie Lewis", role:"adult", detail:"Chaperone" }
+      ]},
+      { id:"r20", code:"Room 20", occupants:[
+        { name:"Mackenzie Stoner", role:"student", detail:"F" },
+        { name:"Lily Cray", role:"student", detail:"F" },
+        { name:"Piper Williams", role:"student", detail:"F" },
+        { name:"Katelyn Hill", role:"student", detail:"F" }
+      ]},
+      { id:"r21", code:"Room 21", occupants:[
+        { name:"Antwan S.", role:"adult", detail:"CharterUP driver · (252) 214-0712" }
+      ]},
+      { id:"sep", code:"Personal (separate)", note:"Not part of master pay block.", occupants:[
+        { name:"Randall Langley", role:"adult", detail:"Chaperone · separate transportation" },
+        { name:"Mason Langley", role:"student", detail:"M · Randall's son" }
+      ]}
+    ];
+
+    const badgeLabel = { director:"Director", adult:"Adult", minor:"Minor" };
+    const key = "spring-trip-hotel-rooms-2026";
+    const state = JSON.parse(localStorage.getItem(key) || "{}");
+
+    function save() {
+      localStorage.setItem(key, JSON.stringify(state));
+      updateCounts();
+    }
+
+    function totalOccupants() {
+      return rooms.reduce((n, r) => n + r.occupants.length, 0);
+    }
+
+    function updateCounts() {
+      let checked = 0;
+      rooms.forEach(room => {
+        room.occupants.forEach((_, i) => {
+          if (state["chk-" + room.id + "-" + i]) checked++;
+        });
+      });
+      const withNumbers = rooms.filter(r => r.occupants.length > 0 && (state["num-" + r.id] || "").trim() !== "").length;
+      const realRooms = rooms.filter(r => r.occupants.length > 0).length;
+      const total = totalOccupants();
+      document.querySelector("#checkedCount strong").textContent = checked + " / " + total;
+      document.querySelector("#roomsCount strong").textContent = withNumbers + " / " + realRooms;
+      document.querySelector("#remainingCount strong").textContent = String(total - checked);
+      document.getElementById("checkedCount").className = "count " + (checked === total ? "good" : "");
+      document.getElementById("remainingCount").className = "count " + ((total - checked) === 0 ? "good" : "warn");
+
+      rooms.forEach(room => {
+        const el = document.getElementById("room-" + room.id);
+        if (!el || room.occupants.length === 0) return;
+        const allChecked = room.occupants.every((_, i) => state["chk-" + room.id + "-" + i]);
+        el.classList.toggle("done", allChecked);
+      });
+    }
+
+    function renderRoom(room) {
+      const el = document.createElement("div");
+      const hasAdult = room.occupants.some(o => o.role !== "student");
+      el.className = "room" + (hasAdult ? " mixed" : "");
+      el.id = "room-" + room.id;
+      const occupantsHtml = room.occupants.length === 0
+        ? `<li style="color:var(--muted);">(no occupants assigned)</li>`
+        : room.occupants.map((occ, i) => {
+          const k = "chk-" + room.id + "-" + i;
+          const badge = occ.role === "student" ? "" : `<span class="badge ${occ.role}">${badgeLabel[occ.role]}</span>`;
+          return `<li${state[k] ? ' class="checked"' : ''}>
+            <input type="checkbox" data-key="${k}"${state[k] ? ' checked' : ''}>
+            <div style="flex:1;">
+              <div>${badge}<span class="name">${occ.name}</span></div>
+              <div class="detail">${occ.detail}</div>
+            </div>
+          </li>`;
+        }).join("");
+      const noteHtml = room.note ? `<div class="room-note">⚠ ${room.note}</div>` : "";
+      el.innerHTML = `
+        <div class="room-head">
+          <div>
+            <label>Sheet5 code</label>
+            <div class="room-code">${room.code}</div>
+            ${noteHtml}
+          </div>
+          <div>
+            <label for="num-${room.id}">Hotel room #</label>
+            <input id="num-${room.id}" type="text" inputmode="numeric" placeholder="fill on arrival" data-num="${room.id}" value="${state["num-" + room.id] || ""}">
+          </div>
+        </div>
+        <ul class="occupants">${occupantsHtml}</ul>
+      `;
+      return el;
+    }
+
+    const container = document.getElementById("allRooms");
+    rooms.forEach(room => container.appendChild(renderRoom(room)));
+
+    document.querySelectorAll('input[type="checkbox"]').forEach(box => {
+      box.addEventListener("change", () => {
+        state[box.dataset.key] = box.checked;
+        box.closest("li").classList.toggle("checked", box.checked);
+        save();
+      });
+    });
+
+    document.querySelectorAll('input[data-num]').forEach(input => {
+      input.addEventListener("input", () => {
+        state["num-" + input.dataset.num] = input.value;
+        save();
+      });
+    });
+
+    document.getElementById("clearAll").addEventListener("click", () => {
+      Object.keys(state).forEach(k => {
+        if (k.startsWith("chk-")) state[k] = false;
+      });
+      document.querySelectorAll('input[type="checkbox"]').forEach(b => { b.checked = false; });
+      document.querySelectorAll(".occupants li").forEach(li => li.classList.remove("checked"));
+      save();
+    });
+
+    document.getElementById("printButton").addEventListener("click", () => window.print());
+    updateCounts();
+
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/trip/trip-sw.js").catch(function () {});
+    }
+  </script>
+</body>
+</html>

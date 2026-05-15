@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Spring Trip 2026 Control Hub</title>
+  <style>
+    :root { --ink:#171717; --muted:#5f6673; --line:#d4dae3; --soft:#f5f7fa; --accent:#7b1829; --gold:#c5a028; --ok:#0f766e; --paper:#fff; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:#eef1f5; color:var(--ink); font-family:Arial, Helvetica, sans-serif; line-height:1.38; }
+    main { max-width:900px; margin:0 auto; padding:18px; min-height:100vh; background:var(--paper); }
+    header { border-bottom:4px solid var(--accent); padding:8px 0 14px; margin-bottom:18px; }
+    h1 { margin:0 0 6px; font-size:28px; }
+    h2 { margin:22px 0 10px; font-size:20px; }
+    p { margin:0 0 10px; }
+    .meta { color:var(--muted); font-size:14px; }
+    .notice { border:1px solid #fed7aa; background:#fff7ed; padding:12px; border-radius:8px; margin:14px 0; }
+    .links { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    a.card { display:block; min-height:112px; padding:14px; border:1px solid var(--line); border-left:6px solid var(--accent); border-radius:8px; color:var(--ink); text-decoration:none; background:#fff; }
+    a.card:focus, a.card:hover { outline:2px solid var(--gold); outline-offset:2px; }
+    .card strong { display:block; font-size:18px; margin-bottom:6px; }
+    .card span { display:block; color:var(--muted); font-size:14px; }
+    .small { color:var(--muted); font-size:13px; }
+    ul { padding-left:20px; margin:8px 0 0; }
+    li { margin:5px 0; }
+    @media (max-width:680px) { main{padding:14px;} .links{grid-template-columns:1fr;} h1{font-size:24px;} }
+    @media print { body{background:#fff;} main{max-width:none;} }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Spring Trip 2026 Control Hub</h1>
+      <div class="meta">Bands of Ashley High School · Busch Gardens / Music in the Parks · May 15-16, 2026</div>
+    </header>
+
+    <section class="notice">
+      <strong>Use the live links as the source of truth.</strong>
+      <p>Open the page once while you have service. These pages try to keep a local fallback on your phone, but reload when you have internet so updates come through.</p>
+      <p class="small">Emergency contacts and medical details are not published here. Use the physical/red folder or controlled source for those.</p>
+    </section>
+
+    <section>
+      <h2>Trip Links</h2>
+      <div class="links">
+        <a class="card" href="/trip/bus-checkoff-2026.html">
+          <strong>Bus Checkoff</strong>
+          <span>Phone-friendly on/off attendance checklist for each bus movement. Saves locally on each device.</span>
+        </a>
+        <a class="card" href="/trip/hotel-rooms-2026.html">
+          <strong>Hotel Room Check-In</strong>
+          <span>Room list + occupants with check-in boxes. Fill in actual hotel room numbers at the front desk.</span>
+        </a>
+        <a class="card" href="/trip/chaperone-field-guide-2026.html">
+          <strong>Chaperone Field Guide</strong>
+          <span>Groups, check-in procedure, missing-student escalation, hotel, park, and schedule anchors.</span>
+        </a>
+        <a class="card" href="/trip/percussion-lead-checklist-2026-05-15.html">
+          <strong>Percussion Load Checklist</strong>
+          <span>Performance percussion equipment and part-assignment checklist.</span>
+        </a>
+        <a class="card" href="/trip/student-checkin-instructions-2026.html">
+          <strong>Student Check-In Instructions</strong>
+          <span>Simple proof-of-life instructions for students and group captains.</span>
+        </a>
+      </div>
+    </section>
+
+    <section>
+      <h2>Schedule Anchors</h2>
+      <ul>
+        <li>Fri 3:00 PM: CharterUP pickup at Ashley.</li>
+        <li>Fri 9:20 PM: arrive Denbigh High School.</li>
+        <li>Fri 9:50 PM: warm-up.</li>
+        <li>Fri 10:15 PM: performance.</li>
+        <li>Fri 10:45 PM: depart Denbigh.</li>
+        <li>Fri 11:30 PM: arrive Wyndham Garden Williamsburg Busch Gardens Area.</li>
+        <li>Sat 9:00 AM: depart hotel.</li>
+        <li>Sat 9:15 AM: arrive Busch Gardens.</li>
+        <li>Sat 12:00-12:30 PM: proof-of-life check-in window.</li>
+        <li>Sat 3:30 PM: awards at Globe Theater.</li>
+        <li>Sat 5:30 PM: depart Busch Gardens.</li>
+        <li>Sat 11:00 PM: estimated return to Ashley.</li>
+      </ul>
+    </section>
+  </main>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/trip/trip-sw.js").catch(function () {});
+    }
+  </script>
+</body>
+</html>

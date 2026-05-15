@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Student Check-In Instructions - Spring Trip 2026</title>
+  <style>
+    :root { --ink:#171717; --muted:#5f6673; --line:#d4dae3; --soft:#f5f7fa; --accent:#7b1829; --paper:#fff; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:#eef1f5; color:var(--ink); font-family:Arial, Helvetica, sans-serif; line-height:1.42; }
+    main { max-width:760px; margin:0 auto; padding:18px; min-height:100vh; background:var(--paper); }
+    header { border-bottom:4px solid var(--accent); padding-bottom:14px; margin-bottom:18px; }
+    h1 { margin:0 0 6px; font-size:28px; }
+    h2 { margin:22px 0 8px; font-size:20px; }
+    .meta, .small { color:var(--muted); font-size:13px; }
+    .box { border:1px solid var(--line); border-radius:8px; padding:14px; margin:12px 0; background:#fff; }
+    .urgent { background:#fff1f2; border-color:#fecdd3; }
+    ol, ul { padding-left:22px; }
+    li { margin:8px 0; }
+    a { color:var(--accent); }
+    @media (max-width:680px) { main{padding:14px;} h1{font-size:24px;} }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Student Check-In Instructions</h1>
+      <div class="meta">Ashley Bands Spring Trip · Busch Gardens</div>
+      <div><a href="/trip/">Trip Hub</a></div>
+    </header>
+
+    <section class="box">
+      <h2>Check-In Window</h2>
+      <p>Saturday, 12:00-12:30 PM.</p>
+      <p>Check-in is not complete until both steps happen.</p>
+    </section>
+
+    <section class="box">
+      <h2>How To Check In</h2>
+      <ol>
+        <li>Take one group photo with every group member's face visible.</li>
+        <li>Text the photo to your assigned chaperone.</li>
+        <li>Include every student's name and your current location.</li>
+        <li>Post the same check-in to Google Chat.</li>
+        <li>Wait for confirmation from your chaperone.</li>
+      </ol>
+      <p class="small">Example: Group 6 check-in: Ava, Jayden, Marcus, Lily. At Italy bridge. All good.</p>
+    </section>
+
+    <section class="box urgent">
+      <h2>Rules That Matter</h2>
+      <ul>
+        <li>Groups of 3 or more at all times.</li>
+        <li>No one goes anywhere alone.</li>
+        <li>Respond immediately to adult texts/calls.</li>
+        <li>Group changes require clear communication.</li>
+        <li>If someone is sick, missing, separated, upset, or not responding, tell an adult immediately.</li>
+      </ul>
+    </section>
+  </main>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/trip/trip-sw.js").catch(function () {});
+    }
+  </script>
+</body>
+</html>
