@@ -27,7 +27,17 @@ const timeline = [
   {
     time: "Friday, May 15 · 10:43 PM",
     title: "Formal CharterUP follow-up sent",
-    body: "A written follow-up was sent to CharterUP requesting documentation and clarification about the transportation failure. CharterUP acknowledged the request."
+    body: "A written follow-up was sent to CharterUP requesting documentation and clarification about the transportation failure. CharterUP acknowledged the request and assigned an internal ticket."
+  },
+  {
+    time: "Saturday, May 16 · 5:45 AM",
+    title: "Chaperone documentation request sent",
+    body: "Trip chaperones were asked to share what they observed on May 15, any phone records related to the cancellation, and confirmation of trip-related transactions on the booster account. The goal is one clean record of how the day unfolded."
+  },
+  {
+    time: "Saturday, May 16 · 6:02 AM",
+    title: "Family impact form sent",
+    body: "Families were invited to share what their student observed and what the family had to give up or change because of trip costs that are now in limbo. Responses are voluntary and are being kept on file alongside the vendor record."
   }
 ];
 
@@ -51,13 +61,20 @@ const statusItems = [
     label: "Family refunds",
     status: "Pending recovery",
     detail: "Final family refund amounts cannot be determined until recovered funds and the trip account are reconciled."
+  },
+  {
+    label: "Witness and family-impact statements",
+    status: "Collection in progress",
+    detail: "Chaperones, families, and students have been invited to share what they observed on May 15 and how the cancellation has affected them. This material is being kept on file and will be referenced in vendor correspondence as appropriate."
   }
 ];
 
 const nextSteps = [
-  "Follow up with CharterUP on the bus refund and exception request.",
+  "Wait for CharterUP's response to the formal documentation request submitted Friday night.",
   "Follow up with Music in the Parks / Festival's Edge when their primary contact returns Monday, May 18.",
   "Watch for the hotel response to the refund / exception request.",
+  "Collect and organize chaperone and family responses as they come in.",
+  "Confirm the bus refund posts to the booster account within the 7-14 business day window.",
   "Continue documenting each response and preserving the written record.",
   "Reconcile the trip account before issuing final refund information to families."
 ];
@@ -72,7 +89,7 @@ export default function SpringTripRecoveryPage() {
           This page is a family-facing summary of the recovery work after the May 15 spring trip cancellation.
           It will focus on confirmed information, major next steps, and what families should expect.
         </p>
-        <div className="recovery-updated">Last updated: Friday, May 15, 2026 · 11:10 PM</div>
+        <div className="recovery-updated">Last updated: Saturday, May 16, 2026 · 12:00 PM</div>
       </section>
 
       <section className="recovery-section recovery-note">
@@ -126,11 +143,24 @@ export default function SpringTripRecoveryPage() {
       </section>
 
       <section className="recovery-section recovery-note">
+        <h2>A Note on Family Responses</h2>
+        <p>
+          Thank you to the families who have already written in. Many of you have offered help, asked
+          good questions, and shared ideas. The recovery work is further along than it may appear from
+          the outside, and several of the suggestions families have raised are already in motion. The
+          best thing families can do right now is share their experience through the family impact form
+          if they have not already, and otherwise hold the questions until the next update.
+        </p>
+      </section>
+
+      <section className="recovery-section recovery-note">
         <h2>Transparency Boundary</h2>
         <p>
           This page will not include student information, private contact information, raw phone records,
-          or internal dispute strategy. Those records are being preserved separately. The goal here is to
-          give families a clear view of the major recovery steps without overwhelming everyone with raw files.
+          or the specific contents of correspondence with vendors. Those records are being preserved
+          separately. Keeping the strategic side of the recovery work private is what allows it to land
+          cleanly with the vendors involved. The goal here is to give families a clear view of the major
+          recovery steps without overwhelming everyone with raw files or compromising the case.
         </p>
       </section>
     </main>
