@@ -126,6 +126,12 @@ export default function SpringTripRecoveryPage() {
           paths not going as hoped reduces what comes back. I want to be straightforward about that so no one
           is expecting a specific amount before we know what is actually possible.
         </p>
+        <p>
+          If the goodwill exceptions from the hotel and festival do not result in meaningful recovery, the
+          focus of the recovery effort will shift toward CharterUP and the bus provider they hired. They
+          are the parties responsible for the failure, and the parties who will ultimately need to account
+          for what happened.
+        </p>
       </section>
 
       <section className="recovery-section">
