@@ -1130,3 +1130,151 @@ h2 {
   margin-top: 3px;
   font-size: 12px;
 }
+
+/* ── Spring Trip Recovery ─────────────────────────── */
+
+.recovery-page {
+  padding-bottom: clamp(42px, 6vw, 80px);
+}
+
+.recovery-hero {
+  padding: clamp(46px, 7vw, 86px) clamp(18px, 5vw, 72px);
+  background: #eee8da;
+  border-bottom: 1px solid var(--line);
+}
+
+.recovery-hero h1 {
+  max-width: 860px;
+  margin: 0;
+  color: var(--garnet-dark);
+  font-size: clamp(42px, 7vw, 82px);
+  line-height: 0.96;
+}
+
+.recovery-hero p {
+  max-width: 760px;
+  color: var(--muted);
+  font-size: 19px;
+}
+
+.recovery-updated {
+  display: inline-flex;
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: var(--paper-strong);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--garnet-dark);
+  font-weight: 800;
+}
+
+.recovery-section {
+  width: min(1100px, calc(100% - 36px));
+  margin: 0 auto;
+  padding-top: clamp(30px, 5vw, 54px);
+}
+
+.recovery-section-heading {
+  max-width: 760px;
+  margin-bottom: 18px;
+}
+
+.recovery-note {
+  max-width: 900px;
+}
+
+.recovery-note h2,
+.recovery-section-heading h2,
+.recovery-next h2 {
+  color: var(--garnet-dark);
+}
+
+.recovery-note p,
+.recovery-next li {
+  color: #322d26;
+  font-size: 17px;
+}
+
+.recovery-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.recovery-card {
+  min-height: 190px;
+  padding: 20px;
+  background: var(--paper-strong);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.recovery-card span,
+.recovery-event span {
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.recovery-card h2 {
+  margin-top: 14px;
+  color: var(--garnet-dark);
+  font-size: 24px;
+}
+
+.recovery-card p,
+.recovery-event p {
+  color: var(--muted);
+  margin-bottom: 0;
+}
+
+.recovery-timeline {
+  display: grid;
+  gap: 12px;
+}
+
+.recovery-event {
+  padding: 18px 0 18px 22px;
+  border-left: 4px solid var(--gold);
+}
+
+.recovery-event h3 {
+  margin: 8px 0 6px;
+  color: var(--garnet-dark);
+  font-size: 22px;
+}
+
+.recovery-next {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.7fr) minmax(300px, 1.3fr);
+  gap: 28px;
+  align-items: start;
+  padding-bottom: 8px;
+}
+
+.recovery-next ul {
+  margin: 0;
+  padding-left: 22px;
+}
+
+.recovery-next li + li {
+  margin-top: 10px;
+}
+
+@media (max-width: 900px) {
+  .recovery-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .recovery-next {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .recovery-grid {
+    grid-template-columns: 1fr;
+  }
+}
