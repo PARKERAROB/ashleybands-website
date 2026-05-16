@@ -102,6 +102,32 @@ export default function SpringTripRecoveryPage() {
         </p>
       </section>
 
+      <section className="recovery-section recovery-note">
+        <h2>What We Are Trying to Recover</h2>
+        <p>
+          To be honest with families about the financial reality, here is the breakdown of what was paid for
+          the trip and where each piece stands right now:
+        </p>
+        <ul>
+          <li><strong>Bus charter (CharterUP):</strong> $5,550 &mdash; <em>refund confirmed in writing, processing through the booster card.</em></li>
+          <li><strong>Music in the Parks festival registration (Festival&rsquo;s Edge):</strong> $5,711 &mdash; <em>currently non-refundable; goodwill exception requested.</em></li>
+          <li><strong>Hotel (Wyndham Garden Williamsburg):</strong> $2,676.24 net &mdash; <em>currently non-refundable; goodwill exception requested.</em></li>
+          <li><strong>Trip t-shirts (Printify):</strong> $720.77 &mdash; <em>physical product, already produced and shipped; not refundable.</em></li>
+        </ul>
+        <p>
+          The total amount paid for the trip is significant. The bus refund covers a meaningful portion of that,
+          but the hotel and festival pieces together are the larger ask, and those are the requests that require
+          vendors to make exceptions to their own policies. Neither vendor is required to grant those exceptions.
+        </p>
+        <p>
+          For families to see a substantial refund returned to them, several things need to go correctly:
+          the bus refund needs to post cleanly, the hotel and festival goodwill exceptions need to be granted
+          in some form, and the trip account needs to reconcile against what is recovered. Any one of those
+          paths not going as hoped reduces what comes back. I want to be straightforward about that so no one
+          is expecting a specific amount before we know what is actually possible.
+        </p>
+      </section>
+
       <section className="recovery-section">
         <div className="recovery-grid">
           {statusItems.map((item) => (
