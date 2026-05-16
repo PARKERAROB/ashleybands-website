@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <base href="/programs/spring-concert-2026/slideshow/">
+  <title>2026 Spring Concert — Slideshow</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+      font-family: 'Georgia', serif;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background-size: cover;
+      background-position: center;
+      isolation: isolate;
+    }
+
+    .slide.active {
+      display: flex;
+    }
+
+    .slide::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      z-index: 1;
+    }
+
+    .slide.dark {
+      background: #0a0a0a;
+    }
+
+    .slide.dark::before {
+      background: none;
+    }
+
+    .slide.gallery::before {
+      background: none;
+    }
+
+    .bg {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 1.5s ease-in-out;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .bg.show {
+      opacity: 1;
+    }
+
+    .bg-backdrop,
+    .bg-image {
+      position: absolute;
+      inset: 0;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .bg-backdrop {
+      background-size: cover;
+      filter: blur(40px) brightness(0.6);
+      transform: scale(1.15);
+    }
+
+    .bg-image {
+      background-size: contain;
+    }
+
+    /* at dawn — fill the screen, crop as needed; nudge image down */
+    #slide-at-dawn .bg-image {
+      background-size: cover;
+      background-position: center calc(50% + 500px);
+    }
+
+    #slide-at-dawn .bg-backdrop {
+      display: none;
+    }
+
+    /* Salvation & Havendance — fill the screen, crop as needed */
+    #slide-salvation .bg-image,
+    #slide-havendance .bg-image {
+      background-size: cover;
+    }
+    #slide-salvation .bg-backdrop,
+    #slide-havendance .bg-backdrop {
+      display: none;
+    }
+
+    .content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      color: #fff;
+      padding: 3rem 4rem;
+      max-width: 1100px;
+      width: 100%;
+    }
+
+    .eyebrow {
+      font-family: 'Arial', sans-serif;
+      font-size: clamp(0.8rem, 1.5vw, 1.1rem);
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: #bbb;
+      margin-bottom: 0.8rem;
+    }
+
+    .rule {
+      display: block;
+      width: 70px;
+      height: 3px;
+      background: #b50000;
+      margin: 1rem auto;
+    }
+
+    .title {
+      font-size: clamp(3rem, 9vw, 8rem);
+      font-weight: normal;
+      line-height: 1.05;
+      letter-spacing: 0.02em;
+      color: #fff;
+    }
+
+    .subtitle {
+      font-size: clamp(1.2rem, 3vw, 2.2rem);
+      font-weight: normal;
+      font-style: italic;
+      color: #ddd;
+      margin-top: 0.5rem;
+    }
+
+    .composer {
+      font-family: 'Arial', sans-serif;
+      font-size: clamp(1rem, 2.2vw, 1.8rem);
+      color: #ccc;
+      letter-spacing: 0.06em;
+      margin-top: 0.4rem;
+    }
+
+    .meta {
+      font-family: 'Arial', sans-serif;
+      font-size: clamp(0.9rem, 1.8vw, 1.4rem);
+      color: #aaa;
+      line-height: 2.2;
+      margin-top: 1.5rem;
+    }
+
+    .qr-wrap {
+      margin-top: 2.5rem;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .qr-wrap img {
+      width: 150px;
+      height: 150px;
+      border: 4px solid rgba(255, 255, 255, 0.85);
+      border-radius: 4px;
+      display: block;
+    }
+
+    .qr-label {
+      font-family: 'Arial', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #999;
+    }
+
+    /* Welcome slide — text + QR side by side, both centered */
+    #slide-welcome.active {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(2rem, 6vw, 6rem);
+      padding: 3rem 4rem;
+    }
+    #slide-welcome .welcome-text {
+      position: relative;
+      z-index: 2;
+      text-align: right;
+      color: #fff;
+      max-width: 620px;
+    }
+    #slide-welcome .welcome-text .rule { margin-right: 0; margin-left: auto; }
+    #slide-welcome .welcome-qr {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    #slide-welcome .welcome-qr img {
+      width: clamp(220px, 22vw, 320px);
+      height: clamp(220px, 22vw, 320px);
+      border: 6px solid rgba(255,255,255,0.9);
+      border-radius: 6px;
+      display: block;
+    }
+
+    .movement-tag {
+      position: absolute;
+      bottom: 1.5rem;
+      left: 1.75rem;
+      z-index: 2;
+      color: rgba(255, 255, 255, 0.9);
+      font-family: 'Arial', sans-serif;
+      font-size: 0.95rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85), 0 0 14px rgba(0, 0, 0, 0.7);
+    }
+
+    #counter {
+      position: fixed;
+      bottom: 1rem;
+      right: 1.5rem;
+      font-family: 'Arial', sans-serif;
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.2);
+      z-index: 100;
+      letter-spacing: 0.05em;
+      pointer-events: none;
+    }
+
+    .cb-placeholder-1 {
+      background: linear-gradient(135deg, #0d1520 0%, #162030 60%, #0a1018 100%);
+    }
+
+    .cb-placeholder-1::before {
+      background: none;
+    }
+
+    .cb-placeholder-2 {
+      background: linear-gradient(135deg, #150d0d 0%, #2a1010 60%, #100808 100%);
+    }
+
+    .cb-placeholder-2::before {
+      background: none;
+    }
+
+    .cb-placeholder-3 {
+      background: linear-gradient(135deg, #0d1520 0%, #1a2840 60%, #0a1020 100%);
+    }
+
+    .cb-placeholder-3::before {
+      background: none;
+    }
+
+    .senior-intro {
+      flex-direction: column;
+      padding: 3rem 4rem;
+      justify-content: center;
+      background:
+        radial-gradient(ellipse at top, rgba(181, 0, 0, 0.08) 0%, transparent 55%),
+        #0a0a0a;
+    }
+
+    .senior-intro .heading {
+      text-align: center;
+      margin-bottom: 3vh;
+    }
+
+    .senior-intro .eyebrow {
+      margin-bottom: 1rem;
+      color: #888;
+    }
+
+    .senior-intro .word {
+      font-family: 'Georgia', serif;
+      font-style: italic;
+      font-size: clamp(4rem, 13vw, 11rem);
+      font-weight: normal;
+      line-height: 0.95;
+      letter-spacing: -0.01em;
+      color: #fff;
+      display: block;
+    }
+
+    .senior-intro .rule {
+      width: 90px;
+      height: 3px;
+      margin: 1.2rem auto 1rem auto;
+    }
+
+    .senior-intro .subtag {
+      font-family: 'Arial', sans-serif;
+      font-size: clamp(0.9rem, 1.6vw, 1.3rem);
+      letter-spacing: 0.45em;
+      text-transform: uppercase;
+      color: #ccc;
+    }
+
+    .senior-strip {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      padding: 0 2rem;
+    }
+
+    .senior-strip .card {
+      width: clamp(100px, 11.5vw, 175px);
+      aspect-ratio: 3 / 4;
+      background-size: cover;
+      background-position: center top;
+      border: 7px solid #f4efe3;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.85), 0 4px 12px rgba(0, 0, 0, 0.5);
+      flex-shrink: 0;
+    }
+
+    .senior-strip .card:nth-child(1) {
+      transform: rotate(-7deg) translateY(10px);
+      margin-right: -1.8rem;
+      z-index: 1;
+    }
+
+    .senior-strip .card:nth-child(2) {
+      transform: rotate(4deg) translateY(-6px);
+      margin-right: -1.8rem;
+      z-index: 4;
+    }
+
+    .senior-strip .card:nth-child(3) {
+      transform: rotate(-2deg) translateY(8px);
+      margin-right: -1.8rem;
+      z-index: 2;
+    }
+
+    .senior-strip .card:nth-child(4) {
+      transform: rotate(5deg) translateY(-8px);
+      margin-right: -1.8rem;
+      z-index: 5;
+    }
+
+    .senior-strip .card:nth-child(5) {
+      transform: rotate(-5deg) translateY(6px);
+      margin-right: -1.8rem;
+      z-index: 3;
+    }
+
+    .senior-strip .card:nth-child(6) {
+      transform: rotate(3deg) translateY(-4px);
+      margin-right: -1.8rem;
+      z-index: 4;
+    }
+
+    .senior-strip .card:nth-child(7) {
+      transform: rotate(-4deg) translateY(10px);
+      margin-right: -1.8rem;
+      z-index: 2;
+    }
+
+    .senior-strip .card:nth-child(8) {
+      transform: rotate(6deg) translateY(-10px);
+      z-index: 5;
+    }
+
+    .senior-intro .senior-quote {
+      margin-top: 4vh;
+      font-family: 'Georgia', serif;
+      font-style: italic;
+      font-size: clamp(1.1rem, 2vw, 1.7rem);
+      color: #ddd;
+      line-height: 1.55;
+      text-align: center;
+      max-width: 1000px;
+      margin-left: auto;
+      margin-right: auto;
+      padding: 0 2rem;
+    }
+
+    .senior-spotlight {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+      gap: 3rem;
+      width: 100%;
+      max-width: 1500px;
+      padding: 2.5rem 4rem;
+      align-items: center;
+    }
+
+    .senior-spotlight .photo {
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      background-size: cover;
+      background-position: center top;
+      border-radius: 8px;
+      box-shadow: 0 8px 48px rgba(0, 0, 0, 0.7);
+    }
+
+    .senior-spotlight .info {
+      color: #fff;
+    }
+
+    .senior-spotlight .name {
+      font-size: clamp(2.4rem, 4.5vw, 4rem);
+      font-weight: normal;
+      line-height: 1.05;
+      margin-top: 0.4rem;
+    }
+
+    .senior-spotlight .instrument {
+      font-family: 'Arial', sans-serif;
+      font-size: clamp(1rem, 1.8vw, 1.4rem);
+      font-style: italic;
+      color: #ddd;
+      margin-top: 0.6rem;
+    }
+
+    .senior-spotlight .rule {
+      margin: 1.3rem 0;
+      width: 50px;
+    }
+
+    .senior-spotlight .row {
+      margin-top: 1.1rem;
+    }
+
+    .senior-spotlight .row .label {
+      display: block;
+      font-family: 'Arial', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #b50000;
+      margin-bottom: 0.4rem;
+    }
+
+    .senior-spotlight .row .value {
+      font-family: 'Georgia', serif;
+      font-size: clamp(1rem, 1.4vw, 1.2rem);
+      color: #eee;
+      line-height: 1.5;
+    }
+
+    .senior-spotlight .origin {
+      font-family: 'Arial', sans-serif;
+      font-size: clamp(0.8rem, 1.2vw, 0.95rem);
+      color: #888;
+      font-style: italic;
+      margin-top: 1.8rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      letter-spacing: 0.04em;
+    }
+  </style>
+</head>
+
+<body>
+
+
+  <!-- ═══════════════════════════════ SLIDE 1 — Welcome ═══════════════════════════════ -->
+  <div class="slide dark active" id="slide-welcome">
+    <div class="welcome-text">
+      <p class="eyebrow">Eugene Ashley High School</p>
+      <h1 class="title" style="font-size: clamp(2.5rem, 6vw, 5.5rem);">2026 Spring Concert</h1>
+      <span class="rule"></span>
+      <p class="subtitle">The Bands of Ashley High School</p>
+      <p class="meta">
+        May 12, 2026 &nbsp;·&nbsp; 7:00 PM<br>
+        Minnie Evans Arts Center<br>
+        Robert A. Parker, Director of Bands
+      </p>
+    </div>
+    <div class="welcome-qr">
+      <img
+        src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&color=ffffff&bgcolor=000000&data=https://ashleybands.com/programs/spring-concert-2026"
+        alt="Digital Program QR Code">
+      <span class="qr-label">Scan for Digital Program</span>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════ SLIDE 2 — at dawn ═══════════════════════════════ -->
+  <div class="slide" id="slide-at-dawn">
+    <div class="bg show">
+      <div class="bg-backdrop"></div>
+      <div class="bg-image"></div>
+    </div>
+    <div class="content">
+      <p class="eyebrow">Concert Band</p>
+      <h1 class="title" style="font-size: clamp(2rem, 6vw, 5.5rem);">at dawn, We Ride!</h1>
+      <span class="rule"></span>
+      <p class="composer">Ben Hylton</p>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════ SLIDE 3 — Salvation ═══════════════════════════════ -->
+  <div class="slide" id="slide-salvation">
+    <div class="bg show">
+      <div class="bg-backdrop"></div>
+      <div class="bg-image"></div>
+    </div>
+    <div class="content">
+      <p class="eyebrow">Concert Band</p>
+      <h1 class="title">Salvation Is Created</h1>
+      <span class="rule"></span>
+      <p class="composer">Pavel Tschesnokoff &nbsp;/&nbsp; arr. Bruce Houseknecht</p>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════ SLIDE 4 — Havendance ═══════════════════════════════ -->
+  <div class="slide" id="slide-havendance">
+    <div class="bg show">
+      <div class="bg-backdrop"></div>
+      <div class="bg-image"></div>
+    </div>
+    <div class="content">
+      <p class="eyebrow">Concert Band</p>
+      <h1 class="title">Havendance</h1>
+      <span class="rule"></span>
+      <p class="composer">David Holsinger</p>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════ SLIDE 5 — Small Ensembles & Awards ═══════════════════════════════ -->
+  <div class="slide dark">
+    <div class="content">
+      <p class="eyebrow">Part II</p>
+      <h1 class="title" style="font-size: clamp(2.5rem, 6vw, 5rem);">Small Ensembles<br>&amp; Awards</h1>
+      <span class="rule"></span>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════ SLIDE 6 — Tchaikovsky ═══════════════════════════════ -->
+  <div class="slide dark">
+    <div class="content">
+      <p class="eyebrow">Small Ensemble</p>
+      <h1 class="title" style="font-size: clamp(2rem, 5vw, 4.5rem);">Symphony No. 2, Mvt. V</h1>
+      <span class="rule"></span>
+      <p class="composer">Pyotr Ilyich Tchaikovsky</p>
+      <p class="meta" style="margin-top:1.2rem;">Caldwell, Parker</p>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════ SLIDE 7 — Ritz ═══════════════════════════════ -->
+  <div class="slide dark">
+    <div class="content">
+      <p class="eyebrow">Small Ensemble</p>
+      <h1 class="title" style="font-size: clamp(2rem, 6vw, 5.5rem);">Puttin&#8217; on the Ritz</h1>
+      <span class="rule"></span>
+      <p class="composer">Irving Berlin</p>
+      <p class="meta" style="margin-top:1.2rem;">Boyette &nbsp;·&nbsp; Franklin &nbsp;·&nbsp; Heglar &nbsp;·&nbsp;
+        Naklicki &nbsp;·&nbsp; Rathgeber</p>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════ SLIDE 8 — Balloonology ═══════════════════════════════ -->
+  <div class="slide dark">
+    <div class="content">
+      <p class="eyebrow">Percussion Ensemble</p>
+      <h1 class="title" style="font-size: clamp(2rem, 6vw, 5.5rem);">Balloonology</h1>
+      <span class="rule"></span>
+      <p class="composer">Chris Crockarell</p>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════ SLIDE 9 — Señor Slide ═══════════════════════════════ -->
+  <div class="slide dark">
+    <div class="content">
+      <p class="eyebrow">Senior Ensemble</p>
+      <h1 class="title" style="font-size: clamp(2rem, 6vw, 5.5rem);">Se&#241;or Slide</h1>
+      <span class="rule"></span>
+      <p class="composer">Steve Frank</p>
+      <p class="meta" style="margin-top:1.2rem;">Cassada &nbsp;·&nbsp; Heglar &nbsp;·&nbsp; Littlejohn &nbsp;·&nbsp;
+        McIntyre &nbsp;·&nbsp; Morrison &nbsp;·&nbsp; Zizzamia</p>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════ SLIDE 10 — Seniors editorial ═══════════════════════════════ -->
+  <div class="slide dark senior-intro">
+    <div class="heading">
+      <p class="eyebrow">Eugene Ashley High School Band</p>
+      <span class="word">Seniors</span>
+      <span class="rule"></span>
+      <p class="subtag">Class of 2026</p>
+    </div>
+    <div class="senior-strip">
+      <div class="card" style="background-image:url('seniors/BuieJalen5.jpg')"></div>
+      <div class="card" style="background-image:url('seniors/CassadaMatthew7.jpg')"></div>
+      <div class="card" style="background-image:url('seniors/HeglarDylan33.jpg')"></div>
+      <div class="card" style="background-image:url('seniors/LewisAddisyn39.jpg')"></div>
+      <div class="card" style="background-image:url('seniors/LittlejohnElizabeth61.jpg')"></div>
+      <div class="card" style="background-image:url('seniors/McIntyreKaren46.jpg')"></div>
+      <div class="card" style="background-image:url('seniors/MorrisonHeather74.jpg')"></div>
+      <div class="card" style="background-image:url('seniors/ZizzamiaTyler119.jpg')"></div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════ SLIDE 11 — Jalen Buie ═══════════════════════════════ -->
+  <div class="slide dark">
+    <div class="senior-spotlight">
+      <div class="photo" style="background-image:url('seniors/BuieJalen5.jpg')"></div>
+      <div class="info">
+        <p class="eyebrow">Senior Spotlight</p>
+        <h1 class="name">Jalen Buie</h1>
+        <p class="instrument">Percussion</p>
+        <span class="rule"></span>
+        <div class="row"><span class="label">After Graduation</span><span class="value">University of Maryland Eastern
+            Shore — Computer Science, Gaming &amp; Software Engineering</span></div>
+        <div class="row"><span class="label">Favorite Memory</span><span class="value">My last marching band
+            competition.</span></div>
+        <div class="row"><span class="label">Message to the Band</span><span class="value">&ldquo;You can&rsquo;t rush
+            greatness.&rdquo;</span></div>
+        <p class="origin">Came up from Murray Middle School</p>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════ SLIDE 12 — Matthew Cassada ═══════════════════════════════ -->
+  <div class="slide dark">
+    <div class="senior-spotlight">
+      <div class="photo" style="background-image:url('seniors/CassadaMatthew7.jpg')"></div>
+      <div class="info">
+        <p class="eyebrow">Senior Spotlight</p>
+        <h1 class="name">Matthew Cassada</h1>
+        <p class="instrument">Trombone</p>
+        <span class="rule"></span>
+        <div class="row"><span class="label">After Graduation</span><span class="value">NC State — Biochemistry</span>
+        </div>
+        <div class="row"><span class="label">Favorite Memory</span><span class="value">Riding Fury 325 for the first
+            time with Dylan and some random Italian guy.</span></div>
+        <div class="row"><span class="label">Message to the Band</span><span class="value">&ldquo;If you believe in
+            yourself, and with a little magic, all your dreams can come true.&rdquo; &mdash; Spongebob
+            Squarepants</span></div>
+        <p class="origin">Came up from Myrtle Grove Middle School</p>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════ SLIDE 13 — Dylan Heglar ═══════════════════════════════ -->
+  <div class="slide dark">
+    <div class="senior-spotlight">
+      <div class="photo" style="background-image:url('seniors/HeglarDylan33.jpg')"></div>
+      <div class="info">
+        <p class="eyebrow">Senior Spotlight</p>
+        <h1 class="name">Dylan Heglar</h1>
+        <p class="instrument">Trombone &nbsp;·&nbsp; Marching Baritone</p>
+        <span class="rule"></span>
+        <div class="row"><span class="label">After Graduation</span><span class="value">UNC Charlotte — Mechanical
+            Engineering, on the path to patent law.</span></div>
+        <div class="row"><span class="label">Favorite Memory</span><span class="value">Playing The Divine Comedy Suite
+            and The Hounds of Spring my junior year.</span></div>
+        <div class="row"><span class="label">Message to the Band</span><span class="value">Hey band — it has been an
+            awesome four years. The friends I have made and the growth I experienced would not have been possible
+            without this band community. I&rsquo;m a bit sad to go, but I know you all will continue to make outstanding
+            music and become excellent musicians.</span></div>
+        <p class="origin">Came up from Murray Middle School</p>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════ SLIDE 14 — Addisyn Lewis ═══════════════════════════════ -->
+  <div class="slide dark">
+    <div class="senior-spotlight">
+      <div class="photo" style="background-image:url('seniors/LewisAddisyn39.jpg')"></div>
+      <div class="info">
+        <p class="eyebrow">Senior Spotlight</p>
+        <h1 class="name">Addisyn Lewis</h1>
+        <p class="instrument">Flute</p>
+        <span class="rule"></span>
+        <div class="row"><span class="label">After Graduation</span><span class="value">Gap year, then Mortuary
+            School.</span></div>
+        <div class="row"><span class="label">Favorite Memory</span><span class="value">Winning Finals in Marching
+            Band.</span></div>
+        <div class="row"><span class="label">Message to the Band</span><span class="value">&ldquo;Release
+            me.&rdquo;</span></div>
+        <p class="origin">Came up from Myrtle Grove Middle School</p>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════ SLIDE 15 — Elizabeth Littlejohn ═══════════════════════════════ -->
+  <div class="slide dark">
+    <div class="senior-spotlight">
+      <div class="photo" style="background-image:url('seniors/LittlejohnElizabeth61.jpg')"></div>
+      <div class="info">
+        <p class="eyebrow">Senior Spotlight</p>
+        <h1 class="name">Elizabeth Littlejohn</h1>
+        <p class="instrument">Flute &nbsp;·&nbsp; Piccolo</p>
+        <span class="rule"></span>
+        <div class="row"><span class="label">After Graduation</span><span class="value">Cape Fear Community College —
+            the Arts &amp; Fashion.</span></div>
+        <div class="row"><span class="label">Favorite Memory</span><span class="value">Attending the Finals Competition
+            at Havelock my sophomore year.</span></div>
+        <div class="row"><span class="label">Message to the Band</span><span class="value">Never give up on what you
+            love &mdash; push through and persevere. I promise you it&rsquo;s worth it in the end. Thank you for all the
+            memories.</span></div>
+        <p class="origin">Came up from Murray Middle School</p>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════ SLIDE 16 — Karen McIntyre ═══════════════════════════════ -->
+  <div class="slide dark">
+    <div class="senior-spotlight">
+      <div class="photo" style="background-image:url('seniors/McIntyreKaren46.jpg')"></div>
+      <div class="info">
+        <p class="eyebrow">Senior Spotlight</p>
+        <h1 class="name">Karen McIntyre</h1>
+        <p class="instrument">Trumpet</p>
+        <span class="rule"></span>
+        <div class="row"><span class="label">After Graduation</span><span class="value">Appalachian State University —
+            Elementary Education.</span></div>
+        <div class="row"><span class="label">Favorite Memory</span><span class="value">Performing at Busch Gardens at
+            9pm last year, then back to the park the next day.</span></div>
+        <div class="row"><span class="label">Message to the Band</span><span class="value">Enjoy the ability to play
+            your instrument every single day.</span></div>
+        <p class="origin">Came up from Murray Middle School</p>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════ SLIDE 17 — Heather Morrison ═══════════════════════════════ -->
+  <div class="slide dark">
+    <div class="senior-spotlight">
+      <div class="photo" style="background-image:url('seniors/MorrisonHeather74.jpg')"></div>
+      <div class="info">
+        <p class="eyebrow">Senior Spotlight</p>
+        <h1 class="name">Heather Morrison</h1>
+        <p class="instrument">Clarinet</p>
+        <span class="rule"></span>
+        <div class="row"><span class="label">After Graduation</span><span class="value">East Carolina University —
+            Biology with a music minor, continuing in marching band and wind ensemble.</span></div>
+        <div class="row"><span class="label">Favorite Memory</span><span class="value">Sophomore year, when we made
+            Finals at Havelock.</span></div>
+        <div class="row"><span class="label">Message to the Band</span><span class="value">I have had so many good
+            memories here &mdash; I will miss you guys.</span></div>
+        <p class="origin">Came up from Myrtle Grove Middle School</p>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════ SLIDE 18 — Tyler Zizzamia ═══════════════════════════════ -->
+  <div class="slide dark">
+    <div class="senior-spotlight">
+      <div class="photo" style="background-image:url('seniors/ZizzamiaTyler119.jpg')"></div>
+      <div class="info">
+        <p class="eyebrow">Senior Spotlight</p>
+        <h1 class="name">Tyler Zizzamia</h1>
+        <p class="instrument">French Horn</p>
+        <span class="rule"></span>
+        <div class="row"><span class="label">After Graduation</span><span class="value">UNC Chapel Hill —
+            Biochemistry.</span></div>
+        <div class="row"><span class="label">Favorite Memory</span><span class="value">Going to Busch Gardens last
+            year.</span></div>
+        <div class="row"><span class="label">Message to the Band</span><span class="value">Thank you to everyone who
+            worked hard and made these four years so amazing. I can&rsquo;t wait to see the band program continue to
+            grow.</span></div>
+        <p class="origin">Came up from Murray Middle School</p>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════ SLIDE 19 — Thank You Seniors (closing) ═══════════════════════════════ -->
+  <div class="slide dark senior-intro">
+    <div class="heading">
+      <p class="eyebrow">Class of 2026</p>
+      <span class="word">Thank You</span>
+      <span class="rule"></span>
+    </div>
+    <div class="senior-strip">
+      <div class="card" style="background-image:url('seniors/BuieJalen5.jpg')"></div>
+      <div class="card" style="background-image:url('seniors/CassadaMatthew7.jpg')"></div>
+      <div class="card" style="background-image:url('seniors/HeglarDylan33.jpg')"></div>
+      <div class="card" style="background-image:url('seniors/LewisAddisyn39.jpg')"></div>
+      <div class="card" style="background-image:url('seniors/LittlejohnElizabeth61.jpg')"></div>
+      <div class="card" style="background-image:url('seniors/McIntyreKaren46.jpg')"></div>
+      <div class="card" style="background-image:url('seniors/MorrisonHeather74.jpg')"></div>
+      <div class="card" style="background-image:url('seniors/ZizzamiaTyler119.jpg')"></div>
+    </div>
+    <p class="senior-quote">
+      &ldquo;They are the members of the Ashley High School Band,<br>
+      and their work is to play. Beautifully.&rdquo;
+    </p>
+  </div>
+
+
+  <!-- ═══════════════════════════════ SLIDE 20 — Wind Ensemble Intro ═══════════════════════════════ -->
+  <div class="slide dark">
+    <div class="content">
+      <p class="eyebrow">Part III — Wind Ensemble</p>
+      <h1 class="title" style="font-size: clamp(2rem, 5.5vw, 5rem);">Symphony No. 1</h1>
+      <span class="rule"></span>
+      <p class="subtitle">The Lord of the Rings</p>
+      <p class="composer" style="margin-top: 1rem;">Johan de Meij</p>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════ SLIDE 20 — Gandalf (title) ═══════════════════════════════ -->
+  <div class="slide" id="slide-gandalf">
+    <div class="bg show">
+      <div class="bg-backdrop"></div>
+      <div class="bg-image"></div>
+    </div>
+    <div class="content">
+      <p class="eyebrow">Movement I</p>
+      <h1 class="title">Gandalf</h1>
+      <span class="rule"></span>
+      <p class="subtitle">The Wizard</p>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════ SLIDE 21 — Gandalf gallery ═══════════════════════════════ -->
+  <div class="slide gallery" id="slide-gandalf-gallery">
+    <div class="bg">
+      <div class="bg-backdrop"></div>
+      <div class="bg-image"></div>
+    </div>
+    <div class="bg">
+      <div class="bg-backdrop"></div>
+      <div class="bg-image"></div>
+    </div>
+    <span class="movement-tag">I &nbsp;·&nbsp; Gandalf</span>
+  </div>
+
+
+  <!-- ═══════════════════════════════ SLIDE 22 — Lothlórien (title) ═══════════════════════════════ -->
+  <div class="slide" id="slide-lothlorien">
+    <div class="bg show">
+      <div class="bg-backdrop"></div>
+      <div class="bg-image"></div>
+    </div>
+    <div class="content">
+      <p class="eyebrow">Movement II</p>
+      <h1 class="title">Lothlórien</h1>
+      <span class="rule"></span>
+      <p class="subtitle">The Elven Forest</p>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════ SLIDE 23 — Lothlórien gallery ═══════════════════════════════ -->
+  <div class="slide gallery" id="slide-lothlorien-gallery">
+    <div class="bg">
+      <div class="bg-backdrop"></div>
+      <div class="bg-image"></div>
+    </div>
+    <div class="bg">
+      <div class="bg-backdrop"></div>
+      <div class="bg-image"></div>
+    </div>
+    <span class="movement-tag">II &nbsp;·&nbsp; Lothlórien</span>
+  </div>
+
+
+  <!-- ═══════════════════════════════ SLIDE 24 — Gollum (title) ═══════════════════════════════ -->
+  <div class="slide" id="slide-gollum">
+    <div class="bg show">
+      <div class="bg-backdrop"></div>
+      <div class="bg-image"></div>
+    </div>
+    <div class="content">
+      <p class="eyebrow">Movement III</p>
+      <h1 class="title">Gollum</h1>
+      <span class="rule"></span>
+      <p class="subtitle">Sméagol</p>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════ SLIDE 25 — Gollum gallery ═══════════════════════════════ -->
+  <div class="slide gallery" id="slide-gollum-gallery">
+    <div class="bg">
+      <div class="bg-backdrop"></div>
+      <div class="bg-image"></div>
+    </div>
+    <div class="bg">
+      <div class="bg-backdrop"></div>
+      <div class="bg-image"></div>
+    </div>
+    <span class="movement-tag">III &nbsp;·&nbsp; Gollum</span>
+  </div>
+
+
+  <!-- ═══════════════════════════════ SLIDE 26 — Journey (title) ═══════════════════════════════ -->
+  <div class="slide" id="slide-journey">
+    <div class="bg show">
+      <div class="bg-backdrop"></div>
+      <div class="bg-image"></div>
+    </div>
+    <div class="content">
+      <p class="eyebrow">Movement IV</p>
+      <h1 class="title">Journey in the Dark</h1>
+      <span class="rule"></span>
+      <p class="subtitle">The Mines of Moria</p>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════ SLIDE 27 — Journey gallery ═══════════════════════════════ -->
+  <div class="slide gallery" id="slide-journey-gallery">
+    <div class="bg">
+      <div class="bg-backdrop"></div>
+      <div class="bg-image"></div>
+    </div>
+    <div class="bg">
+      <div class="bg-backdrop"></div>
+      <div class="bg-image"></div>
+    </div>
+    <span class="movement-tag">IV &nbsp;·&nbsp; Journey in the Dark</span>
+  </div>
+
+
+  <!-- ═══════════════════════════════ SLIDE 28 — Hobbits (title) ═══════════════════════════════ -->
+  <div class="slide" id="slide-hobbits">
+    <div class="bg show">
+      <div class="bg-backdrop"></div>
+      <div class="bg-image"></div>
+    </div>
+    <div class="content">
+      <p class="eyebrow">Movement V</p>
+      <h1 class="title">Hobbits</h1>
+      <span class="rule"></span>
+      <p class="subtitle">The Shire</p>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════ SLIDE 29 — Hobbits gallery ═══════════════════════════════ -->
+  <div class="slide gallery" id="slide-hobbits-gallery">
+    <div class="bg">
+      <div class="bg-backdrop"></div>
+      <div class="bg-image"></div>
+    </div>
+    <div class="bg">
+      <div class="bg-backdrop"></div>
+      <div class="bg-image"></div>
+    </div>
+    <span class="movement-tag">V &nbsp;·&nbsp; Hobbits</span>
+  </div>
+
+
+  <!-- ═══════════════════════════════ SLIDE 30 — Thank You ═══════════════════════════════ -->
+  <div class="slide dark">
+    <div class="content">
+      <p class="eyebrow">Thank You</p>
+      <h1 class="title" style="font-size: clamp(2rem, 5vw, 4.5rem);">The Bands of Ashley High School</h1>
+      <span class="rule"></span>
+      <p class="subtitle">Robert A. Parker, Director of Bands</p>
+      <p class="meta" style="margin-top: 2rem;">
+        Spring Trip &nbsp;·&nbsp; May 15–16<br>
+        Marching Band Registration Opens May 15
+      </p>
+    </div>
+  </div>
+
+
+  <div id="counter">1 / 31</div>
+
+  <script>
+    // ── Manifest (auto-generated by update-manifest.py) ──────────────
+    const HEROES = {
+      "slide-at-dawn": "cb/at-dawn.png",
+      "slide-salvation": "cb/salvation.jpg",
+      "slide-havendance": "cb/havendance.webp",
+      "slide-gandalf": "gandalf/800px-Fabio_Leone_-_Gandalf_the_Grey.jpg",
+      "slide-lothlorien": "lothlorien/1920px-Rebecca_Knudson_-_Lothlorien.jpg",
+      "slide-gollum": "gollum/Ted_Nasmith_-_Endgame_on_the_Mountain.jpg",
+      "slide-journey": "journey/Alan_Lee_-_Moria.jpg",
+      "slide-hobbits": "hobbits/Miriam_Ellis_-_Long_Cleeve_-_The_Wedding_Feast_of_Peregrin_and_Diamond.jpg",
+    };
+
+    const IMAGES = {
+      "slide-at-dawn-gallery": [
+        "cb/salvation.jpg",
+      ],
+      "slide-salvation-gallery": [
+        "cb/at-dawn.png",
+      ],
+      "slide-gandalf-gallery": [
+        "gandalf/800px-Alan_Lee_-_Gandalf_and_Pippin_riding.png",
+        "gandalf/800px-Giuliano_G._Alves_-_Gandalf_O_Branco.jpg",
+        "gandalf/Abe_Papakhian_-_You_Shall_Not_Pass_(colour).jpg",
+        "gandalf/Alan_Lee_-_Gandalf_Rides_to_Minas_Tirith.jpg",
+        "gandalf/Alarie_-_Gandalf_Crosses_the_Sarn_Ford.jpg",
+        "gandalf/Andrea_Piparo_-_Glamdring.jpg",
+        "gandalf/Andrea_Piparo_-_Shadow_of_the_Past_-_The_Lord_of_the_Rings.jpg",
+        "gandalf/Anke_Eissmann_-_Gandalf.jpg",
+        "gandalf/Anke_Eissmann_-_Gandalf_and_Shadowfax.jpg",
+        "gandalf/Anke_Eissmann_-_Gandalf_in_the_archives_of_Minas_Tirith.jpg",
+        "gandalf/Anna_Kulisz_-_The_Bridge_of_Khazad-Dum.jpg",
+        "gandalf/Anna_Kulisz_-_The_White_Rider.jpg",
+        "gandalf/Brad_Williams_-_Gandalf_the_White_Rider.jpg",
+        "gandalf/Brad_Williams_-_Ring_of_Fire.jpg",
+        "gandalf/Carol_Emery_Phenix_-_A_Pleasant_Awakening.jpg",
+        "gandalf/Catherine_Chmiel_-_Shadowfax.jpg",
+        "gandalf/Charles_Burggraf_-_The_Return_Journey.jpg",
+        "gandalf/Coliandre_-_Gandalf_and_Balrog.jpg",
+        "gandalf/DaleComte_-_Once_Upon_A_Time_in_Hobbiton.jpg",
+        "gandalf/Daniel_Govar_-_Balrog_and_Gandalf.jpg",
+        "gandalf/Daniel_Pilla_-_Gandalf_vs_Balrog.jpeg",
+        "gandalf/Donato_Giancola_-_Bag_End_-_Shadow_of_the_Past.jpg",
+        "gandalf/Donato_Giancola_-_Do_Not_Tempt_Me.jpg",
+        "gandalf/Donato_Giancola_-_Gandalf_at_Rivendell.jpg",
+        "gandalf/Donato_Giancola_-_Gandalf_in_Moria.jpeg",
+        "gandalf/Donato_Giancola_-_Gandalf_in_Moria_-_The_Three_Doorways.jpg",
+        "gandalf/Donato_Giancola_-_The_White_Rider.jpeg",
+        "gandalf/Donato_Giancola_-_You_Cannot_Pass.jpg",
+        "gandalf/Eric_Velhagen_-_Encounter_at_Amon_Sul.jpg",
+      ],
+      "slide-lothlorien-gallery": [
+        "lothlorien/1024px-Lida_Holubova_-_Rings_of_Power_-_Nenya.jpg",
+        "lothlorien/Alan_Lee_-_Lothlorien.png",
+        "lothlorien/Andy_Smith_-_Galadriel.jpg",
+        "lothlorien/Angus_McBride_-_Mirror_of_Galadriel.jpg",
+        "lothlorien/Anke_Eissmann_-_The_phial_of_Galadriel.jpg",
+        "lothlorien/Anna_Kulisz_-_Galadriels_Song.jpg",
+        "lothlorien/Anna_Kulisz_-_Mirror_of_Galadriel.jpg",
+        "lothlorien/Anna_Kulisz_-_Mirror_of_Galadriel_2.jpg",
+        "lothlorien/Catherine_Chmiel_-_Galadriel_and_Boromir.jpg",
+        "lothlorien/Celeborn_&_Galadriel_-_The_Lord_of_the_Rings_Roleplaying.png",
+        "lothlorien/David_Greset_-_Galadriel_and_Celeborn_at_Lake_Nenuial.jpg",
+        "lothlorien/ForeverMedhok_-_House_of_Finarfin.png",
+        "lothlorien/Jenny_Dolfen_-_A_Sorrowful_Meeting.jpg",
+        "lothlorien/Miriam_Ellis_-_Lothlorien_-_The_Chamber_of_Celeborn_and_Galadriel.jpg",
+        "lothlorien/Paul_Rivoche_-_Lothlorien.jpg",
+        "lothlorien/Raoul_Vitale_-_Galadriel.jpg",
+        "lothlorien/Sara_M._Morello_-_Caras_Galadhon.jpg",
+        "lothlorien/Stephen_Walsh_-_The_Mirror_of_Galadriel.jpg",
+        "lothlorien/Ted_Nasmith_-_The_Song_of_Galadriel.jpg",
+      ],
+      "slide-gollum-gallery": [
+        "gollum/800px-Ted_Nasmith_-_At_the_Cracks_of_Doom.jpg",
+        "gollum/Andrea_Piparo_-_Gollum_the_Abandoned.png",
+        "gollum/Anke_Eissmann_-_Faramir_bids_farewell.jpg",
+        "gollum/Anke_Eissmann_-_Gollum.jpg",
+        "gollum/Anke_Eissmann_-_The_Stairs_of_Cirith_Ungol.jpg",
+        "gollum/Cor_Blok_-_Gollum_Goes_into_Hiding.jpg",
+        "gollum/Daniel_Pilla_-_Gollum.jpeg",
+        "gollum/David_T._Wenzel_-_Riddles_in_the_Dark.jpeg.jpeg",
+        "gollum/Donato_Giancola_-_Sudden_Fury.jpg",
+        "gollum/Eric_Velhagen_-_Clever_Hobbitses.jpg",
+        "gollum/Eric_Velhagen_-_Hunt_For_The_Thief_Baggins.jpg",
+        "gollum/Francesco_Amadio_-_Gollum.jpg",
+        "gollum/Frederic_Bennett_-_Gollum's_Departure_from_the_Misty_Mountains.jpg",
+        "gollum/Inger_Edelfeldt_-_Gollum_Held_Captive_by_the_Elves.jpg",
+        "gollum/Inger_Edelfeldt_-_The_Dead_Marshes.jpg",
+        "gollum/Jake_Murray_-_Dungeons_Deep_and_Caverns_Dim.jpg",
+        "gollum/Jay_Tyson_-_Gollum.jpg",
+        "gollum/John_Howe_-_The_Endless_Stair.jpg",
+        "gollum/LiXin_Yin_-_Gollum.jpg",
+        "gollum/Matt_Stewart_-_An_Old_Starved_Pitiable_Thing.jpg",
+        "gollum/Ted_Nasmith_-_Gollum_is_Defeated.jpg",
+        "gollum/Ted_Nasmith_-_Through_the_Marshes.jpg",
+      ],
+      "slide-journey-gallery": [
+        "journey/1024px-Joe_Hickman_-_Durin's_Bane.jpg",
+        "journey/2560px-Donato_Giancola_-_Fellowship_in_Moria.jpg",
+        "journey/Alan_Lee_-_The_Eastern_Arches.jpg",
+        "journey/Artem_Demura_-_Durin's_Bane.jpg",
+        "journey/Daniel_Govar_-_Balrog_and_Gandalf.jpg",
+        "journey/Giuliano_G._Alves_-_Saloes_de_Moria.jpg",
+        "journey/Jan_Pospisil_-_Moria.jpg",
+        "journey/Jerrel_Salvatierra_-_Flame_of_Udun.jpg",
+        "journey/John_Howe_-_Gandalf_Falls_with_the_Balrog.jpg",
+        "journey/John_Howe_-_Gandalf_and_the_Balrog.jpg",
+        "journey/John_Howe_-_Khazad-Dum.jpeg",
+        "journey/Lida_Holubova_-_Moria.jpg",
+        "journey/Manuel_Castanon_-_Flame_of_Udun.jpg",
+        "journey/Matej_Cadil_-_Doors_of_Durin_Opening.jpg",
+        "journey/Matt_DeMino_-_The_Balrog.png",
+        "journey/Stephen_Walsh_-_The_Under-galleries.png",
+        "journey/Yulia_Alekseeva_-_Mines_of_Moria.jpg",
+      ],
+      "slide-hobbits-gallery": [
+        "hobbits/1920px-Miriam_Ellis_-_Lobelia_rescued_from_the_Lockholes.png",
+        "hobbits/1920px-Miriam_Ellis_-_The_Springle-ring (1).jpg",
+        "hobbits/1920px-Miriam_Ellis_-_The_Springle-ring.jpg",
+        "hobbits/800px-Inger_Edelfeldt_-_A_Long_Expected_Party.jpg",
+        "hobbits/Anke_Eissmann_-_Frodo_grieves_for_Bilbo.jpg",
+        "hobbits/Anna_Kulisz_-_Summer_in_the_Shire.jpg",
+        "hobbits/Carol_Emery_Phenix_-_A_Conspiracy_Unmasked.jpg",
+        "hobbits/Christina_Kraus_-_Second_Breakfast.jpg",
+        "hobbits/Darrell_Sweet_-_The_Arrival_of_Gandalf.jpg",
+        "hobbits/David_T._Wenzel_-_East_Farthing_Market.jpg",
+        "hobbits/Henning_Janssen_-_Hobbit_Band.jpg",
+        "hobbits/Henning_Janssen_-_Hobbit_Marching_Band.jpg",
+        "hobbits/Kay_Woollard_-_A_Slumbering_Pedlar.jpg",
+        "hobbits/Kay_Woollard_-_Dinner_Time_-_A_farmhouse_kitchen.jpg",
+        "hobbits/Kay_Woollard_-_The_Pedlar_of_Medicines.jpg",
+        "hobbits/Kay_Woollard_-_Two_Gaffers_and_a_Gammer.jpg",
+        "hobbits/Miriam_Ellis_-_Buckland.jpg",
+        "hobbits/Miriam_Ellis_-_Michel_Delving_in_the_Lithedays,_1390.jpg",
+        "hobbits/Miriam_Ellis_-_The_Floating_Log,_Frogmorton.jpg",
+        "hobbits/Paul_Raymond_Gregory_-_Bilbo's_Eleventy_First_Birthday.jpg",
+      ],
+    };
+
+    // ── Cycling engine ───────────────────────────────────────────────
+    const CYCLE_MIN_MS = 10000;
+    const CYCLE_MAX_MS = 15000;
+
+    Object.keys(IMAGES).forEach(function (k) {
+      var a = IMAGES[k];
+      for (var i = a.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+      }
+    });
+
+    function nextDelay() {
+      return CYCLE_MIN_MS + Math.random() * (CYCLE_MAX_MS - CYCLE_MIN_MS);
+    }
+
+    function bgUrl(path) {
+      return 'url("' + path.replace(/"/g, '\\"') + '")';
+    }
+
+    function setBg(bgEl, path) {
+      var url = path ? bgUrl(path) : '';
+      var backdrop = bgEl.querySelector('.bg-backdrop');
+      var image = bgEl.querySelector('.bg-image');
+      if (backdrop) backdrop.style.backgroundImage = url;
+      if (image) image.style.backgroundImage = url;
+    }
+
+    let cycleTimer = null;
+    const cycleIdx = {};
+    const cycleFront = {};
+
+    function setHero(slideEl, path) {
+      var bg = slideEl.querySelector('.bg');
+      if (bg) setBg(bg, path);
+    }
+
+    function startCycling(slideId) {
+      stopCycling();
+      var images = IMAGES[slideId];
+      if (!images || images.length === 0) return;
+
+      var slide = document.getElementById(slideId);
+      if (!slide) return;
+      var bgs = slide.querySelectorAll('.bg');
+      if (bgs.length < 2) return;
+      var bgA = bgs[0], bgB = bgs[1];
+
+      if (!(slideId in cycleIdx)) cycleIdx[slideId] = 0;
+      cycleFront[slideId] = 'a';
+
+      setBg(bgA, images[cycleIdx[slideId]]);
+      bgA.classList.add('show');
+      bgB.classList.remove('show');
+      setBg(bgB, null);
+
+      if (images.length === 1) return;
+
+      function tick() {
+        cycleIdx[slideId] = (cycleIdx[slideId] + 1) % images.length;
+        var nextPath = images[cycleIdx[slideId]];
+        var front = cycleFront[slideId];
+        if (front === 'a') {
+          setBg(bgB, nextPath);
+          bgB.classList.add('show');
+          bgA.classList.remove('show');
+          cycleFront[slideId] = 'b';
+        } else {
+          setBg(bgA, nextPath);
+          bgA.classList.add('show');
+          bgB.classList.remove('show');
+          cycleFront[slideId] = 'a';
+        }
+        cycleTimer = setTimeout(tick, nextDelay());
+      }
+      cycleTimer = setTimeout(tick, nextDelay());
+    }
+
+    function stopCycling() {
+      if (cycleTimer) { clearTimeout(cycleTimer); cycleTimer = null; }
+    }
+
+    // ── Slide navigation ─────────────────────────────────────────────
+    var slides = document.querySelectorAll('.slide');
+    var counter = document.getElementById('counter');
+    var current = 0;
+
+    function go(n) {
+      slides[current].classList.remove('active');
+      current = (n + slides.length) % slides.length;
+      var slide = slides[current];
+      slide.classList.add('active');
+      counter.textContent = (current + 1) + ' / ' + slides.length;
+
+      var id = slide.id;
+      if (id && HEROES[id]) {
+        stopCycling();
+        setHero(slide, HEROES[id]);
+      } else if (id && IMAGES[id]) {
+        startCycling(id);
+      } else {
+        stopCycling();
+      }
+    }
+
+    Object.keys(HEROES).forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) setHero(el, HEROES[id]);
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (['ArrowRight', 'ArrowDown', ' '].indexOf(e.key) > -1) { e.preventDefault(); go(current + 1); }
+      if (['ArrowLeft', 'ArrowUp', 'Backspace'].indexOf(e.key) > -1) { e.preventDefault(); go(current - 1); }
+    });
+
+    document.addEventListener('click', function () { go(current + 1); });
+  </script>
+
+</body>
+
+</html>

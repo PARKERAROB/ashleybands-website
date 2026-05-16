@@ -98,6 +98,12 @@
       font-weight: normal;
       margin-bottom: 0.2rem;
     }
+    .piece .subtitle {
+      font-size: 1rem;
+      color: #555;
+      margin-bottom: 0.2rem;
+      font-style: italic;
+    }
     .piece .composer {
       font-family: 'Arial', sans-serif;
       font-size: 0.85rem;
@@ -172,16 +178,30 @@
       border-bottom-color: #888;
     }
     .interlude .ensemble-item {
-      margin-bottom: 1.5rem;
+      margin-bottom: 2rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid #333;
+    }
+    .interlude .ensemble-item:last-of-type {
+      border-bottom: none;
     }
     .interlude .ensemble-item h3 {
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       font-weight: normal;
       color: var(--white);
+      margin-bottom: 0.15rem;
     }
-    .interlude .ensemble-item p {
-      font-size: 0.9rem;
-      color: #bbb;
+    .interlude .ensemble-item .composer {
+      font-family: 'Arial', sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      color: #aaa;
+      margin-bottom: 0.6rem;
+    }
+    .interlude .ensemble-item .performers {
+      font-size: 0.88rem;
+      color: #e0d8cc;
+      font-style: italic;
     }
     .award-item {
       margin-bottom: 1rem;
@@ -394,36 +414,25 @@
   <h2>Concert Band</h2>
 
   <div class="piece">
-    <h3>At Dawn We Rise</h3>
+    <h3>at dawn, We Ride!</h3>
     <p class="composer">Ben Hylton</p>
-    <p>
-      <em>At Dawn We Rise</em> opens with a quiet, expectant stillness — the hush of a world not yet awake.
-      Composer Ben Hylton builds the work from a single melodic idea, layering voices until the full ensemble
-      erupts in a declaration of momentum and light. The title captures the spirit of the piece exactly:
-      effort, hope, and the decision to begin.
-    </p>
+    <p>With the first light of morning comes the call to adventure: <em>at dawn, We Ride!</em> conjures images of distant kingdoms, ancient banners, and brave souls setting forth into an uncertain world. The piece begins in a hushed, misty atmosphere before surging forward with bold brass fanfares, energetic percussion, and sweeping melodic lines that echo a spirit of heroism and unity. As dawn breaks and the horizon glows with promise, the ensemble rides forward together toward a bright new day.</p>
+    <p style="margin-top:0.75rem;">Ben Hylton is an active composer, educator, and clinician based in South Carolina. He composes and arranges music for concert ensembles, marching bands, and a variety of other settings, and his work has been performed at the Midwest Clinic and by ensembles at the local, regional, and national levels. Hylton holds degrees in music education and trumpet performance from East Carolina University and the University of North Carolina at Greensboro, with additional graduate study in jazz at Florida State University.</p>
+    <p style="margin-top:0.75rem;">The Ashley High School Bands are proud to be a part of the consortium of ensembles that helped bring this piece to life. Tonight&#8217;s performance is among its premieres.</p>
   </div>
 
   <div class="piece">
     <h3>Salvation Is Created</h3>
     <p class="composer">Pavel Tschesnokoff &nbsp;/&nbsp; arr. Bruce Houseknecht</p>
-    <p>
-      Originally composed in 1912 as a choral anthem for the Russian Orthodox church, <em>Salvation Is Created</em>
-      has become one of the most beloved transcriptions in the wind band repertoire. Tschesnokoff's harmonies
-      move with the weight and warmth of a cathedral — slow, inevitable, and deeply felt. Bruce Houseknecht's
-      arrangement preserves every ounce of the original's reverence.
-    </p>
+    <p>Composed in 1912, <em>Salvation Is Created</em> is one of the last sacred works Pavel Tschesnokoff wrote before the Soviet government forced him to abandon religious music entirely. A communion hymn rooted in a Kievan chant melody and Psalm 74 — &#8220;Salvation is made in the midst of the earth, O God. Alleluia&#8221; — the work carries the full weight of the Russian Orthodox choral tradition in which Tschesnokoff was steeped: among a generation of late-Romantic &#8220;spiritualist&#8221; composers that included Bortniansky and Gretchaninoff, he produced more than 500 choral works before that door was closed.</p>
+    <p style="margin-top:0.75rem;">Bruce Houseknecht&#8217;s arrangement for wind band is nearly an exact transcription, transposed up a half step to accommodate the ensemble. The form follows two sections in A-B-Coda, and the writing preserves the call-and-response architecture of the original: horn and clarinets carry the melodic question, the trombone section restates it, and the full ensemble lifts the answer each time — the sound of a cathedral made audible.</p>
   </div>
 
   <div class="piece">
     <h3>Havendance</h3>
     <p class="composer">David Holsinger</p>
-    <p>
-      David Holsinger's <em>Havendance</em> is a rhythmic showcase from start to finish — unpredictable meter,
-      driving percussion, and melodies that dart and pivot across the ensemble. Holsinger describes the piece
-      as a dance of the haven, a place of refuge expressed through energy rather than calm. It demands
-      precision, coordination, and a shared pulse that only comes from months of disciplined work together.
-    </p>
+    <p>David Holsinger&#8217;s first child, his daughter Haven, was the inspiration for this 1983 composition. Its driving rhythms represent the energy of an eight year old who was constantly dancing and twirling around the house, dreaming of being a ballerina. The composition undergoes several variations in style, but is always filled with energy. Some passages evoke the image of a single dancer, with solo pirouettes and leaps; these light efforts grow to draw in the full dance company with an unrelenting, underlying rhythm. <em>Havendance</em> is the first of three dancesongs honoring the composer&#8217;s children; <em>Nilesdance</em> and <em>Graysondance</em> reflect the diverse personalities of his two sons.</p>
+    <p style="font-size:0.82rem; font-style:italic; color:#777; margin-top:0.5rem;">— Program notes by David Bruce Adams</p>
   </div>
 </div>
 
@@ -433,6 +442,9 @@
 ════════════════════════════════════════════ -->
 <div class="section">
   <h2>Concert Band Personnel</h2>
+  <p style="font-size:0.85rem; color:#666; margin: -0.5rem 0 1.5rem 0;">
+    <strong>Bold</strong> = Senior &nbsp;·&nbsp; * Tri-M Music Honor Society &nbsp;·&nbsp; † All-County Band &nbsp;·&nbsp; ‡ All-District Band
+  </p>
   <div class="personnel-grid">
 
     <div class="section-group">
@@ -442,7 +454,7 @@
         <li>Hicks, Ashley</li>
         <li>Lockhart, Skylar</li>
         <li>Pritchard, Caleigh</li>
-        <li>Wofford, Amelia</li>
+        <li>Wofford, Amelia†</li>
       </ul>
     </div>
 
@@ -456,12 +468,18 @@
     <div class="section-group">
       <h4>Clarinet</h4>
       <ul>
-        <li>Blount, Ruby</li>
+        <li>Blount, Ruby†</li>
         <li>DeSantis, Seth</li>
         <li>Larson, Kaelyn</li>
-        <li>McCullah, Caitlyn</li>
-        <li>Meares, Bryson</li>
+        <li>McCullah, Caitlyn†</li>
+        <li>Meares, Bryson†</li>
         <li>Mirek, Jordan</li>
+      </ul>
+    </div>
+
+    <div class="section-group">
+      <h4>Bass Clarinet</h4>
+      <ul>
         <li>Van Patten, Ivy</li>
       </ul>
     </div>
@@ -476,24 +494,24 @@
     <div class="section-group">
       <h4>Tenor Saxophone</h4>
       <ul>
-        <li>Morton, Charles</li>
-        <li>Thompson, Kaiden</li>
+        <li>Morton, Charles†</li>
+        <li>Thompson, Kaiden†</li>
       </ul>
     </div>
 
     <div class="section-group">
       <h4>Baritone Saxophone</h4>
       <ul>
-        <li>Park, Leah</li>
+        <li>Park, Leah†</li>
       </ul>
     </div>
 
     <div class="section-group">
       <h4>Trumpet</h4>
       <ul>
-        <li>Craven, Nathaniel</li>
+        <li>Craven, Nathaniel†‡</li>
         <li>Freck, Deacon</li>
-        <li>Galyean, Ezekiel</li>
+        <li>Galyean, Ezekiel†</li>
         <li>Long, Alec</li>
         <li>Mulholland, Madison</li>
         <li>Sears, Robbe</li>
@@ -504,7 +522,7 @@
     <div class="section-group">
       <h4>French Horn</h4>
       <ul>
-        <li>Cray, Lily</li>
+        <li>Cray, Lily†</li>
         <li>Hill, Katelyn</li>
         <li>Honsinger, Philip</li>
         <li>Sutton, Alexander</li>
@@ -517,7 +535,7 @@
         <li>Ardell, Benjamin</li>
         <li>Bell, Carly</li>
         <li>Eckler, Avery</li>
-        <li>Femia, Christopher</li>
+        <li>Femia, Christopher†</li>
         <li>Gregory, Daniel</li>
         <li>Gullett, Dixon</li>
         <li>Hardee, Hunter</li>
@@ -535,16 +553,19 @@
     <div class="section-group">
       <h4>Tuba</h4>
       <ul>
-        <li>Kelley, Ian</li>
-        <li>Lescalleet, Aaron</li>
+        <li>Kelley, Ian†‡</li>
+        <li>Lescalleet, Aaron†</li>
       </ul>
     </div>
 
     <div class="section-group">
       <h4>Percussion</h4>
       <ul>
+        <li>Hines, Evan</li>
         <li>Jencks, Gage</li>
+        <li>Parks, Brandon</li>
         <li>Pritchard, Caleb</li>
+        <li>Schuhmann, Elijah</li>
       </ul>
     </div>
 
@@ -571,20 +592,30 @@
     <p class="section-label">Part II</p>
     <h2>Small Ensembles &amp; Awards</h2>
 
-    <!-- SMALL ENSEMBLES — add as confirmed -->
+    <!-- SMALL ENSEMBLES -->
     <div class="ensemble-item">
-      <h3><!-- Ensemble name, e.g. "Flute Duo" --></h3>
-      <p><!-- Performers — e.g. "Lewis, Addison &amp; Littlejohn, Lizzie" --></p>
-      <p><!-- Piece title — Composer --></p>
+      <h3>Symphony No. 2, Mvt. V</h3>
+      <p class="composer">Pyotr Ilyich Tchaikovsky</p>
+      <p class="performers">Caldwell, Parker</p>
     </div>
 
     <div class="ensemble-item">
-      <h3>Percussion Ensemble</h3>
-      <p><!-- Performers --></p>
-      <p>Balloonology — Chris Crockarell</p>
+      <h3>Puttin' on the Ritz</h3>
+      <p class="composer">Irving Berlin</p>
+      <p class="performers">Boyette, Jay &nbsp;·&nbsp; Franklin, Lyla &nbsp;·&nbsp; Heglar, Dylan &nbsp;·&nbsp; Naklicki, Justin &nbsp;·&nbsp; Rathgeber, Kade</p>
     </div>
 
-    <!-- ADD MORE ENSEMBLES HERE -->
+    <div class="ensemble-item">
+      <h3>Balloonology</h3>
+      <p class="composer">Chris Crockarell</p>
+      <p class="performers">Percussion Ensemble</p>
+    </div>
+
+    <div class="ensemble-item">
+      <h3>Señor Slide</h3>
+      <p class="composer">Steve Frank</p>
+      <p class="performers">Cassada, Matthew &nbsp;·&nbsp; Heglar, Dylan &nbsp;·&nbsp; Littlejohn, Lizzie &nbsp;·&nbsp; McIntyre, Karen &nbsp;·&nbsp; Morrison, Heather &nbsp;·&nbsp; Zizzamia, Tyler</p>
+    </div>
 
     <hr style="border-color:#555; margin: 2.5rem 0;">
 
@@ -603,12 +634,6 @@
 
     <div class="award-item">
       <h4>John Philip Sousa Award</h4>
-      <p><!-- Recipient --></p>
-    </div>
-
-    <div class="award-item">
-      <h4>Semper Fidelis Award</h4>
-      <p>Presented by the United States Marine Corps</p>
       <p><!-- Recipient --></p>
     </div>
 
@@ -661,42 +686,104 @@
 </div>
 
 <!-- ══════════════════════════════════════════
+     WIND ENSEMBLE — LORD OF THE RINGS
+════════════════════════════════════════════ -->
+<div class="section">
+  <p class="section-label">Part III</p>
+  <h2>Wind Ensemble</h2>
+
+  <div class="piece">
+    <h3>Symphony No. 1</h3>
+    <p class="subtitle"><em>The Lord of the Rings</em></p>
+    <p class="composer">Johan de Meij</p>
+
+    <p>Johan de Meij&#8217;s first symphony <em>The Lord of the Rings</em> is based on the trilogy of that name by J.R.R. Tolkien. This book has fascinated many millions of readers since its publication in 1955. The symphony consists of five separate movements, each illustrating a personage or an important episode from the book.</p>
+
+    <p style="margin: 1rem 0 0.5rem; font-family: Arial, sans-serif; font-size: 0.85rem; letter-spacing: 0.04em; color: #555;">
+      I. GANDALF <em>(The Wizard)</em><br>
+      II. LOTHLÓRIEN <em>(The Elvenwood)</em><br>
+      III. GOLLUM <em>(Sméagol)</em><br>
+      IV. JOURNEY IN THE DARK<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;a. The Mines of Moria<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;b. The Bridge of Khazad-Dûm<br>
+      V. HOBBITS
+    </p>
+
+    <p>The symphony was written between March 1984 and December 1987, and had its première in Brussels on 15 March 1988, performed by the Groot Harmonieorkest van de Gidsen under Norbert Nozy. In 1989 it was awarded first prize in the Sudler International Wind Band Composition Competition in Chicago, and a year later received recognition from the Dutch Composers Fund. In 2001, the orchestral version was premiered by the Rotterdam Philharmonic Orchestra and recorded by the London Symphony Orchestra.</p>
+
+    <p>The central theme is the Ring — made by primæval forces that decide the safety or destruction of the world. For years it was the possession of the creature Gollum, but when the ring falls into the hands of the Hobbits the evil forces awake, and the struggle for the ring commences. There is but one solution: the ring must be destroyed in the fire in which it was forged — Mount Doom, in the heart of Mordor, the country of the evil Lord Sauron.</p>
+
+    <p>It is the Hobbit Frodo who is assigned this task. To assist him, a Fellowship of the Ring is formed under Gandalf, including the Hobbits Sam, Peregrin, and Merin; the Dwarf Gimli; the Elf Legolas; Boromir; and Aragorn, the later King. The companions are secretly followed by Gollum, who does not shun any means, however perfidious, to recover his ring. After many perilous adventures and a surprising dénouement, Frodo and Sam at last return home to the Shire.</p>
+  </div>
+
+  <div class="piece">
+    <h3>I. &nbsp;Gandalf <span style="font-size:0.85em; font-style:italic; color:#666;">(The Wizard)</span></h3>
+    <p>A musical portrait of the wizard Gandalf. His wise and noble personality is expressed by a stately motif used in different forms in movements IV and V. The sudden opening of the Allegro vivace captures the unpredictability of the grey wizard, followed by a wild ride on his horse, Shadowfax.</p>
+  </div>
+
+  <div class="piece">
+    <h3>II. &nbsp;Lothlórien <span style="font-size:0.85em; font-style:italic; color:#666;">(The Elvenwood)</span></h3>
+    <p>An impression of Lothlórien — the elvenwood with its beautiful trees, plants, and exotic birds, expressed through woodwind solos. The meeting of Frodo with the Lady Galadriel is embodied in a charming Allegretto. In the Mirror of Galadriel, a silver basin in the wood, Frodo glimpses three visions, the last of which — a large ominous Eye — greatly upsets him.</p>
+  </div>
+
+  <div class="piece">
+    <h3>III. &nbsp;Gollum <span style="font-size:0.85em; font-style:italic; color:#666;">(Sméagol)</span></h3>
+    <p>The monstrous creature Gollum is represented by the soprano saxophone. It mumbles and talks to itself, hisses and lisps, whines and snickers — alternately pitiful and malicious, continually fleeing and searching for its cherished treasure, the ring.</p>
+  </div>
+
+  <div class="piece">
+    <h3>IV. &nbsp;Journey in the Dark</h3>
+    <p>The laborious journey of the Fellowship through the dark tunnels of the Mines of Moria. The slow walking cadenza and the pervasive fear are audible in the monotonous rhythm of the low brass, piano, and percussion. After a wild pursuit by the Orks, Gandalf battles the Balrog and crashes from the bridge of Khazad-Dûm into a fathomless abyss. To melancholy <em>Marcia funèbre</em> tones, the companions trudge on toward the East Gate of Moria.</p>
+  </div>
+
+  <div class="piece">
+    <h3>V. &nbsp;Hobbits</h3>
+    <p>The carefree and optimistic character of the Hobbits expressed in a happy folk dance; the hymn that follows emanates the determination and noblesse of the hobbit folk. The symphony does not end on an exuberant note but concludes peacefully and resigned — in keeping with the last chapter, <em>The Grey Havens</em>, in which Frodo and Gandalf sail away in a white ship and disappear slowly beyond the horizon.</p>
+    <p style="margin-top: 1rem; font-size: 0.82rem; font-style: italic; color: #777;">— Program note by Johan de Meij</p>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
      WIND ENSEMBLE — PERSONNEL
 ════════════════════════════════════════════ -->
 <div class="section">
   <h2>Wind Ensemble Personnel</h2>
+  <p style="font-size:0.85rem; color:#666; margin: -0.5rem 0 1.5rem 0;">
+    <strong>Bold</strong> = Senior &nbsp;·&nbsp; * Tri-M Music Honor Society &nbsp;·&nbsp; † All-County Band &nbsp;·&nbsp; ‡ All-District Band
+  </p>
   <div class="personnel-grid">
 
     <div class="section-group">
       <h4>Flute</h4>
       <ul>
-        <li>Lewis, Addison</li>
-        <li>Littlejohn, Lizzie</li>
-        <li>Parker, Alissa</li>
+        <li><strong>Lewis, Addison</strong></li>
+        <li><strong>Littlejohn, Lizzie†</strong></li>
+        <li>Parker, Alin</li>
       </ul>
     </div>
 
     <div class="section-group">
       <h4>Oboe</h4>
       <ul>
-        <li>Um, Hyeyul</li>
+        <li>Um, Hyeyul*†</li>
       </ul>
     </div>
 
     <div class="section-group">
       <h4>Bassoon</h4>
       <ul>
-        <li>Boyle, Adam</li>
+        <li>Boyle, Adam†‡</li>
       </ul>
     </div>
 
     <div class="section-group">
       <h4>Clarinet</h4>
       <ul>
-        <li>Cassada, Caleb</li>
-        <li>Hayes, Monet</li>
-        <li>Moffitt, Noah</li>
-        <li>Morrison, Heather</li>
+        <li>Cassada, Caleb†</li>
+        <li>Hayes, Monét*</li>
+        <li>Moffitt, Noah‡</li>
+        <li><strong>Morrison, Heather*†</strong></li>
       </ul>
     </div>
 
@@ -708,13 +795,27 @@
     </div>
 
     <div class="section-group">
-      <h4>Saxophone</h4>
+      <h4>Alto Saxophone</h4>
       <ul>
         <li>Cassada, Ashton</li>
-        <li>Clamme, Braden</li>
+        <li>Ferigo, Maël*†‡</li>
+        <li>Hancock, Matthew*†</li>
+        <li>Lopez Martinez, Giovanni</li>
+      </ul>
+    </div>
+
+    <div class="section-group">
+      <h4>Tenor Saxophone</h4>
+      <ul>
+        <li>Clamme, Brady*†</li>
+        <li>Hill, Cyrus</li>
+      </ul>
+    </div>
+
+    <div class="section-group">
+      <h4>Baritone Saxophone</h4>
+      <ul>
         <li>DeSorbo, Cameron</li>
-        <li>Ferigo, Mael</li>
-        <li>Hancock, Matthew</li>
       </ul>
     </div>
 
@@ -722,9 +823,9 @@
       <h4>Trumpet</h4>
       <ul>
         <li>Ballas, Aidan</li>
-        <li>Boyette, James</li>
-        <li>Langley, Mason</li>
-        <li>McIntyre, Karen</li>
+        <li>Boyette, James†‡</li>
+        <li>Langley, Mason†</li>
+        <li><strong>McIntyre, Karen*</strong></li>
         <li>Rose, Emma</li>
       </ul>
     </div>
@@ -732,18 +833,17 @@
     <div class="section-group">
       <h4>Horn</h4>
       <ul>
-        <li>Caldwell, Parker</li>
-        <li>Hill, Cyrus</li>
-        <li>Naklicki, Justin</li>
-        <li>Zizzamia, Tyler</li>
+        <li>Caldwell, Parker*</li>
+        <li>Naklicki, Justin†‡</li>
+        <li><strong>Zizzamia, Tyler*†‡</strong></li>
       </ul>
     </div>
 
     <div class="section-group">
       <h4>Trombone</h4>
       <ul>
-        <li>Cassada, Matthew</li>
-        <li>Heglar, Dylan</li>
+        <li><strong>Cassada, Matthew†‡</strong></li>
+        <li><strong>Heglar, Dylan*†</strong></li>
         <li>Powers, Noah</li>
         <li>Rose, Ella</li>
       </ul>
@@ -752,7 +852,7 @@
     <div class="section-group">
       <h4>Euphonium</h4>
       <ul>
-        <li>Franklin, Lyla</li>
+        <li>Franklin, Lyla*†</li>
         <li>Mayorga, Mark</li>
       </ul>
     </div>
@@ -760,7 +860,7 @@
     <div class="section-group">
       <h4>Tuba</h4>
       <ul>
-        <li>Rathgeber, Kade</li>
+        <li>Rathgeber, Kade†</li>
         <li>Williams, Piper</li>
       </ul>
     </div>
@@ -768,89 +868,15 @@
     <div class="section-group">
       <h4>Percussion</h4>
       <ul>
-        <li>Buie, Jalen</li>
-        <li>Lopez Martinez, Giovanni</li>
-        <li>Pritchard, Caleb</li>
+        <li>Buchanan, Emma</li>
+        <li><strong>Buie, Jalen</strong></li>
+        <li>Damstetter, Joseph</li>
         <li>Stoner, Mackenzie</li>
+        <li>TejedaTrejo, Mercedes</li>
+        <li>Thompson, Carter</li>
       </ul>
     </div>
 
-  </div>
-</div>
-
-
-<!-- ══════════════════════════════════════════
-     WIND ENSEMBLE — LORD OF THE RINGS
-════════════════════════════════════════════ -->
-<div class="section">
-  <p class="section-label">Part III — Wind Ensemble</p>
-  <h2>Lord of the Rings</h2>
-
-  <p style="font-size:0.95rem; color:#444; margin-bottom:2rem;">
-    Premiered in 1988 and awarded the prestigious Sudler International Wind Band Composition Prize,
-    Johan de Meij's <em>Lord of the Rings</em> stands as one of the most ambitious works ever written
-    for concert band. Inspired by J.R.R. Tolkien's epic trilogy, the symphony traces the entire arc
-    of Middle-earth across five movements — each a world unto itself.
-  </p>
-
-  <!-- I. Gandalf -->
-  <div class="movement-art-panel">
-    <img src="images/John_Howe_-_Gandalf_the_Grey.jpg" alt="Gandalf the Grey — John Howe">
-  </div>
-  <div class="piece">
-    <h3>I. &nbsp;Gandalf</h3>
-    <p>
-      The wizard: ancient, wise, and formidable. De Meij opens with a broad, noble theme that hints
-      at immeasurable depth beneath a calm exterior. Power held in reserve — until it isn't.
-    </p>
-  </div>
-
-  <!-- II. Lothlórien -->
-  <div class="movement-art-panel">
-    <img src="images/Angus_McBride_-_Mirror_of_Galadriel.jpg" alt="Mirror of Galadriel — Angus McBride">
-  </div>
-  <div class="piece">
-    <h3>II. &nbsp;Lothlórien</h3>
-    <p>
-      The elven forest of Galadriel. Shimmering and ethereal, this movement stands entirely apart
-      from the rest — hushed, timeless, otherworldly. De Meij suspends time itself here.
-    </p>
-  </div>
-
-  <!-- III. Gollum -->
-  <div class="movement-art-panel">
-    <img src="images/Ted_Nasmith_-_Endgame_on_the_Mountain.jpg" alt="Endgame on the Mountain — Ted Nasmith">
-  </div>
-  <div class="piece">
-    <h3>III. &nbsp;Gollum</h3>
-    <p>
-      Perhaps the symphony's most inventive movement. A bassoon solo becomes Gollum himself:
-      slippery, pitiable, and unsettling. The ensemble shifts around him like the shadows he haunts.
-    </p>
-  </div>
-
-  <!-- IV. Journey in the Dark -->
-  <div class="movement-art-panel wide">
-    <img src="images/Manuel_Castañón_-_Flame_of_Udûn.jpg" alt="Flame of Udûn — Manuel Castañón">
-  </div>
-  <div class="piece">
-    <h3>IV. &nbsp;Journey in the Dark</h3>
-    <p>
-      The Fellowship enters Moria. Darkness closes in and the walls press tighter with every measure.
-      De Meij writes with full orchestral force here — the Balrog is unmistakable.
-    </p>
-  </div>
-
-  <!-- V. Hobbits -->
-  <div class="movement-art-panel wide">
-    <img src="images/1920px-Miriam_Ellis_-_The_Springle-ring.jpg" alt="The Springle-ring — Miriam Ellis">
-  </div>
-  <div class="piece">
-    <h3>V. &nbsp;Hobbits</h3>
-    <p>
-      A return to the Shire and the simple joy of home. The finale resolves the entire symphony
-      with warmth and hard-earned peace — the journey complete, the road behind them.
-    </p>
   </div>
 </div>
 
