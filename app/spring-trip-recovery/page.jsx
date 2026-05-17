@@ -5,9 +5,44 @@ export const metadata = {
 
 const timeline = [
   {
-    time: "Friday, May 15 · approximately 3:30 PM",
-    title: "Trip cancelled",
-    body: "The charter bus did not arrive as scheduled. After working through the situation and attempting to identify replacement transportation, the trip had to be cancelled and students were sent home."
+    time: "Friday, May 15 · 2:49 PM",
+    title: "Automated \"bus is on the way\" message received",
+    body: "CharterUP's automated system sent a \"your vehicle is on the way\" message 11 minutes before the scheduled 3:00 PM pickup. The same message hit the booster officer's phone and is preserved on her Verizon log."
+  },
+  {
+    time: "Friday, May 15 · 3:00 PM",
+    title: "Scheduled pickup. Bus did not arrive.",
+    body: "Students and chaperones waited outside the band room for approximately 30 to 40 minutes for the bus that had been confirmed and was reportedly already on the way."
+  },
+  {
+    time: "Friday, May 15 · 3:22 PM",
+    title: "First call to the assigned driver",
+    body: "The booster officer placed the first call to the driver assigned to our reservation. The phone rang and went to a voicemail that was not set up. (Verizon billing record.)"
+  },
+  {
+    time: "Friday, May 15 · 3:31 PM",
+    title: "Cancellation call received",
+    body: "Inbound call from CharterUP support to the booster officer. The bus broker informed her that the trip was cancelled. This is the documented cancellation moment, anchored to a Verizon billing record and her contemporaneous note on the log."
+  },
+  {
+    time: "Friday, May 15 · 3:34 PM",
+    title: "Joint callback to CharterUP",
+    body: "Mr. Parker and the booster officer called CharterUP back together for a 9-minute conversation to confirm the cancellation and ask whether a replacement bus could be obtained."
+  },
+  {
+    time: "Friday, May 15 · 4:00 PM",
+    title: "Announcement to students inside the band room",
+    body: "Once the cancellation was confirmed, students were brought inside and told the bus had cancelled last-minute. Adults continued working the phones in pursuit of a replacement."
+  },
+  {
+    time: "Friday, May 15 · 4:34 to 5:40 PM",
+    title: "Replacement-bus search",
+    body: "Calls placed to four charter operators (Sunway in Jacksonville, Daniels in Wilmington, Carolina Limo in Myrtle Beach, and a second Jacksonville operator). None could deploy a bus inside our window. (Carrier billing record.)"
+  },
+  {
+    time: "Friday, May 15 · ~5:20 PM",
+    title: "Final cancellation communicated",
+    body: "Students were told the trip could no longer go forward and were released to families."
   },
   {
     time: "Friday, May 15 · 6:01 PM",
@@ -15,19 +50,29 @@ const timeline = [
     body: "Families were notified that the trip was cancelled and that follow-up would continue once the transportation vendor provided written documentation."
   },
   {
+    time: "Friday, May 15 · 6:19 PM",
+    title: "Substantive call with CharterUP case manager",
+    body: "39-minute call with the CharterUP case manager who took over our case. Bus refund of $5,550 verbally committed; an internal exception request opened for non-bus costs. CharterUP holds the recording. (Carrier billing record.)"
+  },
+  {
     time: "Friday, May 15 · 6:54 PM",
     title: "CharterUP written confirmation received",
     body: "CharterUP confirmed in writing that the bus provider was no longer able to service the trip and that alternate provider options within their marketplace had been exhausted."
   },
   {
-    time: "Friday, May 15 · evening",
-    title: "Vendor recovery requests sent",
-    body: "Refund and exception requests were sent to the hotel and to Music in the Parks / Festival's Edge. CharterUP's written cancellation confirmation was forwarded as documentation."
+    time: "Friday, May 15 · 9:03 PM",
+    title: "Hotel refund request sent",
+    body: "Refund / exception request sent to the hotel general manager and group sales contact, with CharterUP's written cancellation confirmation forwarded as documentation."
+  },
+  {
+    time: "Friday, May 15 · 9:06 PM",
+    title: "Festival refund request sent",
+    body: "Refund / exception request sent to the Music in the Parks / Festival's Edge primary contact, with CharterUP's written cancellation confirmation forwarded. Auto-reply received: primary contact is out of office until Monday, May 18 at 8:00 AM."
   },
   {
     time: "Friday, May 15 · 10:43 PM",
     title: "Formal CharterUP follow-up sent",
-    body: "A written follow-up was sent to CharterUP requesting documentation and clarification about the transportation failure. CharterUP acknowledged the request and assigned an internal ticket."
+    body: "A written follow-up was sent to CharterUP requesting documentation and clarification about the transportation failure. CharterUP acknowledged the request at 10:59 PM and assigned an internal ticket."
   },
   {
     time: "Saturday, May 16 · 5:45 AM",
@@ -38,6 +83,16 @@ const timeline = [
     time: "Saturday, May 16 · 6:02 AM",
     title: "Family impact form sent",
     body: "Families were invited to share what their student observed and what the family had to give up or change because of trip costs that are now in limbo. Responses are voluntary and are being kept on file alongside the vendor record."
+  },
+  {
+    time: "Sunday, May 17 · 6:57 AM",
+    title: "Chaperone witness statement received",
+    body: "A written witness statement was received from one of the chaperones who was present in the band room from 2:30 PM on Friday. It corroborates the timeline already on record from on-site observation."
+  },
+  {
+    time: "Sunday, May 17 · 10:46 to 10:52 AM",
+    title: "Booster phone log and CharterUP correspondence received",
+    body: "A booster officer forwarded her full Verizon Call and Text Log for May 15 and the complete email chain with the bus broker, from initial quote through cancellation. The Verizon log lines up minute-by-minute with the timeline already on record and includes the 3:31 PM incoming call from the broker that informed her the trip was cancelled. That moment is now anchored to a carrier billing record, not a recollection. Additional family responses came in through the weekend. The recovery file is in shape for the vendor conversations that begin Monday, May 18."
   }
 ];
 
@@ -55,7 +110,7 @@ const statusItems = [
   {
     label: "Festival / park package",
     status: "Request submitted",
-    detail: "A refund / exception request has been sent. Primary contact returns Monday, May 18."
+    detail: "A refund / exception request was sent Friday, May 15 at 9:06 PM. Primary contact returns Monday, May 18 at 8:00 AM."
   },
   {
     label: "Family refunds",
@@ -70,7 +125,7 @@ const statusItems = [
 ];
 
 const nextSteps = [
-  "Wait for CharterUP's response to the formal documentation request submitted Friday night.",
+  "Wait for CharterUP's response to the formal documentation request submitted Friday, May 15 at 10:43 PM.",
   "Follow up with Music in the Parks / Festival's Edge when their primary contact returns Monday, May 18.",
   "Watch for the hotel response to the refund / exception request.",
   "Collect and organize chaperone and family responses as they come in.",
@@ -89,7 +144,7 @@ export default function SpringTripRecoveryPage() {
           This page is a family-facing summary of the recovery work after the May 15 spring trip cancellation.
           It will focus on confirmed information, major next steps, and what families should expect.
         </p>
-        <div className="recovery-updated">Last updated: Saturday, May 16, 2026 · 12:00 PM</div>
+        <div className="recovery-updated">Last updated: Sunday, May 17, 2026</div>
       </section>
 
       <section className="recovery-section recovery-note">
@@ -99,6 +154,12 @@ export default function SpringTripRecoveryPage() {
           a full refund for the bus cost. Requests have also been sent to the hotel and festival vendors.
           At this point, final family refund amounts cannot be determined until vendor responses are received
           and the trip account is reconciled.
+        </p>
+        <p>
+          Through the weekend, the documentation file has continued to grow: additional family responses,
+          a written chaperone account, and an independent third-party phone billing record from a booster
+          officer. The day-of timeline is now corroborated from multiple sources. The file is ready for the
+          vendor conversations that begin Monday, May 18.
         </p>
       </section>
 
