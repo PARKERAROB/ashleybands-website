@@ -1278,3 +1278,674 @@ h2 {
     grid-template-columns: 1fr;
   }
 }
+
+/* ============ Sponsors hub ============ */
+.sponsors-page {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 48px 24px 96px;
+}
+.sponsors-hero {
+  border-bottom: 1px solid #e5e1d8;
+  padding-bottom: 32px;
+  margin-bottom: 32px;
+}
+.sponsors-hero h1 {
+  font-family: "Cinzel", serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin: 8px 0 16px;
+}
+.sponsors-lede {
+  font-size: 1.125rem;
+  max-width: 70ch;
+  color: #3a3a3a;
+}
+.sponsors-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+.sponsors-btn {
+  display: inline-block;
+  padding: 12px 20px;
+  border-radius: 6px;
+  background: #fff;
+  border: 1px solid #c9b377;
+  color: #4a3a10;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.95rem;
+  transition: background 0.15s, color 0.15s;
+}
+.sponsors-btn:hover {
+  background: #f8f1dc;
+}
+.sponsors-btn-primary {
+  background: #4a3a10;
+  color: #fff;
+  border-color: #4a3a10;
+}
+.sponsors-btn-primary:hover {
+  background: #2f2408;
+  color: #fff;
+}
+.sponsors-section {
+  padding: 32px 0;
+  border-bottom: 1px solid #efece4;
+}
+.sponsors-section h2 {
+  font-family: "Cinzel", serif;
+  font-size: 1.5rem;
+  margin: 4px 0 16px;
+}
+.sponsors-subhead {
+  font-family: "Inter", sans-serif;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6a5a30;
+  margin-top: 24px;
+  margin-bottom: 8px;
+}
+.tier-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+.tier-card {
+  border: 1px solid #e5e1d8;
+  border-radius: 8px;
+  padding: 20px;
+  background: #fafafa;
+  position: relative;
+}
+.tier-card-best {
+  border-color: #c9b377;
+  border-width: 2px;
+  background: #fff8e6;
+}
+.tier-tag {
+  position: absolute;
+  top: -10px;
+  right: 16px;
+  background: #4a3a10;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+.tier-card h3 {
+  font-family: "Cinzel", serif;
+  margin: 0 0 4px;
+}
+.tier-amount {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #4a3a10;
+  margin: 0 0 12px;
+}
+.tier-card ul {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.92rem;
+}
+.adopt-band {
+  margin-top: 20px;
+}
+.adopt-band h4 {
+  font-family: "Cinzel", serif;
+  font-size: 1.1rem;
+  margin: 16px 0 4px;
+}
+.adopt-band-typical {
+  font-style: italic;
+  color: #6a5a30;
+  margin: 0 0 8px;
+}
+.adopt-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+.adopt-table th,
+.adopt-table td {
+  text-align: left;
+  padding: 6px 12px;
+  border-bottom: 1px solid #efece4;
+}
+.adopt-table th {
+  background: #fafafa;
+  font-weight: 600;
+}
+.adopt-note {
+  font-size: 0.85rem;
+  color: #555;
+  margin-top: 12px;
+  font-style: italic;
+}
+.sponsors-contact {
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 24px;
+  margin-top: 32px;
+}
+.sponsors-contact-block {
+  line-height: 1.7;
+}
+
+/* ============ Print pages ============ */
+.print-page {
+  max-width: 8.5in;
+  margin: 0 auto;
+  padding: 32px 24px;
+  background: #fff;
+  color: #111;
+}
+.print-controls {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 32px;
+  padding-bottom: 16px;
+  border-bottom: 1px dashed #ccc;
+}
+.print-doc {
+  font-family: "Inter", sans-serif;
+  font-size: 11pt;
+  line-height: 1.5;
+  color: #111;
+}
+.print-letterhead {
+  border-bottom: 2px solid #4a3a10;
+  padding-bottom: 12px;
+  margin-bottom: 24px;
+}
+.print-org {
+  font-family: "Cinzel", serif;
+  font-size: 14pt;
+  font-weight: 700;
+  margin: 0;
+  color: #4a3a10;
+}
+.print-address,
+.print-director,
+.print-eyebrow {
+  margin: 4px 0 0;
+  font-size: 9.5pt;
+  color: #555;
+}
+.print-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.print-h1 {
+  font-family: "Cinzel", serif;
+  font-size: 18pt;
+  margin: 16px 0 8px;
+  color: #2f2408;
+}
+.print-h2 {
+  font-family: "Cinzel", serif;
+  font-size: 13pt;
+  margin: 20px 0 8px;
+  color: #2f2408;
+  border-bottom: 1px solid #d8d2bf;
+  padding-bottom: 4px;
+}
+.print-h3 {
+  font-size: 11pt;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6a5a30;
+  margin: 16px 0 6px;
+}
+.print-h4 {
+  font-size: 11pt;
+  font-weight: 700;
+  margin: 12px 0 4px;
+  color: #4a3a10;
+}
+.print-section {
+  margin-bottom: 16px;
+}
+.print-greeting {
+  margin: 16px 0;
+}
+.print-signoff {
+  margin-top: 24px;
+  line-height: 1.6;
+}
+.print-lede {
+  font-size: 11.5pt;
+  margin-bottom: 16px;
+}
+.print-small {
+  font-size: 9.5pt;
+  color: #444;
+}
+.print-note {
+  font-size: 9pt;
+  font-style: italic;
+  color: #555;
+  margin-top: 8px;
+}
+.print-contact {
+  margin-top: 16px;
+  line-height: 1.6;
+  font-size: 10pt;
+}
+.print-return {
+  margin-top: 16px;
+  line-height: 1.6;
+}
+.print-table,
+.print-form-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0 16px;
+  font-size: 10pt;
+}
+.print-table th,
+.print-table td {
+  text-align: left;
+  padding: 6px 8px;
+  border: 1px solid #c8c2b0;
+  vertical-align: top;
+}
+.print-table th {
+  background: #f4ecd7;
+  font-weight: 700;
+}
+.print-table-compact th,
+.print-table-compact td {
+  padding: 4px 6px;
+  font-size: 9.5pt;
+}
+.print-row-best {
+  background: #fff8e6;
+}
+.print-tag {
+  font-size: 9pt;
+  color: #4a3a10;
+  font-weight: 600;
+}
+.print-form-table td {
+  padding: 8px;
+  border-bottom: 1px solid #999;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+}
+.print-form-table tr:first-child td {
+  border-top: 1px solid #999;
+}
+.print-form-blank {
+  min-width: 60%;
+}
+.print-checklist {
+  list-style: none;
+  padding-left: 0;
+  margin: 8px 0;
+}
+.print-checklist li {
+  padding: 4px 0;
+  font-size: 10.5pt;
+}
+.print-ul-tight,
+.print-ol-tight {
+  margin: 6px 0;
+  padding-left: 20px;
+}
+.print-ul-tight li,
+.print-ol-tight li {
+  margin: 2px 0;
+  font-size: 10pt;
+}
+.print-pagebreak {
+  page-break-after: always;
+  height: 0;
+}
+.print-leave-behind {
+  /* single-page leave-behind sizing */
+}
+.print-adopt-band {
+  page-break-inside: avoid;
+  margin-bottom: 12px;
+}
+
+@media print {
+  @page {
+    size: letter;
+    margin: 0.5in;
+  }
+  body {
+    background: #fff !important;
+  }
+  .site-header,
+  .no-print {
+    display: none !important;
+  }
+  .print-page {
+    padding: 0;
+    max-width: none;
+  }
+  .print-doc {
+    font-size: 10.5pt;
+  }
+  .print-h1 {
+    font-size: 16pt;
+  }
+  .print-h2 {
+    font-size: 12pt;
+  }
+  a {
+    color: #111;
+    text-decoration: none;
+  }
+  .tier-card,
+  .print-adopt-band,
+  .print-section {
+    page-break-inside: avoid;
+  }
+  table {
+    page-break-inside: avoid;
+  }
+}
+
+/* ============ Sponsor tracker (Phase 2) ============ */
+.tracker-auth {
+  max-width: 480px;
+  margin: 0 auto;
+}
+.tracker-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.tracker-tab {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #d8d2bf;
+  background: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.95rem;
+  border-radius: 4px;
+}
+.tracker-tab-active {
+  background: #4a3a10;
+  color: #fff;
+  border-color: #4a3a10;
+}
+.tracker-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.tracker-form-narrow {
+  max-width: 420px;
+  margin: 0 auto;
+}
+.tracker-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.92rem;
+}
+.tracker-field-wide {
+  grid-column: 1 / -1;
+}
+.tracker-field span {
+  color: #4a3a10;
+  font-weight: 600;
+}
+.tracker-field input,
+.tracker-field select {
+  padding: 8px 10px;
+  border: 1px solid #c8c2b0;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+.tracker-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.92rem;
+  padding: 8px 0;
+}
+.tracker-error {
+  color: #a00;
+  font-size: 0.92rem;
+  margin: 0;
+}
+.tracker-help {
+  font-size: 0.85rem;
+  color: #555;
+  margin: 0;
+}
+.tracker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  border-bottom: 1px solid #e5e1d8;
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+}
+.tracker-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.tracker-stat {
+  background: #fafafa;
+  border: 1px solid #e5e1d8;
+  border-radius: 6px;
+  padding: 16px;
+  text-align: center;
+}
+.tracker-stat-num {
+  display: block;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #4a3a10;
+  font-family: "Cinzel", serif;
+}
+.tracker-stat-label {
+  display: block;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6a5a30;
+  margin-top: 4px;
+}
+.tracker-add {
+  background: #fff8e6;
+  border: 1px solid #c9b377;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+.tracker-add h3 {
+  margin: 0 0 12px;
+  font-family: "Cinzel", serif;
+  font-size: 1.1rem;
+}
+.tracker-add-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.tracker-table-wrap {
+  overflow-x: auto;
+  margin-top: 16px;
+}
+.tracker-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+.tracker-table th,
+.tracker-table td {
+  text-align: left;
+  padding: 10px 8px;
+  border-bottom: 1px solid #efece4;
+  vertical-align: top;
+}
+.tracker-table th {
+  background: #fafafa;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.78rem;
+}
+.tracker-row-yes {
+  background: #f0f8e6;
+}
+.tracker-row-no {
+  background: #fcf2f2;
+  color: #888;
+}
+.tracker-row-later {
+  background: #fff8e6;
+}
+.tracker-row-editing {
+  background: #f8f1dc;
+}
+.tracker-sub {
+  font-size: 0.85rem;
+  color: #555;
+  margin-top: 2px;
+}
+.tracker-note {
+  font-size: 0.85rem;
+  color: #6a5a30;
+  font-style: italic;
+  margin-top: 2px;
+}
+.tracker-link {
+  background: none;
+  border: none;
+  color: #4a3a10;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0 6px;
+  font-size: 0.88rem;
+  font-family: inherit;
+}
+.tracker-link-danger {
+  color: #a00;
+}
+.tracker-edit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  padding: 12px;
+}
+.tracker-edit-actions {
+  display: flex;
+  gap: 8px;
+  padding: 0 12px 12px;
+}
+.tracker-empty {
+  padding: 32px 0;
+  text-align: center;
+  color: #6a5a30;
+  font-style: italic;
+}
+.dashboard-role {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #6a5a30;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-left: 8px;
+}
+.dashboard-alerts {
+  background: #fcf2dc;
+  border: 1px solid #d9a85a;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+}
+.dashboard-alerts h3 {
+  margin: 0 0 8px;
+  color: #8a5a10;
+}
+.dashboard-alerts ul {
+  margin: 8px 0 0;
+  padding-left: 20px;
+}
+.dashboard-filters {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #fafafa;
+  border-radius: 6px;
+}
+.dashboard-filters .tracker-field {
+  min-width: 200px;
+}
+
+/* ============ Sponsors IA restructure ============ */
+.sponsors-footer {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid #e5e1d8;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #6a5a30;
+}
+.sponsors-footer p {
+  margin: 4px 0;
+}
+.sponsors-footer-staff {
+  font-size: 0.75rem;
+  color: #999;
+}
+.sponsors-footer-staff a {
+  color: #999;
+}
+.campaign-steps {
+  margin: 12px 0;
+  padding-left: 20px;
+  line-height: 1.6;
+}
+.campaign-steps li {
+  margin-bottom: 12px;
+}
+.campaign-printables {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+.campaign-printable {
+  border: 1px solid #e5e1d8;
+  border-radius: 8px;
+  padding: 20px;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+}
+.campaign-printable h3 {
+  font-family: "Cinzel", serif;
+  margin: 0 0 8px;
+  font-size: 1.15rem;
+}
+.campaign-printable p {
+  font-size: 0.92rem;
+  color: #444;
+  flex: 1;
+  margin-bottom: 16px;
+}
