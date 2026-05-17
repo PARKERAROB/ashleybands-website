@@ -50,7 +50,7 @@ export default function PrintPacketPage() {
         <h1 className="print-h1">Become a Screaming Eagle Sponsor</h1>
         <p className="print-greeting">Dear Community Leader,</p>
         <p>
-          I am the Director of Bands at Eugene Ashley High School. I am writing to ask you to
+          I am the Director of Bands at Ashley High School. I am writing to ask you to
           consider sponsoring our program for the 2026-2027 school year.
         </p>
 

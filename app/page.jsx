@@ -52,7 +52,7 @@ export default function HomePage() {
           className="chat-hero-bg"
         />
         <div className="chat-hero-inner">
-          <p className="chat-hero-eyebrow">Eugene Ashley High School · Wilmington, NC</p>
+          <p className="chat-hero-eyebrow">Ashley High School · Wilmington, NC</p>
           <h1 className="chat-hero-headline">
             <span className="chat-hero-the">The Bands of</span>
             <span className="chat-hero-name">Ashley High School</span>

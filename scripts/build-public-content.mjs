@@ -137,7 +137,7 @@ const siteData = {
   sourceRoot: pkaRoot,
   program: {
     name: "Bands of Ashley High School",
-    school: "Eugene Ashley High School",
+    school: "Ashley High School",
     address: "555 Halyburton Memorial Parkway, Wilmington, NC 28412",
     phone: "(910) 790-2360",
     email: "robert.parker@nhcs.net",
