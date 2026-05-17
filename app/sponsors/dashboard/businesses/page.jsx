@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import {
   COLD_EMAIL_SUBJECT,
@@ -24,6 +24,18 @@ function authHeaders(s) {
 
 const STATUS_OPTIONS = ["untested", "asked", "willing", "declined", "silent", "already-sponsor", "skip"];
 const ZONE_OPTIONS = ["carolina-beach", "mid-corridor", "north-17th", "out-of-area"];
+const SORT_OPTIONS = [
+  { key: "name", label: "Business" },
+  { key: "zone", label: "Zone" },
+  { key: "email", label: "Email" },
+  { key: "phone", label: "Phone" },
+  { key: "website", label: "Web" },
+  { key: "source", label: "Source" },
+  { key: "status", label: "Status" },
+  { key: "prior", label: "Prior" },
+  { key: "enriched", label: "Enriched" },
+  { key: "last_outreach", label: "Last outreach" }
+];
 
 function EmailPreview({ business }) {
   if (!business) return null;
@@ -58,7 +70,7 @@ function EditRow({ business, onSave, onCancel }) {
   }
   return (
     <tr className="biz-row-editing">
-      <td colSpan={9}>
+      <td colSpan={8}>
         <div className="biz-edit-grid">
           <label className="tracker-field"><span>Name</span>
             <input value={draft.name_display || ""} onChange={(e) => setDraft({ ...draft, name_display: e.target.value })} />
@@ -106,6 +118,22 @@ function EditRow({ business, onSave, onCancel }) {
   );
 }
 
+function SortHeader({ label, sortKey, sort, onSort }) {
+  const active = sort.key === sortKey;
+  const nextDir = active && sort.dir === "asc" ? "desc" : "asc";
+  return (
+    <button
+      type="button"
+      className={`biz-sort-header${active ? " biz-sort-header-active" : ""}`}
+      onClick={() => onSort(sortKey, nextDir)}
+      aria-label={`Sort by ${label} ${nextDir === "asc" ? "ascending" : "descending"}`}
+    >
+      <span>{label}</span>
+      <span className="biz-sort-mark">{active ? (sort.dir === "asc" ? "up" : "down") : ""}</span>
+    </button>
+  );
+}
+
 function BusinessRow({ session, business, onChange, onDelete, onPreview }) {
   const [editing, setEditing] = useState(false);
 
@@ -127,7 +155,6 @@ function BusinessRow({ session, business, onChange, onDelete, onPreview }) {
       headers: authHeaders(session)
     });
     if (res.ok) {
-      const upd = await fetch(`/api/sponsors/businesses?status=`, { headers: authHeaders(session) });
       // simple: just mark locally as 'asked' so the row updates
       onChange({ ...business, outreach_status: "asked" });
     } else {
@@ -218,6 +245,7 @@ function BusinessRow({ session, business, onChange, onDelete, onPreview }) {
 function Dashboard({ session, onLogout }) {
   const [data, setData] = useState({ businesses: [], totals: {} });
   const [filter, setFilter] = useState({ zone: "", status: "untested", source: "", q: "" });
+  const [sort, setSort] = useState({ key: "", dir: "asc" });
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -227,6 +255,10 @@ function Dashboard({ session, onLogout }) {
     try {
       const params = new URLSearchParams();
       for (const [k, v] of Object.entries(filter)) if (v) params.set(k, v);
+      if (sort.key) {
+        params.set("sort", sort.key);
+        params.set("dir", sort.dir);
+      }
       const res = await fetch(`/api/sponsors/businesses?${params}`, { headers: authHeaders(session) });
       if (res.status === 401) { onLogout(); return; }
       const body = await res.json();
@@ -234,11 +266,14 @@ function Dashboard({ session, onLogout }) {
       setData(body);
     } catch (err) { setError(err.message); }
     finally { setLoading(false); }
-  }, [session, filter, onLogout]);
+  }, [session, filter, sort, onLogout]);
 
   useEffect(() => { load(); }, [load]);
 
   const t = data.totals;
+  function updateSort(key, dir) {
+    setSort({ key, dir });
+  }
 
   return (
     <div className="dashboard">
@@ -292,6 +327,18 @@ function Dashboard({ session, onLogout }) {
         <label className="tracker-field"><span>Search name</span>
           <input value={filter.q} onChange={(e) => setFilter({ ...filter, q: e.target.value })} placeholder="contains..." />
         </label>
+        <label className="tracker-field"><span>Sort by</span>
+          <select value={sort.key} onChange={(e) => setSort({ key: e.target.value, dir: sort.dir })}>
+            <option value="">Default: prior, zone, name</option>
+            {SORT_OPTIONS.map(option => <option key={option.key} value={option.key}>{option.label}</option>)}
+          </select>
+        </label>
+        <label className="tracker-field"><span>Direction</span>
+          <select value={sort.dir} onChange={(e) => setSort({ ...sort, dir: e.target.value })} disabled={!sort.key}>
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+          </select>
+        </label>
       </div>
 
       {error && <p className="tracker-error">{error}</p>}
@@ -302,13 +349,13 @@ function Dashboard({ session, onLogout }) {
           <table className="tracker-table biz-table">
             <thead>
               <tr>
-                <th>Business</th>
-                <th>Zone</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Web</th>
-                <th>Source</th>
-                <th>Status</th>
+                <th><SortHeader label="Business" sortKey="name" sort={sort} onSort={updateSort} /></th>
+                <th><SortHeader label="Zone" sortKey="zone" sort={sort} onSort={updateSort} /></th>
+                <th><SortHeader label="Email" sortKey="email" sort={sort} onSort={updateSort} /></th>
+                <th><SortHeader label="Phone" sortKey="phone" sort={sort} onSort={updateSort} /></th>
+                <th><SortHeader label="Web" sortKey="website" sort={sort} onSort={updateSort} /></th>
+                <th><SortHeader label="Source" sortKey="source" sort={sort} onSort={updateSort} /></th>
+                <th><SortHeader label="Status" sortKey="status" sort={sort} onSort={updateSort} /></th>
                 <th></th>
               </tr>
             </thead>

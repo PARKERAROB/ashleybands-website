@@ -4,6 +4,19 @@ import { readStaffSession } from "@/lib/sponsorAuth";
 
 export const runtime = "nodejs";
 
+const SORT_COLUMNS = {
+  name: "name_display",
+  zone: "zone",
+  email: "email",
+  phone: "phone",
+  website: "website",
+  source: "source",
+  status: "outreach_status",
+  prior: "prior_sponsor",
+  enriched: "enriched_at",
+  last_outreach: "last_outreach_at"
+};
+
 async function validateStaff(req) {
   const { staffId, token } = readStaffSession(req);
   if (!staffId || !token) return null;
@@ -25,21 +38,33 @@ export async function GET(req) {
   const status = url.searchParams.get("status") || "";
   const source = url.searchParams.get("source") || "";
   const search = url.searchParams.get("q") || "";
+  const sort = url.searchParams.get("sort") || "";
+  const dir = url.searchParams.get("dir") === "desc" ? "desc" : "asc";
+  const sortColumn = SORT_COLUMNS[sort];
 
   let q = supabaseAdmin
     .from("businesses")
     .select(
       "id, name_display, address, city, zip, phone, email, website, contact_person, contact_title, category, zone, source, outreach_status, prior_sponsor, notes, enriched_at, last_outreach_at, willing_at, declined_at"
-    )
-    .order("prior_sponsor", { ascending: false })
-    .order("zone", { ascending: true })
-    .order("name_display", { ascending: true })
-    .limit(500);
+    );
 
   if (zone) q = q.eq("zone", zone);
   if (status) q = q.eq("outreach_status", status);
   if (source) q = q.like("source", `${source}%`);
   if (search) q = q.ilike("name_display", `%${search}%`);
+
+  if (sortColumn) {
+    q = q
+      .order(sortColumn, { ascending: dir === "asc", nullsFirst: false })
+      .order("name_display", { ascending: true, nullsFirst: false });
+  } else {
+    q = q
+      .order("prior_sponsor", { ascending: false })
+      .order("zone", { ascending: true, nullsFirst: false })
+      .order("name_display", { ascending: true });
+  }
+
+  q = q.limit(500);
 
   const { data, error } = await q;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

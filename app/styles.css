@@ -1955,6 +1955,35 @@ h2 {
   font-size: 0.85rem;
   padding: 8px 6px;
 }
+.biz-sort-header {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  text-transform: inherit;
+  letter-spacing: inherit;
+}
+.biz-sort-header:hover,
+.biz-sort-header:focus-visible {
+  color: #8a5a10;
+  text-decoration: underline;
+}
+.biz-sort-header-active {
+  color: #4a3a10;
+}
+.biz-sort-mark {
+  min-width: 22px;
+  font-size: 0.62rem;
+  color: #8a5a10;
+}
 .biz-row-skip { opacity: 0.5; background: #f7f7f7; }
 .biz-row-already-sponsor { background: #f0f8e6; }
 .biz-row-willing { background: #d8f0c0; }
