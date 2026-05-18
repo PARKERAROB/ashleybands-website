@@ -113,29 +113,49 @@ const timeline = [
     time: "Sunday, May 17 · evening",
     title: "Monday vendor call plan prepared",
     body: "A point-by-point plan for the Monday conversations with the hotel general manager, the festival owner, and the bus broker has been prepared. The file is in shape for tomorrow."
+  },
+  {
+    time: "Monday, May 18 · morning",
+    title: "Music in the Parks refund approved",
+    body: "Music in the Parks / Festival's Edge approved a refund of $5,611. The $100 deposit is being retained, and the remaining balance is expected by check to the booster organization."
+  },
+  {
+    time: "Monday, May 18 · afternoon",
+    title: "Festival cancellation confirmed",
+    body: "A cancellation confirmation was received from Music in the Parks, matching the refund conversation and documenting that the trip registration has been cancelled."
+  },
+  {
+    time: "Monday, May 18 · afternoon",
+    title: "Hotel partial refund approved",
+    body: "Wyndham approved a partial refund of $1,019.52, covering eight rooms: seven rooms the hotel was able to resell, plus the one-room credit previously approved before the trip."
+  },
+  {
+    time: "Monday, May 18 · afternoon",
+    title: "CharterUP outside-loss review remains active",
+    body: "CharterUP confirmed the outside-loss review is still active. Their case manager folded the related support ticket into the main case and said they expect to respond before the end of the week."
   }
 ];
 
 const statusItems = [
   {
     label: "Bus refund",
-    status: "Pending Monday post",
-    detail: "$5,550 initiated by CharterUP on Saturday, May 16. Visible as two pending credits ($4,995 and $555) on the booster bank statement as of Sunday, May 17. Scheduled to clear on Monday, May 18."
+    status: "Initiated, awaiting posted verification",
+    detail: "$5,550 was initiated by CharterUP as two credits ($4,995 and $555). We are still verifying that those credits have fully posted to the booster account."
   },
   {
     label: "Hotel cost",
-    status: "Request submitted",
-    detail: "A refund / exception request has been sent. Response pending."
+    status: "Partial refund approved",
+    detail: "Wyndham approved $1,019.52 back for eight rooms. After that posts, the remaining hotel amount still unrecovered is $1,784.16."
   },
   {
     label: "Festival / park package",
-    status: "Request submitted",
-    detail: "A refund / exception request was sent Friday, May 15 at 9:06 PM. Primary contact returns Monday, May 18 at 8:00 AM."
+    status: "Refund approved",
+    detail: "Music in the Parks approved a $5,611 refund by check. The $100 deposit is being retained."
   },
   {
     label: "Family refunds",
     status: "Pending recovery",
-    detail: "Final family refund amounts cannot be determined until recovered funds and the trip account are reconciled."
+    detail: "Final family refund amounts cannot be determined until approved refunds are received, posted, and reconciled through the booster account."
   },
   {
     label: "Witness and family-impact statements",
@@ -145,10 +165,11 @@ const statusItems = [
 ];
 
 const nextSteps = [
-  "Verify the $5,550 bus refund posts to the booster account on Monday, May 18 as scheduled.",
-  "Hold the Monday conversations with the hotel general manager, the festival owner, and the bus broker case manager. Document each in writing within 30 minutes of the call.",
+  "Verify the $5,550 bus refund has fully posted to the booster account.",
+  "Track the $5,611 Music in the Parks refund check until it is received and deposited.",
+  "Track the $1,019.52 Wyndham refund until it posts.",
+  "Wait for CharterUP's outside-loss review response, expected before the end of the week.",
   "Continue to collect family impact responses from any families who have not yet submitted one.",
-  "Once vendor responses are in hand, build an itemized summary of what was recovered, what is still outstanding, and what families can expect.",
   "Reconcile the trip account before issuing final refund information to families."
 ];
 
@@ -162,28 +183,26 @@ export default function SpringTripRecoveryPage() {
           This page is a family-facing summary of the recovery work after the May 15 spring trip cancellation.
           It will focus on confirmed information, major next steps, and what families should expect.
         </p>
-        <div className="recovery-updated">Last updated: Sunday, May 17, 2026 (evening)</div>
+        <div className="recovery-updated">Last updated: Monday, May 18, 2026 (evening)</div>
       </section>
 
       <section className="recovery-section recovery-note">
         <h2>Current Status</h2>
         <p>
-          The $5,550 charter bus refund is moving. CharterUP initiated the refund on Saturday, May 16.
-          It posted as two pending credits on the booster account on Sunday, May 17 and is scheduled
-          to clear on Monday, May 18. Once it clears, that piece is closed.
+          Monday brought real movement. Music in the Parks approved a $5,611 refund by check, with the
+          $100 deposit retained. Wyndham approved a $1,019.52 partial refund for eight rooms. CharterUP
+          has initiated the $5,550 bus refund, but we are still verifying that the credits have fully
+          posted to the booster account.
         </p>
         <p>
-          The hotel and festival conversations begin in earnest on Monday. The hotel general manager
-          and the festival owner both return to work that morning. CharterUP also committed to follow
-          up on Monday on the separate exception request they filed for the non-bus costs. Meaningful
-          vendor responses may take several days, not hours.
+          The financial side is not closed yet. Approved refunds still have to be received, posted, and
+          reconciled through the booster account before any family refund amount can be calculated. I do
+          not want to estimate family refunds until the money is actually in hand and the account is clean.
         </p>
         <p>
-          Through the weekend, the documentation file has continued to grow: a second chaperone witness
-          statement, student photos taken at the school during the cancellation window, the booster bank
-          statement showing the refund movement, and a point-by-point plan for the Monday vendor calls.
-          The day-of timeline is now corroborated from multiple independent sources. The file is in shape
-          for tomorrow.
+          CharterUP's separate review of the remaining outside losses is still active. Their case manager
+          has connected the related support ticket to the main case and said they expect to respond before
+          the end of the week.
         </p>
       </section>
 
@@ -194,28 +213,24 @@ export default function SpringTripRecoveryPage() {
           the trip and where each piece stands right now:
         </p>
         <ul>
-          <li><strong>Bus charter (CharterUP):</strong> $5,550 &mdash; <em>refund confirmed in writing, processing through the booster card.</em></li>
-          <li><strong>Music in the Parks festival registration (Festival&rsquo;s Edge):</strong> $5,711 &mdash; <em>currently non-refundable; goodwill exception requested.</em></li>
-          <li><strong>Hotel (Wyndham Garden Williamsburg):</strong> $2,676.24 net &mdash; <em>currently non-refundable; goodwill exception requested.</em></li>
+          <li><strong>Bus charter (CharterUP):</strong> $5,550 &mdash; <em>refund initiated as two credits; posted status still being verified.</em></li>
+          <li><strong>Music in the Parks festival registration (Festival&rsquo;s Edge):</strong> $5,711 &mdash; <em>$5,611 refund approved by check; $100 deposit retained.</em></li>
+          <li><strong>Hotel (Wyndham Garden Williamsburg):</strong> $2,676.24 net &mdash; <em>$1,019.52 partial refund approved; $1,784.16 remains unrecovered after that posts.</em></li>
           <li><strong>Trip t-shirts (Printify):</strong> $720.77 &mdash; <em>physical product, already produced and shipped; not refundable.</em></li>
         </ul>
         <p>
-          The total amount paid for the trip is significant. The bus refund covers a meaningful portion of that,
-          but the hotel and festival pieces together are the larger ask, and those are the requests that require
-          vendors to make exceptions to their own policies. Neither vendor is required to grant those exceptions.
+          The approved refunds are meaningful, but they are not the same as cash received. The booster account
+          still needs the bus credits verified, the Music in the Parks check received and deposited, and the
+          Wyndham refund posted.
         </p>
         <p>
-          For families to see a substantial refund returned to them, several things need to go correctly:
-          the bus refund needs to post cleanly, the hotel and festival goodwill exceptions need to be granted
-          in some form, and the trip account needs to reconcile against what is recovered. Any one of those
-          paths not going as hoped reduces what comes back. I want to be straightforward about that so no one
-          is expecting a specific amount before we know what is actually possible.
+          The remaining unrecovered amount after currently approved refunds post is $2,604.93: $1,784.16 in
+          remaining hotel cost, the $100 retained festival deposit, and $720.77 in trip shirts. CharterUP is
+          still reviewing whether they will help with any outside losses beyond the bus refund.
         </p>
         <p>
-          If the goodwill exceptions from the hotel and festival do not result in meaningful recovery, the
-          focus of the recovery effort will shift toward CharterUP and the bus provider they hired. They
-          are the parties responsible for the failure, and the parties who will ultimately need to account
-          for what happened.
+          I will update families again when funds have posted or when CharterUP responds to the outside-loss
+          review.
         </p>
       </section>
 
