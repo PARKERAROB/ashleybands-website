@@ -92,15 +92,35 @@ const timeline = [
   {
     time: "Sunday, May 17 · 10:46 to 10:52 AM",
     title: "Booster phone log and CharterUP correspondence received",
-    body: "A booster officer forwarded her full Verizon Call and Text Log for May 15 and the complete email chain with the bus broker, from initial quote through cancellation. The Verizon log lines up minute-by-minute with the timeline already on record and includes the 3:31 PM incoming call from the broker that informed her the trip was cancelled. That moment is now anchored to a carrier billing record, not a recollection. Additional family responses came in through the weekend. The recovery file is in shape for the vendor conversations that begin Monday, May 18."
+    body: "A booster officer forwarded her full Verizon Call and Text Log for May 15 and the complete email chain with the bus broker, from initial quote through cancellation. The Verizon log lines up minute-by-minute with the timeline already on record and includes the 3:31 PM incoming call from the broker that informed her the trip was cancelled. That moment is now anchored to a carrier billing record, not a recollection."
+  },
+  {
+    time: "Sunday, May 17 · early afternoon",
+    title: "Booster bank statement confirms refund initiated",
+    body: "The booster bank statement confirmed that the $5,550 charter bus refund was initiated by the broker on Saturday, May 16. It posted as two pending credits ($4,995 and $555, mirroring the original two-payment booking) and is scheduled to clear on Monday, May 18."
+  },
+  {
+    time: "Sunday, May 17 · afternoon",
+    title: "Second chaperone witness statement received",
+    body: "A second chaperone who was present at the school on Friday submitted a written account of what she observed from approximately 2:15 PM through the cancellation. It corroborates the timeline already on record from an independent on-site vantage point."
+  },
+  {
+    time: "Sunday, May 17 · evening",
+    title: "Student photos and video received",
+    body: "In response to a request in the student group chat, several students sent photos and video from the school on May 15 between 3:00 and 5:30 PM. Two of the photos carry intact timestamp metadata from the cancellation window and are real-time records of students waiting at the school."
+  },
+  {
+    time: "Sunday, May 17 · evening",
+    title: "Monday vendor call plan prepared",
+    body: "A point-by-point plan for the Monday conversations with the hotel general manager, the festival owner, and the bus broker has been prepared. The file is in shape for tomorrow."
   }
 ];
 
 const statusItems = [
   {
     label: "Bus refund",
-    status: "Confirmed in writing",
-    detail: "$5,550 submitted by CharterUP. Expected processing window: 7-14 business days."
+    status: "Pending Monday post",
+    detail: "$5,550 initiated by CharterUP on Saturday, May 16. Visible as two pending credits ($4,995 and $555) on the booster bank statement as of Sunday, May 17. Scheduled to clear on Monday, May 18."
   },
   {
     label: "Hotel cost",
@@ -125,12 +145,10 @@ const statusItems = [
 ];
 
 const nextSteps = [
-  "Wait for CharterUP's response to the formal documentation request submitted Friday, May 15 at 10:43 PM.",
-  "Follow up with Music in the Parks / Festival's Edge when their primary contact returns Monday, May 18.",
-  "Watch for the hotel response to the refund / exception request.",
-  "Collect and organize chaperone and family responses as they come in.",
-  "Confirm the bus refund posts to the booster account within the 7-14 business day window.",
-  "Continue documenting each response and preserving the written record.",
+  "Verify the $5,550 bus refund posts to the booster account on Monday, May 18 as scheduled.",
+  "Hold the Monday conversations with the hotel general manager, the festival owner, and the bus broker case manager. Document each in writing within 30 minutes of the call.",
+  "Continue to collect family impact responses from any families who have not yet submitted one.",
+  "Once vendor responses are in hand, build an itemized summary of what was recovered, what is still outstanding, and what families can expect.",
   "Reconcile the trip account before issuing final refund information to families."
 ];
 
@@ -144,22 +162,28 @@ export default function SpringTripRecoveryPage() {
           This page is a family-facing summary of the recovery work after the May 15 spring trip cancellation.
           It will focus on confirmed information, major next steps, and what families should expect.
         </p>
-        <div className="recovery-updated">Last updated: Sunday, May 17, 2026</div>
+        <div className="recovery-updated">Last updated: Sunday, May 17, 2026 (evening)</div>
       </section>
 
       <section className="recovery-section recovery-note">
         <h2>Current Status</h2>
         <p>
-          CharterUP has confirmed in writing that the transportation could not be provided and has submitted
-          a full refund for the bus cost. Requests have also been sent to the hotel and festival vendors.
-          At this point, final family refund amounts cannot be determined until vendor responses are received
-          and the trip account is reconciled.
+          The $5,550 charter bus refund is moving. CharterUP initiated the refund on Saturday, May 16.
+          It posted as two pending credits on the booster account on Sunday, May 17 and is scheduled
+          to clear on Monday, May 18. Once it clears, that piece is closed.
         </p>
         <p>
-          Through the weekend, the documentation file has continued to grow: additional family responses,
-          a written chaperone account, and an independent third-party phone billing record from a booster
-          officer. The day-of timeline is now corroborated from multiple sources. The file is ready for the
-          vendor conversations that begin Monday, May 18.
+          The hotel and festival conversations begin in earnest on Monday. The hotel general manager
+          and the festival owner both return to work that morning. CharterUP also committed to follow
+          up on Monday on the separate exception request they filed for the non-bus costs. Meaningful
+          vendor responses may take several days, not hours.
+        </p>
+        <p>
+          Through the weekend, the documentation file has continued to grow: a second chaperone witness
+          statement, student photos taken at the school during the cancellation window, the booster bank
+          statement showing the refund movement, and a point-by-point plan for the Monday vendor calls.
+          The day-of timeline is now corroborated from multiple independent sources. The file is in shape
+          for tomorrow.
         </p>
       </section>
 
