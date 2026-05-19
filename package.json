@@ -13,8 +13,10 @@
     "@supabase/supabase-js": "^2.105.4",
     "bcryptjs": "^3.0.3",
     "next": "^16.2.4",
+    "qrcode": "^1.5.4",
     "react": "19.0.0",
-    "react-dom": "19.0.0"
+    "react-dom": "19.0.0",
+    "vexflow": "^5.0.0"
   },
   "devDependencies": {
     "eslint": "9.26.0",
