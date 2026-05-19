@@ -19,7 +19,9 @@ export async function POST(request) {
     if (!res.ok) return Response.json({ error: data.message || "replay failed" }, { status: 500 });
 
     const row = Array.isArray(data) ? data[0] : data;
-    return Response.json(row);
+    return Response.json({
+      new_race_id: row.out_new_race_id ?? row.new_race_id
+    });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }

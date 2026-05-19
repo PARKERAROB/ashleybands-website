@@ -28,7 +28,11 @@ export async function POST(request) {
     if (!res.ok) return Response.json({ error: data.message || "join failed" }, { status: 500 });
 
     const row = Array.isArray(data) ? data[0] : data;
-    return Response.json(row);
+    return Response.json({
+      player_id: row.out_player_id ?? row.player_id,
+      race_id: row.out_race_id ?? row.race_id,
+      session_id: row.out_session_id ?? row.session_id
+    });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
