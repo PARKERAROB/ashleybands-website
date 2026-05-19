@@ -33,20 +33,38 @@ export default function TeacherDashboard() {
     if (!session) return;
     const supabase = getStaffSprintClient();
 
-    async function load() {
+    (async () => {
       const [r, p] = await Promise.all([
         supabase.from("staff_sprint_races").select("*").eq("session_id", session.id).order("race_number"),
         supabase.from("staff_sprint_players").select("*").eq("session_id", session.id)
       ]);
       if (r.data) setRaces(r.data);
       if (p.data) setPlayers(p.data);
+    })();
+
+    function mergeRow(prev, payload, sortFn) {
+      if (payload.eventType === "DELETE") {
+        return prev.filter((row) => row.id !== payload.old?.id);
+      }
+      const row = payload.new;
+      if (!row) return prev;
+      const idx = prev.findIndex((r) => r.id === row.id);
+      const next = idx === -1 ? [...prev, row] : Object.assign(prev.slice(), { [idx]: row });
+      return sortFn ? next.slice().sort(sortFn) : next;
     }
-    load();
 
     const channel = supabase
       .channel(`teacher-${session.id}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "staff_sprint_races", filter: `session_id=eq.${session.id}` }, load)
-      .on("postgres_changes", { event: "*", schema: "public", table: "staff_sprint_players", filter: `session_id=eq.${session.id}` }, load)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "staff_sprint_races", filter: `session_id=eq.${session.id}` },
+        (payload) => setRaces((prev) => mergeRow(prev, payload, (a, b) => a.race_number - b.race_number))
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "staff_sprint_players", filter: `session_id=eq.${session.id}` },
+        (payload) => setPlayers((prev) => mergeRow(prev, payload))
+      )
       .subscribe();
 
     const stallTimer = setInterval(() => {

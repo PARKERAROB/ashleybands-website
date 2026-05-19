@@ -76,7 +76,7 @@ export default function PlayPage({ params }) {
     if (!sessionId || !raceId) return;
     const supabase = getStaffSprintClient();
 
-    async function loadAll() {
+    (async () => {
       const [s, r, p] = await Promise.all([
         supabase.from("staff_sprint_sessions").select("*").eq("id", sessionId).single(),
         supabase.from("staff_sprint_races").select("*").eq("id", raceId).single(),
@@ -85,13 +85,33 @@ export default function PlayPage({ params }) {
       if (s.data) setSessionRow(s.data);
       if (r.data) setRaceRow(r.data);
       if (p.data) setPlayers(p.data);
-    }
-    loadAll();
+    })();
 
     const channel = supabase
       .channel(`play-${raceId}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "staff_sprint_races", filter: `id=eq.${raceId}` }, loadAll)
-      .on("postgres_changes", { event: "*", schema: "public", table: "staff_sprint_players", filter: `race_id=eq.${raceId}` }, loadAll)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "staff_sprint_races", filter: `id=eq.${raceId}` },
+        (payload) => { if (payload.new) setRaceRow(payload.new); }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "staff_sprint_players", filter: `race_id=eq.${raceId}` },
+        (payload) => {
+          setPlayers((prev) => {
+            if (payload.eventType === "DELETE") {
+              return prev.filter((p) => p.id !== payload.old?.id);
+            }
+            const row = payload.new;
+            if (!row) return prev;
+            const idx = prev.findIndex((p) => p.id === row.id);
+            if (idx === -1) return [...prev, row];
+            const next = prev.slice();
+            next[idx] = row;
+            return next;
+          });
+        }
+      )
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
