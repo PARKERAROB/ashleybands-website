@@ -1,7 +1,14 @@
+"use client";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
+
+const HIDDEN_NAV_ROUTES = ["/raleigh-brief"];
 
 export default function SiteNav() {
+  const pathname = usePathname();
+  if (HIDDEN_NAV_ROUTES.includes(pathname)) return null;
+
   return (
     <header className="site-header">
       <Link className="brand" href="/">
