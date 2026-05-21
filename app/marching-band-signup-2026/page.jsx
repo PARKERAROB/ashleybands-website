@@ -277,6 +277,16 @@ function MarchingBandSignupInner() {
         <div className="signup-submit">
           <button type="submit" disabled={!canSubmit}>{status === "saving" ? "Submitting..." : status === "success" ? "Submitted" : "Submit sign-up"}</button>
           {message && <p className={status === "error" ? "signup-error" : "signup-success"}>{message}</p>}
+          {status === "success" && (
+            <div className="signup-next">
+              <p>
+                {form.funding_path === "sponsorship_fundraising"
+                  ? "You chose to raise $500 through sponsorships. Here is your next step."
+                  : "Want a head start on funding? One $2,000 sponsor can cover your student and several others."}
+              </p>
+              <a href="/sponsors/campaign" className="sponsors-btn sponsors-btn-primary">Open Family Sponsorship Tools</a>
+            </div>
+          )}
         </div>
       </form>
     </main>
