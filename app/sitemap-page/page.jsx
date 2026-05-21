@@ -14,12 +14,33 @@ export default function SitemapPage() {
     { label: "Support the Band", category: "Support the band" }
   ];
 
-  const staticPages = [
+  const mainPages = [
     { title: "Home", href: "/" },
     { title: "Performed Repertoire", href: "/repertoire" },
     { title: "Program Archive", href: "/programs" },
+    { title: "Spring Concert 2026 Program", href: "/programs/spring-concert-2026" },
+    { title: "Handbook", href: "/handbook" },
+    { title: "Marching Band Sign-Up", href: "/marching-band-signup-2026" },
+    { title: "Spring Trip Recovery", href: "/spring-trip-recovery" },
     { title: "Band Assistant", href: "/assistant" },
     { title: "Member Area", href: "/members" }
+  ];
+
+  const sponsorPages = [
+    { title: "Become a Sponsor", href: "/sponsors" },
+    { title: "Family Campaign Tools", href: "/sponsors/campaign" },
+    { title: "Sponsorship Tracker", href: "/sponsors/tracker" },
+    { title: "Sponsorship Packet (print)", href: "/sponsors/print/packet" },
+    { title: "Leave-Behind Card (print)", href: "/sponsors/print/leave-behind" },
+    { title: "Tracker Sheet (print)", href: "/sponsors/print/tracker" }
+  ];
+
+  const staffPages = [
+    { title: "Sponsor Dashboard", href: "/sponsors/dashboard" },
+    { title: "Business Outreach Dashboard", href: "/sponsors/dashboard/businesses" },
+    { title: "Staff Sprint", href: "/staff-sprint" },
+    { title: "Staff Sprint - Teacher View", href: "/staff-sprint/teacher" },
+    { title: "Raleigh Brief", href: "/raleigh-brief" }
   ];
 
   return (
@@ -31,7 +52,7 @@ export default function SitemapPage() {
       <section className="sitemap-section">
         <h2>Main Pages</h2>
         <ul className="sitemap-list">
-          {staticPages.map((page) => (
+          {mainPages.map((page) => (
             <li key={page.href}>
               <Link href={page.href}>{page.title}</Link>
             </li>
@@ -55,6 +76,29 @@ export default function SitemapPage() {
           </section>
         );
       })}
+
+      <section className="sitemap-section">
+        <h2>Sponsorship Tools &amp; Print</h2>
+        <ul className="sitemap-list">
+          {sponsorPages.map((page) => (
+            <li key={page.href}>
+              <Link href={page.href}>{page.title}</Link>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="sitemap-section">
+        <h2>Staff / Internal</h2>
+        <p className="sitemap-summary">Sign-in required. Listed for quick access.</p>
+        <ul className="sitemap-list">
+          {staffPages.map((page) => (
+            <li key={page.href}>
+              <Link href={page.href}>{page.title}</Link>
+            </li>
+          ))}
+        </ul>
+      </section>
     </main>
   );
 }
