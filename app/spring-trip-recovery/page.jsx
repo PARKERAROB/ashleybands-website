@@ -228,8 +228,10 @@ export default function SpringTripRecoveryPage() {
           the account is reconciled.
         </p>
         <p>
-          Refund checks and transfers will not go out until the money is actually in the account. That keeps
-          the booster books clean. Thank you for your patience while we close this out the right way.
+          Nothing goes out until the money is actually back in the account. Refund checks follow once the
+          booster books are reconciled. The day the last refunds post, every family will get an email from me
+          with the link to the refund form and a full update on where things landed. Until then, there is
+          nothing families need to do. Thank you for your patience while we close this out the right way.
         </p>
       </section>
 
