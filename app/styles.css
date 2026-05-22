@@ -820,6 +820,20 @@ h2 {
   color: #8f2638;
 }
 
+.refund-banner {
+  margin: 0 0 24px;
+  padding: 16px 18px;
+  border-radius: 10px;
+  border: 1px solid #e2c275;
+  background: #fdf6e3;
+  color: #5a4a1f;
+  line-height: 1.5;
+}
+
+.refund-banner strong {
+  color: #8f2638;
+}
+
 @media (max-width: 900px) {
   .site-header {
     align-items: flex-start;
