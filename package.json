@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "content:build": "node scripts/build-public-content.mjs"
+    "content:build": "node scripts/build-public-content.mjs",
+    "portal:sync": "node scripts/sync-portal-csv.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.105.4",
@@ -16,6 +17,7 @@
     "qrcode": "^1.5.4",
     "react": "19.0.0",
     "react-dom": "19.0.0",
+    "resend": "^6.12.3",
     "vexflow": "^5.0.0"
   },
   "devDependencies": {

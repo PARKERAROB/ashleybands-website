@@ -16,6 +16,8 @@ export default function SitemapPage() {
 
   const mainPages = [
     { title: "Home", href: "/" },
+    { title: "Family Profile", href: "/portal" },
+    { title: "Request Profile Access", href: "/portal/request" },
     { title: "Performed Repertoire", href: "/repertoire" },
     { title: "Program Archive", href: "/programs" },
     { title: "Spring Concert 2026 Program", href: "/programs/spring-concert-2026" },
@@ -36,6 +38,7 @@ export default function SitemapPage() {
   ];
 
   const staffPages = [
+    { title: "Profile Requests", href: "/admin/profile-requests" },
     { title: "Sponsor Dashboard", href: "/sponsors/dashboard" },
     { title: "Business Outreach Dashboard", href: "/sponsors/dashboard/businesses" },
     { title: "Staff Sprint", href: "/staff-sprint" },
