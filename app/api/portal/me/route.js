@@ -4,24 +4,42 @@ import { readPortalSession } from "@/lib/portalTokens";
 
 export const runtime = "nodejs";
 
+function splitContacts(rows) {
+  const emails = [];
+  const phones = [];
+  for (const row of rows || []) {
+    const item = { id: row.id, value: row.value_display, status: row.verification_status };
+    if (row.contact_type === "phone") phones.push(item);
+    else if (row.contact_type === "email") emails.push(item);
+  }
+  return { emails, phones };
+}
+
 export async function GET(request) {
   const session = readPortalSession(request);
   if (!session?.personId) {
     return NextResponse.json({ error: "Not signed in." }, { status: 401 });
   }
 
-  const [{ data: person, error: personError }, { data: links, error: linksError }] = await Promise.all([
-    supabaseAdmin
-      .from("portal_people")
-      .select("id, display_name, person_type")
-      .eq("id", session.personId)
-      .maybeSingle(),
-    supabaseAdmin
-      .from("portal_student_people")
-      .select("relationship_status, role, primary_contact, portal_students(id, display_name, preferred_first, grade_fall26, status, cell_phone)")
-      .eq("person_id", session.personId)
-      .eq("relationship_status", "trusted")
-  ]);
+  const [{ data: person, error: personError }, { data: ownContacts }, { data: links, error: linksError }] =
+    await Promise.all([
+      supabaseAdmin
+        .from("portal_people")
+        .select("id, display_name, person_type")
+        .eq("id", session.personId)
+        .maybeSingle(),
+      supabaseAdmin
+        .from("portal_contact_methods")
+        .select("id, contact_type, value_display, verification_status")
+        .eq("person_id", session.personId),
+      supabaseAdmin
+        .from("portal_student_people")
+        .select(
+          "student_id, relationship_status, role, primary_contact, portal_students(id, display_name, preferred_first, grade_fall26, status, cell_phone, notes)"
+        )
+        .eq("person_id", session.personId)
+        .eq("relationship_status", "trusted")
+    ]);
 
   if (personError || linksError) {
     return NextResponse.json({ error: "Could not load portal profile." }, { status: 500 });
@@ -35,15 +53,63 @@ export async function GET(request) {
       grade: link.portal_students?.grade_fall26,
       status: link.portal_students?.status,
       cellPhone: link.portal_students?.cell_phone,
-      relationshipStatus: link.relationship_status,
-      role: link.role,
-      primaryContact: link.primary_contact
+      note: link.portal_students?.notes || "",
+      guardians: []
     }))
     .filter((student) => student.id);
+
+  // Attach the other adult guardians linked to each student.
+  const studentIds = students.map((s) => s.id);
+  if (studentIds.length) {
+    const { data: guardianLinks } = await supabaseAdmin
+      .from("portal_student_people")
+      .select("student_id, role, primary_contact, portal_people(id, display_name, person_type)")
+      .in("student_id", studentIds)
+      .eq("relationship_status", "trusted");
+
+    const guardianPeople = (guardianLinks || []).filter(
+      (link) => link.portal_people && link.portal_people.person_type !== "student"
+    );
+    const guardianIds = [...new Set(guardianPeople.map((link) => link.portal_people.id))];
+
+    let contactsByPerson = {};
+    if (guardianIds.length) {
+      const { data: guardianContacts } = await supabaseAdmin
+        .from("portal_contact_methods")
+        .select("person_id, contact_type, value_display")
+        .in("person_id", guardianIds);
+      contactsByPerson = (guardianContacts || []).reduce((acc, row) => {
+        (acc[row.person_id] = acc[row.person_id] || []).push(row);
+        return acc;
+      }, {});
+    }
+
+    const byStudent = students.reduce((acc, s) => {
+      acc[s.id] = s;
+      return acc;
+    }, {});
+
+    for (const link of guardianPeople) {
+      const student = byStudent[link.student_id];
+      if (!student) continue;
+      const personId = link.portal_people.id;
+      const contacts = contactsByPerson[personId] || [];
+      student.guardians.push({
+        id: personId,
+        name: link.portal_people.display_name,
+        role: link.role || "",
+        primary: Boolean(link.primary_contact),
+        isSelf: personId === session.personId,
+        phones: contacts.filter((c) => c.contact_type === "phone").map((c) => c.value_display),
+        emails: contacts.filter((c) => c.contact_type === "email").map((c) => c.value_display)
+      });
+    }
+  }
 
   return NextResponse.json({
     person,
     email: session.email,
+    contacts: splitContacts(ownContacts),
     students
   });
 }

@@ -1,12 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function PortalClient() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
+
+  // Already signed in? Skip the login screen and go to the profile.
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/portal/session")
+      .then((res) => (res.ok ? res.json() : { signedIn: false }))
+      .then((data) => {
+        if (!cancelled && data?.signedIn) router.replace("/portal/review");
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
 
   async function submit(event) {
     event.preventDefault();

@@ -5,14 +5,17 @@ import { readPortalSession } from "@/lib/portalTokens";
 
 export const runtime = "nodejs";
 
+// Fields a signed-in person may edit about themselves or their own students.
+// Each write hits the Supabase mirror immediately (so the family sees it) AND
+// queues a review request for Rob to push into the canonical CSV.
 const ALLOWED_FIELDS = {
   person_display_name: {
-    label: "Name",
+    label: "Your name",
     targetTable: "portal_people",
     sensitivity: "normal"
   },
-  guardian_phone: {
-    label: "Phone",
+  person_phone: {
+    label: "Your phone",
     targetTable: "portal_contact_methods",
     sensitivity: "contact"
   },
@@ -25,11 +28,6 @@ const ALLOWED_FIELDS = {
     label: "Student cell phone",
     targetTable: "portal_students",
     sensitivity: "contact"
-  },
-  student_note: {
-    label: "Student note",
-    targetTable: "portal_students",
-    sensitivity: "relationship"
   }
 };
 
@@ -59,7 +57,18 @@ export async function POST(request) {
 
   const targetId = await resolveTargetId({ field, session, studentId });
   const oldValue = await resolveOldValue({ field, targetId, session, studentId });
-  const summary = `${session.email} submitted a profile update: ${config.label}`;
+
+  // Apply to the mirror right away so the change shows on the site.
+  let mirrorApplied = false;
+  try {
+    await applyMirrorWrite({ field, session, studentId, targetId, newValue });
+    mirrorApplied = true;
+  } catch (error) {
+    // If the live write fails, still queue it for Rob; just don't claim it's applied.
+    mirrorApplied = false;
+  }
+
+  const summary = `${session.email} updated a profile field: ${config.label}`;
 
   const { data: updateRequest, error: updateError } = await supabaseAdmin
     .from("portal_update_requests")
@@ -93,7 +102,8 @@ export async function POST(request) {
         label: config.label,
         old_value: oldValue,
         new_value: newValue,
-        submitted_by_email: session.email
+        submitted_by_email: session.email,
+        mirror_applied: mirrorApplied
       }
     })
     .select("id")
@@ -116,7 +126,8 @@ export async function POST(request) {
         `Submitted by: ${session.email}`,
         `Field: ${config.label}`,
         `Old: ${oldValue || "blank"}`,
-        `New: ${newValue}`
+        `New: ${newValue}`,
+        mirrorApplied ? "Already showing on the site; push to CSV when ready." : "Not yet applied on site - apply manually."
       ]
     });
     await supabaseAdmin
@@ -130,7 +141,64 @@ export async function POST(request) {
       .eq("id", reviewItem.id);
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, mirrorApplied, value: newValue });
+}
+
+function normalizePhone(value) {
+  return String(value || "").replace(/[^0-9]/g, "");
+}
+
+async function applyMirrorWrite({ field, session, studentId, targetId, newValue }) {
+  const now = new Date().toISOString();
+
+  if (field === "person_display_name") {
+    const { error } = await supabaseAdmin
+      .from("portal_people")
+      .update({ display_name: newValue, updated_at: now })
+      .eq("id", session.personId);
+    if (error) throw new Error(error.message);
+    return;
+  }
+
+  if (field === "person_phone") {
+    const normalized = normalizePhone(newValue);
+    if (targetId) {
+      const { error } = await supabaseAdmin
+        .from("portal_contact_methods")
+        .update({ value_display: newValue, value_normalized: normalized, updated_at: now })
+        .eq("id", targetId)
+        .eq("person_id", session.personId);
+      if (error) throw new Error(error.message);
+    } else {
+      const { error } = await supabaseAdmin.from("portal_contact_methods").insert({
+        person_id: session.personId,
+        contact_type: "phone",
+        value_display: newValue,
+        value_normalized: normalized,
+        verification_status: "unverified",
+        verification_source: "portal_self_edit"
+      });
+      if (error) throw new Error(error.message);
+    }
+    return;
+  }
+
+  if (field === "student_preferred_first") {
+    const { error } = await supabaseAdmin
+      .from("portal_students")
+      .update({ preferred_first: newValue, updated_at: now })
+      .eq("id", studentId);
+    if (error) throw new Error(error.message);
+    return;
+  }
+
+  if (field === "student_cell_phone") {
+    const { error } = await supabaseAdmin
+      .from("portal_students")
+      .update({ cell_phone: newValue, updated_at: now })
+      .eq("id", studentId);
+    if (error) throw new Error(error.message);
+  }
 }
 
 async function hasTrustedStudentAccess(personId, studentId) {
@@ -148,7 +216,7 @@ async function hasTrustedStudentAccess(personId, studentId) {
 async function resolveTargetId({ field, session, studentId }) {
   if (field === "person_display_name") return session.personId;
   if (field.startsWith("student_")) return studentId;
-  if (field === "guardian_phone") {
+  if (field === "person_phone") {
     const { data } = await supabaseAdmin
       .from("portal_contact_methods")
       .select("id")
@@ -156,7 +224,7 @@ async function resolveTargetId({ field, session, studentId }) {
       .eq("contact_type", "phone")
       .limit(1)
       .maybeSingle();
-    return data?.id || session.personId;
+    return data?.id || null;
   }
   return null;
 }
@@ -170,7 +238,8 @@ async function resolveOldValue({ field, targetId, session, studentId }) {
       .maybeSingle();
     return data?.display_name || "";
   }
-  if (field === "guardian_phone") {
+  if (field === "person_phone") {
+    if (!targetId) return "";
     const { data } = await supabaseAdmin
       .from("portal_contact_methods")
       .select("value_display")

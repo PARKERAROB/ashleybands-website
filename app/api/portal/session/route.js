@@ -1,8 +1,24 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { createPortalSession, hashToken, setPortalSessionCookie } from "@/lib/portalTokens";
+import { createPortalSession, hashToken, readPortalSession, setPortalSessionCookie } from "@/lib/portalTokens";
 
 export const runtime = "nodejs";
+
+// Lightweight signed-in check for the site header.
+export async function GET(request) {
+  const session = readPortalSession(request);
+  if (!session?.personId) {
+    return NextResponse.json({ signedIn: false });
+  }
+  const { data: person } = await supabaseAdmin
+    .from("portal_people")
+    .select("display_name")
+    .eq("id", session.personId)
+    .maybeSingle();
+  const displayName = person?.display_name || session.email || "";
+  const firstName = displayName.trim().split(/\s+/)[0] || "";
+  return NextResponse.json({ signedIn: true, firstName, email: session.email });
+}
 
 export async function POST(request) {
   const body = await request.json().catch(() => ({}));
