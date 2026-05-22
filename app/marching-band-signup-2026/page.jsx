@@ -138,6 +138,7 @@ function MarchingBandSignupInner() {
             <Field label="Grade for fall 2026" required>
               <select value={form.grade_fall} onChange={(event) => update("grade_fall", event.target.value)}>
                 <option value="">Select one</option>
+                <option>Rising 8th</option>
                 <option>Rising 9th</option>
                 <option>Rising 10th</option>
                 <option>Rising 11th</option>
