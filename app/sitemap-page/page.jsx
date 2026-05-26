@@ -25,7 +25,9 @@ export default function SitemapPage() {
     { title: "Marching Band Sign-Up", href: "/marching-band-signup-2026" },
     { title: "Spring Trip Recovery", href: "/spring-trip-recovery" },
     { title: "Band Assistant", href: "/assistant" },
-    { title: "Member Area", href: "/members" }
+    { title: "Member Area", href: "/members" },
+    { title: "Instrument Inventory (submit)", href: "/instrument-inventory" },
+    { title: "Music Library (submit)", href: "/music-library" }
   ];
 
   const sponsorPages = [
@@ -39,6 +41,9 @@ export default function SitemapPage() {
 
   const staffPages = [
     { title: "Profile Requests", href: "/admin/profile-requests" },
+    { title: "Marching Band Dashboard", href: "/admin/marching-band" },
+    { title: "Instrument Inventory (review)", href: "/admin/instrument-inventory" },
+    { title: "Music Library (review)", href: "/admin/music-library" },
     { title: "Sponsor Dashboard", href: "/sponsors/dashboard" },
     { title: "Business Outreach Dashboard", href: "/sponsors/dashboard/businesses" },
     { title: "Staff Sprint", href: "/staff-sprint" },

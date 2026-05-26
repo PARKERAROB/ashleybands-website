@@ -4,3 +4,5 @@ node_modules
 .env*.local
 .vercel
 google-site-audit.json
+.DS_Store
+supabase/.temp

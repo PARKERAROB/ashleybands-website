@@ -2560,3 +2560,121 @@ h2 {
   border-radius: 8px;
   background: #fff;
 }
+
+/* ===== Marching band staff dashboard ===== */
+.mb-admin {
+  min-height: 100vh;
+  background: #f5f7f4;
+  padding: 28px;
+}
+.mb-admin-inner {
+  max-width: 1500px;
+  margin: 0 auto;
+}
+.mb-admin-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.mb-stats {
+  margin: 20px 0;
+}
+.mb-stat-btn {
+  border: 1px solid #dfe5dc;
+  cursor: pointer;
+  text-align: left;
+}
+.mb-stat-btn-active {
+  border-color: #245c3b;
+  box-shadow: inset 0 0 0 2px #245c3b;
+}
+.mb-admin-table {
+  min-width: 1180px;
+  table-layout: fixed;
+}
+.mb-admin-table th:nth-child(1) { width: 220px; }
+.mb-admin-table th:nth-child(2) { width: 140px; }
+.mb-admin-table th:nth-child(3) { width: 150px; }
+.mb-admin-table th:nth-child(4) { width: 130px; }
+.mb-admin-table th:nth-child(5) { width: 145px; }
+.mb-admin-table th:nth-child(6) { width: 360px; }
+.mb-admin-table th:nth-child(7) { width: 110px; }
+.mb-row td {
+  vertical-align: top;
+}
+.mb-row select,
+.mb-row textarea,
+.dashboard-filters input {
+  width: 100%;
+  border: 1px solid #b9c5b7;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font: inherit;
+  background: #fff;
+}
+.mb-row textarea {
+  resize: vertical;
+  min-height: 88px;
+}
+.mb-empty-cell {
+  display: inline-block;
+  min-width: 0;
+  font-size: 0.78rem;
+  color: #98a195;
+}
+.mb-note {
+  margin-top: 5px;
+  color: #4b584d;
+  font-size: 0.84rem;
+  line-height: 1.35;
+}
+.mb-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.mb-status-pill span {
+  border-left: 1px solid currentColor;
+  padding-left: 6px;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+.mb-status-signed_up {
+  background: #e4f2e5;
+  color: #245c3b;
+}
+.mb-status-mb_info,
+.mb-status-talk,
+.mb-status-needs_clarification {
+  background: #fdf3d8;
+  color: #7a5a1e;
+}
+.mb-status-band_only {
+  background: #e8eef8;
+  color: #244d7a;
+}
+.mb-status-out {
+  background: #fbe6e8;
+  color: #9f2430;
+}
+.mb-status-no_response {
+  background: #ecefeb;
+  color: #59645b;
+}
+.mb-row-signed_up {
+  background: #fbfffb;
+}
+.mb-row-out {
+  background: #fffafa;
+}
+
+@media (max-width: 760px) {
+  .mb-admin {
+    padding: 14px;
+  }
+}
