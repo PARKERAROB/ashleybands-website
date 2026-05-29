@@ -13,7 +13,8 @@ const sources = {
   requiredItems: "knowledge/student-required-items.md",
   nextYear: "projects/parent-meeting/google-site-page-2026-2027-band-info.md",
   springTrip: "projects/parent-meeting/google-site-page-spring-trip.md",
-  marchingBand: "projects/parent-meeting/google-site-page-marching-band-2026.md",
+  // marching-band-2026 now lives in this repo (content/sources), not PKA — see readRepoSource
+  marchingBand: "content/sources/marching-band-2026.md",
   marchingFunding: "projects/parent-meeting/google-site-page-marching-band-funding.md",
   instaraise: "projects/parent-meeting/google-site-page-instaraise.md",
   bandFolder: "projects/band-website/public-pages/the-band-folder.md",
@@ -25,6 +26,15 @@ function readSource(relativePath) {
   const fullPath = path.join(pkaRoot, relativePath);
   if (!existsSync(fullPath)) {
     throw new Error(`Missing source file: ${fullPath}`);
+  }
+  return readFileSync(fullPath, "utf8");
+}
+
+// Read a source that lives inside this repo (not PKA).
+function readRepoSource(relativePath) {
+  const fullPath = path.join(root, relativePath);
+  if (!existsSync(fullPath)) {
+    throw new Error(`Missing repo source file: ${fullPath}`);
   }
   return readFileSync(fullPath, "utf8");
 }
@@ -74,7 +84,7 @@ const pages = [
     audience: "Families and students",
     source: sources.marchingBand,
     category: "Current information",
-    body: cleanGoogleSiteDraft(readSource(sources.marchingBand))
+    body: cleanGoogleSiteDraft(readRepoSource(sources.marchingBand))
   },
   {
     slug: "marching-band-funding",
