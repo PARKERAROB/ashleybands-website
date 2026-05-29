@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { sendPortalMagicLinkEmail } from "@/lib/portalEmail";
 import { createMagicToken } from "@/lib/portalTokens";
+import { checkRateLimit, clientIp } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
 
@@ -12,6 +13,14 @@ export async function POST(request) {
   const email = String(body.email || "").trim().toLowerCase();
   if (!email || !email.includes("@")) {
     return NextResponse.json({ error: "Enter a valid email address." }, { status: 400 });
+  }
+
+  // Throttle magic-link spam: 6 / 15 min per email, 20 / 15 min per IP.
+  const emailLimit = await checkRateLimit({ key: `portal-start:${email}`, limit: 6, windowMs: 15 * 60 * 1000 });
+  const ipLimit = await checkRateLimit({ key: `portal-start-ip:${clientIp(request)}`, limit: 20, windowMs: 15 * 60 * 1000 });
+  if (!emailLimit.allowed || !ipLimit.allowed) {
+    // Mirror the existing privacy-preserving response shape.
+    return NextResponse.json({ ok: true, status: "sent_if_known" });
   }
 
   const { data: contacts, error } = await supabaseAdmin

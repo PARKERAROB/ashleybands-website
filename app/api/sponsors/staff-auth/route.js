@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { verifyPin } from "@/lib/sponsorAuth";
+import { checkRateLimit, clientIp } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
 
@@ -10,6 +11,13 @@ export async function POST(req) {
   const pin = String(body.pin || "").trim();
   if (!email || !pin) {
     return NextResponse.json({ error: "Email and PIN are required" }, { status: 400 });
+  }
+
+  // Throttle PIN brute-force: 15 attempts / 15 min per email and per IP.
+  const limit = await checkRateLimit({ key: `staff-auth:${email}`, limit: 15, windowMs: 15 * 60 * 1000 });
+  const ipLimit = await checkRateLimit({ key: `staff-auth-ip:${clientIp(req)}`, limit: 30, windowMs: 15 * 60 * 1000 });
+  if (!limit.allowed || !ipLimit.allowed) {
+    return NextResponse.json({ error: "Too many attempts. Please wait a few minutes and try again." }, { status: 429 });
   }
   const { data } = await supabaseAdmin
     .from("staff")
