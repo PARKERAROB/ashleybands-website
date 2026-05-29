@@ -83,6 +83,7 @@ export default function AdminBillingPage() {
   const [selected, setSelected] = useState({});
   const [msg, setMsg] = useState("");
   const [syncing, setSyncing] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
 
   const load = async () => {
     const res = await fetch("/api/admin/billing", { headers: authHeaders(session) });
@@ -177,8 +178,13 @@ export default function AdminBillingPage() {
     <div style={pageStyle}>
       <h2>💵 Student Billing</h2>
       <p style={{ color: "#555", fontSize: 14 }}>
-        Charged {usd(totals.charged)} · Paid {usd(totals.paid)} · Outstanding {usd(totals.balance)}
+        Charged {usd(totals.charged)} · Paid {usd(totals.paid)} · Outstanding {usd(totals.balance)} ·{" "}
+        <button onClick={() => setShowSummary((v) => !v)} style={{ ...btnStyle, background: "#245c73", padding: "2px 10px" }}>
+          {showSummary ? "Hide summary" : "Treasurer summary"}
+        </button>
       </p>
+
+      {showSummary && <FinancialSummary roster={roster} />}
 
       <BulkCharge session={session} selectedIds={selectedIds} onDone={(m) => { setMsg(m); setSelected({}); load(); }} />
 
@@ -237,6 +243,96 @@ export default function AdminBillingPage() {
     </div>
   );
 }
+
+function FinancialSummary({ roster }) {
+  const s = roster.reduce(
+    (a, r) => {
+      a.charged += r.chargedCents;
+      a.paid += r.paidCents;
+      a.cash += r.cashPaidCents || 0;
+      a.sponsor += r.sponsorshipCents || 0;
+      a.outstanding += Math.max(r.balanceCents, 0);
+      if (r.chargedCents > 0) a.countCharged += 1;
+      if (r.balanceCents > 0) a.owing.push(r);
+      if (r.chargedCents > 0 && r.balanceCents <= 0) a.paidInFull += 1;
+      if (r.marchingBand) {
+        a.mbCharged += r.chargedCents;
+        a.mbPaid += r.paidCents;
+        a.mbOutstanding += Math.max(r.balanceCents, 0);
+        a.mbCount += 1;
+      }
+      return a;
+    },
+    { charged: 0, paid: 0, cash: 0, sponsor: 0, outstanding: 0, countCharged: 0, paidInFull: 0, owing: [], mbCharged: 0, mbPaid: 0, mbOutstanding: 0, mbCount: 0 }
+  );
+  const rate = s.charged > 0 ? Math.round((s.paid / s.charged) * 100) : 0;
+
+  // Outstanding by grade.
+  const byGrade = {};
+  for (const r of s.owing) {
+    const g = r.grade || "—";
+    byGrade[g] = byGrade[g] || { count: 0, outstanding: 0 };
+    byGrade[g].count += 1;
+    byGrade[g].outstanding += Math.max(r.balanceCents, 0);
+  }
+  const gradeRows = Object.entries(byGrade).sort((a, b) => gradeRank(a[0]) - gradeRank(b[0]));
+  const topOwing = [...s.owing].sort((a, b) => b.balanceCents - a.balanceCents).slice(0, 10);
+
+  return (
+    <div style={{ border: "1px solid #245c73", borderRadius: 10, background: "#f2f7f9", padding: 16, margin: "8px 0 4px" }}>
+      <strong style={{ fontSize: 14 }}>📊 Treasurer Summary</strong>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: 10, marginTop: 10 }}>
+        <Stat label="Charged" value={usd(s.charged)} />
+        <Stat label="Collected" value={usd(s.paid)} sub={`${rate}% of charged`} />
+        <Stat label="Cash/card/check" value={usd(s.cash)} />
+        <Stat label="Sponsorship credit" value={usd(s.sponsor)} />
+        <Stat label="Outstanding" value={usd(s.outstanding)} strong />
+        <Stat label="Families owing" value={`${s.owing.length}`} sub={`${s.paidInFull} paid in full`} />
+      </div>
+
+      <div style={{ marginTop: 10, fontSize: 13, color: "#245c73" }}>
+        <strong>Marching Band:</strong> {s.mbCount} students · charged {usd(s.mbCharged)} · collected {usd(s.mbPaid)} · outstanding {usd(s.mbOutstanding)}
+      </div>
+
+      <div style={{ display: "flex", gap: 28, flexWrap: "wrap", marginTop: 12 }}>
+        <div>
+          <span style={subhead}>Outstanding by grade</span>
+          <table style={{ fontSize: 12.5, borderCollapse: "collapse", marginTop: 4 }}>
+            <tbody>
+              {gradeRows.map(([g, v]) => (
+                <tr key={g}><td style={{ padding: "2px 12px 2px 0" }}>{g}</td><td style={{ padding: "2px 12px 2px 0" }}>{v.count}</td><td style={{ fontWeight: 600 }}>{usd(v.outstanding)}</td></tr>
+              ))}
+              {gradeRows.length === 0 && <tr><td style={{ color: "#999" }}>Nobody owes — all clear.</td></tr>}
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <span style={subhead}>Largest balances</span>
+          <table style={{ fontSize: 12.5, borderCollapse: "collapse", marginTop: 4 }}>
+            <tbody>
+              {topOwing.map((r) => (
+                <tr key={r.id}><td style={{ padding: "2px 12px 2px 0" }}>{lastFirst(r)}</td><td style={{ fontWeight: 600 }}>{usd(r.balanceCents)}</td></tr>
+              ))}
+              {topOwing.length === 0 && <tr><td style={{ color: "#999" }}>—</td></tr>}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Stat({ label, value, sub, strong }) {
+  return (
+    <div style={{ background: "#fff", border: "1px solid #d4e2e7", borderRadius: 8, padding: "8px 10px" }}>
+      <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.04em", color: "#6f675a" }}>{label}</div>
+      <div style={{ fontSize: 18, fontWeight: 700, color: strong ? "#7b1829" : "#191716" }}>{value}</div>
+      {sub ? <div style={{ fontSize: 11, color: "#6f675a" }}>{sub}</div> : null}
+    </div>
+  );
+}
+
+const subhead = { fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#6f675a" };
 
 function StudentRow({ row, session, checked, onCheck, onChanged }) {
   const [open, setOpen] = useState(false);
