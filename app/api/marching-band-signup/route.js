@@ -82,7 +82,7 @@ async function maybeAutoChargeMarchingBand(payload) {
   try {
     const { data: students, error } = await supabaseAdmin
       .from("portal_students")
-      .select("id, source_student_id, legal_first, legal_last, display_name, school_email");
+      .select("id, source_student_id, legal_first, legal_last, preferred_first, display_name, school_email");
     if (error || !students) return;
 
     const studentId = findStudentIdForSignup(students, {
