@@ -479,6 +479,47 @@ h2 {
   background: #ece2ce;
 }
 
+.markdown-block .cta-link {
+  display: inline-block;
+  margin: 6px 0;
+  padding: 11px 20px;
+  border-radius: 8px;
+  background: var(--garnet-dark);
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.markdown-block .cta-link:hover {
+  filter: brightness(1.08);
+}
+
+.markdown-block .md-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 18px 0;
+  font-size: 15px;
+}
+
+.markdown-block .md-table th,
+.markdown-block .md-table td {
+  text-align: left;
+  padding: 9px 12px;
+  border-bottom: 1px solid #e1d6bf;
+  vertical-align: top;
+  color: #322d26;
+}
+
+.markdown-block .md-table th {
+  background: #f3ead6;
+  color: var(--garnet-dark);
+  white-space: nowrap;
+}
+
+.markdown-block .md-table tr:last-child td {
+  border-bottom: none;
+}
+
 .assistant-page {
   display: grid;
   grid-template-columns: minmax(260px, 0.78fr) minmax(320px, 1.22fr);

@@ -2,34 +2,34 @@
 
 This page covers the full 2026 marching band season: the schedule, what is expected, the cost, how it is funded, and how to commit.
 
-The Screaming Eagle Regiment is a competitive marching band. Sign-up closes **June 1**.
+The Screaming Eagle Regiment is a competitive marching band. Sign-up closes June 1.
 
 **[Complete the 2026 Marching Band Sign-Up Form](/marching-band-signup-2026)**
 
 ## The Season at a Glance
 
-The Google Calendar is the official source of truth. Working 2026 dates:
+We are moving our scheduling to Microsoft. After that transition, we will share a digital calendar as the official source of truth. Until then, these are the working 2026 dates.
 
-Summer / Preseason
+| Date | Event |
+| --- | --- |
+| July 27-30 | Leadership Week (also Colorguard Week) |
+| August 3-7 | Band Camp, 7:00 AM - 3:00 PM |
+| August 10-14 | Band Camp, 7:00 AM - 3:00 PM |
+| August 28 | Home football game (band performs) |
+| September 11 | Home football game (band performs) |
+| September 25 | Home football game (band performs) |
+| September 26 | Mattress fundraiser |
+| October 3 | Saturday stadium rehearsal |
+| October 10 | White Oak HS competition |
+| October 16 | Home football game (band performs) |
+| October 17 | Pirate Classic at Topsail HS competition |
+| October 20 | NHCS Marching Band Showcase at Hoggard HS |
+| October 22 | Fall Concert |
+| October 23 | Home football game (band performs) |
+| October 24 | Corinth Holders HS competition (season finale) |
+| October 30 | Away game at Hoggard (band attends) |
 
-- July 27-30: Leadership Week (also Colorguard Week)
-- August 3-7: Band Camp (7:00 AM - 3:00 PM)
-- August 10-14: Band Camp (7:00 AM - 3:00 PM)
-
-Ms. Mead will send more detailed timing for colorguard and leadership later this summer.
-
-In Season
-
-- Tuesdays and Thursdays: rehearsal, 4:00 - 7:00 PM
-- Saturdays on non-competition weeks (late September through October), including a Saturday stadium rehearsal on October 3
-- Home football games (band performs): August 28, September 11, September 25, October 16, October 23
-- October 30: away game at Hoggard (band attends)
-- September 26: Mattress fundraiser
-- October 10: White Oak HS competition
-- October 17: Pirate Classic at Topsail HS
-- October 20: NHCS Marching Band Showcase at Hoggard HS
-- October 22: Fall Concert
-- October 24: Corinth Holders HS competition (final competition of the season)
+Regular rehearsals run Tuesdays and Thursdays, 4:00 - 7:00 PM, plus Saturdays on non-competition weeks. Ms. Mead will send more detailed timing for colorguard and leadership later this summer.
 
 ## What Is Expected
 
@@ -65,7 +65,7 @@ No student is excluded from a band activity because of financial hardship. If co
 
 ## Signing Day - June 1
 
-**You must complete the sign-up form to finalize your spot in marching band.** Sign-up closes on **June 1**.
+You must complete the sign-up form to finalize your spot in marching band. Sign-up closes June 1.
 
 **[Complete the 2026 Marching Band Sign-Up Form](/marching-band-signup-2026)**
 
