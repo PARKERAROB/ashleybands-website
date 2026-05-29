@@ -1,8 +1,30 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const PENDING_NOTE = "Saved. Showing now; Mr. Parker reviews before it updates the official record.";
+
+function formatUsd(cents) {
+  return `$${((Number(cents) || 0) / 100).toFixed(2)}`;
+}
+
+let paypalSdkPromise = null;
+function loadPaypalSdk(clientId) {
+  if (typeof window === "undefined") return Promise.reject(new Error("no window"));
+  if (window.paypal) return Promise.resolve(window.paypal);
+  if (paypalSdkPromise) return paypalSdkPromise;
+  paypalSdkPromise = new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=USD`;
+    script.onload = () => resolve(window.paypal);
+    script.onerror = () => {
+      paypalSdkPromise = null;
+      reject(new Error("Could not load PayPal."));
+    };
+    document.body.appendChild(script);
+  });
+  return paypalSdkPromise;
+}
 
 export default function PortalReviewClient() {
   const [state, setState] = useState({ status: "loading", message: "Opening your profile..." });
@@ -81,10 +103,218 @@ export default function PortalReviewClient() {
             ) : (
               <p className="portal-copy">No student is connected to this profile yet.</p>
             )}
+
+            <BillingSection />
           </div>
         ) : null}
       </section>
     </main>
+  );
+}
+
+function BillingSection() {
+  const [data, setData] = useState(null);
+  const [error, setError] = useState("");
+
+  async function load() {
+    try {
+      const res = await fetch("/api/billing/me");
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(json.error || "Could not load fees.");
+        return;
+      }
+      setData(json);
+    } catch {
+      setError("Could not load fees.");
+    }
+  }
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/billing/me")
+      .then((r) => r.json().catch(() => ({})).then((j) => ({ ok: r.ok, j })))
+      .then(({ ok, j }) => {
+        if (cancelled) return;
+        if (!ok) {
+          setError(j.error || "Could not load fees.");
+          return;
+        }
+        setData(j);
+      })
+      .catch(() => {
+        if (!cancelled) setError("Could not load fees.");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (error) return null;
+  if (!data) return null;
+  const students = (data.students || []).filter((s) => s.charges.length || s.payments.length);
+  if (!students.length) return null;
+
+  return (
+    <section className="portal-section">
+      <h2>Fees &amp; Payments</h2>
+      {students.map((s) => (
+        <StudentFeeCard
+          key={s.id}
+          student={s}
+          paymentsEnabled={data.paymentsEnabled}
+          onPaid={load}
+        />
+      ))}
+    </section>
+  );
+}
+
+function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
+  const balanceCents = Number(student.balanceCents) || 0;
+  const owes = balanceCents > 0;
+  const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
+  const canPayOnline = owes && paymentsEnabled && Boolean(clientId);
+
+  const [showPay, setShowPay] = useState(false);
+  const [amount, setAmount] = useState((balanceCents / 100).toFixed(2));
+  const amountRef = useRef(amount);
+  useEffect(() => {
+    amountRef.current = amount;
+  }, [amount]);
+
+  return (
+    <article className="portal-student-card">
+      <div className="portal-student-head">
+        <h3>{student.name}</h3>
+        <span className="portal-tag">{owes ? `Balance ${formatUsd(balanceCents)}` : "Paid in full"}</span>
+      </div>
+
+      <div className="portal-field">
+        <span className="portal-field-label">Summary</span>
+        <span className="portal-field-value">
+          Charged {formatUsd(student.chargedCents)} · Paid {formatUsd(student.paidCents)} · Balance{" "}
+          {formatUsd(balanceCents)}
+        </span>
+      </div>
+
+      {student.charges.length ? (
+        <div className="portal-field">
+          <span className="portal-field-label">Charges</span>
+          <ul className="portal-fee-list">
+            {student.charges
+              .filter((c) => c.status === "active")
+              .map((c) => (
+                <li key={c.id}>
+                  {c.label} — {formatUsd(c.amountCents)}
+                </li>
+              ))}
+          </ul>
+        </div>
+      ) : null}
+
+      {student.payments.length ? (
+        <div className="portal-field">
+          <span className="portal-field-label">Payments</span>
+          <ul className="portal-fee-list">
+            {student.payments.map((p) => (
+              <li key={p.id}>
+                {new Date(p.receivedAt).toLocaleDateString()} — {formatUsd(p.amountCents)} ({p.method})
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      {canPayOnline ? (
+        showPay ? (
+          <div className="portal-field-edit" style={{ flexDirection: "column", alignItems: "stretch" }}>
+            <label className="portal-field-label" htmlFor={`pay-${student.id}`}>
+              Amount to pay (you can pay any amount toward the balance)
+            </label>
+            <input
+              id={`pay-${student.id}`}
+              type="number"
+              min="1"
+              step="0.01"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
+            <PayPalButton
+              clientId={clientId}
+              studentId={student.id}
+              amountRef={amountRef}
+              onPaid={() => {
+                setShowPay(false);
+                if (onPaid) onPaid();
+              }}
+            />
+          </div>
+        ) : (
+          <button type="button" onClick={() => setShowPay(true)}>
+            Pay online
+          </button>
+        )
+      ) : owes && !paymentsEnabled ? (
+        <p className="portal-field-note">Online payment is coming soon. You can still pay by check.</p>
+      ) : null}
+    </article>
+  );
+}
+
+function PayPalButton({ clientId, studentId, amountRef, onPaid }) {
+  const containerRef = useRef(null);
+  const [status, setStatus] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    let buttons;
+    loadPaypalSdk(clientId)
+      .then((paypal) => {
+        if (cancelled || !containerRef.current) return;
+        buttons = paypal.Buttons({
+          createOrder: async () => {
+            setStatus("");
+            const amountCents = Math.round(Number(amountRef.current) * 100);
+            const res = await fetch("/api/billing/create-order", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ studentId, amountCents })
+            });
+            const json = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(json.error || "Could not start payment.");
+            return json.orderId;
+          },
+          onApprove: async (data) => {
+            const res = await fetch("/api/billing/capture-order", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ orderId: data.orderID })
+            });
+            const json = await res.json().catch(() => ({}));
+            if (!res.ok) {
+              setStatus("There was a problem completing your payment.");
+              return;
+            }
+            setStatus("Payment received — thank you!");
+            if (onPaid) onPaid();
+          },
+          onError: () => setStatus("Payment could not be processed. Please try again.")
+        });
+        buttons.render(containerRef.current);
+      })
+      .catch(() => setStatus("Could not load PayPal."));
+    return () => {
+      cancelled = true;
+      if (buttons && buttons.close) buttons.close();
+    };
+  }, [clientId, studentId, amountRef, onPaid]);
+
+  return (
+    <div>
+      <div ref={containerRef} />
+      {status ? <span className="portal-field-pending">{status}</span> : null}
+    </div>
   );
 }
 

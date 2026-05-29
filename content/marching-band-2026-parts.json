@@ -1,0 +1,1123 @@
+{
+  "title": "Ascend 2026 Parts & Signup Status",
+  "updated": "2026-05-28",
+  "version": "Grade 2-3",
+  "source": "Ascend Grade 2-3 MusicXML part list + BDOS marching band signup/recapture pull",
+  "partList": [
+    "Solo 1",
+    "Solo 2",
+    "Solo 3",
+    "Flute 1",
+    "Flute 2",
+    "Clarinet in Bb 1",
+    "Clarinet in Bb 2",
+    "Bass Clarinet in Bb",
+    "Alto Sax",
+    "Tenor Sax",
+    "Baritone Sax",
+    "Trumpet in Bb 1",
+    "Trumpet in Bb 2",
+    "Mellophone",
+    "Low Brass 1",
+    "Low Brass 2",
+    "Low Brass 3",
+    "Tuba",
+    "Snares",
+    "Quads",
+    "Basses (5)",
+    "Marimba 1",
+    "Marimba 2",
+    "Xylo",
+    "Bells",
+    "Vibes 1",
+    "Vibes 2",
+    "Synth 1",
+    "Synth 2",
+    "Lead Guitar",
+    "Rhythm Guitar",
+    "Bass Guitar",
+    "Timpani",
+    "Drumset",
+    "Rack 1",
+    "Rack 2"
+  ],
+  "summary": {
+    "signedUp": 32,
+    "intends": 1,
+    "bandOnly": 31,
+    "out": 14,
+    "needsPrintedMusic": 18
+  },
+  "sections": [
+    {
+      "name": "Leadership",
+      "students": [
+        {
+          "name": "Parker Caldwell",
+          "grade": "Rising 12th",
+          "instrument": "Drum Major",
+          "status": "signed_up",
+          "statusLabel": "Signed up",
+          "section": "Leadership",
+          "partOptions": [
+            "Drum Major / Conductor"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": false,
+          "notes": "Form received"
+        }
+      ]
+    },
+    {
+      "name": "Clarinet",
+      "students": [
+        {
+          "name": "Emma Hales",
+          "grade": "Rising 11th",
+          "instrument": "Bass clarinet",
+          "status": "signed_up",
+          "statusLabel": "Signed up",
+          "section": "Clarinet",
+          "partOptions": [
+            "Bass Clarinet in Bb"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": true,
+          "notes": "Form received"
+        }
+      ]
+    },
+    {
+      "name": "Saxophone",
+      "students": [
+        {
+          "name": "Daniel Gregory",
+          "grade": "Rising 11th",
+          "instrument": "baritone",
+          "status": "signed_up",
+          "statusLabel": "Signed up",
+          "section": "Saxophone",
+          "partOptions": [
+            "Baritone Sax"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": true,
+          "notes": "Form received"
+        },
+        {
+          "name": "Giovanni Lopez Martinez",
+          "grade": "Rising 9th",
+          "instrument": "Alto saxophone",
+          "status": "signed_up",
+          "statusLabel": "Signed up",
+          "section": "Saxophone",
+          "partOptions": [
+            "Alto Sax"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": true,
+          "notes": "Form received"
+        },
+        {
+          "name": "Matthew Hancock",
+          "grade": "Rising 12th",
+          "instrument": "Saxophone",
+          "status": "signed_up",
+          "statusLabel": "Signed up",
+          "section": "Saxophone",
+          "partOptions": [
+            "Alto Sax",
+            "Tenor Sax",
+            "Baritone Sax"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": true,
+          "notes": "Form received"
+        },
+        {
+          "name": "Michael Tyler Shooj",
+          "grade": "Rising 11th",
+          "instrument": "Alto or tenor sax",
+          "status": "signed_up",
+          "statusLabel": "Signed up",
+          "section": "Saxophone",
+          "partOptions": [
+            "Alto Sax"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": true,
+          "notes": "Form received"
+        },
+        {
+          "name": "Noah Powers",
+          "grade": "Rising 12th",
+          "instrument": "Trombone, Baritone/ Low Brass",
+          "status": "signed_up",
+          "statusLabel": "Signed up",
+          "section": "Saxophone",
+          "partOptions": [
+            "Baritone Sax"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": true,
+          "notes": "Form received"
+        },
+        {
+          "name": "Wyatt Paul",
+          "grade": "Rising 9th",
+          "instrument": "Alto Sax",
+          "status": "signed_up",
+          "statusLabel": "Signed up",
+          "section": "Saxophone",
+          "partOptions": [
+            "Alto Sax"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": true,
+          "notes": "Form received"
+        }
+      ]
+    },
+    {
+      "name": "Trumpet",
+      "students": [
+        {
+          "name": "Deacon Freck",
+          "grade": "Rising 10th",
+          "instrument": "Trumpet",
+          "status": "signed_up",
+          "statusLabel": "Signed up",
+          "section": "Trumpet",
+          "partOptions": [
+            "Trumpet in Bb 1",
+            "Trumpet in Bb 2"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": true,
+          "notes": "Form received"
+        }
+      ]
+    },
+    {
+      "name": "Mellophone",
+      "students": [
+        {
+          "name": "Justin Naklicki",
+          "grade": "Rising 12th",
+          "instrument": "Mellophone/Horn",
+          "status": "signed_up",
+          "statusLabel": "Signed up",
+          "section": "Mellophone",
+          "partOptions": [
+            "Mellophone"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": true,
+          "notes": "Form received"
+        }
+      ]
+    },
+    {
+      "name": "Low Brass",
+      "students": [
+        {
+          "name": "Benjamin Ardell",
+          "grade": "Rising 10th",
+          "instrument": "Trombone",
+          "status": "signed_up",
+          "statusLabel": "Signed up",
+          "section": "Low Brass",
+          "partOptions": [
+            "Low Brass 1",
+            "Low Brass 2",
+            "Low Brass 3"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": true,
+          "notes": "Form received"
+        }
+      ]
+    },
+    {
+      "name": "Tuba",
+      "students": [
+        {
+          "name": "Ian Kelley",
+          "grade": "Rising 10th",
+          "instrument": "Sousaphone",
+          "status": "signed_up",
+          "statusLabel": "Signed up",
+          "section": "Tuba",
+          "partOptions": [
+            "Tuba"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": true,
+          "notes": "Form received"
+        },
+        {
+          "name": "Kade Rathgeber",
+          "grade": "Rising 11th",
+          "instrument": "Tuba",
+          "status": "signed_up",
+          "statusLabel": "Signed up",
+          "section": "Tuba",
+          "partOptions": [
+            "Tuba"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": true,
+          "notes": "Form received"
+        },
+        {
+          "name": "Michael Groner",
+          "grade": "Rising 9th",
+          "instrument": "Tuba",
+          "status": "signed_up",
+          "statusLabel": "Signed up",
+          "section": "Tuba",
+          "partOptions": [
+            "Tuba"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": true,
+          "notes": "Form received"
+        }
+      ]
+    },
+    {
+      "name": "Battery",
+      "students": [
+        {
+          "name": "Joseph Damstetter",
+          "grade": "Rising 12th",
+          "instrument": "Percussion",
+          "status": "signed_up",
+          "statusLabel": "Signed up",
+          "section": "Battery",
+          "partOptions": [
+            "Snares",
+            "Quads",
+            "Basses (5)"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": true,
+          "notes": "Form received"
+        },
+        {
+          "name": "Mackenzie Stoner",
+          "grade": "Rising 12th",
+          "instrument": "Percussion (battery)",
+          "status": "signed_up",
+          "statusLabel": "Signed up",
+          "section": "Battery",
+          "partOptions": [
+            "Snares",
+            "Quads",
+            "Basses (5)"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": true,
+          "notes": "Form received"
+        }
+      ]
+    },
+    {
+      "name": "Front Ensemble / Electronics",
+      "students": [
+        {
+          "name": "Arianna Quesada",
+          "grade": "Rising 11th",
+          "instrument": "Electric bass",
+          "status": "signed_up",
+          "statusLabel": "Signed up",
+          "section": "Front Ensemble / Electronics",
+          "partOptions": [
+            "Bass Guitar"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": true,
+          "notes": "Form received"
+        },
+        {
+          "name": "Cameron DeSorbo",
+          "grade": "Rising 12th",
+          "instrument": "Guitar",
+          "status": "signed_up",
+          "statusLabel": "Signed up",
+          "section": "Front Ensemble / Electronics",
+          "partOptions": [
+            "Lead Guitar",
+            "Rhythm Guitar"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": true,
+          "notes": "Form received"
+        }
+      ]
+    },
+    {
+      "name": "Colorguard",
+      "students": [
+        {
+          "name": "Alin Parker",
+          "grade": "Rising 12th",
+          "instrument": "Colorguard",
+          "status": "signed_up",
+          "statusLabel": "Signed up",
+          "section": "Colorguard",
+          "partOptions": [
+            "Colorguard"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": false,
+          "notes": "Form received"
+        },
+        {
+          "name": "Ashley Hicks",
+          "grade": "Rising 11th",
+          "instrument": "Colorguard",
+          "status": "signed_up",
+          "statusLabel": "Signed up",
+          "section": "Colorguard",
+          "partOptions": [
+            "Colorguard"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": false,
+          "notes": "Form received"
+        },
+        {
+          "name": "Caleigh Pritchard",
+          "grade": "Rising 10th",
+          "instrument": "Colorguard",
+          "status": "signed_up",
+          "statusLabel": "Signed up",
+          "section": "Colorguard",
+          "partOptions": [
+            "Colorguard"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": false,
+          "notes": "Form received"
+        },
+        {
+          "name": "Cassidy Coley",
+          "grade": "Rising 9th",
+          "instrument": "Colorguard",
+          "status": "signed_up",
+          "statusLabel": "Signed up",
+          "section": "Colorguard",
+          "partOptions": [
+            "Colorguard"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": false,
+          "notes": "Form received"
+        },
+        {
+          "name": "Charlotte Parker",
+          "grade": "Rising 8th",
+          "instrument": "Colorguard",
+          "status": "signed_up",
+          "statusLabel": "Signed up",
+          "section": "Colorguard",
+          "partOptions": [
+            "Colorguard"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": false,
+          "notes": "Form received"
+        },
+        {
+          "name": "Claire Costner",
+          "grade": "Rising 11th",
+          "instrument": "Colorgaurd",
+          "status": "signed_up",
+          "statusLabel": "Signed up",
+          "section": "Colorguard",
+          "partOptions": [
+            "Colorguard"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": false,
+          "notes": "Form received"
+        },
+        {
+          "name": "Lilyrose Pahl",
+          "grade": "Rising 12th",
+          "instrument": "Colorgaurd",
+          "status": "signed_up",
+          "statusLabel": "Signed up",
+          "section": "Colorguard",
+          "partOptions": [
+            "Colorguard"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": false,
+          "notes": "Form received"
+        },
+        {
+          "name": "Lin Um",
+          "grade": "Rising 12th",
+          "instrument": "Colorguard",
+          "status": "signed_up",
+          "statusLabel": "Signed up",
+          "section": "Colorguard",
+          "partOptions": [
+            "Colorguard"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": false,
+          "notes": "Form received"
+        },
+        {
+          "name": "Lyla Franklin",
+          "grade": "Rising 12th",
+          "instrument": "colorguard",
+          "status": "signed_up",
+          "statusLabel": "Signed up",
+          "section": "Colorguard",
+          "partOptions": [
+            "Colorguard"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": false,
+          "notes": "Form received"
+        },
+        {
+          "name": "Lylee Hager",
+          "grade": "Rising 12th",
+          "instrument": "Color guard",
+          "status": "signed_up",
+          "statusLabel": "Signed up",
+          "section": "Colorguard",
+          "partOptions": [
+            "Colorguard"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": false,
+          "notes": "Form received"
+        },
+        {
+          "name": "Milo Canady",
+          "grade": "Rising 11th",
+          "instrument": "Colorguard",
+          "status": "signed_up",
+          "statusLabel": "Signed up",
+          "section": "Colorguard",
+          "partOptions": [
+            "Colorguard"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": false,
+          "notes": "Form received"
+        },
+        {
+          "name": "Riley Chemburkar",
+          "grade": "Rising 9th",
+          "instrument": "Colorguard",
+          "status": "signed_up",
+          "statusLabel": "Signed up",
+          "section": "Colorguard",
+          "partOptions": [
+            "Colorguard"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": false,
+          "notes": "Form received"
+        },
+        {
+          "name": "Robert Sears",
+          "grade": "Rising 12th",
+          "instrument": "Trumpet / Colorguard",
+          "status": "signed_up",
+          "statusLabel": "Signed up",
+          "section": "Colorguard",
+          "partOptions": [
+            "Colorguard"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": false,
+          "notes": "Form received"
+        },
+        {
+          "name": "Skylar Lockhart",
+          "grade": "Rising 11th",
+          "instrument": "colorguard",
+          "status": "signed_up",
+          "statusLabel": "Signed up",
+          "section": "Colorguard",
+          "partOptions": [
+            "Colorguard"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": false,
+          "notes": "Form received"
+        }
+      ]
+    },
+    {
+      "name": "Needs Placement",
+      "students": [
+        {
+          "name": "Elijah Moore",
+          "grade": "",
+          "instrument": "",
+          "status": "intends",
+          "statusLabel": "Interested - needs signup",
+          "section": "Needs Placement",
+          "partOptions": [
+            "TBD"
+          ],
+          "assignedPart": "TBD",
+          "needsPrintedMusic": true,
+          "notes": "Needs signup link"
+        }
+      ]
+    }
+  ],
+  "notMarchingBand": [
+    {
+      "name": "Aidan Ballas",
+      "grade": "",
+      "instrument": "",
+      "status": "band_only",
+      "statusLabel": "Band only",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Alexander Redinger",
+      "grade": "",
+      "instrument": "",
+      "status": "band_only",
+      "statusLabel": "Band only",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Amelia Wofford",
+      "grade": "",
+      "instrument": "",
+      "status": "band_only",
+      "statusLabel": "Band only",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Ava Braswell",
+      "grade": "",
+      "instrument": "",
+      "status": "band_only",
+      "statusLabel": "Band only",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Avery Eckler",
+      "grade": "",
+      "instrument": "",
+      "status": "band_only",
+      "statusLabel": "Band only",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Brandon Parks",
+      "grade": "",
+      "instrument": "",
+      "status": "band_only",
+      "statusLabel": "Band only",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Brooklyn Tillman",
+      "grade": "",
+      "instrument": "",
+      "status": "band_only",
+      "statusLabel": "Band only",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Bryson Meares",
+      "grade": "",
+      "instrument": "",
+      "status": "band_only",
+      "statusLabel": "Band only",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Caitlyn Mccullah",
+      "grade": "",
+      "instrument": "",
+      "status": "band_only",
+      "statusLabel": "Band only",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Caleb Cassada",
+      "grade": "",
+      "instrument": "",
+      "status": "band_only",
+      "statusLabel": "Band only",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Cameron Bacon",
+      "grade": "",
+      "instrument": "",
+      "status": "band_only",
+      "statusLabel": "Band only",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Carly Bell",
+      "grade": "",
+      "instrument": "",
+      "status": "band_only",
+      "statusLabel": "Band only",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Christopher Femia",
+      "grade": "",
+      "instrument": "",
+      "status": "band_only",
+      "statusLabel": "Band only",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Cooper Williams",
+      "grade": "",
+      "instrument": "",
+      "status": "band_only",
+      "statusLabel": "Band only",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Elijah Schuhmann",
+      "grade": "",
+      "instrument": "",
+      "status": "band_only",
+      "statusLabel": "Band only",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Ella Rose",
+      "grade": "",
+      "instrument": "",
+      "status": "band_only",
+      "statusLabel": "Band only",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Emma Rose",
+      "grade": "",
+      "instrument": "",
+      "status": "band_only",
+      "statusLabel": "Band only",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Jericho Wurz",
+      "grade": "",
+      "instrument": "",
+      "status": "band_only",
+      "statusLabel": "Band only",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Kaelyn Larson",
+      "grade": "",
+      "instrument": "",
+      "status": "band_only",
+      "statusLabel": "Band only",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Kaiden Thompson",
+      "grade": "",
+      "instrument": "",
+      "status": "band_only",
+      "statusLabel": "Band only",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Lily Cray",
+      "grade": "",
+      "instrument": "",
+      "status": "band_only",
+      "statusLabel": "Band only",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Louie Jia",
+      "grade": "",
+      "instrument": "",
+      "status": "band_only",
+      "statusLabel": "Band only",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Louis Neill Martinez",
+      "grade": "",
+      "instrument": "",
+      "status": "band_only",
+      "statusLabel": "Band only",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Mason Langley",
+      "grade": "",
+      "instrument": "",
+      "status": "band_only",
+      "statusLabel": "Band only",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Mon\u00e9t Hayes",
+      "grade": "",
+      "instrument": "",
+      "status": "band_only",
+      "statusLabel": "Band only",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Nathaniel Craven",
+      "grade": "",
+      "instrument": "",
+      "status": "band_only",
+      "statusLabel": "Band only",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Noah Stickley",
+      "grade": "",
+      "instrument": "",
+      "status": "band_only",
+      "statusLabel": "Band only",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "PJ Honsinger",
+      "grade": "",
+      "instrument": "",
+      "status": "band_only",
+      "statusLabel": "Band only",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Piper Williams",
+      "grade": "",
+      "instrument": "",
+      "status": "band_only",
+      "statusLabel": "Band only",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Ruby Blount",
+      "grade": "",
+      "instrument": "",
+      "status": "band_only",
+      "statusLabel": "Band only",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Seth Desantis",
+      "grade": "",
+      "instrument": "",
+      "status": "band_only",
+      "statusLabel": "Band only",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Alexander Sutton",
+      "grade": "",
+      "instrument": "",
+      "status": "out",
+      "statusLabel": "Not participating",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Benjamin Aust",
+      "grade": "",
+      "instrument": "",
+      "status": "out",
+      "statusLabel": "Not participating",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Chloe Williams",
+      "grade": "",
+      "instrument": "",
+      "status": "out",
+      "statusLabel": "Not participating",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Harrison Holley",
+      "grade": "",
+      "instrument": "",
+      "status": "out",
+      "statusLabel": "Not participating",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Ivy Van Patten",
+      "grade": "",
+      "instrument": "",
+      "status": "out",
+      "statusLabel": "Not participating",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Jackson Baker",
+      "grade": "",
+      "instrument": "",
+      "status": "out",
+      "statusLabel": "Not participating",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Jacob Barr",
+      "grade": "",
+      "instrument": "",
+      "status": "out",
+      "statusLabel": "Not participating",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Jude Sox",
+      "grade": "",
+      "instrument": "",
+      "status": "out",
+      "statusLabel": "Not participating",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Julianna Manning",
+      "grade": "",
+      "instrument": "",
+      "status": "out",
+      "statusLabel": "Not participating",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Katelyn Hill",
+      "grade": "",
+      "instrument": "",
+      "status": "out",
+      "statusLabel": "Not participating",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Lincoln Knight",
+      "grade": "",
+      "instrument": "",
+      "status": "out",
+      "statusLabel": "Not participating",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Ocean Dunlap",
+      "grade": "",
+      "instrument": "",
+      "status": "out",
+      "statusLabel": "Not participating",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "William Boles",
+      "grade": "",
+      "instrument": "",
+      "status": "out",
+      "statusLabel": "Not participating",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    },
+    {
+      "name": "Yericson Teruel Paz",
+      "grade": "",
+      "instrument": "",
+      "status": "out",
+      "statusLabel": "Not participating",
+      "section": "Not Marching Band",
+      "partOptions": [],
+      "assignedPart": "",
+      "needsPrintedMusic": false,
+      "notes": ""
+    }
+  ],
+  "disclaimer": "Part assignments are preliminary. This page confirms status and likely part families, not final seating."
+}

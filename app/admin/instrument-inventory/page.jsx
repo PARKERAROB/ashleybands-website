@@ -45,15 +45,9 @@ function StaffLogin({ onAuthed }) {
 }
 
 export default function AdminInventoryPage() {
-  const [session, setSession] = useState(null);
+  const [session, setSession] = useState(() => readSession());
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const s = readSession();
-    if (s) setSession(s);
-    else setLoading(false);
-  }, []);
 
   useEffect(() => {
     if (!session) return;
@@ -87,20 +81,28 @@ export default function AdminInventoryPage() {
 
       {pending.map((item) => (
         <div key={item.id} style={{ border: "1px solid #ddd", borderRadius: 8, padding: 16, margin: "12px 0" }}>
-          <div style={{ fontWeight: 600 }}>{item.instrument_type} — {item.brand || "unknown brand"}</div>
+          <div style={{ fontWeight: 600 }}>
+            {item.asset_id ? `${item.asset_id} — ` : ""}{item.instrument_type} — {item.brand || "unknown brand"}
+          </div>
           <div style={{ fontSize: 13, color: "#555", marginTop: 4 }}>
             Submitted by {item.submitted_by} · {new Date(item.submitted_at).toLocaleString()}
           </div>
           <table style={{ width: "100%", fontSize: 13, marginTop: 8, borderCollapse: "collapse" }}>
             <tbody>
+              {item.asset_id && <tr><td style={tdStyle}>Asset ID</td><td>{item.asset_id}</td></tr>}
               {item.serial_number && <tr><td style={tdStyle}>Serial</td><td>{item.serial_number}</td></tr>}
               {item.model_markings && <tr><td style={tdStyle}>Model</td><td>{item.model_markings}</td></tr>}
               {item.finish && <tr><td style={tdStyle}>Finish</td><td>{item.finish}</td></tr>}
+              {item.locker && <tr><td style={tdStyle}>Locker</td><td>{item.locker}</td></tr>}
+              {item.location && <tr><td style={tdStyle}>Location</td><td>{item.location}</td></tr>}
+              {item.repair_needed && <tr><td style={tdStyle}>Repair Needed</td><td>{item.repair_needed}</td></tr>}
+              {item.repair_priority && <tr><td style={tdStyle}>Repair Priority</td><td>{item.repair_priority}</td></tr>}
               {item.condition_notes && <tr><td style={tdStyle}>Condition</td><td>{item.condition_notes}</td></tr>}
               {item.visible_damage && <tr><td style={tdStyle}>Damage</td><td>{item.visible_damage}</td></tr>}
               {item.missing_parts && <tr><td style={tdStyle}>Missing</td><td>{item.missing_parts}</td></tr>}
               <tr><td style={tdStyle}>Plays</td><td>{item.plays || "?"}</td></tr>
               <tr><td style={tdStyle}>Case</td><td>{item.case_present || "?"}</td></tr>
+              <tr><td style={tdStyle}>Mouthpiece</td><td>{item.mouthpiece_present || "?"}</td></tr>
             </tbody>
           </table>
           {item.raw_transcript && (
