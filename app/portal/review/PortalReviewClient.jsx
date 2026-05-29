@@ -173,6 +173,10 @@ function BillingSection() {
 function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
   const balanceCents = Number(student.balanceCents) || 0;
   const owes = balanceCents > 0;
+  const sponsorshipCents = (student.payments || [])
+    .filter((p) => p.method === "sponsorship")
+    .reduce((s, p) => s + (Number(p.amountCents) || 0), 0);
+  const cashPaidCents = Math.max((Number(student.paidCents) || 0) - sponsorshipCents, 0);
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
   const canPayOnline = owes && paymentsEnabled && Boolean(clientId);
 
@@ -193,7 +197,8 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
       <div className="portal-field">
         <span className="portal-field-label">Summary</span>
         <span className="portal-field-value">
-          Charged {formatUsd(student.chargedCents)} · Paid {formatUsd(student.paidCents)} · Balance{" "}
+          Charged {formatUsd(student.chargedCents)} · Paid {formatUsd(cashPaidCents)}
+          {sponsorshipCents > 0 ? ` · Sponsorship credit ${formatUsd(sponsorshipCents)}` : ""} · Balance{" "}
           {formatUsd(balanceCents)}
         </span>
       </div>

@@ -1,5 +1,12 @@
 import { getSupabaseEnv } from "@/lib/supabaseEnv";
 import { supabaseHeaders } from "@/lib/supabaseRest";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import {
+  findStudentIdForSignup,
+  MARCHING_BAND_2026_FEE_CENTS,
+  MARCHING_BAND_2026_CATEGORY,
+  MARCHING_BAND_2026_LABEL
+} from "@/lib/marchingBandSignups";
 
 const REQUIRED_TEXT = [
   "student_first_name",
@@ -61,9 +68,51 @@ export async function POST(request) {
       return Response.json({ error: data.message || data.error || "Signup failed" }, { status: 500 });
     }
 
+    // Best-effort: auto-add the $500 season fee to the matched student's billing
+    // account. Never fail the signup if this errors.
+    await maybeAutoChargeMarchingBand(payload);
+
     return Response.json(data);
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
+  }
+}
+
+async function maybeAutoChargeMarchingBand(payload) {
+  try {
+    const { data: students, error } = await supabaseAdmin
+      .from("portal_students")
+      .select("id, source_student_id, legal_first, legal_last, display_name, school_email");
+    if (error || !students) return;
+
+    const studentId = findStudentIdForSignup(students, {
+      sourceStudentId: payload.source_student_id,
+      studentEmail: payload.student_email,
+      firstName: payload.student_first_name,
+      lastName: payload.student_last_name
+    });
+    if (!studentId) return;
+
+    // Idempotent: skip if this student already has an active MB charge.
+    const { data: existing } = await supabaseAdmin
+      .from("fee_charges")
+      .select("id")
+      .eq("student_id", studentId)
+      .eq("category", MARCHING_BAND_2026_CATEGORY)
+      .eq("status", "active")
+      .limit(1);
+    if (existing && existing.length) return;
+
+    await supabaseAdmin.from("fee_charges").insert({
+      student_id: studentId,
+      category: MARCHING_BAND_2026_CATEGORY,
+      label: MARCHING_BAND_2026_LABEL,
+      amount_cents: MARCHING_BAND_2026_FEE_CENTS,
+      source: "signup",
+      created_by: "mb_signup_form"
+    });
+  } catch (err) {
+    console.error("[marching-band-signup] auto-charge failed:", err?.message || err);
   }
 }
 

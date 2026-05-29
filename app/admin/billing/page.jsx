@@ -21,6 +21,26 @@ function usd(cents) {
   return `$${((Number(cents) || 0) / 100).toFixed(2)}`;
 }
 
+// "Last, First" from legal names, falling back to display_name.
+function lastFirst(row) {
+  const last = (row.legalLast || "").trim();
+  const first = (row.preferredFirst || row.legalFirst || "").trim();
+  if (last && first) return `${last}, ${first}`;
+  if (last) return last;
+  return row.name || "";
+}
+
+// Sort key for "Last, First".
+function lastNameKey(row) {
+  return `${(row.legalLast || row.name || "").toLowerCase()} ${(row.legalFirst || "").toLowerCase()}`.trim();
+}
+
+// Pull the rising-grade number out of strings like "Rising 9th (current 8th)".
+function gradeRank(grade) {
+  const m = String(grade || "").match(/(\d{1,2})/);
+  return m ? Number(m[1]) : 999;
+}
+
 function StaffLogin({ onAuthed }) {
   const [form, setForm] = useState({ email: "", pin: "" });
   const [err, setErr] = useState("");
@@ -58,8 +78,11 @@ export default function AdminBillingPage() {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [onlyBalance, setOnlyBalance] = useState(false);
+  const [mbOnly, setMbOnly] = useState(false);
+  const [sortBy, setSortBy] = useState("lastName");
   const [selected, setSelected] = useState({});
   const [msg, setMsg] = useState("");
+  const [syncing, setSyncing] = useState(false);
 
   const load = async () => {
     const res = await fetch("/api/admin/billing", { headers: authHeaders(session) });
@@ -81,12 +104,22 @@ export default function AdminBillingPage() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return roster.filter((r) => {
-      if (q && !r.name.toLowerCase().includes(q)) return false;
+    const rows = roster.filter((r) => {
+      if (q && !lastFirst(r).toLowerCase().includes(q) && !r.name.toLowerCase().includes(q)) return false;
       if (onlyBalance && r.balanceCents <= 0) return false;
+      if (mbOnly && !r.marchingBand) return false;
       return true;
     });
-  }, [roster, query, onlyBalance]);
+    const sorted = [...rows];
+    if (sortBy === "grade") {
+      sorted.sort((a, b) => gradeRank(a.grade) - gradeRank(b.grade) || lastNameKey(a).localeCompare(lastNameKey(b)));
+    } else if (sortBy === "balance") {
+      sorted.sort((a, b) => b.balanceCents - a.balanceCents || lastNameKey(a).localeCompare(lastNameKey(b)));
+    } else {
+      sorted.sort((a, b) => lastNameKey(a).localeCompare(lastNameKey(b)));
+    }
+    return sorted;
+  }, [roster, query, onlyBalance, mbOnly, sortBy]);
 
   const totals = useMemo(() => {
     return roster.reduce(
@@ -117,6 +150,26 @@ export default function AdminBillingPage() {
     URL.revokeObjectURL(url);
   };
 
+  const syncMarchingBand = async () => {
+    setSyncing(true);
+    setMsg("");
+    const res = await fetch("/api/admin/billing/sync-marching-band", {
+      method: "POST",
+      headers: authHeaders(session)
+    });
+    const data = await res.json().catch(() => ({}));
+    setSyncing(false);
+    if (!res.ok) {
+      setMsg(data.error || "Sync failed.");
+      return;
+    }
+    const unmatched = data.unmatchedSignups
+      ? ` · ${data.unmatchedSignups} signup(s) not matched to a student`
+      : "";
+    setMsg(`MB season fee: added ${data.inserted}, skipped ${data.skipped} already charged${unmatched}.`);
+    load();
+  };
+
   if (!session) return <StaffLogin onAuthed={(s) => { setSession(s); setLoading(true); }} />;
   if (loading) return <div style={pageStyle}><p>Loading...</p></div>;
 
@@ -130,11 +183,26 @@ export default function AdminBillingPage() {
       <BulkCharge session={session} selectedIds={selectedIds} onDone={(m) => { setMsg(m); setSelected({}); load(); }} />
 
       <div style={{ display: "flex", gap: 8, alignItems: "center", margin: "12px 0", flexWrap: "wrap" }}>
-        <input placeholder="Search name..." value={query} onChange={(e) => setQuery(e.target.value)} style={{ ...inputStyle, width: 220 }} />
+        <input placeholder="Search name..." value={query} onChange={(e) => setQuery(e.target.value)} style={{ ...inputStyle, width: 200 }} />
+        <label style={{ fontSize: 13, display: "flex", gap: 4, alignItems: "center" }}>
+          Sort:
+          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={{ ...inputStyle, width: "auto" }}>
+            <option value="lastName">Last name (A–Z)</option>
+            <option value="grade">Grade</option>
+            <option value="balance">Balance (high→low)</option>
+          </select>
+        </label>
         <label style={{ fontSize: 13, display: "flex", gap: 4, alignItems: "center" }}>
           <input type="checkbox" checked={onlyBalance} onChange={(e) => setOnlyBalance(e.target.checked)} />
           Owes money only
         </label>
+        <label style={{ fontSize: 13, display: "flex", gap: 4, alignItems: "center" }}>
+          <input type="checkbox" checked={mbOnly} onChange={(e) => setMbOnly(e.target.checked)} />
+          Marching band only
+        </label>
+        <button onClick={syncMarchingBand} disabled={syncing} style={{ ...btnStyle, background: "#7b1829" }}>
+          {syncing ? "Applying…" : "Apply MB season fee to signups"}
+        </button>
         <button onClick={exportCsv} style={{ ...btnStyle, background: "#245c73" }}>Export CSV</button>
       </div>
       {msg && <p style={{ color: "#446349", fontSize: 13 }}>{msg}</p>}
@@ -147,6 +215,7 @@ export default function AdminBillingPage() {
             <th style={thStyle}>Grade</th>
             <th style={thStyle}>Charged</th>
             <th style={thStyle}>Paid</th>
+            <th style={thStyle}>Sponsor</th>
             <th style={thStyle}>Balance</th>
             <th style={thStyle}>Actions</th>
           </tr>
@@ -175,10 +244,14 @@ function StudentRow({ row, session, checked, onCheck, onChanged }) {
     <>
       <tr style={{ borderBottom: "1px solid #eee" }}>
         <td style={tdStyle}><input type="checkbox" checked={checked} onChange={(e) => onCheck(e.target.checked)} /></td>
-        <td style={tdStyle}>{row.name}</td>
+        <td style={tdStyle}>
+          {lastFirst(row)}
+          {row.marchingBand ? <span style={mbTagStyle}>MB</span> : null}
+        </td>
         <td style={tdStyle}>{row.grade}</td>
         <td style={tdStyle}>{usd(row.chargedCents)}</td>
-        <td style={tdStyle}>{usd(row.paidCents)}</td>
+        <td style={tdStyle}>{usd(row.cashPaidCents)}</td>
+        <td style={tdStyle}>{row.sponsorshipCents ? usd(row.sponsorshipCents) : "—"}</td>
         <td style={{ ...tdStyle, fontWeight: 700, color: row.balanceCents > 0 ? "#7b1829" : "#446349" }}>{usd(row.balanceCents)}</td>
         <td style={tdStyle}>
           <button onClick={() => setOpen((v) => !v)} style={{ ...btnStyle, background: "#6f675a", padding: "4px 10px" }}>{open ? "Close" : "Manage"}</button>
@@ -186,7 +259,7 @@ function StudentRow({ row, session, checked, onCheck, onChanged }) {
       </tr>
       {open && (
         <tr>
-          <td colSpan={7} style={{ padding: "8px 8px 16px", background: "#faf7ef" }}>
+          <td colSpan={8} style={{ padding: "8px 8px 16px", background: "#faf7ef" }}>
             <StudentManage studentId={row.id} session={session} onChanged={onChanged} />
           </td>
         </tr>
@@ -213,14 +286,39 @@ function StudentManage({ studentId, session, onChanged }) {
 
   if (!detail) return <p style={{ fontSize: 13 }}>Loading...</p>;
 
+  const completed = (detail.payments || []).filter((p) => p.status === "completed");
+  const sponsorshipCents = completed.filter((p) => p.method === "sponsorship").reduce((s, p) => s + (p.amount_cents || 0), 0);
+  const cashPaidCents = completed.filter((p) => p.method !== "sponsorship").reduce((s, p) => s + (p.amount_cents || 0), 0);
+  const balanceCents = Number(detail.balance?.balance_cents) || 0;
+
+  const voidCharge = async (id) => {
+    if (!window.confirm("Void this charge? It will be removed from the student's balance.")) return;
+    const res = await fetch("/api/admin/billing/charges", {
+      method: "PATCH",
+      headers: authHeaders(session),
+      body: JSON.stringify({ id })
+    });
+    if (res.ok) {
+      load();
+      onChanged();
+    }
+  };
+
   return (
     <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
-      <div style={{ minWidth: 260 }}>
+      <div style={{ minWidth: 280 }}>
+        <p style={{ fontSize: 13, margin: "0 0 6px", fontWeight: 600 }}>
+          Paid {usd(cashPaidCents)} · Sponsorship {usd(sponsorshipCents)} ·{" "}
+          <span style={{ color: balanceCents > 0 ? "#7b1829" : "#446349" }}>Balance {usd(balanceCents)}</span>
+        </p>
         <strong style={{ fontSize: 13 }}>Charges</strong>
         <ul style={{ margin: "4px 0", paddingLeft: 18, fontSize: 13 }}>
           {(detail.charges || []).map((c) => (
             <li key={c.id} style={{ opacity: c.status === "void" ? 0.5 : 1 }}>
               {c.label || c.category} — {usd(c.amount_cents)} {c.status === "void" ? "(void)" : ""}
+              {c.status === "active" ? (
+                <button onClick={() => voidCharge(c.id)} style={{ ...linkBtnStyle, marginLeft: 6 }}>void</button>
+              ) : null}
             </li>
           ))}
           {(detail.charges || []).length === 0 && <li style={{ color: "#999" }}>None</li>}
@@ -320,3 +418,5 @@ const inputStyle = { boxSizing: "border-box", width: "100%", padding: "8px 10px"
 const btnStyle = { padding: "8px 16px", fontSize: 13, fontWeight: 600, border: "none", borderRadius: 6, color: "#fff", cursor: "pointer" };
 const thStyle = { padding: "6px 8px", fontWeight: 700, color: "#555", fontSize: 12 };
 const tdStyle = { padding: "6px 8px", verticalAlign: "top" };
+const mbTagStyle = { marginLeft: 6, fontSize: 10, fontWeight: 700, color: "#fff", background: "#7b1829", borderRadius: 4, padding: "1px 5px", verticalAlign: "middle" };
+const linkBtnStyle = { background: "none", border: "none", color: "#7b1829", fontSize: 12, cursor: "pointer", textDecoration: "underline", padding: 0 };

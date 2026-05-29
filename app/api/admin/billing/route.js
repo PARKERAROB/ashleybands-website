@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { validateStaffRequest } from "@/lib/staffAuth";
 import { loadStudentLedgers } from "@/lib/billing";
+import { loadMatchedSignups } from "@/lib/marchingBandSignups";
 
 export const runtime = "nodejs";
 
@@ -31,16 +32,24 @@ export async function GET(req) {
     });
   }
 
-  // Roster: all students left-joined to the balance view.
-  const [{ data: students, error }, { data: balanceRows }] = await Promise.all([
-    supabaseAdmin
-      .from("portal_students")
-      .select("id, display_name, grade_fall26, status")
-      .order("display_name", { ascending: true }),
-    supabaseAdmin
-      .from("student_fee_balances")
-      .select("student_id, charged_cents, paid_cents, balance_cents")
-  ]);
+  // Roster: all students left-joined to the balance view, plus marching-band
+  // signup flag and sponsorship-credit totals.
+  const [{ data: students, error }, { data: balanceRows }, { data: sponsorRows }, matchResult] =
+    await Promise.all([
+      supabaseAdmin
+        .from("portal_students")
+        .select("id, display_name, legal_first, legal_last, preferred_first, grade_fall26, status")
+        .order("display_name", { ascending: true }),
+      supabaseAdmin
+        .from("student_fee_balances")
+        .select("student_id, charged_cents, paid_cents, balance_cents"),
+      supabaseAdmin
+        .from("fee_payments")
+        .select("student_id, amount_cents")
+        .eq("method", "sponsorship")
+        .eq("status", "completed"),
+      loadMatchedSignups().catch(() => ({ matches: [], unmatchedCount: 0 }))
+    ]);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
@@ -49,18 +58,33 @@ export async function GET(req) {
     return acc;
   }, {});
 
+  const sponsorByStudent = (sponsorRows || []).reduce((acc, r) => {
+    acc[r.student_id] = (acc[r.student_id] || 0) + (Number(r.amount_cents) || 0);
+    return acc;
+  }, {});
+
+  const mbStudentIds = new Set((matchResult?.matches || []).map((m) => m.studentId));
+
   const roster = (students || []).map((s) => {
     const bal = byStudent[s.id] || { charged_cents: 0, paid_cents: 0, balance_cents: 0 };
+    const sponsorshipCents = sponsorByStudent[s.id] || 0;
+    const paidCents = Number(bal.paid_cents) || 0;
     return {
       id: s.id,
       name: s.display_name,
+      legalFirst: s.legal_first || "",
+      legalLast: s.legal_last || "",
+      preferredFirst: s.preferred_first || "",
       grade: s.grade_fall26 || "",
       status: s.status || "",
+      marchingBand: mbStudentIds.has(s.id),
       chargedCents: Number(bal.charged_cents) || 0,
-      paidCents: Number(bal.paid_cents) || 0,
+      paidCents,
+      sponsorshipCents,
+      cashPaidCents: Math.max(paidCents - sponsorshipCents, 0),
       balanceCents: Number(bal.balance_cents) || 0
     };
   });
 
-  return NextResponse.json({ roster });
+  return NextResponse.json({ roster, marchingBandUnmatched: matchResult?.unmatchedCount || 0 });
 }
