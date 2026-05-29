@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { StaffGate } from "@/components/StaffGate";
 import { staffAuthHeaders } from "@/lib/staffSession";
 
@@ -46,11 +46,75 @@ function StudentsAdmin({ session }) {
 
       {showNew && <NewStudent session={session} onCreated={() => { setShowNew(false); search(); }} />}
 
+      <UnmatchedSignups session={session} />
+
       {loading ? <p>Loading…</p> : null}
       {students.map((s) => (
         <StudentEditor key={s.id} student={s} session={session} onChanged={search} />
       ))}
       {!loading && students.length === 0 && <p style={{ color: "#999" }}>No students loaded. Search or add one.</p>}
+    </div>
+  );
+}
+
+function UnmatchedSignups({ session }) {
+  const [items, setItems] = useState(null);
+  const [busyId, setBusyId] = useState("");
+  const [msg, setMsg] = useState("");
+
+  const reload = () => {
+    fetch("/api/admin/students/unmatched-signups", { headers: staffAuthHeaders(session) })
+      .then((r) => r.json())
+      .then((d) => setItems(d.unmatched || []))
+      .catch(() => setItems([]));
+  };
+
+  useEffect(() => {
+    fetch("/api/admin/students/unmatched-signups", { headers: staffAuthHeaders(session) })
+      .then((r) => r.json())
+      .then((d) => setItems(d.unmatched || []))
+      .catch(() => setItems([]));
+  }, [session]);
+
+  const create = async (signupId) => {
+    setBusyId(signupId);
+    setMsg("");
+    const res = await fetch("/api/admin/students/unmatched-signups", {
+      method: "POST",
+      headers: staffAuthHeaders(session),
+      body: JSON.stringify({ signupId })
+    });
+    const data = await res.json().catch(() => ({}));
+    setBusyId("");
+    if (!res.ok) { setMsg(data.error || "Failed."); return; }
+    setMsg("Created student + guardian + $500 charge.");
+    reload();
+  };
+
+  if (!items || items.length === 0) return null;
+
+  return (
+    <div style={{ ...panel, borderColor: "#b3541e", background: "#fff5ec" }}>
+      <strong>⚠️ Marching-band signups with no student record ({items.length})</strong>
+      <p style={{ fontSize: 12.5, color: "#6f675a", margin: "4px 0 8px" }}>
+        One click creates the student, links the guardian, and adds the $500 season fee.
+      </p>
+      {msg && <p style={{ fontSize: 13, color: "#446349" }}>{msg}</p>}
+      {items.map((u) => (
+        <div key={u.signupId} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, padding: "6px 0", borderTop: "1px solid #eaddc9", flexWrap: "wrap" }}>
+          <span style={{ fontSize: 13 }}>
+            <strong>{u.student.firstName} {u.student.lastName}</strong>{" "}
+            <span style={{ color: "#6f675a" }}>
+              {u.student.gradeFall ? `· ${u.student.gradeFall}` : ""} {u.student.email ? `· ${u.student.email}` : ""}
+              {u.guardian.name ? ` · guardian: ${u.guardian.name}${u.guardian.email ? ` (${u.guardian.email})` : ""}` : " · no guardian on signup"}
+              {u.fundingPath ? ` · ${u.fundingPath}` : ""}
+            </span>
+          </span>
+          <button onClick={() => create(u.signupId)} disabled={busyId === u.signupId} style={{ ...btn, background: "#b3541e" }}>
+            {busyId === u.signupId ? "Creating…" : "Create + $500"}
+          </button>
+        </div>
+      ))}
     </div>
   );
 }
