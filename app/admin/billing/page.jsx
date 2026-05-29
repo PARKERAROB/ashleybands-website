@@ -151,6 +151,30 @@ export default function AdminBillingPage() {
     URL.revokeObjectURL(url);
   };
 
+  const exportBalances = () => {
+    const esc = (v) => {
+      const s = String(v ?? "");
+      return /[",\n]/.test(s) ? `"${s.replaceAll('"', '""')}"` : s;
+    };
+    const money = (c) => ((Number(c) || 0) / 100).toFixed(2);
+    const header = ["student", "grade", "marching_band", "charged", "paid_cash", "sponsorship", "total_paid", "balance"];
+    const rows = [...roster]
+      .sort((a, b) => lastNameKey(a).localeCompare(lastNameKey(b)))
+      .map((r) =>
+        [lastFirst(r), r.grade, r.marchingBand ? "yes" : "", money(r.chargedCents), money(r.cashPaidCents), money(r.sponsorshipCents), money(r.paidCents), money(r.balanceCents)]
+          .map(esc)
+          .join(",")
+      );
+    const csv = [header.join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `ashley-bands-balances-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const syncMarchingBand = async () => {
     setSyncing(true);
     setMsg("");
@@ -209,7 +233,8 @@ export default function AdminBillingPage() {
         <button onClick={syncMarchingBand} disabled={syncing} style={{ ...btnStyle, background: "#7b1829" }}>
           {syncing ? "Applying…" : "Apply MB season fee to signups"}
         </button>
-        <button onClick={exportCsv} style={{ ...btnStyle, background: "#245c73" }}>Export CSV</button>
+        <button onClick={exportCsv} style={{ ...btnStyle, background: "#245c73" }}>Transactions CSV</button>
+        <button onClick={exportBalances} style={{ ...btnStyle, background: "#245c73" }}>Balances CSV</button>
       </div>
       {msg && <p style={{ color: "#446349", fontSize: 13 }}>{msg}</p>}
 
