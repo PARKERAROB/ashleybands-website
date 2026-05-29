@@ -14,6 +14,8 @@ export function StaffGate({ children }) {
   }
 
   const signOut = () => {
+    // Clear the httpOnly cookie server-side, then the local display copy.
+    fetch("/api/sponsors/staff-signout", { method: "POST" }).catch(() => {});
     clearStaffSession();
     setSession(null);
   };

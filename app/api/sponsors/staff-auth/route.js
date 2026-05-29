@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { verifyPin } from "@/lib/sponsorAuth";
 import { checkRateLimit, clientIp } from "@/lib/rateLimit";
+import { createStaffCookieValue, setStaffCookie } from "@/lib/staffAuthCookie";
 
 export const runtime = "nodejs";
 
@@ -27,10 +28,20 @@ export async function POST(req) {
   if (!data || !verifyPin(pin, data.pin_hash)) {
     return NextResponse.json({ error: "Email or PIN not recognized" }, { status: 401 });
   }
-  return NextResponse.json({
-    id: data.id,
-    token: data.session_token,
-    role: data.role,
-    display_name: data.display_name
-  });
+
+  // Set an httpOnly session cookie. If that fails (e.g. secret unset), fall back
+  // to returning the token so there's always a working auth path (no lockout).
+  let cookieValue = null;
+  try {
+    cookieValue = createStaffCookieValue({ id: data.id, token: data.session_token });
+  } catch {
+    cookieValue = null;
+  }
+
+  const payload = { id: data.id, role: data.role, display_name: data.display_name };
+  if (!cookieValue) payload.token = data.session_token;
+
+  const res = NextResponse.json(payload);
+  if (cookieValue) setStaffCookie(res, cookieValue);
+  return res;
 }
