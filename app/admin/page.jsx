@@ -4,6 +4,12 @@ import { StaffGate } from "@/components/StaffGate";
 
 const SECTIONS = [
   {
+    title: "Communication",
+    links: [
+      { href: "/admin/broadcast", emoji: "📣", label: "Broadcast", desc: "Email families by audience — band's own sender, you compose and send" }
+    ]
+  },
+  {
     title: "Money",
     links: [
       { href: "/admin/billing", emoji: "💵", label: "Student Billing", desc: "Charges, payments, balances, MB fees, CSV export" }
