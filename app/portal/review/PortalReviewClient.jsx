@@ -86,6 +86,34 @@ export default function PortalReviewClient() {
             </p>
 
             <section className="portal-section">
+              <h2>Quick Links</h2>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {[
+                  { href: "/info/marching-band-2026", label: "Marching Band" },
+                  { href: "/info/the-band-folder", label: "Resources" },
+                  { href: "/assistant", label: "Ask the Band Assistant" },
+                  { href: "/staff-sprint", label: "Staff Sprint (note race)" }
+                ].map((link) => (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    style={{
+                      padding: "6px 12px",
+                      border: "1px solid #7b1829",
+                      borderRadius: 16,
+                      color: "#7b1829",
+                      textDecoration: "none",
+                      fontSize: 14,
+                      fontWeight: 600
+                    }}
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </div>
+            </section>
+
+            <section className="portal-section">
               <h2>You</h2>
               <EditableField field="person_display_name" label="Your name" value={profile.person?.display_name || ""} />
               <EditableField field="person_phone" label="Your phone" value={ownPhone} placeholder="Add a phone number" />

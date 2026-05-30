@@ -32,7 +32,9 @@ const SECTIONS = [
     title: "Inventory",
     links: [
       { href: "/admin/instrument-inventory", emoji: "🎺", label: "Instrument Inventory", desc: "Student-submitted instrument intake review" },
-      { href: "/admin/music-library", emoji: "🎼", label: "Music Library", desc: "Music piece intake review" }
+      { href: "/admin/music-library", emoji: "🎼", label: "Music Library", desc: "Music piece intake review" },
+      { href: "/instrument-inventory", emoji: "🎙️", label: "Instrument Intake (voice)", desc: "Staff data-entry form for instruments" },
+      { href: "/music-library", emoji: "🎙️", label: "Music Intake (voice)", desc: "Staff data-entry form for music pieces" }
     ]
   },
   {

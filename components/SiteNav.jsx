@@ -9,11 +9,10 @@ const HIDDEN_NAV_ROUTES = ["/raleigh-brief"];
 const NAV_LINKS = [
   { href: "/info/2026-2027-band-information", label: "Info" },
   { href: "/info/marching-band-2026", label: "Marching Band" },
-  { href: "/portal", label: "Profile", profile: true },
+  { href: "/portal", label: "My Band", profile: true },
   { href: "/sponsors", label: "Support" },
   { href: "/info/the-band-folder", label: "Resources" },
-  { href: "/assistant", label: "Ask" },
-  { href: "/sitemap-page", label: "All Pages" }
+  { href: "/assistant", label: "Ask" }
 ];
 
 export default function SiteNav() {
