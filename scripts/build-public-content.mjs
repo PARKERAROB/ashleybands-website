@@ -11,7 +11,8 @@ const pkaRoot = process.env.PKA_ROOT
 const sources = {
   facts: "facts/bandsofahs-facts.md",
   requiredItems: "knowledge/student-required-items.md",
-  nextYear: "projects/parent-meeting/google-site-page-2026-2027-band-info.md",
+  // 2026-2027-band-information now lives in this repo (content/sources), not PKA
+  nextYear: "content/sources/2026-2027-band-information.md",
   springTrip: "projects/parent-meeting/google-site-page-spring-trip.md",
   // marching-band-2026 now lives in this repo (content/sources), not PKA — see readRepoSource
   marchingBand: "content/sources/marching-band-2026.md",
@@ -66,7 +67,7 @@ const pages = [
     audience: "Families",
     source: sources.nextYear,
     category: "Current information",
-    body: cleanGoogleSiteDraft(readSource(sources.nextYear))
+    body: cleanGoogleSiteDraft(readRepoSource(sources.nextYear))
   },
   {
     slug: "spring-trip",
