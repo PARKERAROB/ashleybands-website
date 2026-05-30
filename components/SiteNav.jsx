@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { readStaffSession } from "@/lib/staffSession";
 
 const HIDDEN_NAV_ROUTES = ["/raleigh-brief"];
 const NAV_LINKS = [
@@ -19,13 +20,19 @@ export default function SiteNav() {
   const pathname = usePathname();
   const router = useRouter();
   const [session, setSession] = useState({ signedIn: false, firstName: "" });
+  // Staff identity is a SEPARATE login from the family/portal session above.
+  // When a staff session exists, surface a Manage door to the /admin hub.
+  const [isStaff, setIsStaff] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     fetch("/api/portal/session")
       .then((res) => (res.ok ? res.json() : { signedIn: false }))
       .then((data) => {
-        if (!cancelled) setSession(data || { signedIn: false });
+        if (cancelled) return;
+        setSession(data || { signedIn: false });
+        // Staff session lives in localStorage, independent of the portal session.
+        setIsStaff(Boolean(readStaffSession()));
       })
       .catch(() => {});
     return () => {
@@ -60,6 +67,16 @@ export default function SiteNav() {
             </Link>
           );
         })}
+        {isStaff && (
+          <Link
+            href="/admin"
+            className="nav-manage"
+            aria-current={pathname.startsWith("/admin") ? "page" : undefined}
+            style={{ fontWeight: 700, color: "#7b1829" }}
+          >
+            Manage
+          </Link>
+        )}
         {session.signedIn ? (
           <span className="nav-account">
             <span className="nav-account-name">Signed in{session.firstName ? ` as ${session.firstName}` : ""}</span>
