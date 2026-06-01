@@ -202,7 +202,7 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
   const balanceCents = Number(student.balanceCents) || 0;
   const owes = balanceCents > 0;
   const sponsorshipCents = (student.payments || [])
-    .filter((p) => p.method === "sponsorship")
+    .filter((p) => p.isSponsorship)
     .reduce((s, p) => s + (Number(p.amountCents) || 0), 0);
   const cashPaidCents = Math.max((Number(student.paidCents) || 0) - sponsorshipCents, 0);
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
@@ -252,7 +252,8 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
           <ul className="portal-fee-list">
             {student.payments.map((p) => (
               <li key={p.id}>
-                {new Date(p.receivedAt).toLocaleDateString()} — {formatUsd(p.amountCents)} ({p.method})
+                {new Date(p.receivedAt).toLocaleDateString()} — {formatUsd(p.amountCents)}{" "}
+                ({p.isSponsorship ? `sponsorship${p.payerName ? ` — ${p.payerName}` : ""}` : p.method})
               </li>
             ))}
           </ul>
