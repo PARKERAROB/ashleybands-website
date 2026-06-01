@@ -109,6 +109,7 @@ async function maybeAutoChargeMarchingBand(payload) {
       label: MARCHING_BAND_2026_LABEL,
       amount_cents: MARCHING_BAND_2026_FEE_CENTS,
       source: "signup",
+      kind: "funding_goal",
       created_by: "mb_signup_form"
     });
   } catch (err) {

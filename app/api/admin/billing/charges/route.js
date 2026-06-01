@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { validateStaffRequest } from "@/lib/staffAuth";
+import { chargeKindForCategory } from "@/lib/billing";
 
 export const runtime = "nodejs";
 
@@ -51,12 +52,14 @@ export async function POST(req) {
   }
 
   const source = targets.length > 1 ? "bulk" : "manual";
+  const kind = chargeKindForCategory(category);
   const rows = targets.map((student_id) => ({
     student_id,
     category,
     label,
     amount_cents: amountCents,
     source,
+    kind,
     created_by: staff.display_name,
     notes
   }));

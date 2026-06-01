@@ -201,10 +201,22 @@ function BillingSection() {
 function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
   const balanceCents = Number(student.balanceCents) || 0;
   const owes = balanceCents > 0;
-  const sponsorshipCents = (student.payments || [])
-    .filter((p) => p.isSponsorship)
-    .reduce((s, p) => s + (Number(p.amountCents) || 0), 0);
-  const cashPaidCents = Math.max((Number(student.paidCents) || 0) - sponsorshipCents, 0);
+  const activeCharges = (student.charges || []).filter((c) => c.status === "active");
+  const allPayments = student.payments || [];
+  const kindTotals = (kind) => {
+    const charges = activeCharges.filter((c) => (c.kind || "fee") === kind);
+    const charged = charges.reduce((s, c) => s + (Number(c.amountCents) || 0), 0);
+    const pays = allPayments.filter((p) => (p.kind || "fee") === kind);
+    const paid = pays.reduce((s, p) => s + (Number(p.amountCents) || 0), 0);
+    const sponsorship = pays
+      .filter((p) => p.isSponsorship)
+      .reduce((s, p) => s + (Number(p.amountCents) || 0), 0);
+    return { charges, charged, paid, sponsorship, remaining: Math.max(charged - paid, 0) };
+  };
+  const goal = kindTotals("funding_goal");
+  const fee = kindTotals("fee");
+  const hasGoal = goal.charges.length > 0 || goal.paid > 0;
+  const hasFee = fee.charges.length > 0 || fee.paid > 0;
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
   const canPayOnline = owes && paymentsEnabled && Boolean(clientId);
 
@@ -219,30 +231,42 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
     <article className="portal-student-card">
       <div className="portal-student-head">
         <h3>{student.name}</h3>
-        <span className="portal-tag">{owes ? `Balance ${formatUsd(balanceCents)}` : "Paid in full"}</span>
-      </div>
-
-      <div className="portal-field">
-        <span className="portal-field-label">Summary</span>
-        <span className="portal-field-value">
-          Charged {formatUsd(student.chargedCents)} · Paid {formatUsd(cashPaidCents)}
-          {sponsorshipCents > 0 ? ` · Sponsorship credit ${formatUsd(sponsorshipCents)}` : ""} · Balance{" "}
-          {formatUsd(balanceCents)}
+        <span className="portal-tag">
+          {fee.remaining > 0
+            ? `Balance ${formatUsd(fee.remaining)}`
+            : goal.remaining > 0
+              ? `${formatUsd(goal.remaining)} to raise`
+              : "All set"}
         </span>
       </div>
 
-      {student.charges.length ? (
+      {hasGoal ? (
         <div className="portal-field">
-          <span className="portal-field-label">Charges</span>
+          <span className="portal-field-label">Season funding</span>
+          <span className="portal-field-value">
+            Goal {formatUsd(goal.charged)} · Raised {formatUsd(goal.paid)} · Remaining{" "}
+            {formatUsd(goal.remaining)}
+            {goal.sponsorship > 0 ? ` (includes ${formatUsd(goal.sponsorship)} from sponsorships)` : ""}
+          </span>
+          <span className="portal-field-note">
+            This is our shared season goal, not a bill. Sponsorships and fundraising count toward it.
+          </span>
+        </div>
+      ) : null}
+
+      {hasFee ? (
+        <div className="portal-field">
+          <span className="portal-field-label">Fees</span>
           <ul className="portal-fee-list">
-            {student.charges
-              .filter((c) => c.status === "active")
-              .map((c) => (
-                <li key={c.id}>
-                  {c.label} — {formatUsd(c.amountCents)}
-                </li>
-              ))}
+            {fee.charges.map((c) => (
+              <li key={c.id}>
+                {c.label} — {formatUsd(c.amountCents)}
+              </li>
+            ))}
           </ul>
+          <span className="portal-field-value">
+            Charged {formatUsd(fee.charged)} · Paid {formatUsd(fee.paid)} · Balance {formatUsd(fee.remaining)}
+          </span>
         </div>
       ) : null}
 

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { readPortalSession } from "@/lib/portalTokens";
-import { trustedStudentIds, loadStudentLedgers } from "@/lib/billing";
+import { trustedStudentIds, loadStudentLedgers, chargeKindForCategory } from "@/lib/billing";
 import { isPaypalConfigured } from "@/lib/paypal";
 
 export const runtime = "nodejs";
@@ -37,6 +37,7 @@ export async function GET(request) {
         label: c.label || c.category,
         amountCents: c.amount_cents,
         status: c.status,
+        kind: c.kind || "fee",
         createdAt: c.created_at
       })),
       payments: (payments[s.id] || [])
@@ -45,6 +46,7 @@ export async function GET(request) {
           id: p.id,
           amountCents: p.amount_cents,
           method: p.method,
+          kind: chargeKindForCategory(p.category),
           isSponsorship: !!p.is_sponsorship,
           payerName: p.payer_name || "",
           receivedAt: p.received_at || p.created_at,
