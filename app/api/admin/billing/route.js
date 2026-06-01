@@ -46,7 +46,7 @@ export async function GET(req) {
       supabaseAdmin
         .from("fee_payments")
         .select("student_id, amount_cents")
-        .eq("method", "sponsorship")
+        .eq("is_sponsorship", true)
         .eq("status", "completed"),
       loadMatchedSignups().catch(() => ({ matches: [], unmatchedCount: 0 }))
     ]);

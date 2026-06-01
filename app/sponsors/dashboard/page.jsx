@@ -223,6 +223,12 @@ function Dashboard({ session, onLogout }) {
                 <td>
                   <strong>{p.business?.name_display}</strong>
                   {p.contact_name && <div className="tracker-sub">{p.contact_name}</div>}
+                  {(p.contact_email || p.contact_phone) && (
+                    <div className="tracker-sub">
+                      {[p.contact_email, p.contact_phone].filter(Boolean).join(" · ")}
+                    </div>
+                  )}
+                  {p.business_address && <div className="tracker-sub">{p.business_address}</div>}
                 </td>
                 <td>{STATUS_LABELS[p.status]}</td>
                 <td>{p.dropped_off_at || "—"}</td>

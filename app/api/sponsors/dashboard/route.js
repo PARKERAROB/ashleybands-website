@@ -24,7 +24,7 @@ export async function GET(req) {
     supabaseAdmin
       .from("prospects")
       .select(
-        "id, status, contact_name, relationship_note, dropped_off_at, follow_up_at, ask_again_at, committed_amount, committed_tier, sent_to_lead, sent_at, created_at, family:families(id, display_name, student_first, student_last, section), business:businesses(id, name_display, category)"
+        "id, status, contact_name, contact_email, contact_phone, business_address, relationship_note, dropped_off_at, follow_up_at, ask_again_at, committed_amount, committed_tier, sent_to_lead, sent_at, created_at, family:families(id, display_name, student_first, student_last, section), business:businesses(id, name_display, category)"
       )
       .order("created_at", { ascending: false }),
     supabaseAdmin.from("prospect_dedup").select("*"),

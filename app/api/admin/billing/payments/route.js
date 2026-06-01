@@ -49,6 +49,9 @@ export async function POST(req) {
       invoice_id: generateInvoiceId(),
       recorded_by: staff.display_name,
       received_at: receivedAt.toISOString(),
+      payer_name: String(body.payerName || "").slice(0, 200),
+      check_number: method === "check" ? String(body.checkNumber || "").slice(0, 50) : "",
+      is_sponsorship: !!body.isSponsorship,
       notes: String(body.notes || "").slice(0, 500)
     })
     .select("id")

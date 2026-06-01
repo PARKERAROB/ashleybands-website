@@ -408,8 +408,8 @@ function StudentManage({ studentId, session, onChanged }) {
   if (!detail) return <p style={{ fontSize: 13 }}>Loading...</p>;
 
   const completed = (detail.payments || []).filter((p) => p.status === "completed");
-  const sponsorshipCents = completed.filter((p) => p.method === "sponsorship").reduce((s, p) => s + (p.amount_cents || 0), 0);
-  const cashPaidCents = completed.filter((p) => p.method !== "sponsorship").reduce((s, p) => s + (p.amount_cents || 0), 0);
+  const sponsorshipCents = completed.filter((p) => p.is_sponsorship).reduce((s, p) => s + (p.amount_cents || 0), 0);
+  const cashPaidCents = completed.filter((p) => !p.is_sponsorship).reduce((s, p) => s + (p.amount_cents || 0), 0);
   const balanceCents = Number(detail.balance?.balance_cents) || 0;
 
   const voidCharge = async (id) => {
@@ -448,7 +448,8 @@ function StudentManage({ studentId, session, onChanged }) {
         <ul style={{ margin: "4px 0", paddingLeft: 18, fontSize: 13 }}>
           {(detail.payments || []).map((p) => (
             <li key={p.id} style={{ opacity: p.status === "completed" ? 1 : 0.5 }}>
-              {usd(p.amount_cents)} — {p.method} ({p.status}) {p.notes ? `· ${p.notes}` : ""}
+              {usd(p.amount_cents)} — {p.method}{p.check_number ? ` #${p.check_number}` : ""}{p.is_sponsorship ? " · sponsorship" : ""} ({p.status})
+              {p.payer_name ? ` · from ${p.payer_name}` : ""}{p.notes ? ` · ${p.notes}` : ""}
             </li>
           ))}
           {(detail.payments || []).length === 0 && <li style={{ color: "#999" }}>None</li>}
@@ -460,7 +461,7 @@ function StudentManage({ studentId, session, onChanged }) {
 }
 
 function RecordPayment({ studentId, session, onDone }) {
-  const [form, setForm] = useState({ amount: "", method: "check", notes: "" });
+  const [form, setForm] = useState({ amount: "", method: "check", payerName: "", checkNumber: "", isSponsorship: false, notes: "" });
   const [status, setStatus] = useState("");
 
   const submit = async () => {
@@ -470,12 +471,20 @@ function RecordPayment({ studentId, session, onDone }) {
     const res = await fetch("/api/admin/billing/payments", {
       method: "POST",
       headers: authHeaders(session),
-      body: JSON.stringify({ studentId, amountCents, method: form.method, notes: form.notes })
+      body: JSON.stringify({
+        studentId,
+        amountCents,
+        method: form.method,
+        payerName: form.payerName,
+        checkNumber: form.checkNumber,
+        isSponsorship: form.isSponsorship,
+        notes: form.notes
+      })
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) { setStatus(data.error || "Failed."); return; }
     setStatus("Recorded.");
-    setForm({ amount: "", method: "check", notes: "" });
+    setForm({ amount: "", method: "check", payerName: "", checkNumber: "", isSponsorship: false, notes: "" });
     onDone();
   };
 
@@ -487,10 +496,17 @@ function RecordPayment({ studentId, session, onDone }) {
         <option value="check">Check</option>
         <option value="cash">Cash</option>
         <option value="credit">Credit</option>
-        <option value="sponsorship">Sponsorship</option>
         <option value="adjustment">Adjustment</option>
       </select>
-      <input placeholder="Notes (check #, etc.)" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} style={{ ...inputStyle, marginTop: 6 }} />
+      <input placeholder="From / paid by (check writer or sponsor)" value={form.payerName} onChange={(e) => setForm({ ...form, payerName: e.target.value })} style={{ ...inputStyle, marginTop: 6 }} />
+      {form.method === "check" && (
+        <input placeholder="Check #" value={form.checkNumber} onChange={(e) => setForm({ ...form, checkNumber: e.target.value })} style={{ ...inputStyle, marginTop: 6 }} />
+      )}
+      <label style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, fontSize: 13 }}>
+        <input type="checkbox" checked={form.isSponsorship} onChange={(e) => setForm({ ...form, isSponsorship: e.target.checked })} />
+        This is a sponsorship
+      </label>
+      <input placeholder="Notes (context only — not check # or payer)" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} style={{ ...inputStyle, marginTop: 6 }} />
       <button onClick={submit} style={{ ...btnStyle, marginTop: 8, background: "#446349" }}>Record</button>
       {status && <p style={{ fontSize: 12, marginTop: 4 }}>{status}</p>}
     </div>

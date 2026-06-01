@@ -133,7 +133,7 @@ function AuthForm({ onAuthed }) {
 }
 
 function AddProspectForm({ session, onAdded }) {
-  const [form, setForm] = useState({ business_name: "", contact_name: "", relationship_note: "" });
+  const [form, setForm] = useState({ business_name: "", contact_name: "", contact_email: "", contact_phone: "", business_address: "", relationship_note: "" });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -149,7 +149,7 @@ function AddProspectForm({ session, onAdded }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Could not add");
-      setForm({ business_name: "", contact_name: "", relationship_note: "" });
+      setForm({ business_name: "", contact_name: "", contact_email: "", contact_phone: "", business_address: "", relationship_note: "" });
       onAdded(data.prospect);
     } catch (err) {
       setError(err.message);
@@ -177,6 +177,33 @@ function AddProspectForm({ session, onAdded }) {
             type="text"
             value={form.contact_name}
             onChange={(e) => setForm({ ...form, contact_name: e.target.value })}
+          />
+        </label>
+        <label className="tracker-field">
+          <span>Email (email or phone required)</span>
+          <input
+            type="email"
+            value={form.contact_email}
+            onChange={(e) => setForm({ ...form, contact_email: e.target.value })}
+            placeholder="owner@business.com"
+          />
+        </label>
+        <label className="tracker-field">
+          <span>Phone</span>
+          <input
+            type="tel"
+            value={form.contact_phone}
+            onChange={(e) => setForm({ ...form, contact_phone: e.target.value })}
+            placeholder="(910) 555-1234"
+          />
+        </label>
+        <label className="tracker-field tracker-field-wide">
+          <span>Business address</span>
+          <input
+            type="text"
+            value={form.business_address}
+            onChange={(e) => setForm({ ...form, business_address: e.target.value })}
+            placeholder="Street, city"
           />
         </label>
         <label className="tracker-field tracker-field-wide">
@@ -208,6 +235,9 @@ function ProspectRow({ session, prospect, onChange, onDelete }) {
       const update = {
         status: draft.status,
         contact_name: draft.contact_name || null,
+        contact_email: draft.contact_email || null,
+        contact_phone: draft.contact_phone || null,
+        business_address: draft.business_address || null,
         relationship_note: draft.relationship_note || null,
         dropped_off_at: draft.dropped_off_at || null,
         follow_up_at: draft.follow_up_at || null,
@@ -250,6 +280,12 @@ function ProspectRow({ session, prospect, onChange, onDelete }) {
         <td>
           <strong>{prospect.business?.name_display}</strong>
           {prospect.contact_name && <div className="tracker-sub">{prospect.contact_name}</div>}
+          {(prospect.contact_email || prospect.contact_phone) && (
+            <div className="tracker-sub">
+              {[prospect.contact_email, prospect.contact_phone].filter(Boolean).join(" · ")}
+            </div>
+          )}
+          {prospect.business_address && <div className="tracker-sub">{prospect.business_address}</div>}
           {prospect.relationship_note && (
             <div className="tracker-note">{prospect.relationship_note}</div>
           )}
@@ -296,6 +332,30 @@ function ProspectRow({ session, prospect, onChange, onDelete }) {
               type="text"
               value={draft.contact_name || ""}
               onChange={(e) => setDraft({ ...draft, contact_name: e.target.value })}
+            />
+          </label>
+          <label className="tracker-field">
+            <span>Email</span>
+            <input
+              type="email"
+              value={draft.contact_email || ""}
+              onChange={(e) => setDraft({ ...draft, contact_email: e.target.value })}
+            />
+          </label>
+          <label className="tracker-field">
+            <span>Phone</span>
+            <input
+              type="tel"
+              value={draft.contact_phone || ""}
+              onChange={(e) => setDraft({ ...draft, contact_phone: e.target.value })}
+            />
+          </label>
+          <label className="tracker-field tracker-field-wide">
+            <span>Business address</span>
+            <input
+              type="text"
+              value={draft.business_address || ""}
+              onChange={(e) => setDraft({ ...draft, business_address: e.target.value })}
             />
           </label>
           <label className="tracker-field tracker-field-wide">

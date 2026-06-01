@@ -23,7 +23,7 @@ export async function GET(req) {
   const { data, error } = await supabaseAdmin
     .from("prospects")
     .select(
-      "id, status, contact_name, relationship_note, dropped_off_at, follow_up_at, ask_again_at, committed_amount, committed_tier, sent_to_lead, sent_at, created_at, business:businesses(id, name_display, category)"
+      "id, status, contact_name, contact_email, contact_phone, business_address, relationship_note, dropped_off_at, follow_up_at, ask_again_at, committed_amount, committed_tier, sent_to_lead, sent_at, created_at, business:businesses(id, name_display, category)"
     )
     .eq("family_id", fam.id)
     .order("created_at", { ascending: true });
@@ -40,6 +40,14 @@ export async function POST(req) {
   const businessName = String(body.business_name || "").trim();
   if (!businessName) {
     return NextResponse.json({ error: "Business name is required" }, { status: 400 });
+  }
+  const contactEmail = String(body.contact_email || "").trim();
+  const contactPhone = String(body.contact_phone || "").trim();
+  if (!contactEmail && !contactPhone) {
+    return NextResponse.json(
+      { error: "Add an email or phone so we can reach this business." },
+      { status: 400 }
+    );
   }
   const canonical = canonicalName(businessName);
 
@@ -68,6 +76,9 @@ export async function POST(req) {
     family_id: fam.id,
     business_id: businessId,
     contact_name: String(body.contact_name || "").trim() || null,
+    contact_email: contactEmail || null,
+    contact_phone: contactPhone || null,
+    business_address: String(body.business_address || "").trim() || null,
     relationship_note: String(body.relationship_note || "").trim() || null,
     status: "pending"
   };
@@ -75,7 +86,7 @@ export async function POST(req) {
     .from("prospects")
     .insert(insert)
     .select(
-      "id, status, contact_name, relationship_note, dropped_off_at, follow_up_at, ask_again_at, committed_amount, committed_tier, sent_to_lead, sent_at, created_at, business:businesses(id, name_display, category)"
+      "id, status, contact_name, contact_email, contact_phone, business_address, relationship_note, dropped_off_at, follow_up_at, ask_again_at, committed_amount, committed_tier, sent_to_lead, sent_at, created_at, business:businesses(id, name_display, category)"
     )
     .single();
 

@@ -7,6 +7,9 @@ export const runtime = "nodejs";
 const ALLOWED = [
   "status",
   "contact_name",
+  "contact_email",
+  "contact_phone",
+  "business_address",
   "relationship_note",
   "dropped_off_at",
   "follow_up_at",
@@ -70,7 +73,7 @@ export async function PATCH(req, { params }) {
     .update(update)
     .eq("id", id)
     .select(
-      "id, status, contact_name, relationship_note, dropped_off_at, follow_up_at, ask_again_at, committed_amount, committed_tier, sent_to_lead, sent_at, business:businesses(id, name_display)"
+      "id, status, contact_name, contact_email, contact_phone, business_address, relationship_note, dropped_off_at, follow_up_at, ask_again_at, committed_amount, committed_tier, sent_to_lead, sent_at, business:businesses(id, name_display)"
     )
     .single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
