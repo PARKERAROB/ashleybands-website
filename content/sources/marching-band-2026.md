@@ -44,11 +44,11 @@ Marching band is a season-long commitment. Students are expected to:
 
 The full competitive season costs roughly **$42,000 to $47,000** to operate. That covers staff, custom music, drill and choreography, colorguard uniforms and equipment, props, instruments and equipment, transportation, competition logistics, meals, water, and maintenance.
 
-NHCS has covered transportation for the past two seasons, and we expect that to continue. If it does, the shared funding goal for the band is closer to **$36,000 to $41,000**.
+NHCS has covered transportation for the past two seasons, and we expect that to continue. If it does, the shared funding goal for the band is closer to **$35,000 to $41,000**.
 
-On a projected 60-student band, that is about **$600 to $685 per student** in true per-pupil cost.
+On a band of about 70 students, that is roughly **$600 to $670 per student** in true cost, or about **$500 to $585 per student** as the shared goal.
 
-This is not a bill. No student pays a required individual fee to participate. See [how we fund the season](/info/marching-band-funding) for the full breakdown.
+This is not a bill. No student pays a required individual fee. What we ask each family to help meet is a **$500 funding goal**. See [how we fund the season](/info/marching-band-funding) for the full breakdown and the ways to meet it.
 
 ## How It Is Funded
 
@@ -69,12 +69,14 @@ You must complete the sign-up form to finalize your spot in marching band. Sign-
 
 **[Complete the 2026 Marching Band Sign-Up Form](/marching-band-signup-2026)**
 
-At Signing Day, each family chooses one path:
+Signing up commits your student to the season and to helping meet the **$500 family funding goal**. The $500 is a goal, not a bill. There are two ways to meet it:
 
-- **Path A:** $500 up front
-- **Path B:** $250 up front, then $250 by band camp
-- **Path C:** Raise $500 through sponsorships and/or fundraising. [Family Campaign Tools](/sponsors/campaign) walk you through it and give you a tracker.
-- **Path D:** Talk with Mr. Parker to build a path that works.
+- **Pay it.** $500 up front, or $250 up front and $250 by band camp. Pay online through this website, or by check or cash in the band room payment box.
+- **Raise it through sponsorship.** Give us 5 local businesses your family has a real connection to, and we help you turn them into sponsors. One $2,000 sponsor can cover your student and several others. [Family Campaign Tools](/sponsors/campaign) give you the script and a tracker.
+
+On top of that, we ask every family to pursue sponsorships, however they meet their $500. That is how we fund the season together, and how we build toward a future where no family pays out of pocket.
+
+If cost is a concern, choose **talk with Mr. Parker** on the form. That conversation is private, and no student is ever kept off the field over money.
 
 If the form is not completed by June 1, we will assume the student is not marching this season. Mr. Parker or student leadership may still reach out to confirm.
 
