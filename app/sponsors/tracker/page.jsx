@@ -161,6 +161,9 @@ function AddProspectForm({ session, onAdded }) {
   return (
     <form className="tracker-add" onSubmit={submit}>
       <h3>Add a business to your list</h3>
+      <p style={{ fontSize: 13, color: "#666", margin: "0 0 8px" }}>
+        Add an email or phone so we can reach them.
+      </p>
       <div className="tracker-add-grid">
         <label className="tracker-field">
           <span>Business name *</span>
@@ -180,7 +183,7 @@ function AddProspectForm({ session, onAdded }) {
           />
         </label>
         <label className="tracker-field">
-          <span>Email (email or phone required)</span>
+          <span>Email</span>
           <input
             type="email"
             value={form.contact_email}
