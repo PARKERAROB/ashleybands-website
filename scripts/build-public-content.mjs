@@ -4,9 +4,13 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
+// PKA was retired 2026-06-01. The handful of pages that originated there are now
+// vendored into this repo at content/pka-sources (same relative layout) so the
+// content build is self-contained and needs no external PKA folder. PKA_ROOT can
+// still override for one-off rebuilds against an archive copy.
 const pkaRoot = process.env.PKA_ROOT
   ? path.resolve(process.env.PKA_ROOT)
-  : path.resolve(root, "../PKA");
+  : path.resolve(root, "content/pka-sources");
 
 const sources = {
   facts: "facts/bandsofahs-facts.md",
@@ -16,7 +20,8 @@ const sources = {
   springTrip: "projects/parent-meeting/google-site-page-spring-trip.md",
   // marching-band-2026 now lives in this repo (content/sources), not PKA — see readRepoSource
   marchingBand: "content/sources/marching-band-2026.md",
-  marchingFunding: "projects/parent-meeting/google-site-page-marching-band-funding.md",
+  // marching-band-funding now lives in this repo (content/sources), not PKA — see readRepoSource
+  marchingFunding: "content/sources/marching-band-funding.md",
   instaraise: "projects/parent-meeting/google-site-page-instaraise.md",
   bandFolder: "projects/band-website/public-pages/the-band-folder.md",
   corporateSponsorship: "projects/band-website/public-pages/corporate-sponsorship.md",
@@ -94,7 +99,7 @@ const pages = [
     audience: "Families",
     source: sources.marchingFunding,
     category: "Current information",
-    body: cleanGoogleSiteDraft(readSource(sources.marchingFunding))
+    body: cleanGoogleSiteDraft(readRepoSource(sources.marchingFunding))
   },
   {
     slug: "instaraise-fundraiser",
