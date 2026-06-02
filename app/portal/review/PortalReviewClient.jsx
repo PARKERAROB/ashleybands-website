@@ -217,6 +217,7 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
   const fee = kindTotals("fee");
   const hasGoal = goal.charges.length > 0 || goal.paid > 0;
   const hasFee = fee.charges.length > 0 || fee.paid > 0;
+  const enrolledMB = (student.charges || []).some((c) => /marching band/i.test(c.label || ""));
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
   const canPayOnline = owes && paymentsEnabled && Boolean(clientId);
 
@@ -239,6 +240,13 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
               : "All set"}
         </span>
       </div>
+
+      {enrolledMB ? (
+        <div className="portal-field">
+          <span className="portal-field-label">2026 sign-ups</span>
+          <span className="portal-field-value">Marching Band 2026 ✓</span>
+        </div>
+      ) : null}
 
       {hasGoal ? (
         <div className="portal-field">
