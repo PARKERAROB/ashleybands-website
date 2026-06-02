@@ -1368,7 +1368,7 @@ export const repertoire = [
     "notes": ""
   },
   {
-    "title": "At Dawn We Rise",
+    "title": "at dawn, We Ride!",
     "arranger": "",
     "composer": "Ben Hylton",
     "cycle": "Spring Concert",
