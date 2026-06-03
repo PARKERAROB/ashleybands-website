@@ -24,18 +24,19 @@
     "2025",
     "2026"
   ],
-  "rows": 5787,
-  "works": 1914,
-  "repeated": 908,
-  "ensembles": 1932,
+  "rows": 5886,
+  "works": 1936,
+  "repeated": 927,
+  "ensembles": 1965,
   "bySite": {
     "Eastern District": 4838,
     "North": 545,
-    "South": 404
+    "South": 404,
+    "Central": 99
   },
   "byLevel": {
-    "HS": 2981,
-    "MS": 2767,
+    "HS": 3023,
+    "MS": 2824,
     "?": 39
   }
 }

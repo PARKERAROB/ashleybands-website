@@ -81,8 +81,9 @@ export default function MpaRepertoireClient() {
         <aside className="mpa-warning">
           <strong>Working archive</strong>
           <span>
-            Built from official MPA programs (2002–2021 district-wide; South + North by site, 2022–2026).
-            Central Site repertoire not yet available. Older programs auto-extracted; expect minor noise.
+            Built from official MPA programs: 2002–2021 district-wide, then South, North &amp; Central
+            by site (2022–2026). Central ran as its own site only in 2026. Older programs were
+            auto-extracted, so expect minor noise.
           </span>
         </aside>
       </section>
