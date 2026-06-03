@@ -28,8 +28,8 @@
   "works": 1924,
   "repeated": 927,
   "graded": 979,
-  "rated": 590,
-  "ensembles": 1965,
+  "rated": 780,
+  "ensembles": 1964,
   "byDistrict": {
     "Eastern": 5886
   },
@@ -53,10 +53,12 @@
     "VI": 96
   },
   "ratingYears": [
+    "2013",
     "2015",
     "2016",
     "2017",
     "2018",
+    "2019",
     "2022",
     "2023",
     "2024",
