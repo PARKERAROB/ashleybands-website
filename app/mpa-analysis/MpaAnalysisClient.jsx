@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 
 const summaryStats = [
@@ -139,7 +140,8 @@ export default function MpaAnalysisClient() {
           <h1>2026 NC MPA Results Analysis</h1>
           <p>
             Aggregated statewide discussion notes for interpreting MPA data by level, grade,
-            district, and program structure.
+            district, and program structure. See also the{" "}
+            <Link href="/mpa-repertoire">South Site repertoire archive</Link>.
           </p>
         </div>
         <aside className="mpa-warning">

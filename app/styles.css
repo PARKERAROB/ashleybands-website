@@ -1401,6 +1401,7 @@ h2 {
 }
 
 .mpa-filter select,
+.mpa-filter input,
 .mpa-login-form input {
   width: 100%;
   min-height: 42px;
@@ -1410,6 +1411,30 @@ h2 {
   border: 1px solid var(--line);
   border-radius: 8px;
   font: inherit;
+}
+
+.mpa-year-block {
+  margin-top: 26px;
+}
+
+.mpa-year-block h2 {
+  border-bottom: 2px solid var(--garnet);
+  padding-bottom: 4px;
+}
+
+.mpa-pill {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+  color: #fff;
+  background: #8a8f98;
+  white-space: nowrap;
+}
+
+.mpa-pill.march {
+  background: var(--garnet);
 }
 
 .mpa-bars {
