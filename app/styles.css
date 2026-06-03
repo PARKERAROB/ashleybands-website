@@ -1437,6 +1437,39 @@ h2 {
   background: var(--garnet);
 }
 
+.mpa-filter-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.mpa-ens-block {
+  margin-top: 14px;
+}
+
+.mpa-ens-block h3 {
+  margin: 0 0 2px;
+}
+
+.mpa-ens-meta {
+  font-weight: 400;
+  color: #6b6b6b;
+  font-size: 13px;
+}
+
+.mpa-piece-list {
+  margin: 2px 0 0;
+  padding-left: 20px;
+}
+
+.mpa-piece-list li {
+  margin: 2px 0;
+}
+
+.mpa-comp {
+  color: #6b6b6b;
+}
+
 .mpa-bars {
   display: grid;
   gap: 12px;
