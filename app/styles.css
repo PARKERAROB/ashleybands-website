@@ -1470,6 +1470,25 @@ h2 {
   color: #6b6b6b;
 }
 
+.mpa-pill.grade {
+  background: #3a6ea5;
+}
+
+.mpa-rate {
+  display: inline-block;
+  min-width: 44px;
+  text-align: center;
+  padding: 1px 8px;
+  border-radius: 6px;
+  font-weight: 900;
+  font-size: 12px;
+  color: #fff;
+}
+
+.mpa-rate.good { background: #2e7d32; }
+.mpa-rate.mid { background: #b07d18; }
+.mpa-rate.low { background: #a13b2b; }
+
 .mpa-bars {
   display: grid;
   gap: 12px;

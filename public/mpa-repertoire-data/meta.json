@@ -25,9 +25,14 @@
     "2026"
   ],
   "rows": 5886,
-  "works": 1936,
+  "works": 1924,
   "repeated": 927,
+  "graded": 979,
+  "rated": 228,
   "ensembles": 1965,
+  "byDistrict": {
+    "Eastern": 5886
+  },
   "bySite": {
     "Eastern District": 4838,
     "North": 545,
@@ -38,5 +43,16 @@
     "HS": 3023,
     "MS": 2824,
     "?": 39
-  }
+  },
+  "byGrade": {
+    "I": 78,
+    "II": 274,
+    "III": 221,
+    "IV": 211,
+    "V": 99,
+    "VI": 96
+  },
+  "ratingYears": [
+    "2026"
+  ]
 }
