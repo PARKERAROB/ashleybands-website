@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>WSW — Governance Refresh</title>
+<style>
+  :root{
+    --navy:#1f2d3d; --slate:#42566b; --ink:#26323f; --muted:#6b7a8c;
+    --gold:#b6863b; --line:#e3e7ec; --bg:#f6f7f9; --card:#ffffff;
+    --board:#eef2f7; --art:#f4efe6;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:760px; margin:0 auto; padding:28px 20px 64px}
+  header{border-bottom:3px solid var(--gold); padding-bottom:18px; margin-bottom:26px}
+  .kicker{letter-spacing:.14em; text-transform:uppercase; font-size:12px; color:var(--gold); font-weight:700; margin:0 0 6px}
+  h1{font-size:27px; line-height:1.2; margin:0 0 8px; color:var(--navy)}
+  .sub{color:var(--muted); font-size:15px; margin:0}
+  h2{font-size:19px; color:var(--navy); margin:34px 0 10px}
+  p{margin:0 0 14px}
+  ul{margin:0 0 14px; padding-left:20px}
+  li{margin:0 0 9px}
+  strong{color:var(--ink)}
+  .lead{font-size:17px; color:var(--slate)}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:18px 20px; margin:16px 0}
+  .pillars{display:flex; flex-wrap:wrap; gap:10px; margin:10px 0 4px}
+  .pillar{flex:1 1 200px; background:var(--card); border:1px solid var(--line); border-left:4px solid var(--gold); border-radius:8px; padding:12px 14px}
+  .pillar b{display:block; color:var(--navy); margin-bottom:2px}
+  .pillar span{font-size:14px; color:var(--muted)}
+  .keep{background:#eef4ee; border:1px solid #d6e4d6; border-radius:12px; padding:16px 20px; margin:16px 0}
+  .keep h2{margin-top:0; color:#3a6a3a}
+
+  /* diagram */
+  .diagram{margin:18px 0 6px}
+  .triangle{background:var(--navy); color:#fff; border-radius:12px; text-align:center; padding:16px 18px}
+  .triangle b{font-size:14px; letter-spacing:.05em; text-transform:uppercase; display:block; margin-bottom:7px}
+  .triangle .seats{font-size:14px; color:#dbe4ee}
+  .tri-cap{text-align:center; color:var(--muted); font-size:13px; margin:8px 0 2px}
+  .conn{text-align:center; color:#b9c3cd; font-size:18px; line-height:1; margin:4px 0}
+  .president{max-width:380px; margin:2px auto 0; background:#fff; border:1px solid var(--line); border-top:3px solid var(--gold); border-radius:10px; text-align:center; padding:11px 14px}
+  .president b{color:var(--navy)} .president span{display:block; font-size:13px; color:var(--muted)}
+  .coreband{max-width:480px; margin:12px auto 2px; background:var(--art); border:1px solid #e7ddca; border-radius:10px; text-align:center; padding:10px 14px; font-size:14px}
+  .coreband b{color:#8a6726}
+  .sides{display:flex; gap:14px; flex-wrap:wrap; margin-top:12px}
+  .side{flex:1 1 300px; border-radius:12px; padding:15px 16px}
+  .side.internal{background:var(--board); border:1px solid #dbe3ec}
+  .side.external{background:#f1ece2; border:1px solid #e7ddca}
+  .side h3{margin:0 0 2px; font-size:16px; color:var(--navy)}
+  .side h3 small{font-weight:400; font-size:13px; color:var(--muted)}
+  .director{background:#fff; border:1px solid var(--line); border-left:4px solid var(--gold); border-radius:8px; padding:10px 12px; margin:11px 0}
+  .director b{display:block; color:var(--navy); font-size:14px} .director span{font-size:13px; color:var(--muted)}
+  .anchors{font-size:13px; color:var(--slate); margin:0 0 10px}
+  .anchors b{color:var(--ink)}
+  .clabel{font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:0 0 6px}
+  .committees{display:flex; flex-direction:column; gap:6px}
+  .comm{background:#fff; border:1px solid var(--line); border-radius:7px; padding:7px 10px; font-size:13.5px}
+  .comm b{color:var(--ink)} .comm span{color:var(--muted)}
+  .dfoot{text-align:center; color:var(--muted); font-size:13px; margin-top:14px; font-style:italic}
+
+  .ask{background:var(--navy); color:#fff; border-radius:12px; padding:20px 22px; margin:26px 0 10px}
+  .ask h2{color:#fff; margin-top:0}
+  .ask p{color:#e7edf3}
+  .sign{margin-top:22px; font-size:16px; color:var(--slate)}
+  footer{margin-top:34px; padding-top:16px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  @media (max-width:560px){
+    h1{font-size:23px} .wrap{padding:22px 16px 52px}
+    .triangle .seats{font-size:13px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="kicker">Wilmington Symphonic Winds</p>
+    <h1>Governance Refresh — a concept for your input</h1>
+    <p class="sub">A short overview for Gwen and Dachuan, from Rob · June 2026</p>
+  </header>
+
+  <p class="lead">This is an idea and a shape, not a set of motions — I wanted to show you the whole
+  picture before building anything out, and hear whether you think it is a sound direction.</p>
+
+  <h2>Why now</h2>
+  <p>As we move through this transition, I have been looking back over our first ten or eleven years
+  and reading our governing documents against what WSW actually does today. A few good updates would
+  bring the documents into better alignment with how the ensemble really operates, and let us retire
+  some early founding-era language that no longer fits. Mostly, this is about bringing our paperwork
+  up to speed with what is already happening — and putting the organization on a footing that does
+  not depend on any one person.</p>
+
+  <h2>The direction</h2>
+  <p>A refreshed sense of who we are: <strong>a leading wind band of the Cape Fear region</strong>
+  that performs exceptional music at a professional artistic level, connects meaningfully with our
+  audiences through free and welcoming performances, and strengthens the region's musical life by
+  uniting student, collegiate, and professional musicians.</p>
+  <div class="pillars">
+    <div class="pillar"><b>Artistic Excellence</b><span>the finest repertoire, performed at the highest level</span></div>
+    <div class="pillar"><b>Community Connection</b><span>genuine connection with the audiences we serve</span></div>
+    <div class="pillar"><b>Music Education &amp; Mentorship</b><span>welcoming musicians in, sending players out to teach</span></div>
+  </div>
+
+  <h2>How it all fits together</h2>
+  <div class="diagram">
+    <div class="triangle"><b>The Decision Triangle</b><span class="seats">President&nbsp; +&nbsp; Artistic Director, Internal Operations&nbsp; +&nbsp; Artistic Director, External Operations</span></div>
+    <p class="tri-cap">Always three. Resolves day-to-day operational questions and keeps us aligned.</p>
+    <div class="conn">▾</div>
+    <div class="president"><b>President</b><span>chairs the board &middot; bridges governance &amp; operations</span></div>
+    <div class="coreband"><b>The Music</b> — programmed jointly by both Artistic Directors</div>
+    <div class="sides">
+      <div class="side internal">
+        <h3>Internal <small>· the room</small></h3>
+        <div class="director"><b>Artistic Director, Internal Operations</b><span>Dachuan Cao</span></div>
+        <p class="anchors"><b>Board anchors:</b> President-Elect (Bradley) &middot; Secretary (Alana)</p>
+        <p class="clabel">Committees</p>
+        <div class="committees">
+          <div class="comm"><b>Music Library</b> <span>— Zoe</span></div>
+          <div class="comm"><b>Personnel</b> <span>— roster &amp; attendance</span></div>
+          <div class="comm"><b>Equipment &amp; Logistics</b> <span>— Alana &middot; Bradley</span></div>
+          <div class="comm"><b>Percussion Coordinator</b> <span>— paid &middot; Mitch</span></div>
+        </div>
+      </div>
+      <div class="side external">
+        <h3>External <small>· the community</small></h3>
+        <div class="director"><b>Artistic Director, External Operations</b><span>Rob Parker</span></div>
+        <p class="anchors"><b>Board anchors:</b> Past President (Shawn) &middot; Treasurer (David)</p>
+        <p class="clabel">Committees</p>
+        <div class="committees">
+          <div class="comm"><b>Marketing</b> <span>— Sarah</span></div>
+          <div class="comm"><b>Fundraising &amp; Grants</b> <span>— Deborah &middot; Sean</span></div>
+          <div class="comm"><b>Audience Interaction</b> <span>— Dara</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="dfoot">The board governs and recruits; the directors lead the work.</p>
+  </div>
+
+  <h2>What would change at the top</h2>
+  <ul>
+    <li>Update our stated <strong>mission and purpose</strong> to the language above.</li>
+    <li>A board of <strong>five voting officers</strong>, with the <strong>Past President restored
+      to a voting seat</strong> as our continuity and stability voice, and the
+      <strong>Administrative Coordinator seat retired</strong> (its duties folded into the
+      Secretary). Each officer also anchors a clear operating area.</li>
+    <li><strong>Artistic leadership defined in our documents:</strong> an Artistic Director role that
+      can be held by one person or split between an <strong>Artistic Director for Internal
+      Operations</strong> and one for <strong>External Operations</strong>, each a contracted,
+      non-voting position. On concert programs, both are simply "Artistic Director."</li>
+    <li>A small <strong>decision triangle</strong> — the President plus the two directors — to
+      resolve day-to-day operational questions and keep us aligned.</li>
+  </ul>
+
+  <div class="keep">
+    <h2>What would NOT change</h2>
+    <p style="margin-bottom:0">Our <strong>Articles of Incorporation</strong>, our
+    <strong>501(c)(3) status</strong>, and our <strong>conflict-of-interest policy</strong> all stay
+    as they are. These are <strong>bylaws-level updates the board can adopt by vote</strong> — not a
+    charter rewrite.</p>
+  </div>
+
+  <h2>One housekeeping item</h2>
+  <p>Separately: our registered agent on file with the State is Tom Smicklas, who has passed away, so
+  that needs updating regardless. I would suggest attaching that role to the Treasurer's office going
+  forward, so it is always owned by a seat.</p>
+
+  <div class="ask">
+    <h2>The ask</h2>
+    <p>Does this direction make sense to you? If you like it, I will flesh it out all the way into the
+    full language for the board to review and adopt. I would love your thoughts, and I am happy to
+    talk it through anytime.</p>
+    <p style="margin-bottom:0">— Rob</p>
+  </div>
+
+  <footer>Private overview prepared for WSW board discussion. Not a public document.</footer>
+
+</div>
+</body>
+</html>
