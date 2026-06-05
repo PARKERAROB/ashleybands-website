@@ -132,22 +132,27 @@ function extractEmails(text, siteHost, tokens = []) {
   return { best, all: list.join("; "), confidence, usable };
 }
 
-function searchText(query) {
-  try {
-    return execFileSync("firecrawl", ["search", query, "--limit", "5"], {
-      encoding: "utf8", timeout: 60000, maxBuffer: 20 * 1024 * 1024, stdio: ["ignore", "pipe", "ignore"],
-    });
-  } catch { return ""; }
-}
+function searchText(query) { return run(["search", query, "--limit", "5"]); } // returns {text, failed}
 
 // ---- firecrawl wrapper ----
-function fc(u, format) {
+// Detect credit/rate-limit exhaustion so we can STOP cleanly instead of
+// recording rate-limited businesses as "no email" (which would mark them done
+// and skip them on next month's run). limitHit is checked in the main loop.
+let limitHit = false;
+const LIMIT_RE = /(payment required|insufficient|out of credit|no credits|credit limit|monthly limit|quota|rate ?limit|too many requests|\b402\b|\b429\b|upgrade your plan|exceeded)/i;
+function run(args) {
   try {
-    return execFileSync("firecrawl", ["scrape", u, "-f", format], {
-      encoding: "utf8", timeout: 60000, maxBuffer: 20 * 1024 * 1024, stdio: ["ignore", "pipe", "ignore"],
+    const text = execFileSync("firecrawl", args, {
+      encoding: "utf8", timeout: 60000, maxBuffer: 20 * 1024 * 1024, stdio: ["ignore", "pipe", "pipe"],
     });
-  } catch { return ""; }
+    return { text, failed: false };
+  } catch (e) {
+    const blob = `${e.stderr || ""}${e.stdout || ""}${e.message || ""}`;
+    if (LIMIT_RE.test(blob)) limitHit = true;
+    return { text: "", failed: true };
+  }
 }
+function fc(u, format) { return run(["scrape", u, "-f", format]).text; }
 
 function pickContactLinks(linksText, siteHost) {
   const out = [];
@@ -215,7 +220,17 @@ for (let i = 0; i < candidates.length; i++) {
 
   // 1) Search-first — highest yield (catches directory/social/Google-profile emails).
   const city = (b.city && b.city.trim()) || "Wilmington";
-  consider(extractEmails(searchText(`${b.name_display} ${city} NC contact email`), siteHost, tokens), "search");
+  const sres = searchText(`${b.name_display} ${city} NC contact email`);
+  // Credit/rate limit: stop now WITHOUT recording this business, so it (and all
+  // remaining) are retried next run. Resumable — already-done rows are skipped.
+  if (limitHit) {
+    console.log(`\nLIMIT REACHED at [${i + 1}/${candidates.length}] ${b.name_display}.`);
+    console.log(`Stopped cleanly. ${i} processed this run; ${candidates.length - i} remain for next batch.`);
+    break;
+  }
+  // Transient (non-limit) search failure: skip without recording so it retries later.
+  if (sres.failed) { console.log(`${tag} -> search failed (transient), will retry next run`); continue; }
+  consider(extractEmails(sres.text, siteHost, tokens), "search");
 
   // 2) Fallback: scrape the real homepage + a contact/about subpage.
   let homeLinks = "", homeMd = "";
@@ -229,6 +244,13 @@ for (let i = 0; i < candidates.length; i++) {
         if (hit) break;
       }
     }
+  }
+
+  // Limit hit during the scrape fallback (no usable hit) — stop without recording.
+  if (limitHit && !hit) {
+    console.log(`\nLIMIT REACHED at [${i + 1}/${candidates.length}] ${b.name_display} (during scrape).`);
+    console.log(`Stopped cleanly. ${i} processed this run; ${candidates.length - i} remain for next batch.`);
+    break;
   }
 
   if (hit) {
