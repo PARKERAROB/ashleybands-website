@@ -1,9 +1,12 @@
 #!/usr/bin/env node
 /**
- * Phase C dispatcher: drain queued business_outreach rows from Supabase
- * and send each via gws gmail. Runs locally on Mr. Parker's machine because
- * the gws CLI uses his existing NHCS Gmail auth — no Gmail API OAuth needed
- * in the web app.
+ * FALLBACK dispatcher (gws/Gmail). The PRIMARY send path is now the website:
+ * the staff dashboard "Send queued" button -> /api/sponsors/businesses/send-queue
+ * -> lib/businessOutreachSend.js, which sends through Resend on ashleybands.com and
+ * is not tied to any NHCS account. Keep this script only as a manual backstop.
+ *
+ * Drains queued business_outreach rows from Supabase and sends each via gws gmail.
+ * Runs locally because the gws CLI uses Mr. Parker's Google auth.
  *
  * Usage:
  *   node scripts/drain-send-queue.mjs                # send all queued, 10s between

@@ -24,7 +24,7 @@ export async function GET(req) {
     supabaseAdmin
       .from("prospects")
       .select(
-        "id, status, contact_name, contact_email, contact_phone, business_address, relationship_note, dropped_off_at, follow_up_at, ask_again_at, committed_amount, committed_tier, sent_to_lead, sent_at, created_at, family:families(id, display_name, student_first, student_last, section), business:businesses(id, name_display, category)"
+        "id, status, contact_name, contact_email, contact_phone, business_address, relationship_note, dropped_off_at, follow_up_at, ask_again_at, committed_amount, committed_tier, sent_to_lead, sent_at, confirmed_by_lead, confirmed_at, created_at, family:families(id, display_name, student_first, student_last, section), business:businesses(id, name_display, category)"
       )
       .order("created_at", { ascending: false }),
     supabaseAdmin.from("prospect_dedup").select("*"),
@@ -39,11 +39,14 @@ export async function GET(req) {
       acc.count += 1;
       acc[p.status] = (acc[p.status] || 0) + 1;
       if (p.status === "yes" && p.committed_amount) {
+        // Reported = what families self-entered. Confirmed = lead has the signed
+        // form. Only confirmed money should be treated as actually raised.
         acc.committed_amount += Number(p.committed_amount);
+        if (p.confirmed_by_lead) acc.committed_confirmed += Number(p.committed_amount);
       }
       return acc;
     },
-    { count: 0, pending: 0, yes: 0, no: 0, later: 0, committed_amount: 0 }
+    { count: 0, pending: 0, yes: 0, no: 0, later: 0, committed_amount: 0, committed_confirmed: 0 }
   );
 
   return NextResponse.json({

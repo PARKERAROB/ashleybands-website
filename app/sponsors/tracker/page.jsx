@@ -26,6 +26,17 @@ function authHeaders(s) {
   return { "Content-Type": "application/json", "x-family-id": s.id, "x-family-token": s.token };
 }
 
+async function endSession() {
+  // Clears the httpOnly cookie server-side, then the local copy. Without the
+  // server call the cookie would keep the session alive after "Log out".
+  try {
+    await fetch("/api/sponsors/family-signout", { method: "POST" });
+  } catch {
+    // ignore — still clear local state below
+  }
+  writeSession(null);
+}
+
 const STATUS_LABELS = {
   pending: "Pending",
   yes: "Yes — committed",
@@ -132,10 +143,44 @@ function AuthForm({ onAuthed }) {
   );
 }
 
+const EMPTY_PROSPECT = { business_name: "", business_id: "", contact_name: "", contact_email: "", contact_phone: "", business_address: "", relationship_note: "" };
+
 function AddProspectForm({ session, onAdded }) {
-  const [form, setForm] = useState({ business_name: "", contact_name: "", contact_email: "", contact_phone: "", business_address: "", relationship_note: "" });
+  const [form, setForm] = useState(EMPTY_PROSPECT);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggest, setShowSuggest] = useState(false);
+
+  // Typeahead against existing businesses so families reuse a record instead of
+  // creating a near-duplicate of one already in the prospect DB.
+  useEffect(() => {
+    const q = form.business_name.trim();
+    if (form.business_id || q.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+    let active = true;
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/sponsors/business-search?q=${encodeURIComponent(q)}`, {
+          headers: authHeaders(session)
+        });
+        if (!res.ok) return;
+        const body = await res.json();
+        if (active) setSuggestions(body.results || []);
+      } catch {
+        // ignore typeahead errors — free text still works
+      }
+    }, 250);
+    return () => { active = false; clearTimeout(timer); };
+  }, [form.business_name, form.business_id, session]);
+
+  function pickSuggestion(s) {
+    setForm({ ...form, business_name: s.name_display, business_id: s.id });
+    setSuggestions([]);
+    setShowSuggest(false);
+  }
 
   async function submit(e) {
     e.preventDefault();
@@ -149,7 +194,7 @@ function AddProspectForm({ session, onAdded }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Could not add");
-      setForm({ business_name: "", contact_name: "", contact_email: "", contact_phone: "", business_address: "", relationship_note: "" });
+      setForm(EMPTY_PROSPECT);
       onAdded(data.prospect);
     } catch (err) {
       setError(err.message);
@@ -165,14 +210,69 @@ function AddProspectForm({ session, onAdded }) {
         Add an email or phone so we can reach them.
       </p>
       <div className="tracker-add-grid">
-        <label className="tracker-field">
+        <label className="tracker-field" style={{ position: "relative" }}>
           <span>Business name *</span>
           <input
             type="text"
             required
+            autoComplete="off"
             value={form.business_name}
-            onChange={(e) => setForm({ ...form, business_name: e.target.value })}
+            onChange={(e) => {
+              // Typing after a pick means they're entering a different business.
+              setForm({ ...form, business_name: e.target.value, business_id: "" });
+              setShowSuggest(true);
+            }}
+            onFocus={() => setShowSuggest(true)}
+            onBlur={() => setTimeout(() => setShowSuggest(false), 150)}
           />
+          {form.business_id && (
+            <span className="tracker-sub" style={{ color: "#2f7a2f" }}>
+              Linked to an existing business — no duplicate created.
+            </span>
+          )}
+          {showSuggest && suggestions.length > 0 && (
+            <ul
+              style={{
+                position: "absolute",
+                top: "100%",
+                left: 0,
+                right: 0,
+                zIndex: 20,
+                margin: "2px 0 0",
+                padding: 0,
+                listStyle: "none",
+                background: "#fff",
+                border: "1px solid #ccc",
+                borderRadius: 6,
+                boxShadow: "0 6px 18px rgba(0,0,0,0.12)",
+                maxHeight: 240,
+                overflowY: "auto"
+              }}
+            >
+              {suggestions.map((s) => (
+                <li key={s.id}>
+                  <button
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => pickSuggestion(s)}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      textAlign: "left",
+                      padding: "8px 10px",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      fontSize: 14
+                    }}
+                  >
+                    {s.name_display}
+                    {s.city ? <span style={{ color: "#888" }}> · {s.city}</span> : null}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </label>
         <label className="tracker-field">
           <span>Contact person</span>
@@ -480,7 +580,7 @@ function TrackerDashboard({ session, onLogout }) {
           <p className="eyebrow">Signed in as</p>
           <h2>{session.display_name}</h2>
         </div>
-        <button type="button" className="sponsors-btn" onClick={() => { writeSession(null); onLogout(); }}>
+        <button type="button" className="sponsors-btn" onClick={async () => { await endSession(); onLogout(); }}>
           Log out
         </button>
       </header>
@@ -499,6 +599,10 @@ function TrackerDashboard({ session, onLogout }) {
           <span className="tracker-stat-label">Raised</span>
         </div>
       </div>
+      <p className="tracker-help" style={{ marginTop: 4 }}>
+        Everything you raise counts toward the program's shared season funding goal. It is not a
+        personal account or a credit against a bill. We meet the goal together.
+      </p>
 
       <AddProspectForm session={session} onAdded={(p) => setData({ ...data, prospects: [...data.prospects, p] })} />
 

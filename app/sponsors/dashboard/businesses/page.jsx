@@ -39,8 +39,8 @@ const SORT_OPTIONS = [
 
 function EmailPreview({ business }) {
   if (!business) return null;
-  const yesUrl = `https://ashleybands.com/api/sponsors/business-respond?id=<TOKEN>&a=yes`;
-  const noUrl = `https://ashleybands.com/api/sponsors/business-respond?id=<TOKEN>&a=no`;
+  const yesUrl = `https://ashleybands.com/sponsors/respond?t=<TOKEN>&a=yes`;
+  const noUrl = `https://ashleybands.com/sponsors/respond?t=<TOKEN>&a=no`;
   const html = renderColdEmailHTML({
     businessName: business.name_display,
     contactFirst: business.contact_person ? business.contact_person.split(/\s+/)[0] : "",
@@ -55,7 +55,7 @@ function EmailPreview({ business }) {
       </div>
       <div className="biz-preview-body" dangerouslySetInnerHTML={{ __html: html }} />
       <p className="biz-preview-note">
-        Token placeholder shown. Real send (Phase C) will generate unique click-yes / click-no URLs per outreach row.
+        Token placeholder shown. Each real send generates unique click-yes / click-no URLs per outreach row.
       </p>
     </div>
   );
@@ -115,6 +115,66 @@ function EditRow({ business, onSave, onCancel }) {
         </div>
       </td>
     </tr>
+  );
+}
+
+function SendQueuePanel({ session, askedCount }) {
+  const [queued, setQueued] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState("");
+
+  const loadCount = useCallback(async () => {
+    try {
+      const res = await fetch("/api/sponsors/businesses/send-queue", { headers: authHeaders(session) });
+      if (res.ok) {
+        const body = await res.json();
+        setQueued(body.queued);
+      }
+    } catch {
+      // leave count as-is
+    }
+  }, [session]);
+
+  // Refetch when the queued count likely changed (a queue/unqueue flips asked count).
+  useEffect(() => { loadCount(); }, [loadCount, askedCount]);
+
+  async function send() {
+    if (!queued) return;
+    if (!confirm(`Send the cold willingness email to ${queued} business${queued === 1 ? "" : "es"} now? This emails real businesses.`)) {
+      return;
+    }
+    setBusy(true);
+    setResult("");
+    try {
+      const res = await fetch("/api/sponsors/businesses/send-queue", {
+        method: "POST",
+        headers: authHeaders(session),
+        body: JSON.stringify({ confirm: true })
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error || "Send failed");
+      setResult(`Sent ${body.sent}. Failed ${body.failed}. Remaining ${body.remaining}.`);
+      loadCount();
+    } catch (err) {
+      setResult(`Error: ${err.message}`);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (!queued) {
+    return result ? <p className="biz-queue-note">{result}</p> : null;
+  }
+
+  return (
+    <p className="biz-queue-note">
+      <strong>{queued} email{queued === 1 ? "" : "s"} queued and ready to send.</strong>{" "}
+      <button type="button" className="sponsors-btn sponsors-btn-primary" onClick={send} disabled={busy}>
+        {busy ? "Sending..." : `Send queued (${queued})`}
+      </button>
+      {" "}Sends through Resend on ashleybands.com. You are the one clicking send.
+      {result && <span style={{ display: "block", marginTop: 6 }}>{result}</span>}
+    </p>
   );
 }
 
@@ -204,6 +264,15 @@ function BusinessRow({ session, business, onChange, onDelete, onPreview }) {
       <td>
         <strong>{business.name_display}</strong>
         {business.prior_sponsor && <span className="biz-tag biz-tag-prior">prior</span>}
+        {business.family_count > 0 && (
+          <span
+            className="biz-tag"
+            title="A family is already working this business in the tracker — avoid cold-emailing on top of an in-person visit"
+            style={{ background: "#e6f0ff", color: "#1d4ed8" }}
+          >
+            {business.family_count} family{business.family_count === 1 ? "" : " families"}
+          </span>
+        )}
         {business.category && <div className="tracker-sub">{business.category}</div>}
         {business.notes && <div className="biz-note">{business.notes}</div>}
       </td>
@@ -296,11 +365,7 @@ function Dashboard({ session, onLogout }) {
         <div className="tracker-stat"><span className="tracker-stat-num">{(t.by_status && t.by_status.declined) || 0}</span><span className="tracker-stat-label">Declined</span></div>
         <div className="tracker-stat"><span className="tracker-stat-num">{t.prior || 0}</span><span className="tracker-stat-label">Prior sponsors</span></div>
       </div>
-      {(t.by_status && t.by_status.asked) > 0 && (
-        <p className="biz-queue-note">
-          <strong>{t.by_status.asked} business{t.by_status.asked === 1 ? "" : "es"} queued.</strong> Run <code>node scripts/drain-send-queue.mjs</code> locally to dispatch (use <code>--dry-run</code> to preview, <code>--limit 10</code> to cap).
-        </p>
-      )}
+      <SendQueuePanel session={session} askedCount={(t.by_status && t.by_status.asked) || 0} />
 
       <div className="dashboard-filters">
         <label className="tracker-field"><span>Zone</span>
@@ -421,8 +486,8 @@ export default function BusinessCurationPage() {
         <h1>Business Prospect Curation</h1>
         <p className="sponsors-lede">
           Review the 200+ candidate businesses. Edit emails/contacts, mark obvious skips, preview
-          the cold-willingness email per row. Sending happens in a separate step (Phase C) — this
-          page is for curation only.
+          the cold-willingness email per row, queue the ones to contact, then send the queue from
+          here. Sends go out through Resend on ashleybands.com, on your click.
         </p>
       </section>
       <section className="sponsors-section">

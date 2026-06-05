@@ -69,6 +69,21 @@ export async function GET(req) {
   const { data, error } = await q;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
+  // Cross-path overlap: how many families are also pursuing each business via the
+  // warm tracker. Lets staff see a cold-DB business that's already being worked in
+  // person, so it doesn't get cold-emailed on top of a family visit.
+  const { data: prospectRows } = await supabaseAdmin
+    .from("prospects")
+    .select("business_id, family_id");
+  const familyByBiz = {};
+  for (const row of prospectRows || []) {
+    if (!row.business_id) continue;
+    (familyByBiz[row.business_id] ||= new Set()).add(row.family_id);
+  }
+  for (const b of data) {
+    b.family_count = familyByBiz[b.id] ? familyByBiz[b.id].size : 0;
+  }
+
   const totals = data.reduce(
     (acc, b) => {
       acc.count += 1;

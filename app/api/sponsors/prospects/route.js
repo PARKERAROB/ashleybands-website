@@ -51,17 +51,38 @@ export async function POST(req) {
   }
   const canonical = canonicalName(businessName);
 
-  // upsert business
+  // Resolve the business, reusing an existing row wherever possible so the warm
+  // list and the cold prospect DB don't accumulate duplicate businesses.
+  // Priority: (1) an id the family picked from typeahead, (2) exact canonical
+  // match, (3) case-insensitive name match, else (4) create a new row.
   let businessId;
   {
-    const { data: existing } = await supabaseAdmin
-      .from("businesses")
-      .select("id")
-      .eq("name_canonical", canonical)
-      .maybeSingle();
-    if (existing) {
-      businessId = existing.id;
-    } else {
+    const pickedId = String(body.business_id || "").trim();
+    if (pickedId) {
+      const { data: picked } = await supabaseAdmin
+        .from("businesses")
+        .select("id")
+        .eq("id", pickedId)
+        .maybeSingle();
+      if (picked) businessId = picked.id;
+    }
+    if (!businessId) {
+      const { data: existing } = await supabaseAdmin
+        .from("businesses")
+        .select("id")
+        .eq("name_canonical", canonical)
+        .maybeSingle();
+      if (existing) businessId = existing.id;
+    }
+    if (!businessId) {
+      const { data: byName } = await supabaseAdmin
+        .from("businesses")
+        .select("id")
+        .ilike("name_display", businessName)
+        .maybeSingle();
+      if (byName) businessId = byName.id;
+    }
+    if (!businessId) {
       const { data, error } = await supabaseAdmin
         .from("businesses")
         .insert({ name_canonical: canonical, name_display: businessName })

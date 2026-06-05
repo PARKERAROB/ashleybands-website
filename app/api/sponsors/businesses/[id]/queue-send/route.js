@@ -54,8 +54,10 @@ export async function POST(req, { params }) {
 
   const clickToken = crypto.randomUUID();
   const origin = siteOrigin(req);
-  const yesUrl = `${origin}/api/sponsors/business-respond?t=${clickToken}&a=yes`;
-  const noUrl = `${origin}/api/sponsors/business-respond?t=${clickToken}&a=no`;
+  // Point at the read-only confirm page (not the mutating API route) so mail
+  // scanners that prefetch the link can't answer on the business's behalf.
+  const yesUrl = `${origin}/sponsors/respond?t=${clickToken}&a=yes`;
+  const noUrl = `${origin}/sponsors/respond?t=${clickToken}&a=no`;
 
   const { data: outreach, error: insErr } = await supabaseAdmin
     .from("business_outreach")

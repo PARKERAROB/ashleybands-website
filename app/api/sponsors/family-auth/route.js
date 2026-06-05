@@ -1,11 +1,31 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { hashPin, verifyPin } from "@/lib/sponsorAuth";
+import { checkRateLimit, clientIp } from "@/lib/rateLimit";
+import { createFamilyCookieValue, setFamilyCookie } from "@/lib/familyAuthCookie";
 
 export const runtime = "nodejs";
 
 function bad(msg, status = 400) {
   return NextResponse.json({ error: msg }, { status });
+}
+
+// Issue a session: set the httpOnly cookie, and (for backward compat with the
+// localStorage client) also return id/token unless the cookie was set, mirroring
+// the staff-auth rollout. The cookie is the secure path; the token fallback keeps
+// existing sessions working and avoids any lockout if the secret is unset.
+function issueSession(fam) {
+  let cookieValue = null;
+  try {
+    cookieValue = createFamilyCookieValue({ id: fam.id, token: fam.session_token });
+  } catch {
+    cookieValue = null;
+  }
+  const payload = { id: fam.id, display_name: fam.display_name };
+  if (!cookieValue) payload.token = fam.session_token;
+  const res = NextResponse.json(payload);
+  if (cookieValue) setFamilyCookie(res, cookieValue);
+  return res;
 }
 
 export async function POST(req) {
@@ -22,6 +42,22 @@ export async function POST(req) {
 
   if (!displayName || !/^\d{4}$/.test(pin)) {
     return bad("Family name and a 4-digit PIN are required.");
+  }
+
+  // Throttle PIN guessing: 10 attempts / 15 min per family name, 30 / 15 min per IP.
+  // 4-digit PINs are only safe behind a rate limit, which family-auth previously lacked.
+  const nameLimit = await checkRateLimit({
+    key: `family-auth:${displayName.toLowerCase()}`,
+    limit: 10,
+    windowMs: 15 * 60 * 1000
+  });
+  const ipLimit = await checkRateLimit({
+    key: `family-auth-ip:${clientIp(req)}`,
+    limit: 30,
+    windowMs: 15 * 60 * 1000
+  });
+  if (!nameLimit.allowed || !ipLimit.allowed) {
+    return bad("Too many attempts. Please wait a few minutes and try again.", 429);
   }
 
   if (mode === "signup") {
@@ -46,11 +82,7 @@ export async function POST(req) {
       .select("id, session_token, display_name")
       .single();
     if (error) return bad(error.message, 500);
-    return NextResponse.json({
-      id: data.id,
-      token: data.session_token,
-      display_name: data.display_name
-    });
+    return issueSession(data);
   }
 
   // login
@@ -62,9 +94,5 @@ export async function POST(req) {
   if (!fam || !verifyPin(pin, fam.pin_hash)) {
     return bad("Family name or PIN not recognized.", 401);
   }
-  return NextResponse.json({
-    id: fam.id,
-    token: fam.session_token,
-    display_name: fam.display_name
-  });
+  return issueSession(fam);
 }

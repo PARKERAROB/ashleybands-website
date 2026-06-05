@@ -123,6 +123,20 @@ function Dashboard({ session, onLogout }) {
     return true;
   });
 
+  async function toggleConfirm(p) {
+    const next = !p.confirmed_by_lead;
+    if (next && !confirm(`Confirm ${p.business?.name_display} ($${Number(p.committed_amount || 0).toLocaleString()})? Only do this once the signed form is in hand.`)) {
+      return;
+    }
+    const res = await fetch(`/api/sponsors/prospects/${p.id}`, {
+      method: "PATCH",
+      headers: authHeaders(session),
+      body: JSON.stringify({ confirmed_by_lead: next })
+    });
+    if (res.ok) load();
+    else alert("Could not update confirmation.");
+  }
+
   return (
     <div className="dashboard">
       <header className="tracker-header">
@@ -149,8 +163,12 @@ function Dashboard({ session, onLogout }) {
           <span className="tracker-stat-label">Committed</span>
         </div>
         <div className="tracker-stat">
-          <span className="tracker-stat-num">${Math.round(data.totals.committed_amount).toLocaleString()}</span>
-          <span className="tracker-stat-label">Raised</span>
+          <span className="tracker-stat-num">${Math.round(data.totals.committed_confirmed || 0).toLocaleString()}</span>
+          <span className="tracker-stat-label">Raised (confirmed)</span>
+        </div>
+        <div className="tracker-stat">
+          <span className="tracker-stat-num">${Math.round((data.totals.committed_amount || 0) - (data.totals.committed_confirmed || 0)).toLocaleString()}</span>
+          <span className="tracker-stat-label">Reported, not yet confirmed</span>
         </div>
         <div className="tracker-stat">
           <span className="tracker-stat-num">{data.totals.pending}</span>
@@ -237,6 +255,22 @@ function Dashboard({ session, onLogout }) {
                   {p.committed_amount
                     ? `$${Number(p.committed_amount).toLocaleString()}${p.committed_tier ? ` (${p.committed_tier})` : ""}`
                     : "—"}
+                  {p.status === "yes" && p.committed_amount ? (
+                    <div className="tracker-sub">
+                      {p.confirmed_by_lead ? (
+                        <span style={{ color: "#2f7a2f" }}>
+                          ✓ confirmed{" "}
+                          <button type="button" className="tracker-link" onClick={() => toggleConfirm(p)}>
+                            undo
+                          </button>
+                        </span>
+                      ) : (
+                        <button type="button" className="tracker-link tracker-link-action" onClick={() => toggleConfirm(p)}>
+                          Confirm (signed form in hand)
+                        </button>
+                      )}
+                    </div>
+                  ) : null}
                 </td>
                 <td>{p.sent_to_lead ? "✓" : "—"}</td>
                 <td className="tracker-sub">{new Date(p.created_at).toLocaleDateString()}</td>

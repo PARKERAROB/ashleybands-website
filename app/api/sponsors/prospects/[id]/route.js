@@ -35,7 +35,7 @@ async function authorize(req, prospectId) {
       .eq("id", fam.familyId)
       .maybeSingle();
     if (data && data.session_token === fam.token && data.id === prospect.family_id) {
-      return { ok: true, prospect };
+      return { ok: true, prospect, actor: "family" };
     }
   }
 
@@ -47,7 +47,7 @@ async function authorize(req, prospectId) {
       .eq("id", staff.staffId)
       .maybeSingle();
     if (data && data.session_token === staff.token) {
-      return { ok: true, prospect };
+      return { ok: true, prospect, actor: "staff" };
     }
   }
 
@@ -68,12 +68,23 @@ export async function PATCH(req, { params }) {
     update.sent_at = new Date().toISOString();
   }
 
+  // Confirming money is a staff-only action — families can report a "yes" but only
+  // the sponsor lead, holding the signed form, marks it confirmed (banked).
+  if ("confirmed_by_lead" in body) {
+    if (auth.actor !== "staff") {
+      return NextResponse.json({ error: "Only staff can confirm a commitment." }, { status: 403 });
+    }
+    const confirmed = body.confirmed_by_lead === true;
+    update.confirmed_by_lead = confirmed;
+    update.confirmed_at = confirmed ? new Date().toISOString() : null;
+  }
+
   const { data, error } = await supabaseAdmin
     .from("prospects")
     .update(update)
     .eq("id", id)
     .select(
-      "id, status, contact_name, contact_email, contact_phone, business_address, relationship_note, dropped_off_at, follow_up_at, ask_again_at, committed_amount, committed_tier, sent_to_lead, sent_at, business:businesses(id, name_display)"
+      "id, status, contact_name, contact_email, contact_phone, business_address, relationship_note, dropped_off_at, follow_up_at, ask_again_at, committed_amount, committed_tier, sent_to_lead, sent_at, confirmed_by_lead, confirmed_at, business:businesses(id, name_display)"
     )
     .single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
