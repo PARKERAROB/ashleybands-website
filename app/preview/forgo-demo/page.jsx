@@ -87,14 +87,6 @@ export default function ForgoDemoPage() {
                       If the final refund from the bus company clears, the remaining {usd(REFUND_TOPUP)} will
                       be applied too, for {usd(REFUND_MAX)} total. You will not receive a check for this amount.
                     </span>
-                    <button
-                      type="button"
-                      className="portal-link-btn"
-                      style={{ marginTop: 8, alignSelf: "flex-start" }}
-                      onClick={() => setApplied(false)}
-                    >
-                      Undo (preview)
-                    </button>
                   </>
                 ) : (
                   <>
