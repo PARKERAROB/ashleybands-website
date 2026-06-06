@@ -31,7 +31,14 @@ const REQUIRED_CHECKS = [
   "emergency_care_permission"
 ];
 
+// 2026 marching band Signing Day is closed (see BDOS archives/2026-06-06-signing-day-close).
+// The form no longer accepts submissions. Set to false only for a deliberate reopen.
+const SIGNUP_CLOSED = true;
+
 export async function POST(request) {
+  if (SIGNUP_CLOSED) {
+    return Response.json({ error: "Marching band sign-up for the 2026 season is closed." }, { status: 403 });
+  }
   try {
     const payload = await request.json();
     const missingText = REQUIRED_TEXT.filter((field) => !String(payload[field] || "").trim());
