@@ -31,9 +31,9 @@ const REQUIRED_CHECKS = [
   "emergency_care_permission"
 ];
 
-// 2026 marching band Signing Day is closed (see BDOS archives/2026-06-06-signing-day-close).
-// The form no longer accepts submissions. Set to false only for a deliberate reopen.
-const SIGNUP_CLOSED = true;
+// 2026 marching band Signing Day closed 2026-06-06 (see BDOS archives/2026-06-06-signing-day-close).
+// REOPENED 2026-06-06 for late/edge entrants (Charlie Bradshaw + stragglers). Re-close when done.
+const SIGNUP_CLOSED = false;
 
 export async function POST(request) {
   if (SIGNUP_CLOSED) {
