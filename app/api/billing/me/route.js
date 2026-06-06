@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { readPortalSession } from "@/lib/portalTokens";
-import { trustedStudentIds, loadStudentLedgers, chargeKindForCategory } from "@/lib/billing";
+import {
+  trustedStudentIds,
+  loadStudentLedgers,
+  loadRefundCredits,
+  chargeKindForCategory,
+  forgoRefundLive
+} from "@/lib/billing";
 import { isPaypalConfigured } from "@/lib/paypal";
 
 export const runtime = "nodejs";
@@ -24,11 +30,24 @@ export async function GET(request) {
 
   const { charges, payments, balances } = await loadStudentLedgers(studentIds);
 
+  // Spring-Trip forgo offer — DARK by default. Only attach when the flag is live,
+  // so families see nothing until go-live (the data never reaches the client otherwise).
+  const refundCredits = forgoRefundLive() ? await loadRefundCredits(studentIds) : {};
+
   const students = (studentRows || []).map((s) => {
     const bal = balances[s.id] || { charged_cents: 0, paid_cents: 0, balance_cents: 0 };
+    const credit = refundCredits[s.id];
     return {
       id: s.id,
       name: s.display_name,
+      springTripRefund: credit
+        ? {
+            status: credit.status,
+            confirmedCents: Number(credit.confirmed_cents) || 0,
+            topupCents: Number(credit.topup_cents) || 0,
+            fullCents: Number(credit.full_cents) || 0
+          }
+        : null,
       chargedCents: Number(bal.charged_cents) || 0,
       paidCents: Number(bal.paid_cents) || 0,
       balanceCents: Number(bal.balance_cents) || 0,

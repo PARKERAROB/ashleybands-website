@@ -180,7 +180,9 @@ function BillingSection() {
 
   if (error) return null;
   if (!data) return null;
-  const students = (data.students || []).filter((s) => s.charges.length || s.payments.length);
+  const students = (data.students || []).filter(
+    (s) => s.charges.length || s.payments.length || s.springTripRefund
+  );
   if (!students.length) return null;
 
   return (
@@ -227,6 +229,35 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
   useEffect(() => {
     amountRef.current = amount;
   }, [amount]);
+
+  // Spring-Trip forgo offer (only present when the feature flag is live server-side).
+  const refund = student.springTripRefund || null;
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [forgoBusy, setForgoBusy] = useState(false);
+  const [forgoError, setForgoError] = useState("");
+
+  async function submitRefundChoice(choice) {
+    setForgoBusy(true);
+    setForgoError("");
+    try {
+      const res = await fetch("/api/billing/forgo-refund", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ studentId: student.id, choice })
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setForgoError(json.error || "Could not save your choice. Please try again.");
+        return;
+      }
+      setConfirmOpen(false);
+      if (onPaid) onPaid(); // re-fetch /api/billing/me so the goal + end state refresh
+    } catch {
+      setForgoError("Could not save your choice. Please try again.");
+    } finally {
+      setForgoBusy(false);
+    }
+  }
 
   return (
     <article className="portal-student-card">
@@ -292,6 +323,73 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
         </div>
       ) : null}
 
+      {refund ? (
+        <div className="portal-field" style={{ borderTop: "1px solid #eee", paddingTop: 14, marginTop: 6 }}>
+          <span className="portal-field-label">Spring Trip 2026 refund</span>
+
+          {refund.status === "applied_mb" ? (
+            <>
+              <span className="portal-field-value">
+                ✓ Applied. {formatUsd(refund.confirmedCents)} is now counting toward {student.name}&rsquo;s
+                marching band funding goal.
+              </span>
+              {refund.topupCents > 0 ? (
+                <span className="portal-field-note">
+                  If the final refund from the bus company clears, the remaining{" "}
+                  {formatUsd(refund.topupCents)} will be applied too, for {formatUsd(refund.fullCents)} total.
+                  You will not receive a check for this amount.
+                </span>
+              ) : null}
+            </>
+          ) : refund.status === "check" ? (
+            <span className="portal-field-value">
+              You chose to have your Spring Trip refund sent back as a check. Nothing was applied to the
+              funding goal.
+            </span>
+          ) : (
+            <>
+              <span className="portal-field-value">
+                The May trip was cancelled and your family is owed a refund. You can have it sent back as a
+                check, or apply it toward {student.name}&rsquo;s marching band season instead.
+              </span>
+              <span className="portal-field-note">
+                Right now we can confirm {formatUsd(refund.confirmedCents)}.
+                {refund.topupCents > 0
+                  ? ` If the final refund from the bus company clears, it rises to ${formatUsd(refund.fullCents)}.`
+                  : ""}{" "}
+                Applying it means you forgo the refund check and we credit that amount to your season funding
+                goal.
+              </span>
+              <button
+                type="button"
+                style={{
+                  marginTop: 10,
+                  alignSelf: "flex-start",
+                  background: "#7b1829",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 6,
+                  padding: "10px 16px",
+                  fontWeight: 600,
+                  cursor: "pointer"
+                }}
+                onClick={() => {
+                  setForgoError("");
+                  setConfirmOpen(true);
+                }}
+              >
+                Apply my refund to marching band
+              </button>
+              {forgoError ? (
+                <span className="portal-field-note" style={{ color: "#7b1829" }}>
+                  {forgoError}
+                </span>
+              ) : null}
+            </>
+          )}
+        </div>
+      ) : null}
+
       {canPayOnline ? (
         showPay ? (
           <div className="portal-field-edit" style={{ flexDirection: "column", alignItems: "stretch" }}>
@@ -323,6 +421,55 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
         )
       ) : owes && !paymentsEnabled ? (
         <p className="portal-field-note">Online payment is coming soon. You can still pay by check.</p>
+      ) : null}
+
+      {confirmOpen && refund ? (
+        <div
+          style={{
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)",
+            display: "flex", alignItems: "center", justifyContent: "center", padding: 20, zIndex: 50
+          }}
+          onClick={() => (forgoBusy ? null : setConfirmOpen(false))}
+        >
+          <div
+            style={{ background: "#fff", borderRadius: 10, padding: "22px", maxWidth: 440, width: "100%" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{ marginTop: 0 }}>Apply your Spring Trip refund?</h3>
+            <p style={{ color: "#333", lineHeight: 1.5 }}>
+              You are choosing to <strong>forgo your refund check</strong>. The boosters keep that amount and
+              credit <strong>{formatUsd(refund.confirmedCents)}</strong> toward {student.name}&rsquo;s marching
+              band funding goal
+              {refund.topupCents > 0 ? ` (up to ${formatUsd(refund.fullCents)} if the final bus-company refund clears)` : ""}.
+              This cannot be sent back to you as cash once applied.
+            </p>
+            {forgoError ? (
+              <p style={{ color: "#7b1829", fontWeight: 600 }}>{forgoError}</p>
+            ) : null}
+            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 18 }}>
+              <button
+                type="button"
+                className="portal-link-btn"
+                disabled={forgoBusy}
+                onClick={() => setConfirmOpen(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={forgoBusy}
+                style={{
+                  background: "#7b1829", color: "#fff", border: "none", borderRadius: 6,
+                  padding: "10px 16px", fontWeight: 600, cursor: forgoBusy ? "default" : "pointer",
+                  opacity: forgoBusy ? 0.7 : 1
+                }}
+                onClick={() => submitRefundChoice("forgo")}
+              >
+                {forgoBusy ? "Applying…" : `Yes, apply ${formatUsd(refund.confirmedCents)}`}
+              </button>
+            </div>
+          </div>
+        </div>
       ) : null}
     </article>
   );
