@@ -152,7 +152,7 @@ export default function ForgoDemoPage() {
             <h3 style={{ marginTop: 0 }}>Apply your Spring Trip refund?</h3>
             <p style={{ color: "#333", lineHeight: 1.5 }}>
               You are choosing to <strong>forgo your refund check</strong>. The boosters keep that amount and
-              credit <strong>{usd(REFUND_CONFIRMED)}</strong> toward Charlotte&rsquo;s marching band funding
+              credit <strong>{usd(REFUND_CONFIRMED)}</strong>{" "}toward Charlotte&rsquo;s marching band funding
               goal (up to {usd(REFUND_MAX)} if the final bus-company refund clears). This cannot be sent back to
               you as cash once applied.
             </p>
