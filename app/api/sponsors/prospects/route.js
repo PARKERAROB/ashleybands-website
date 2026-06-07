@@ -1,19 +1,15 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin, canonicalName } from "@/lib/supabaseAdmin";
-import { readFamilySession } from "@/lib/sponsorAuth";
+import { resolveSponsorFamily } from "@/lib/sponsorFamily";
 
 export const runtime = "nodejs";
 
+const PROSPECT_FIELDS =
+  "id, status, contact_name, contact_email, contact_phone, business_address, relationship_note, contact_mode, lead_kind, contacted_at, dropped_off_at, follow_up_at, ask_again_at, committed_amount, committed_tier, sent_to_lead, sent_at, created_at, business:businesses(id, name_display, category)";
+
 async function validateFamily(req) {
-  const { familyId, token } = readFamilySession(req);
-  if (!familyId || !token) return null;
-  const { data } = await supabaseAdmin
-    .from("families")
-    .select("id, display_name, session_token")
-    .eq("id", familyId)
-    .maybeSingle();
-  if (!data || data.session_token !== token) return null;
-  return data;
+  const resolved = await resolveSponsorFamily(req);
+  return resolved?.family || null;
 }
 
 export async function GET(req) {
@@ -22,9 +18,7 @@ export async function GET(req) {
 
   const { data, error } = await supabaseAdmin
     .from("prospects")
-    .select(
-      "id, status, contact_name, contact_email, contact_phone, business_address, relationship_note, dropped_off_at, follow_up_at, ask_again_at, committed_amount, committed_tier, sent_to_lead, sent_at, created_at, business:businesses(id, name_display, category)"
-    )
+    .select(PROSPECT_FIELDS)
     .eq("family_id", fam.id)
     .order("created_at", { ascending: true });
 
@@ -93,6 +87,8 @@ export async function POST(req) {
     }
   }
 
+  const contactMode = ["self", "warm_first"].includes(body.contact_mode) ? body.contact_mode : null;
+
   const insert = {
     family_id: fam.id,
     business_id: businessId,
@@ -101,14 +97,14 @@ export async function POST(req) {
     contact_phone: contactPhone || null,
     business_address: String(body.business_address || "").trim() || null,
     relationship_note: String(body.relationship_note || "").trim() || null,
+    contact_mode: contactMode,
+    lead_kind: "family_added",
     status: "pending"
   };
   const { data, error } = await supabaseAdmin
     .from("prospects")
     .insert(insert)
-    .select(
-      "id, status, contact_name, contact_email, contact_phone, business_address, relationship_note, dropped_off_at, follow_up_at, ask_again_at, committed_amount, committed_tier, sent_to_lead, sent_at, created_at, business:businesses(id, name_display, category)"
-    )
+    .select(PROSPECT_FIELDS)
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import {
   SPONSOR_CONTACT,
   TIERS,
@@ -16,7 +17,34 @@ export const metadata = {
     "Become a Screaming Eagle Sponsor. Tier sponsorships and Adopt-an-Instrument capital giving for the Bands of Ashley High School."
 };
 
-export default function SponsorsHubPage() {
+// Sponsors auto-publish here the day a gift is confirmed (build-spec §6 Lane A.2). Reads the
+// walled sponsor_public_listing view (names + tier only). Resilient: any error or a dark
+// funnel just hides the section. ISR-cached so the page stays fast.
+export const revalidate = 300;
+
+async function fetchListedSponsors() {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("sponsor_public_listing")
+      .select("gift_id, name_display, tier, gift_year")
+      .order("name_display", { ascending: true });
+    if (error || !data) return [];
+    const seen = new Set();
+    const names = [];
+    for (const row of data) {
+      const key = (row.name_display || "").trim().toLowerCase();
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      names.push(row.name_display.trim());
+    }
+    return names;
+  } catch {
+    return [];
+  }
+}
+
+export default async function SponsorsHubPage() {
+  const sponsors = await fetchListedSponsors();
   return (
     <main className="sponsors-page">
       <section className="sponsors-hero">
@@ -28,7 +56,10 @@ export default function SponsorsHubPage() {
           the program for the long run.
         </p>
         <div className="sponsors-cta-row">
-          <a href="#tiers" className="sponsors-btn sponsors-btn-primary">
+          <Link href="/sponsors/give" className="sponsors-btn sponsors-btn-primary">
+            Give now
+          </Link>
+          <a href="#tiers" className="sponsors-btn">
             See sponsorship levels
           </a>
           <a href={`mailto:${SPONSOR_CONTACT.email}`} className="sponsors-btn">
@@ -39,6 +70,39 @@ export default function SponsorsHubPage() {
           </Link>
         </div>
       </section>
+
+      {sponsors.length ? (
+        <section className="sponsors-section" id="our-sponsors">
+          <p className="eyebrow">Thank you</p>
+          <h2>Our Sponsors</h2>
+          <p>
+            These businesses are funding the Bands of Ashley. When you support them, you support our students.
+          </p>
+          <ul
+            style={{
+              listStyle: "none",
+              padding: 0,
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 10
+            }}
+          >
+            {sponsors.map((name) => (
+              <li
+                key={name}
+                style={{
+                  border: "1px solid #ece3d6",
+                  borderRadius: 18,
+                  padding: "8px 16px",
+                  fontWeight: 600
+                }}
+              >
+                {name}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <section className="sponsors-section" id="tiers">
         <p className="eyebrow">Path 1</p>
