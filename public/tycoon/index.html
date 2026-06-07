@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Marching Band Tycoon</title>
+<style>
+  :root {
+    --navy: #0b1d3a;
+    --navy-2: #122a4f;
+    --panel: #14233f;
+    --panel-2: #1b2e51;
+    --gold: #ffb81c;
+    --gold-dim: #c79324;
+    --ink: #e9eef7;
+    --muted: #93a4c2;
+    --green: #3ecf8e;
+    --amber: #f2a93b;
+    --red: #ef5b6b;
+    --teal: #46c6d6;
+    --purple: #9b8cff;
+    --line: #24365c;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: radial-gradient(1200px 600px at 50% -10%, #16305c 0%, var(--navy) 60%);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 18px;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; }
+
+  /* Top bar */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 14px; flex-wrap: wrap; margin-bottom: 16px;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand .logo { font-size: 30px; }
+  .brand h1 {
+    font-size: 21px; margin: 0; letter-spacing: .3px;
+    background: linear-gradient(90deg, var(--gold), #fff3cf);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .brand .sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .clock { text-align: right; }
+  .clock .yw { font-size: 15px; font-weight: 700; }
+  .clock .yw b { color: var(--gold); }
+  .progress { width: 200px; height: 7px; background: var(--navy-2); border-radius: 6px; margin-top: 6px; overflow: hidden; border: 1px solid var(--line); }
+  .progress > div { height: 100%; background: linear-gradient(90deg, var(--gold-dim), var(--gold)); transition: width .35s ease; }
+
+  /* Stat bars */
+  .bars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 10px; }
+  .bar {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px;
+  }
+  .bar .lab { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; color: var(--muted); }
+  .bar .lab b { color: var(--ink); font-size: 15px; }
+  .bar .track { height: 8px; background: var(--navy-2); border-radius: 6px; margin-top: 7px; overflow: hidden; }
+  .bar .fill { height: 100%; border-radius: 6px; transition: width .4s ease, background .4s ease; }
+
+  /* Resource tiles */
+  .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+  .tile { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; }
+  .tile .k { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+  .tile .v { font-size: 18px; font-weight: 700; margin-top: 3px; }
+  .tile .hint { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .tile.op .v { color: var(--green); }
+  .tile.cap .v { color: var(--gold); }
+
+  /* Layout */
+  .main { display: grid; grid-template-columns: 1.15fr .85fr; gap: 14px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+  .card h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin: 0 0 10px; }
+
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+  button.act {
+    text-align: left; background: var(--panel-2); color: var(--ink); border: 1px solid var(--line);
+    border-radius: 11px; padding: 10px 12px; cursor: pointer; transition: transform .08s ease, border-color .15s ease, background .15s ease;
+  }
+  button.act:hover:not(:disabled) { border-color: var(--gold-dim); background: #20355e; transform: translateY(-1px); }
+  button.act:active:not(:disabled) { transform: translateY(0); }
+  button.act:disabled { opacity: .45; cursor: not-allowed; }
+  button.act .t { font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 7px; }
+  button.act .d { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
+
+  .shop { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 12px; }
+
+  /* Log */
+  .log { height: 360px; overflow-y: auto; display: flex; flex-direction: column; gap: 7px; padding-right: 4px; }
+  .logline { font-size: 12.5px; line-height: 1.35; padding: 7px 9px; border-radius: 8px; background: var(--navy-2); border-left: 3px solid var(--line); }
+  .logline .wk { color: var(--muted); font-size: 10.5px; display: block; margin-bottom: 1px; }
+  .logline.action { border-left-color: var(--teal); }
+  .logline.event { border-left-color: var(--purple); }
+  .logline.good { border-left-color: var(--green); }
+  .logline.bad { border-left-color: var(--red); }
+  .logline.season { border-left-color: var(--gold); background: #1c2c4d; }
+  .logline.win { border-left-color: var(--gold); background: #2a2410; }
+  .logline.lose { border-left-color: var(--red); background: #2a1418; }
+
+  /* Modal / overlay */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(4, 10, 22, .72); backdrop-filter: blur(3px);
+    display: none; align-items: center; justify-content: center; padding: 18px; z-index: 30;
+  }
+  .overlay.show { display: flex; }
+  .modal { width: 100%; max-width: 440px; background: linear-gradient(180deg, var(--panel-2), var(--panel)); border: 1px solid var(--gold-dim); border-radius: 16px; padding: 20px; box-shadow: 0 20px 60px rgba(0,0,0,.5); }
+  .modal .badge { font-size: 11px; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; }
+  .modal h3 { margin: 6px 0 8px; font-size: 19px; }
+  .modal p { color: #cdd8ec; font-size: 14px; line-height: 1.5; margin: 0 0 16px; }
+  .choices { display: flex; flex-direction: column; gap: 9px; }
+  button.choice { background: var(--navy-2); color: var(--ink); border: 1px solid var(--line); border-radius: 11px; padding: 12px 14px; cursor: pointer; font-size: 14px; text-align: left; transition: border-color .15s, background .15s; }
+  button.choice:hover { border-color: var(--gold); background: #20355e; }
+
+  .endcard { text-align: center; }
+  .endcard .big { font-size: 30px; margin: 6px 0; }
+  .endcard.win .big { color: var(--gold); }
+  .endcard.lose .big { color: var(--red); }
+  .endstats { display: flex; gap: 16px; justify-content: center; margin: 14px 0 18px; flex-wrap: wrap; }
+  .endstats div { font-size: 13px; color: var(--muted); }
+  .endstats b { display: block; font-size: 20px; color: var(--ink); }
+  button.primary { background: linear-gradient(90deg, var(--gold-dim), var(--gold)); color: #20180a; font-weight: 800; border: none; border-radius: 11px; padding: 12px 22px; cursor: pointer; font-size: 15px; }
+  button.ghost { background: transparent; color: var(--muted); border: 1px solid var(--line); border-radius: 10px; padding: 7px 12px; cursor: pointer; font-size: 12px; }
+
+  .controls { display: flex; gap: 8px; }
+  .footer { text-align: center; color: var(--muted); font-size: 11px; margin-top: 16px; }
+
+  @media (max-width: 760px) {
+    .bars { grid-template-columns: repeat(2, 1fr); }
+    .tiles { grid-template-columns: repeat(2, 1fr); }
+    .main { grid-template-columns: 1fr; }
+    .log { height: 240px; }
+    .progress { width: 150px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo">🦅</div>
+      <div>
+        <h1>Marching Band Tycoon</h1>
+        <div class="sub">Build a Program of Distinction. Reputation to 100 wins.</div>
+      </div>
+    </div>
+    <div class="clock">
+      <div class="yw">Year <b id="year">1</b> &middot; Week <b id="week">1</b> / 16</div>
+      <div class="progress"><div id="seasonbar" style="width:0%"></div></div>
+      <div class="controls" style="margin-top:8px; justify-content:flex-end;">
+        <button class="ghost" id="newgame">New Game</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bars">
+    <div class="bar"><div class="lab"><span>🏆 Reputation</span><b id="repV">0</b></div><div class="track"><div class="fill" id="repF"></div></div></div>
+    <div class="bar"><div class="lab"><span>🎯 Musicianship</span><b id="skillV">0</b></div><div class="track"><div class="fill" id="skillF"></div></div></div>
+    <div class="bar"><div class="lab"><span>😊 Morale</span><b id="moraleV">0</b></div><div class="track"><div class="fill" id="moraleF"></div></div></div>
+    <div class="bar"><div class="lab"><span>⚡ Your Energy</span><b id="energyV">0</b></div><div class="track"><div class="fill" id="energyF"></div></div></div>
+  </div>
+
+  <div class="tiles">
+    <div class="tile op"><div class="k">Operating $</div><div class="v" id="opV">$0</div><div class="hint">runs the program</div></div>
+    <div class="tile cap"><div class="k">Capital $</div><div class="v" id="capV">$0</div><div class="hint">instruments &amp; staff</div></div>
+    <div class="tile"><div class="k">Roster</div><div class="v" id="rosterV">0</div><div class="hint" id="rosterHint">0 / 0 capacity</div></div>
+    <div class="tile"><div class="k">Instruments</div><div class="v" id="condV">70%</div><div class="hint" id="staffHint">condition &middot; 0 staff</div></div>
+  </div>
+
+  <div class="main">
+    <div class="card">
+      <h2>This Week &mdash; pick one move</h2>
+      <div class="actions" id="actions"></div>
+      <h2 style="margin-top:14px;">Program Investments</h2>
+      <div class="shop" id="shop"></div>
+    </div>
+    <div class="card">
+      <h2>Season Log</h2>
+      <div class="log" id="log"></div>
+    </div>
+  </div>
+
+  <div class="footer">Built in BandDirectorOS &middot; autosaves in your browser &middot; 🎺🥁🦅</div>
+</div>
+
+<!-- Event modal -->
+<div class="overlay" id="eventOverlay">
+  <div class="modal">
+    <div class="badge">Something comes up</div>
+    <h3 id="evTitle"></h3>
+    <p id="evText"></p>
+    <div class="choices" id="evChoices"></div>
+  </div>
+</div>
+
+<!-- End screen -->
+<div class="overlay" id="endOverlay">
+  <div class="modal endcard" id="endCard">
+    <div class="badge" id="endBadge"></div>
+    <div class="big" id="endBig"></div>
+    <p id="endText"></p>
+    <div class="endstats" id="endStats"></div>
+    <button class="primary" id="endNew">Start a New Program</button>
+  </div>
+</div>
+
+<script src="engine.js"></script>
+<script>
+(function () {
+  "use strict";
+  var game = MBT.load() || MBT.newGame();
+
+  // ---- Action + shop definitions (UI metadata only) --------------------
+  var ACTION_DEFS = [
+    { id: "rehearse",  icon: "🎯", name: "Rehearse",      desc: "Build musicianship. Tires the kids." },
+    { id: "recruit",   icon: "➕", name: "Recruit",       desc: "Add members (needs open instruments)." },
+    { id: "fundraise", icon: "💵", name: "Fundraise",     desc: "Raise operating $. Kids get worn out." },
+    { id: "sponsor",   icon: "🤝", name: "Chase a Sponsor", desc: "Shot at capital $. Better with reputation." },
+    { id: "community", icon: "🎉", name: "Team Build",     desc: "Morale + a little reputation. Costs $100." },
+    { id: "rest",      icon: "🌙", name: "Rest & Reset",   desc: "Recover your energy. Lift morale." },
+  ];
+
+  var elActions = document.getElementById("actions");
+  ACTION_DEFS.forEach(function (a) {
+    var b = document.createElement("button");
+    b.className = "act"; b.dataset.id = a.id;
+    b.innerHTML = '<div class="t">' + a.icon + " " + a.name + '</div><div class="d">' + a.desc + "</div>";
+    b.addEventListener("click", function () { onAction(a.id); });
+    elActions.appendChild(b);
+  });
+
+  var elShop = document.getElementById("shop");
+  function shopButton(label, desc, handler, id) {
+    var b = document.createElement("button");
+    b.className = "act"; b.dataset.shop = id;
+    b.innerHTML = '<div class="t">' + label + '</div><div class="d">' + desc + "</div>";
+    b.addEventListener("click", handler);
+    elShop.appendChild(b);
+    return b;
+  }
+  shopButton("🎺 Buy 2 Instruments", "Raise capacity. " + MBT.fmtMoney(2 * MBT.CONFIG.INSTRUMENT_PRICE) + " capital.",
+    function () { var r = MBT.buyInstruments(game, 2); afterInstant(r); }, "buy");
+  shopButton("🧑‍🏫 Hire Assistant", "Stronger rehearsals. " + MBT.fmtMoney(MBT.CONFIG.STAFF_HIRE_COST) + " capital + payroll.",
+    function () { var r = MBT.hireStaff(game); afterInstant(r); }, "hire");
+
+  // ---- Core interactions ------------------------------------------------
+  function onAction(id) {
+    if (game.status !== "playing" || game.pendingEvent) return;
+    MBT.takeWeek(game, id);
+    MBT.save(game);
+    if (game.pendingEvent) showEvent();
+    render();
+    if (game.status !== "playing") showEnd();
+  }
+
+  function afterInstant(result) {
+    if (result && !result.ok) flashHint(result.msg);
+    MBT.save(game);
+    render();
+  }
+
+  // ---- Event modal ------------------------------------------------------
+  var evOverlay = document.getElementById("eventOverlay");
+  function showEvent() {
+    var ev = game.pendingEvent;
+    document.getElementById("evTitle").textContent = ev.title;
+    document.getElementById("evText").textContent = ev.text;
+    var box = document.getElementById("evChoices");
+    box.innerHTML = "";
+    ev.choices.forEach(function (c, i) {
+      var b = document.createElement("button");
+      b.className = "choice";
+      b.textContent = c.label;
+      b.addEventListener("click", function () { chooseEvent(i); });
+      box.appendChild(b);
+    });
+    evOverlay.classList.add("show");
+  }
+  function chooseEvent(i) {
+    MBT.resolveEvent(game, i);
+    evOverlay.classList.remove("show");
+    MBT.save(game);
+    render();
+    if (game.status !== "playing") showEnd();
+  }
+
+  // ---- End screen -------------------------------------------------------
+  var endOverlay = document.getElementById("endOverlay");
+  function showEnd() {
+    var won = game.status === "won";
+    var card = document.getElementById("endCard");
+    card.className = "modal endcard " + (won ? "win" : "lose");
+    document.getElementById("endBadge").textContent = won ? "Victory" : "Game Over";
+    document.getElementById("endBig").textContent = won ? "🏆 Program of Distinction" : "💀 The Program Folds";
+    document.getElementById("endText").textContent = game.ending || "";
+    document.getElementById("endStats").innerHTML =
+      tile("Years", game.year) + tile("Best Rating", game.bestRating || "-") +
+      tile("Reputation", Math.round(game.reputation)) + tile("Roster", game.roster);
+    endOverlay.classList.add("show");
+  }
+  function tile(k, v) { return "<div><b>" + v + "</b>" + k + "</div>"; }
+
+  function newGame() {
+    MBT.clearSave();
+    game = MBT.newGame();
+    endOverlay.classList.remove("show");
+    evOverlay.classList.remove("show");
+    render();
+  }
+  document.getElementById("newgame").addEventListener("click", function () {
+    if (confirm("Start over? This erases your current program.")) newGame();
+  });
+  document.getElementById("endNew").addEventListener("click", newGame);
+
+  // ---- Rendering --------------------------------------------------------
+  function barColor(id, v) {
+    if (id === "rep") return "linear-gradient(90deg,var(--gold-dim),var(--gold))";
+    if (id === "skill") return "linear-gradient(90deg,#2f8f9c,var(--teal))";
+    if (v >= 60) return "linear-gradient(90deg,#2f9e6b,var(--green))";
+    if (v >= 35) return "linear-gradient(90deg,#c98a2a,var(--amber))";
+    return "linear-gradient(90deg,#b33,var(--red))";
+  }
+  function setBar(idV, idF, val, kind) {
+    var v = Math.round(val);
+    document.getElementById(idV).textContent = v;
+    var f = document.getElementById(idF);
+    f.style.width = v + "%";
+    f.style.background = barColor(kind, v);
+  }
+
+  function render() {
+    var s = game;
+    document.getElementById("year").textContent = s.year;
+    document.getElementById("week").textContent = Math.min(s.week, MBT.CONFIG.SEASON_WEEKS);
+    document.getElementById("seasonbar").style.width =
+      Math.min(100, (Math.min(s.week, MBT.CONFIG.SEASON_WEEKS) / MBT.CONFIG.SEASON_WEEKS) * 100) + "%";
+
+    setBar("repV", "repF", s.reputation, "rep");
+    setBar("skillV", "skillF", s.skill, "skill");
+    setBar("moraleV", "moraleF", s.morale, "morale");
+    setBar("energyV", "energyF", s.energy, "energy");
+
+    document.getElementById("opV").textContent = MBT.fmtMoney(s.money.operating);
+    document.getElementById("capV").textContent = MBT.fmtMoney(s.money.capital);
+    document.getElementById("rosterV").textContent = s.roster;
+    document.getElementById("rosterHint").textContent = s.roster + " / " + s.instruments + " capacity";
+    document.getElementById("condV").textContent = Math.round(s.condition) + "%";
+    document.getElementById("staffHint").innerHTML = "condition &middot; " + s.staff + " staff";
+
+    // Button states
+    var over = s.status !== "playing" || !!s.pendingEvent;
+    document.querySelectorAll("button.act[data-id]").forEach(function (b) {
+      var id = b.dataset.id;
+      var disabled = over;
+      if (id === "recruit" && s.roster >= s.instruments) {
+        b.querySelector(".d").textContent = "No open instruments. Buy more first.";
+      } else {
+        var def = ACTION_DEFS.find(function (a) { return a.id === id; });
+        b.querySelector(".d").textContent = def.desc;
+      }
+      b.disabled = disabled;
+    });
+    document.querySelector('button.act[data-shop="buy"]').disabled = over || s.money.capital < 2 * MBT.CONFIG.INSTRUMENT_PRICE;
+    document.querySelector('button.act[data-shop="hire"]').disabled = over || s.money.capital < MBT.CONFIG.STAFF_HIRE_COST;
+
+    // Log
+    var log = document.getElementById("log");
+    log.innerHTML = "";
+    s.log.forEach(function (l) {
+      var d = document.createElement("div");
+      d.className = "logline " + (l.type || "info");
+      d.innerHTML = '<span class="wk">Yr ' + l.year + " &middot; Wk " + l.week + "</span>" + escapeHtml(l.text);
+      log.appendChild(d);
+    });
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c];
+    });
+  }
+
+  function flashHint(msg) {
+    var log = document.getElementById("log");
+    var d = document.createElement("div");
+    d.className = "logline bad";
+    d.textContent = msg;
+    log.insertBefore(d, log.firstChild);
+    setTimeout(function () { if (d.parentNode) d.parentNode.removeChild(d); }, 2600);
+  }
+
+  // ---- Boot -------------------------------------------------------------
+  render();
+  if (game.pendingEvent) showEvent();
+  if (game.status !== "playing") showEnd();
+})();
+</script>
+</body>
+</html>
