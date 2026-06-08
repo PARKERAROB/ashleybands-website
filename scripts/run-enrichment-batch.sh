@@ -10,7 +10,7 @@
 
 export PATH="/Users/parkerarob/.nvm/versions/node/v20.19.3/bin:/usr/local/bin:/usr/bin:/bin"
 APP="/Users/parkerarob/Desktop/Band/band-website"
-LOG="/Users/parkerarob/Desktop/BandDirectorOS/data/_work/batch-$(date +%Y%m%d-%H%M).log"
+LOG="/Users/parkerarob/Desktop/BandsofAHS/data/_work/batch-$(date +%Y%m%d-%H%M).log"
 PLIST="$HOME/Library/LaunchAgents/com.ahsband.enrichment-resume.plist"
 
 cd "$APP" || exit 1

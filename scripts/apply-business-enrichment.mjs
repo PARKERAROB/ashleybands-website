@@ -10,7 +10,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-const DATA_DIR = "/Users/parkerarob/Desktop/BandDirectorOS/data";
+const DATA_DIR = "/Users/parkerarob/Desktop/BandsofAHS/data";
 const DRY_RUN = process.argv.includes("--dry-run");
 
 try {

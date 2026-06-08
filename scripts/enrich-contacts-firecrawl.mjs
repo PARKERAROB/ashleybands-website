@@ -23,7 +23,7 @@ import { readFileSync, existsSync, appendFileSync, writeFileSync } from "node:fs
 import { join } from "node:path";
 import { execFileSync } from "node:child_process";
 
-const OUT = "/Users/parkerarob/Desktop/BandDirectorOS/data/_work/contact-enrichment.csv";
+const OUT = "/Users/parkerarob/Desktop/BandsofAHS/data/_work/contact-enrichment.csv";
 const LIMIT = (() => { const i = process.argv.indexOf("--limit"); return i > -1 ? Number(process.argv[i + 1]) : Infinity; })();
 const WITH_WEBSITE_ONLY = process.argv.includes("--with-website-only");
 
