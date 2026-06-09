@@ -105,8 +105,20 @@
 .boh-qr.is-big { padding: 16px; }
 .boh-qr-cap { font-family: 'Cinzel', Georgia, serif; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.72rem; color: #4a2f12; font-weight: 700; }
 
-/* tally overlaid low on the parchment during a vote */
-.boh-stage-tally { position: absolute; left: 8%; right: 8%; bottom: 7%; display: flex; flex-direction: column; gap: 12px; }
+/* tally overlaid low on the parchment during a vote — dark subtitle-style
+   backing so the light lettering + numbers pop against the bright parchment */
+.boh-stage-tally {
+  position: absolute; left: 6%; right: 6%; bottom: 6%;
+  display: flex; flex-direction: column; gap: 14px;
+  background: rgba(16, 10, 4, 0.7);
+  padding: clamp(14px, 2vw, 26px) clamp(16px, 2.4vw, 30px);
+  border-radius: 16px;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.5);
+}
+.boh-stage-tally .boh-tally-name { color: #fbf3df; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6); }
+.boh-stage-tally .boh-tally-num { color: #ffffff; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6); }
 
 .boh-reveal {
   position: absolute; inset: 0; border-radius: 8px;
