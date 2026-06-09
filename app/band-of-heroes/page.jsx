@@ -1,4 +1,4 @@
-import Presenter from "./Presenter";
+import Display from "./Display";
 import "./band-of-heroes.css";
 
 export const metadata = {
@@ -8,5 +8,5 @@ export const metadata = {
 };
 
 export default function BandOfHeroesPage() {
-  return <Presenter />;
+  return <Display />;
 }
