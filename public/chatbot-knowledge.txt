@@ -1,6 +1,6 @@
 ASHLEY HIGH SCHOOL BAND PUBLIC KNOWLEDGE BASE
 
-The Google Calendar is the official source of truth for dates and times. If a date conflicts with another source, tell families to use the calendar or contact Mr. Parker.
+The band calendar at ashleybands.com/calendar is the official source of truth for dates and times. Families subscribe to it once and updates appear automatically. If a date conflicts with another source, tell families to use the calendar or contact Mr. Parker.
 
 **Eugene Ashley High School Band Program**
 555 Halyburton Memorial Parkway · Wilmington, NC 28412
@@ -42,7 +42,7 @@ Tax ID: **20-5605218** — all donations tax-deductible.
 Payment: Check payable to "Ashley High School Band Boosters" or online payment.
 
 ---
-Google Calendar remains the official source of truth.
+The band calendar at ashleybands.com/calendar is the source of truth. Subscribe once and dates update automatically.
 
 | Event | Date / Time | Notes |
 |---|---|---|
@@ -53,14 +53,15 @@ Google Calendar remains the official source of truth.
 | Spring Concert | May 11, 2027 at 7:00 PM | Confirmed by Rob Apr 24, 2026 |
 
 ---
-### Google Calendar
-**Official source of truth for all band events.** If there is a date conflict, always assume the Google Calendar is correct.
+### Band Calendar
+**Official source of truth for all band events.** If there is a date conflict, always assume the band calendar is correct.
 
-Subscribe (.ics): `https://calendar.google.com/calendar/ical/nhcs.net_3olclj1g9acb2qp851rgq826to@group.calendar.google.com/public/basic.ics`
+Subscribe at: `https://ashleybands.com/calendar`
 
-- **iPhone/iPad:** Settings → Calendar → Accounts → Add Account → Other → Add Subscribed Calendar → paste link
-- **Android/Google Calendar:** Click "Add to Google Calendar" on band website → click "+ Google Calendar"
-- Always subscribe (don't download) for automatic real-time updates.
+- **Easiest:** open ashleybands.com/calendar and tap "Subscribe to the calendar."
+- **iPhone/iPad:** the subscribe button opens Apple Calendar directly. Or Settings → Calendar → Accounts → Add Account → Other → Add Subscribed Calendar → paste `https://ashleybands.com/calendar.ics`
+- **Android/Google Calendar:** open the download link in Google Calendar.
+- Always subscribe (don't download a one-time copy) for automatic real-time updates.
 
 ### My Music Office (MMO)
 Every student AND at least one parent must have an active account at https://www.mymusicoffice.com/
@@ -167,7 +168,7 @@ Operational snapshot moved to `superprojects/spring-2026-calendar-snapshot.md`.
 
 This page collects the general next-year information normally covered at open house.
 
-The Google Calendar is the official source of truth for dates and times.
+The band calendar at ashleybands.com/calendar is the official source of truth for dates and times.
 
 ## Major Dates
 
@@ -202,14 +203,14 @@ Working dates include:
 
 ## Communication
 
-### Google Calendar
+### Band Calendar
 
-The Google Calendar is the official source of truth for band events.
+The band calendar is the official source of truth for band events.
 
 Subscribe to the calendar instead of downloading a one-time copy. Subscribing allows updates to appear automatically.
 
-Calendar subscription link:  
-https://calendar.google.com/calendar/ical/nhcs.net_3olclj1g9acb2qp851rgq826to@group.calendar.google.com/public/basic.ics
+Open and subscribe at:  
+https://ashleybands.com/calendar
 
 ### My Music Office
 
@@ -680,9 +681,9 @@ Everything Needed for Band
 
 ## General Information
 
-### Google Calendar - The Official Band Calendar
+### The Official Band Calendar
 
-The Google Calendar is the source of truth for all band events. Always assume the Google Calendar is correct if there is a date conflict.
+The band calendar at ashleybands.com/calendar is the source of truth for all band events. Always assume the band calendar is correct if there is a date conflict. Subscribe once and dates update automatically.
 
 ### My Music Office
 

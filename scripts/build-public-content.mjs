@@ -178,7 +178,7 @@ const siteData = {
   quickLinks: [
     {
       label: "Calendar subscription",
-      href: "https://calendar.google.com/calendar/ical/nhcs.net_3olclj1g9acb2qp851rgq826to@group.calendar.google.com/public/basic.ics"
+      href: "https://ashleybands.com/calendar"
     },
     {
       label: "My Music Office",
@@ -206,7 +206,7 @@ writeFileSync(path.join(contentDir, "site-data.json"), JSON.stringify(siteData, 
 const chatbotKnowledge = [
   "ASHLEY HIGH SCHOOL BAND PUBLIC KNOWLEDGE BASE",
   "",
-  "The Google Calendar is the official source of truth for dates and times. If a date conflicts with another source, tell families to use the calendar or contact Mr. Parker.",
+  "The band calendar at ashleybands.com/calendar is the official source of truth for dates and times. Families subscribe to it once and updates appear automatically. If a date conflicts with another source, tell families to use the calendar or contact Mr. Parker.",
   "",
   siteData.program.overview,
   siteData.program.staff,

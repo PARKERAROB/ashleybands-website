@@ -4,9 +4,9 @@ Everything Needed for Band
 
 ## General Information
 
-### Google Calendar - The Official Band Calendar
+### The Official Band Calendar
 
-The Google Calendar is the source of truth for all band events. Always assume the Google Calendar is correct if there is a date conflict.
+The band calendar at ashleybands.com/calendar is the source of truth for all band events. Always assume the band calendar is correct if there is a date conflict. Subscribe once and dates update automatically.
 
 ### My Music Office
 
