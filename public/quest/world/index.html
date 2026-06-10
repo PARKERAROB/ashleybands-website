@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Theory Quest: Overworld (prototype)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Music&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c0820; --panel:#241a52; --ink:#ece9ff; --mut:#a99fe0;
+    --gold:#ffd23f; --good:#3ddc84; --bad:#ff5d6c; --cyan:#46e0ff; --line:#4b3a9a;
+    --parch:#f3ecd6; --parch-line:#2a2310;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;}
+  body{background:var(--bg);color:var(--ink);font-family:'Press Start 2P',monospace;
+    -webkit-font-smoothing:none;display:flex;flex-direction:column;align-items:center;
+    padding:10px;overflow:hidden;touch-action:none;}
+  h1{font-size:13px;color:var(--gold);text-shadow:2px 2px 0 #000;margin:4px 0 8px;}
+  .tiny{font-size:8px;}.mut{color:var(--mut);}
+
+  #stage{position:relative;width:100%;max-width:480px;}
+  canvas{width:100%;image-rendering:pixelated;border:3px solid #000;
+    box-shadow:0 0 0 3px var(--line),6px 6px 0 #000;background:#1a3a1f;display:block;}
+
+  /* dialog / battle overlay */
+  .overlay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:8px;}
+  .overlay.on{display:flex;}
+  .box{background:var(--panel);border:3px solid #000;box-shadow:0 0 0 3px var(--line),5px 5px 0 #000;
+    padding:12px;width:100%;max-width:440px;max-height:100%;overflow:auto;}
+  .box h2{font-size:11px;color:var(--cyan);margin:0 0 8px;text-shadow:1px 1px 0 #000;}
+  .box p{font-size:9px;line-height:1.9;margin:6px 0;}
+  .dialog{position:absolute;left:8px;right:8px;bottom:8px;background:#0b0820;border:3px solid var(--cyan);
+    padding:10px;font-size:9px;line-height:1.8;display:none;}
+  .dialog.on{display:block;}
+
+  .btn{font-family:inherit;font-size:9px;cursor:pointer;background:var(--gold);color:#231400;
+    border:3px solid #000;box-shadow:3px 3px 0 #000;padding:9px 10px;margin:4px 4px 0 0;text-transform:uppercase;}
+  .btn:active{transform:translate(3px,3px);box-shadow:0 0 0 #000;}
+  .btn.alt{background:var(--cyan);}.btn.good{background:var(--good);}.btn.ghost{background:#2e2168;color:#fff;}
+  .grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;}
+  .feedback{min-height:14px;font-size:9px;text-align:center;margin:6px 0;}
+  .feedback.good{color:var(--good);}.feedback.bad{color:var(--bad);}
+
+  /* creature */
+  .mon{width:88px;height:88px;margin:0 auto;border:3px solid #000;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;font-family:'Noto Music';font-size:46px;color:#0b0820;}
+  .hpwrap{font-size:8px;color:var(--cyan);margin:8px 0 2px;}
+  .hp{height:10px;background:#3a0f1a;border:2px solid #000;}.hp>i{display:block;height:100%;background:var(--good);transition:width .25s;}
+
+  /* staff (reused look) */
+  .staffwrap{display:flex;justify-content:center;margin:8px 0;}
+  svg.staff{width:100%;max-width:300px;height:auto;}
+  .staffbg{fill:var(--parch);stroke:#000;stroke-width:3;}
+  .sl,.ledger{stroke:var(--parch-line);stroke-width:2;}
+  .stem{stroke:var(--parch-line);stroke-width:2.4;}.head{fill:var(--parch-line);}
+  .clef{font-family:'Noto Music';font-size:64px;fill:var(--parch-line);}
+  .notelabel{font-family:'Press Start 2P';font-size:11px;fill:#b3451a;}
+
+  /* controls */
+  .controls{display:flex;justify-content:space-between;align-items:center;width:100%;max-width:480px;margin-top:10px;}
+  .dpad{display:grid;grid-template-columns:repeat(3,40px);grid-template-rows:repeat(3,40px);gap:3px;}
+  .dpad button{font-family:inherit;font-size:12px;background:#2e2168;color:#fff;border:3px solid #000;box-shadow:2px 2px 0 #000;}
+  .dpad button:active{transform:translate(2px,2px);box-shadow:0 0 0 #000;}
+  .dpad .sp{visibility:hidden;}
+  .abtn{width:64px;height:64px;border-radius:50%;background:var(--gold);color:#231400;border:3px solid #000;
+    box-shadow:3px 3px 0 #000;font-family:inherit;font-size:14px;}
+  .topbar{display:flex;gap:10px;width:100%;max-width:480px;justify-content:space-between;font-size:8px;color:var(--gold);margin-bottom:4px;}
+  .topbar a{color:var(--cyan);text-decoration:none;}
+  .hint{font-size:8px;color:var(--mut);text-align:center;margin-top:8px;max-width:480px;line-height:1.8;}
+</style>
+</head>
+<body>
+  <h1>★ THEORY QUEST: OVERWORLD ★</h1>
+  <div class="topbar">
+    <span>DEX <b id="dexcount">0</b>/4 <span id="badges"></span></span>
+    <a id="mute">SOUND: ON</a>
+    <a href="/quest/">menu »</a>
+  </div>
+
+  <div id="stage">
+    <canvas id="game" width="240" height="208"></canvas>
+    <div class="dialog" id="dialog"></div>
+    <div class="overlay" id="overlay"><div class="box" id="box"></div></div>
+  </div>
+
+  <div class="controls">
+    <div class="dpad">
+      <button class="sp"></button><button data-dir="up">▲</button><button class="sp"></button>
+      <button data-dir="left">◀</button><button class="sp"></button><button data-dir="right">▶</button>
+      <button class="sp"></button><button data-dir="down">▼</button><button class="sp"></button>
+    </div>
+    <button class="abtn" id="abtn">A</button>
+  </div>
+  <p class="hint">Arrow keys / WASD to walk · SPACE or A to talk · step in the tall grass to find wild Clef-mon</p>
+
+  <script src="/quest/music.js"></script>
+  <script src="/quest/audio.js"></script>
+  <script src="/quest/world/world.js"></script>
+</body>
+</html>
