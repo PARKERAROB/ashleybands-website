@@ -7,8 +7,12 @@ Next.js + Vercel + Supabase. When in doubt, BDOS is the source of truth.
 - Public info pages are GENERATED. Source markdown lives in `content/sources/`
   (e.g. `marching-band-2026.md`, `2026-2027-band-information.md`). Edit the SOURCE,
   then run `npm run content:build`. Never hand-edit the generated `content/*.json`.
-- Site dates must match BDOS `data/calendar-2026.csv`. Run `/check-site-dates` before
-  shipping any date change.
+- Dated truth = `RobOS/store/events.jsonl` (store-as-master, 2026-06-10). `/calendar` +
+  `public/calendar.ics` + `public/calendar-data.json` are GENERATED from it: run
+  `python3 ~/Desktop/RobOS/store/render_calendar.py`, copy `RobOS/calendar/program.{ics,json}`
+  to `public/calendar.ics` / `public/calendar-data.json`, deploy. BDOS `data/calendar-2026.csv`
+  is a generated projection of the same store (never hand-edit). Run `/check-site-dates`
+  before shipping any date change.
 - Voice/naming: short sentences, no em dashes, "Mr. Parker" (not "Rob"), "Ashley"
   (not "Eugene Ashley"). Full rules: BDOS `references/voice.md`.
 
