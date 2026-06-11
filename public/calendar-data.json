@@ -275,7 +275,7 @@
   "start": "2026-11-23",
   "end": null,
   "all_day": true,
-  "category": "Honor-Band",
+  "category": "AllCounty",
   "location": ""
  },
  {
@@ -284,7 +284,7 @@
   "start": "2026-11-24",
   "end": null,
   "all_day": true,
-  "category": "Honor-Band",
+  "category": "AllCounty",
   "location": ""
  },
  {
@@ -320,7 +320,7 @@
   "start": "2027-01-09",
   "end": null,
   "all_day": true,
-  "category": "Honor-Band",
+  "category": "AllDistrict",
   "location": ""
  },
  {
@@ -338,7 +338,7 @@
   "start": "2027-01-16",
   "end": null,
   "all_day": true,
-  "category": "Honor-Band",
+  "category": "AllDistrict",
   "location": ""
  },
  {
@@ -347,7 +347,7 @@
   "start": "2027-02-05",
   "end": "2027-02-06",
   "all_day": true,
-  "category": "Honor-Band",
+  "category": "AllDistrict",
   "location": ""
  },
  {
@@ -356,7 +356,7 @@
   "start": "2027-02-19",
   "end": "2027-02-20",
   "all_day": true,
-  "category": "Honor-Band",
+  "category": "Jazz",
   "location": ""
  },
  {
@@ -383,7 +383,7 @@
   "start": "2027-03-06",
   "end": null,
   "all_day": true,
-  "category": "Honor-Band",
+  "category": "AllState",
   "location": ""
  },
  {
@@ -392,7 +392,7 @@
   "start": "2027-03-13",
   "end": null,
   "all_day": true,
-  "category": "Honor-Band",
+  "category": "AllState",
   "location": ""
  },
  {
@@ -428,7 +428,7 @@
   "start": "2027-04-16",
   "end": "2027-04-17",
   "all_day": true,
-  "category": "Honor-Band",
+  "category": "Jazz",
   "location": ""
  },
  {
@@ -446,7 +446,7 @@
   "start": "2027-04-30",
   "end": "2027-05-02",
   "all_day": true,
-  "category": "Honor-Band",
+  "category": "AllState",
   "location": ""
  },
  {
