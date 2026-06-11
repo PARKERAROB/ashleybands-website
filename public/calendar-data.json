@@ -1,13 +1,102 @@
 [
  {
+  "id": "evt-0057",
+  "title": "Murray HS visit (MB recruitment)",
+  "start": "2026-05-11",
+  "end": null,
+  "all_day": true,
+  "category": "Visit",
+  "location": ""
+ },
+ {
+  "id": "evt-0059",
+  "title": "Spring Concert",
+  "start": "2026-05-12",
+  "end": null,
+  "all_day": true,
+  "category": "Concert",
+  "location": ""
+ },
+ {
+  "id": "evt-0063",
+  "title": "Murray HS visit (MB recruitment)",
+  "start": "2026-05-13",
+  "end": null,
+  "all_day": true,
+  "category": "Visit",
+  "location": ""
+ },
+ {
+  "id": "evt-0060",
+  "title": "Spring Trip",
+  "start": "2026-05-15",
+  "end": "2026-05-16",
+  "all_day": true,
+  "category": "Trip",
+  "location": ""
+ },
+ {
+  "id": "evt-0061",
+  "title": "Senior Walk",
+  "start": "2026-05-19",
+  "end": null,
+  "all_day": true,
+  "category": "School",
+  "location": ""
+ },
+ {
+  "id": "evt-0065",
+  "title": "Senior Walk + Lawn Party",
+  "start": "2026-05-19",
+  "end": null,
+  "all_day": true,
+  "category": "School",
+  "location": ""
+ },
+ {
+  "id": "evt-0067",
+  "title": "EOC Test & Proctor Training",
+  "start": "2026-05-27",
+  "end": null,
+  "all_day": true,
+  "category": "Meeting",
+  "location": ""
+ },
+ {
+  "id": "evt-0068",
+  "title": "Ashley HS Graduation",
+  "start": "2026-06-06",
+  "end": null,
+  "all_day": true,
+  "category": "School",
+  "location": ""
+ },
+ {
+  "id": "evt-0069",
+  "title": "Cumulative Records",
+  "start": "2026-06-08",
+  "end": null,
+  "all_day": true,
+  "category": "School",
+  "location": ""
+ },
+ {
+  "id": "evt-0070",
+  "title": "EOY Staff Meeting & Lunch",
+  "start": "2026-06-09",
+  "end": null,
+  "all_day": true,
+  "category": "School",
+  "location": ""
+ },
+ {
   "id": "evt-0006",
   "title": "Leadership Week",
   "start": "2026-07-27",
   "end": "2026-07-30",
   "all_day": true,
   "category": "MB-Preseason",
-  "location": "AHS",
-  "notes": "Mon-Thu; colorguard/percussion inclusion TBD"
+  "location": "AHS"
  },
  {
   "id": "evt-0007",
@@ -16,8 +105,43 @@
   "end": "2026-08-03T15:00",
   "all_day": false,
   "category": "MB-Preseason",
-  "location": "AHS",
-  "notes": "7am-3pm daily Mon-Fri"
+  "location": "AHS"
+ },
+ {
+  "id": "evt-0007",
+  "title": "Band Camp (week 1)",
+  "start": "2026-08-04T07:00",
+  "end": "2026-08-04T15:00",
+  "all_day": false,
+  "category": "MB-Preseason",
+  "location": "AHS"
+ },
+ {
+  "id": "evt-0007",
+  "title": "Band Camp (week 1)",
+  "start": "2026-08-05T07:00",
+  "end": "2026-08-05T15:00",
+  "all_day": false,
+  "category": "MB-Preseason",
+  "location": "AHS"
+ },
+ {
+  "id": "evt-0007",
+  "title": "Band Camp (week 1)",
+  "start": "2026-08-06T07:00",
+  "end": "2026-08-06T15:00",
+  "all_day": false,
+  "category": "MB-Preseason",
+  "location": "AHS"
+ },
+ {
+  "id": "evt-0007",
+  "title": "Band Camp (week 1)",
+  "start": "2026-08-07T07:00",
+  "end": "2026-08-07T15:00",
+  "all_day": false,
+  "category": "MB-Preseason",
+  "location": "AHS"
  },
  {
   "id": "evt-0008",
@@ -26,8 +150,43 @@
   "end": "2026-08-10T15:00",
   "all_day": false,
   "category": "MB-Preseason",
-  "location": "AHS",
-  "notes": "7am-3pm daily Mon-Fri"
+  "location": "AHS"
+ },
+ {
+  "id": "evt-0008",
+  "title": "Band Camp (week 2)",
+  "start": "2026-08-11T07:00",
+  "end": "2026-08-11T15:00",
+  "all_day": false,
+  "category": "MB-Preseason",
+  "location": "AHS"
+ },
+ {
+  "id": "evt-0008",
+  "title": "Band Camp (week 2)",
+  "start": "2026-08-12T07:00",
+  "end": "2026-08-12T15:00",
+  "all_day": false,
+  "category": "MB-Preseason",
+  "location": "AHS"
+ },
+ {
+  "id": "evt-0008",
+  "title": "Band Camp (week 2)",
+  "start": "2026-08-13T07:00",
+  "end": "2026-08-13T15:00",
+  "all_day": false,
+  "category": "MB-Preseason",
+  "location": "AHS"
+ },
+ {
+  "id": "evt-0008",
+  "title": "Band Camp (week 2)",
+  "start": "2026-08-14T07:00",
+  "end": "2026-08-14T15:00",
+  "all_day": false,
+  "category": "MB-Preseason",
+  "location": "AHS"
  },
  {
   "id": "evt-0009",
@@ -36,8 +195,7 @@
   "end": "2026-08-28T22:00",
   "all_day": false,
   "category": "MB-Football",
-  "location": "AHS",
-  "notes": "MB performs. Kickoff 7pm; band call typically 5pm (soft default, Rob 6/10); end approximate"
+  "location": "AHS"
  },
  {
   "id": "evt-0010",
@@ -46,8 +204,7 @@
   "end": "2026-09-11T22:00",
   "all_day": false,
   "category": "MB-Football",
-  "location": "AHS",
-  "notes": "MB performs. Kickoff 7pm; band call typically 5pm (soft default, Rob 6/10); end approximate"
+  "location": "AHS"
  },
  {
   "id": "evt-0012",
@@ -56,8 +213,7 @@
   "end": "2026-09-25T22:00",
   "all_day": false,
   "category": "MB-Football",
-  "location": "AHS",
-  "notes": "MB performs. Kickoff 7pm; band call typically 5pm (soft default, Rob 6/10); end approximate"
+  "location": "AHS"
  },
  {
   "id": "evt-0013",
@@ -66,8 +222,7 @@
   "end": null,
   "all_day": true,
   "category": "MB-Fundraiser",
-  "location": "AHS",
-  "notes": ""
+  "location": "AHS"
  },
  {
   "id": "evt-0014",
@@ -76,8 +231,7 @@
   "end": null,
   "all_day": true,
   "category": "MB-Rehearsal",
-  "location": "AHS stadium",
-  "notes": "Oct 3 = rehearsal by default (decided 2026-05-20); Raleigh competition unlikely"
+  "location": "AHS stadium"
  },
  {
   "id": "evt-0015",
@@ -86,8 +240,7 @@
   "end": null,
   "all_day": true,
   "category": "MB-Competition",
-  "location": "White Oak HS",
-  "notes": "Confirmed and registered 5/27; official show name TBD"
+  "location": "White Oak HS"
  },
  {
   "id": "evt-0016",
@@ -96,8 +249,7 @@
   "end": "2026-10-16T22:00",
   "all_day": false,
   "category": "MB-Football",
-  "location": "AHS",
-  "notes": "MB performs. Kickoff 7pm; band call typically 5pm (soft default, Rob 6/10); end approximate"
+  "location": "AHS"
  },
  {
   "id": "evt-0017",
@@ -106,8 +258,16 @@
   "end": null,
   "all_day": true,
   "category": "MB-Competition",
-  "location": "Topsail HS",
-  "notes": "Confirmed and registered"
+  "location": "Topsail HS"
+ },
+ {
+  "id": "evt-0054",
+  "title": "HOCO Dance",
+  "start": "2026-10-17",
+  "end": null,
+  "all_day": true,
+  "category": "School",
+  "location": ""
  },
  {
   "id": "evt-0018",
@@ -116,8 +276,7 @@
   "end": null,
   "all_day": true,
   "category": "MB-Event",
-  "location": "Hoggard HS",
-  "notes": "Tuesday"
+  "location": "Hoggard HS"
  },
  {
   "id": "evt-0019",
@@ -126,8 +285,7 @@
   "end": "2026-10-22T20:30",
   "all_day": false,
   "category": "Concert",
-  "location": "AHS/MEAC",
-  "notes": "7pm (program standard, confirmed Rob 6/10)"
+  "location": "AHS/MEAC"
  },
  {
   "id": "evt-0020",
@@ -136,8 +294,7 @@
   "end": "2026-10-23T22:00",
   "all_day": false,
   "category": "MB-Football",
-  "location": "AHS",
-  "notes": "MB performs. Kickoff 7pm; band call typically 5pm (soft default, Rob 6/10); end approximate"
+  "location": "AHS"
  },
  {
   "id": "evt-0021",
@@ -146,8 +303,7 @@
   "end": null,
   "all_day": true,
   "category": "MB-Competition",
-  "location": "Corinth Holders HS",
-  "notes": "Official show name confirmed Rob 6/10; venue kept in title because Topsail are also Pirates (their show = Pirate Classic). Season-ending; registered 5/27"
+  "location": "Corinth Holders HS"
  },
  {
   "id": "evt-0022",
@@ -156,8 +312,7 @@
   "end": "2026-10-30T22:00",
   "all_day": false,
   "category": "MB-Football",
-  "location": "Hoggard HS",
-  "notes": "Away game; MB attends (only away game MB attends). Kickoff 7pm; band call typically 5pm (soft default, Rob 6/10); end approximate"
+  "location": "Hoggard HS"
  },
  {
   "id": "evt-0023",
@@ -166,8 +321,7 @@
   "end": null,
   "all_day": true,
   "category": "WSW",
-  "location": "Kenan Auditorium",
-  "notes": "Concert time unknown - all-day until known. Program placement = Rob's standing choice (band should know about WSW concerts, 6/10 grill)"
+  "location": "Kenan Auditorium"
  },
  {
   "id": "evt-0025",
@@ -176,8 +330,7 @@
   "end": null,
   "all_day": true,
   "category": "Honor-Band",
-  "location": "",
-  "notes": "Student honor-band event"
+  "location": ""
  },
  {
   "id": "evt-0026",
@@ -186,8 +339,7 @@
   "end": null,
   "all_day": true,
   "category": "Honor-Band",
-  "location": "",
-  "notes": "Student honor-band event"
+  "location": ""
  },
  {
   "id": "evt-0027",
@@ -196,8 +348,7 @@
   "end": null,
   "all_day": true,
   "category": "MB-Event",
-  "location": "Carolina Beach (assumed)",
-  "notes": "Read as Carolina Beach Christmas Parade, band marches (conf 75) - confirm"
+  "location": ""
  },
  {
   "id": "evt-0028",
@@ -206,8 +357,7 @@
   "end": "2026-12-08T20:30",
   "all_day": false,
   "category": "Concert",
-  "location": "AHS/MEAC (assumed)",
-  "notes": "7pm (program standard, Rob 6/10). Was missing from CSV - confirmed in reconcile"
+  "location": ""
  },
  {
   "id": "evt-0034",
@@ -216,8 +366,7 @@
   "end": "2027-01-08",
   "all_day": true,
   "category": "School",
-  "location": "AHS",
-  "notes": "On the band calendar per Rob 6/10 (families plan around exams)"
+  "location": "AHS"
  },
  {
   "id": "evt-0035",
@@ -226,8 +375,7 @@
   "end": null,
   "all_day": true,
   "category": "Honor-Band",
-  "location": "",
-  "notes": "Student honor-band event"
+  "location": ""
  },
  {
   "id": "evt-0036",
@@ -236,8 +384,7 @@
   "end": "2027-01-15",
   "all_day": true,
   "category": "School",
-  "location": "AHS",
-  "notes": "On the band calendar per Rob 6/10 (families plan around exams)"
+  "location": "AHS"
  },
  {
   "id": "evt-0037",
@@ -246,8 +393,7 @@
   "end": null,
   "all_day": true,
   "category": "Honor-Band",
-  "location": "",
-  "notes": "Snow date - publishes so families hold it"
+  "location": ""
  },
  {
   "id": "evt-0038",
@@ -256,8 +402,7 @@
   "end": "2027-02-06",
   "all_day": true,
   "category": "Honor-Band",
-  "location": "",
-  "notes": "Fri-Sat"
+  "location": ""
  },
  {
   "id": "evt-0039",
@@ -266,8 +411,7 @@
   "end": "2027-02-20",
   "all_day": true,
   "category": "Honor-Band",
-  "location": "",
-  "notes": ""
+  "location": ""
  },
  {
   "id": "evt-0040",
@@ -276,8 +420,7 @@
   "end": "2027-02-26",
   "all_day": true,
   "category": "CCC",
-  "location": "",
-  "notes": "CCC = Conductor's Clinic and Concert. Whole week on the band calendar per Rob 6/10"
+  "location": ""
  },
  {
   "id": "evt-0041",
@@ -286,8 +429,7 @@
   "end": null,
   "all_day": true,
   "category": "CCC",
-  "location": "",
-  "notes": "On the band calendar per Rob 6/10"
+  "location": ""
  },
  {
   "id": "evt-0042",
@@ -296,8 +438,7 @@
   "end": null,
   "all_day": true,
   "category": "Honor-Band",
-  "location": "",
-  "notes": ""
+  "location": ""
  },
  {
   "id": "evt-0043",
@@ -306,8 +447,7 @@
   "end": null,
   "all_day": true,
   "category": "Honor-Band",
-  "location": "",
-  "notes": ""
+  "location": ""
  },
  {
   "id": "evt-0045",
@@ -316,8 +456,7 @@
   "end": null,
   "all_day": true,
   "category": "MPA",
-  "location": "",
-  "notes": "Two-day Concert MPA; AHS ensembles perform (Rob confirmed 5/28)"
+  "location": ""
  },
  {
   "id": "evt-0046",
@@ -326,8 +465,7 @@
   "end": null,
   "all_day": true,
   "category": "MPA",
-  "location": "",
-  "notes": ""
+  "location": ""
  },
  {
   "id": "evt-0048",
@@ -336,8 +474,7 @@
   "end": null,
   "all_day": true,
   "category": "MB-Event",
-  "location": "Downtown Wilmington",
-  "notes": ""
+  "location": "Downtown Wilmington"
  },
  {
   "id": "evt-0049",
@@ -346,8 +483,16 @@
   "end": "2027-04-17",
   "all_day": true,
   "category": "Honor-Band",
-  "location": "",
-  "notes": ""
+  "location": ""
+ },
+ {
+  "id": "evt-0055",
+  "title": "Prom",
+  "start": "2027-04-24",
+  "end": null,
+  "all_day": true,
+  "category": "School",
+  "location": ""
  },
  {
   "id": "evt-0050",
@@ -356,8 +501,7 @@
   "end": "2027-05-02",
   "all_day": true,
   "category": "Honor-Band",
-  "location": "",
-  "notes": ""
+  "location": ""
  },
  {
   "id": "evt-0051",
@@ -366,8 +510,7 @@
   "end": null,
   "all_day": true,
   "category": "MPA",
-  "location": "",
-  "notes": ""
+  "location": ""
  },
  {
   "id": "evt-0052",
@@ -376,8 +519,7 @@
   "end": null,
   "all_day": true,
   "category": "MPA",
-  "location": "",
-  "notes": ""
+  "location": ""
  },
  {
   "id": "evt-0053",
@@ -386,7 +528,15 @@
   "end": "2027-05-11T20:30",
   "all_day": false,
   "category": "Concert",
-  "location": "AHS/MEAC (assumed)",
-  "notes": "7pm (program standard, Rob 6/10)"
+  "location": ""
+ },
+ {
+  "id": "evt-0056",
+  "title": "Ashley HS Graduation",
+  "start": "2027-06-05",
+  "end": null,
+  "all_day": true,
+  "category": "School",
+  "location": ""
  }
 ]
