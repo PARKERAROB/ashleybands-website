@@ -9,8 +9,15 @@ export const byId = new Map(deck.map((s) => [s.id, s]));
 export function renderSlide(slide) {
   if (!slide) return null;
   if (slide.kind === "image") {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img className="boh-flyer-img" src={slide.image} alt={slide.alt || ""} />;
+    return (
+      <>
+        {/* blurred, scaled copy of the poster fills the stage (YouTube portrait look) */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="boh-flyer-bg" src={slide.image} alt="" aria-hidden="true" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="boh-flyer-img" src={slide.image} alt={slide.alt || ""} />
+      </>
+    );
   }
   if (slide.kind === "program") {
     return (
