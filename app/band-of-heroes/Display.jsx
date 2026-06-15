@@ -8,9 +8,12 @@
 import { useEffect, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { byId, renderSlide } from "./slideView";
+import { PROGRAM_START } from "./program";
 import { getLiveClient, BOH_CHANNEL } from "@/lib/bandOfHeroes/live";
 
-const DEFAULT = { slideId: 1, status: "idle", optionA: null, optionB: null, counts: { a: 0, b: 0 }, winner: null };
+// Default to the program start (not the BoH finale cover) so an unconnected or
+// reconnecting display never flashes the ending. It follows the remote on connect.
+const DEFAULT = { slideId: PROGRAM_START, status: "idle", optionA: null, optionB: null, counts: { a: 0, b: 0 }, winner: null };
 
 export default function Display() {
   const [snap, setSnap] = useState(DEFAULT);
