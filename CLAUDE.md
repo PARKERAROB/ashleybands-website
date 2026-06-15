@@ -18,9 +18,11 @@ Next.js + Vercel + Supabase. When in doubt, BDOS is the source of truth.
 
 ## Deploy
 - `/deploy-website` only. Never deploy spring-concert-2026.vercel.app.
-- **Prod tracks `band-of-heroes-live`, NOT `main` (observed 6/10).** `/band-of-heroes` is live;
-  `/tycoon` (only on `main`) 404s in prod. Deploying `main` would drop live content — check the
-  live site (`curl ashleybands.com/<route>`) before assuming which branch is production.
+- **CONSOLIDATED 2026-06-15: `main` now has ALL content** (`band-of-heroes-live` merged into `main`,
+  no history rewrite). The old "deploying `main` drops live content" warning is now STALE — `main` is
+  the full superset. Prod stays aliased from the last `band-of-heroes-live` deploy until the next
+  `vercel --prod`; **going forward, work and deploy from `main`.** (Verify with `curl ashleybands.com/<route>`
+  if unsure what's currently live.)
 - `vercel --prod --yes` builds with Production env + aliases ashleybands.com. **Preview deploys
   (`vercel`) fail** here — env vars are scoped to Production only, so a preview `next build` exits 1
   even when the local build passes. Use prod, or fix preview-scoped env, don't chase the code.
