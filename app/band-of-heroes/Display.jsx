@@ -35,6 +35,18 @@ export default function Display() {
     return () => { try { client.removeChannel(ch); } catch {} };
   }, []);
 
+  // Press F to toggle fullscreen (true fullscreen hides the browser address bar).
+  useEffect(() => {
+    function onKey(e) {
+      if (e.key === "f" || e.key === "F") {
+        if (document.fullscreenElement) document.exitFullscreen?.();
+        else document.documentElement.requestFullscreen?.();
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   const slide = byId.get(snap.slideId) || byId.get(1);
   const isVote = !!slide.choices;
   const status = snap.status;
