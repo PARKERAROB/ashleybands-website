@@ -180,6 +180,8 @@ function Dashboard({ session, onLogout }) {
         </div>
       </div>
 
+      <GiftsPanel session={session} />
+
       {data.dedup.length > 0 && (
         <section className="dashboard-alerts">
           <h3>⚠ Duplicate prospect alerts</h3>
@@ -281,6 +283,105 @@ function Dashboard({ session, onLogout }) {
         {rows.length === 0 && <p className="tracker-empty">No prospects match your filter.</p>}
       </div>
     </div>
+  );
+}
+
+function GiftsPanel({ session }) {
+  const [data, setData] = useState(null);
+  const [busy, setBusy] = useState("");
+
+  const load = useCallback(async () => {
+    try {
+      const res = await fetch("/api/sponsors/gifts", { headers: authHeaders(session) });
+      if (!res.ok) return;
+      setData(await res.json());
+    } catch {
+      /* ignore */
+    }
+  }, [session]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  async function confirmGift(g) {
+    if (!confirm(`Confirm ${g.business_name} ($${((g.amount_cents || 0) / 100).toLocaleString()})? This sends the receipt + lists them publicly.`)) {
+      return;
+    }
+    setBusy(g.id);
+    try {
+      const res = await fetch(`/api/sponsors/gifts/${g.id}`, {
+        method: "PATCH",
+        headers: authHeaders(session),
+        body: JSON.stringify({ action: "confirm" })
+      });
+      if (res.ok) await load();
+      else alert("Could not confirm gift.");
+    } finally {
+      setBusy("");
+    }
+  }
+
+  async function voidGift(g) {
+    if (!confirm(`Void the ${g.business_name} pledge? Use this if a check never arrived.`)) return;
+    setBusy(g.id);
+    try {
+      const res = await fetch(`/api/sponsors/gifts/${g.id}`, {
+        method: "PATCH",
+        headers: authHeaders(session),
+        body: JSON.stringify({ action: "void" })
+      });
+      if (res.ok) await load();
+    } finally {
+      setBusy("");
+    }
+  }
+
+  if (!data) return null;
+  const gifts = data.gifts || [];
+  if (!gifts.length) return null;
+  const pending = gifts.filter((g) => g.status === "pending");
+  const confirmed = gifts.filter((g) => g.status === "confirmed");
+  const fmt = (c) => `$${((c || 0) / 100).toLocaleString()}`;
+
+  return (
+    <section className="dashboard-alerts" style={{ background: "#fbf7ee", borderColor: "#ecd9ad" }}>
+      <h3>💛 Sponsor gifts</h3>
+      <p>
+        {fmt(data.confirmedCents)} confirmed · {pending.length} pending. Confirming a gift sends the tax receipt,
+        lists the sponsor publicly, and emails their badge (receipt/badge stay held until the templates are turned on).
+      </p>
+      {pending.length ? (
+        <table className="tracker-table" style={{ marginTop: 8 }}>
+          <thead>
+            <tr><th>Business</th><th>Amount</th><th>Method</th><th>From</th><th></th></tr>
+          </thead>
+          <tbody>
+            {pending.map((g) => (
+              <tr key={g.id}>
+                <td><strong>{g.business_name}</strong></td>
+                <td>{fmt(g.amount_cents)}{g.tier ? <div className="tracker-sub">{g.tier}</div> : null}</td>
+                <td>{g.method}</td>
+                <td>{g.payer_name || "—"}{g.payer_email ? <div className="tracker-sub">{g.payer_email}</div> : null}</td>
+                <td>
+                  <button type="button" className="tracker-link tracker-link-action" disabled={busy === g.id} onClick={() => confirmGift(g)}>
+                    Confirm received
+                  </button>
+                  <div className="tracker-sub">
+                    <button type="button" className="tracker-link" disabled={busy === g.id} onClick={() => voidGift(g)}>void</button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : null}
+      {confirmed.length ? (
+        <p className="tracker-sub" style={{ marginTop: 8 }}>
+          Confirmed: {confirmed.map((g) => `${g.business_name} (${fmt(g.amount_cents)})`).join(", ")}
+        </p>
+      ) : null}
+    </section>
   );
 }
 

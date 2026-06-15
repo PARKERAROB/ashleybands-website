@@ -15,8 +15,8 @@
     <key>Hour</key><integer>5</integer>
     <key>Minute</key><integer>0</integer>
   </dict>
-  <key>StandardOutPath</key><string>/Users/parkerarob/Desktop/BandDirectorOS/data/_work/launchd-enrichment.out</string>
-  <key>StandardErrorPath</key><string>/Users/parkerarob/Desktop/BandDirectorOS/data/_work/launchd-enrichment.err</string>
+  <key>StandardOutPath</key><string>/Users/parkerarob/Desktop/BandsofAHS/data/_work/launchd-enrichment.out</string>
+  <key>StandardErrorPath</key><string>/Users/parkerarob/Desktop/BandsofAHS/data/_work/launchd-enrichment.err</string>
   <key>RunAtLoad</key><false/>
 </dict>
 </plist>

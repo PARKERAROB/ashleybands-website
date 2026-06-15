@@ -142,7 +142,7 @@ export default function HomePage() {
             The band calendar is the source of truth for dates and times. Subscribe instead of
             downloading a one-time copy so updates appear automatically.
           </p>
-          <a className="text-link" href={data.quickLinks[0].href}>Calendar subscription link</a>
+          <a className="text-link" href="/calendar">Open the band calendar</a>
         </div>
         <div>
           <p className="eyebrow">Payments and Records</p>

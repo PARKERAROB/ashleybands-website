@@ -1,6 +1,6 @@
 # Bands of AHS Facts
 
-*Stable reference for drafting communications. The Google Calendar is the official source of truth for all dates and times — always defer to it over this file. Update this file when facts change; do not let stale entries persist.*
+*Stable reference for drafting communications. The band calendar at ashleybands.com/calendar is the official source of truth for all dates and times — always defer to it over this file. Update this file when facts change; do not let stale entries persist.*
 
 *Handbook reference: `knowledge/handbooks/` contains the 2023 handbook. Treat as historical reference only — policies, grading, and financials are under revision with student leadership. Do not cite specific figures or rules from the handbook as current until the updated version is approved.*
 
@@ -61,7 +61,7 @@ Ashley proudly hosts the **NCBA Eastern District MPA South** each March.
 
 ## Major Concert / Assessment Dates — 2026–2027
 
-Google Calendar remains the official source of truth.
+The band calendar at ashleybands.com/calendar is the source of truth. Subscribe once and dates update automatically.
 
 | Event | Date / Time | Notes |
 |---|---|---|
@@ -129,14 +129,15 @@ Payment: Check payable to "Ashley High School Band Boosters" or online payment.
 
 ## Communication Platforms
 
-### Google Calendar
-**Official source of truth for all band events.** If there is a date conflict, always assume the Google Calendar is correct.
+### Band Calendar
+**Official source of truth for all band events.** If there is a date conflict, always assume the band calendar is correct.
 
-Subscribe (.ics): `https://calendar.google.com/calendar/ical/nhcs.net_3olclj1g9acb2qp851rgq826to@group.calendar.google.com/public/basic.ics`
+Subscribe at: `https://ashleybands.com/calendar`
 
-- **iPhone/iPad:** Settings → Calendar → Accounts → Add Account → Other → Add Subscribed Calendar → paste link
-- **Android/Google Calendar:** Click "Add to Google Calendar" on band website → click "+ Google Calendar"
-- Always subscribe (don't download) for automatic real-time updates.
+- **Easiest:** open ashleybands.com/calendar and tap "Subscribe to the calendar."
+- **iPhone/iPad:** the subscribe button opens Apple Calendar directly. Or Settings → Calendar → Accounts → Add Account → Other → Add Subscribed Calendar → paste `https://ashleybands.com/calendar.ics`
+- **Android/Google Calendar:** open the download link in Google Calendar.
+- Always subscribe (don't download a one-time copy) for automatic real-time updates.
 
 ### My Music Office (MMO)
 Every student AND at least one parent must have an active account at https://www.mymusicoffice.com/

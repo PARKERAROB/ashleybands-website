@@ -8,7 +8,7 @@
 
 This page collects the general next-year information normally covered at open house.
 
-The Google Calendar is the official source of truth for dates and times.
+The band calendar at ashleybands.com/calendar is the official source of truth for dates and times.
 
 ## Major Dates
 
@@ -43,14 +43,14 @@ Working dates include:
 
 ## Communication
 
-### Google Calendar
+### Band Calendar
 
-The Google Calendar is the official source of truth for band events.
+The band calendar is the official source of truth for band events.
 
 Subscribe to the calendar instead of downloading a one-time copy. Subscribing allows updates to appear automatically.
 
-Calendar subscription link:  
-https://calendar.google.com/calendar/ical/nhcs.net_3olclj1g9acb2qp851rgq826to@group.calendar.google.com/public/basic.ics
+Open and subscribe at:  
+https://ashleybands.com/calendar
 
 ### My Music Office
 
