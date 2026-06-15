@@ -313,6 +313,58 @@ export default function SpringTripRecoveryPage() {
       </section>
 
       <section className="recovery-section recovery-note">
+        <h2>Filing Your Own Complaint</h2>
+        <p>
+          The Ashley Band Boosters is filing a consumer-protection complaint with the North Carolina
+          Attorney General&rsquo;s office, because what happened to our trip is part of a pattern that
+          affects other families and groups, not just ours. If you would like to file your own complaint,
+          you are welcome to. It is completely optional, and your refund does not depend on it.
+        </p>
+        <p>
+          A complaint in your own words carries more weight than a copied one. You can file with any or
+          all of these, and all are free:
+        </p>
+        <ul>
+          <li>
+            <strong>NC Attorney General (Consumer Protection):</strong>{" "}
+            <a href="https://ncdoj.gov/file-a-complaint/consumer-complaint/" target="_blank" rel="noopener noreferrer">
+              ncdoj.gov/file-a-complaint
+            </a>
+            , or call 1-877-5-NO-SCAM (in NC) or 919-716-6000.
+          </li>
+          <li>
+            <strong>Better Business Bureau:</strong>{" "}
+            <a
+              href="https://www.bbb.org/us/ga/atlanta/profile/charter-bus/charter-up-charter-bus-company-0443-91840089"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              CharterUP&rsquo;s BBB profile
+            </a>{" "}
+            (Atlanta, GA), then use &ldquo;File a Complaint.&rdquo;
+          </li>
+          <li>
+            <strong>FMCSA</strong> (the federal agency that licenses bus brokers):{" "}
+            <a href="https://nccdb.fmcsa.dot.gov/nccdb/home.aspx" target="_blank" rel="noopener noreferrer">
+              National Consumer Complaint Database
+            </a>
+            , or call 1-888-368-7238.
+          </li>
+        </ul>
+        <p>
+          Keep it to your own experience: who you are (a parent of a student signed up for the May 15 trip),
+          what happened (the booked bus never arrived and CharterUP cancelled with no replacement), the company
+          (CharterUP, Inc., Atlanta GA), the date, and what the cancellation cost your family. You do not need
+          to include anyone else&rsquo;s information.
+        </p>
+        <p>
+          If you would like a document from our records to attach, such as CharterUP&rsquo;s written
+          cancellation notice, email Mr. Parker and let him know which complaint you are filing. He will
+          share what fits.
+        </p>
+      </section>
+
+      <section className="recovery-section recovery-note">
         <h2>A Note on Family Responses</h2>
         <p>
           Thank you to the families who have already written in. Many of you have offered help, asked
