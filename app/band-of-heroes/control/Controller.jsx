@@ -235,7 +235,14 @@ export default function Controller() {
         <button className="boh-btn boh-btn--ghost boh-btn--sm" onClick={reset}>⟲ Start over</button>
       </div>
 
-      <div className="boh-control-stage">
+      <div className={`boh-control-stage${slide.bg ? " boh-stage--photo" : ""}`}>
+        {slide.bg && (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="boh-card-bg" src={slide.bg} alt="" aria-hidden="true" />
+            <div className="boh-card-scrim" />
+          </>
+        )}
         <div className="boh-text">{renderSlide(slide)}</div>
         {isVote && status === "closed" && winnerLabel && (
           <div className="boh-reveal"><span className="boh-reveal-label">Winner</span><span className="boh-reveal-name">{winnerLabel}</span></div>

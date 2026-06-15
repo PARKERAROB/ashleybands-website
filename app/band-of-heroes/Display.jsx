@@ -54,7 +54,14 @@ export default function Display() {
       <button className="boh-fs" onClick={goFullscreen} title="Fullscreen">⛶</button>
 
       <div className="boh-display-main">
-        <div className={`boh-stage boh-stage--${slide.kind} boh-stage--display`}>
+        <div className={`boh-stage boh-stage--${slide.kind} boh-stage--display${slide.bg ? " boh-stage--photo" : ""}`}>
+          {slide.bg && (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className="boh-card-bg" src={slide.bg} alt="" aria-hidden="true" />
+              <div className="boh-card-scrim" />
+            </>
+          )}
           <div className="boh-text">{renderSlide(slide)}</div>
 
           {voteOpen && (
