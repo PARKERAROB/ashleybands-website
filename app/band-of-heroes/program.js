@@ -15,9 +15,11 @@
 // Dates verified against sources 2026-06-15 (Barnes Alvamar = 1981 not 1882; Hisaishi
 // b. 1950 and living; Anderson 1908-1975, Typewriter composed 1950). Rob's call on titles.
 
-export const PROGRAM_START = 1001;
+export const PROGRAM_START = 1000;
 
 export const programSlides = [
+  { id: 1000, kind: "image", program: true, scene: "Welcome",
+    image: "/band-of-heroes/summer-band-flyer.png", alt: "UNCW Summer Concert Band 2026 — Kenan Auditorium, Monday June 15, 7:30 PM", next: 1001 },
   { id: 1001, kind: "program", program: true, scene: "Program",
     title: "Alvamar Overture", composer: "James Barnes", life: "b. 1949", year: "1981", next: 1002 },
   { id: 1002, kind: "program", program: true, scene: "Program",
