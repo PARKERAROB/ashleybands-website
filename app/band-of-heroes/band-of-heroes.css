@@ -149,8 +149,8 @@
 }
 .boh-qr.is-big { padding: 16px; }
 /* Force the QR to scale to the projector regardless of the rendered size prop. */
-.boh-qr svg { width: 30vw; height: auto; max-width: 560px; }
-.boh-qr.is-big svg { width: 34vw; max-width: 620px; }
+.boh-qr svg { width: 15vw; height: auto; max-width: 280px; }
+.boh-qr.is-big svg { width: 17vw; max-width: 310px; }
 .boh-qr-cap { font-family: 'Cinzel', Georgia, serif; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.95rem; color: #4a2f12; font-weight: 700; }
 
 /* tally overlaid low on the parchment during a vote — dark subtitle-style
