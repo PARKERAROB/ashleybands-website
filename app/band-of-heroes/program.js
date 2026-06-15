@@ -21,7 +21,7 @@ export const programSlides = [
   { id: 1001, kind: "program", program: true, scene: "Program",
     title: "Alvamar Overture", composer: "James Barnes", life: "b. 1949", year: "1981", next: 1002 },
   { id: 1002, kind: "program", program: true, scene: "Program",
-    title: "Children’s Overture", composer: "Percy Grainger", life: "1882–1961", year: "1916", next: 1003 },
+    title: "Children’s March", composer: "Percy Grainger", life: "1882–1961", year: "1916", next: 1003 },
   { id: 1003, kind: "program", program: true, scene: "Program",
     title: "Foundry", composer: "John Mackey", life: "b. 1973", year: "2010", next: 1004 },
   { id: 1004, kind: "intermission", program: true, scene: "Intermission",
