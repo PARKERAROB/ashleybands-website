@@ -152,7 +152,17 @@ const timeline = [
   {
     time: "Early June",
     title: "CharterUP courtesy refund set to come by check",
-    body: "CharterUP confirmed it will issue the $1,784.16 courtesy refund by check rather than back to the card. CharterUP has confirmed it has the booster organization's information for the check, and the check is now being cut and mailed. There is no firm delivery date yet. This is the last piece still outstanding."
+    body: "CharterUP confirmed it would issue the $1,784.16 courtesy refund by check rather than back to the card, and that it had the booster organization's information to cut and mail it."
+  },
+  {
+    time: "Saturday, June 14",
+    title: "CharterUP courtesy refund check received",
+    body: "The $1,784.16 CharterUP courtesy refund check arrived. With it, every outside-vendor cost the trip could recover is now back in hand. That was the last piece we were waiting on."
+  },
+  {
+    time: "Monday, June 15",
+    title: "Check deposited — family refunds opening",
+    body: "The CharterUP check was deposited. The trip account is being reconciled and the family refund selection form is opening now. Every family will get an email from Mr. Parker with their link and a full update."
   }
 ];
 
@@ -165,7 +175,7 @@ const statusItems = [
   {
     label: "Hotel cost",
     status: "Whole",
-    detail: "Wyndham refunded $1,019.52 for eight rooms, which has posted. CharterUP then approved a $1,784.16 courtesy refund covering the rest of the hotel cost, which it is issuing by check. That check is the last piece still outstanding."
+    detail: "Wyndham refunded $1,019.52 for eight rooms, which has posted. CharterUP then approved a $1,784.16 courtesy refund covering the rest of the hotel cost. That check was received and deposited on June 15. The hotel side is fully whole."
   },
   {
     label: "Festival / park package",
@@ -174,8 +184,8 @@ const statusItems = [
   },
   {
     label: "Family refunds",
-    status: "Plan set, opening soon",
-    detail: "Each family gets back what they paid minus a flat $20 for the trip t-shirt they keep. Families who need the full amount will receive it. A short selection form is coming so each family can choose how to handle their refund."
+    status: "Opening now",
+    detail: "Each family gets back what they paid minus a flat $20 for the trip t-shirt they keep. Families who need the full amount will receive it. The selection form is open, and every family will get an email with their link so they can choose how to handle their refund."
   },
   {
     label: "Witness and family-impact statements",
@@ -185,10 +195,10 @@ const statusItems = [
 ];
 
 const nextSteps = [
-  "Receive the $1,784.16 CharterUP courtesy refund check. CharterUP has the booster organization's information and is preparing the check to mail.",
-  "Reconcile the trip account once the CharterUP check is in hand.",
-  "Open the family refund selection form and email every family the link.",
-  "Issue refunds by the method each family chooses once the account is reconciled."
+  "Email every family the link to the refund selection form.",
+  "Finish reconciling the trip account now that the CharterUP check is deposited.",
+  "Process each family's choice as it comes in: a refund check, a credit toward the 2026 marching band season, or a donation to the boosters.",
+  "Get refund checks out to the families who choose that option."
 ];
 
 export default function SpringTripRecoveryPage() {
@@ -201,26 +211,24 @@ export default function SpringTripRecoveryPage() {
           This page is a family-facing summary of the recovery work after the May 15 spring trip cancellation.
           It will focus on confirmed information, major next steps, and what families should expect.
         </p>
-        <div className="recovery-updated">Last updated: Wednesday, June 3, 2026</div>
+        <div className="recovery-updated">Last updated: Monday, June 15, 2026</div>
       </section>
 
       <section className="recovery-section recovery-note">
         <h2>Current Status</h2>
         <p>
-          The recovery is essentially complete. The full $5,550 bus fare is back. Wyndham refunded
+          The recovery is complete on the vendor side. The full $5,550 bus fare is back. Wyndham refunded
           $1,019.52, and CharterUP approved a $1,784.16 courtesy refund that covers the rest of the
-          hotel cost. Music in the Parks refunded $5,611 by check, and that check has been received.
+          hotel cost. Music in the Parks refunded $5,611 by check.
         </p>
         <p>
-          One piece is still in motion. CharterUP is issuing its $1,784.16 courtesy refund by check.
-          CharterUP has confirmed it has the booster organization's information for the check, and the
-          check is now being cut and mailed. We do not have a firm delivery date. Once it arrives, the
-          booster account is reconciled and family refunds go out.
+          The last piece is now in. The CharterUP courtesy refund check arrived and was deposited on
+          June 15, so every outside-vendor cost the trip could recover is back in the account. The trip
+          account is being reconciled and family refunds are opening now.
         </p>
         <p>
-          After all approved refunds post, the only cost the trip could not recover is $820.77: the $720.77
-          in trip t-shirts the students keep, and the $100 festival deposit. Every major vendor cost has
-          been returned.
+          The only cost the trip could not recover is $820.77: the $720.77 in trip t-shirts the students
+          keep, and the $100 festival deposit. Every major vendor cost has been returned.
         </p>
       </section>
 
@@ -232,16 +240,14 @@ export default function SpringTripRecoveryPage() {
           a hardship for your family, we will return the full amount, no questions asked.
         </p>
         <p>
-          When the form opens, each family will choose one of three options: apply the refund to the 2026
+          The form is open. Each family will choose one of three options: apply the refund to the 2026
           marching band season, take the refund back by check (pick it up at the school or have it mailed),
-          or donate it to the boosters. We will email every family the link once the last refund arrives and
-          the account is reconciled.
+          or donate it to the boosters. Every family will get an email from me with the link.
         </p>
         <p>
-          Nothing goes out until the money is actually back in the account. Refund checks follow once the
-          booster books are reconciled. The day the last refund is in hand, every family will get an email from me
-          with the link to the refund form and a full update on where things landed. Until then, there is
-          nothing families need to do. Thank you for your patience while we close this out the right way.
+          The money is back in the account, so this is the part where it comes to you. Watch for an email
+          from me with your link to the refund form and a full update on where things landed. Thank you for
+          your patience while we closed this out the right way.
         </p>
       </section>
 
@@ -254,21 +260,20 @@ export default function SpringTripRecoveryPage() {
         <ul>
           <li><strong>Bus charter (CharterUP):</strong> $5,550 &mdash; <em>fully refunded and posted to the account.</em></li>
           <li><strong>Music in the Parks festival registration (Festival&rsquo;s Edge):</strong> $5,711 &mdash; <em>$5,611 refund by check, received; $100 deposit retained.</em></li>
-          <li><strong>Hotel (Wyndham Garden Williamsburg):</strong> $2,803.68 &mdash; <em>$1,019.52 refunded by the hotel and posted; the remaining $1,784.16 is covered by CharterUP&rsquo;s courtesy refund, which is being issued by check.</em></li>
+          <li><strong>Hotel (Wyndham Garden Williamsburg):</strong> $2,803.68 &mdash; <em>$1,019.52 refunded by the hotel and posted; the remaining $1,784.16 covered by CharterUP&rsquo;s courtesy refund, received and deposited June 15.</em></li>
           <li><strong>Trip t-shirts (Printify):</strong> $720.77 &mdash; <em>physical product, already produced and delivered; the students keep them.</em></li>
         </ul>
         <p>
-          A refund is not the same as cash in hand until it arrives. The Music in the Parks check has been
-          received. One piece is still on the way: the $1,784.16 CharterUP courtesy refund, which CharterUP
-          is sending by check.
+          Every refund is now in hand. The Music in the Parks check and the CharterUP courtesy refund have
+          both been received, and the CharterUP check was deposited on June 15.
         </p>
         <p>
-          After everything posts, the only cost the trip could not recover is $820.77: the $720.77 in trip
-          shirts the students keep and the $100 retained festival deposit. Every other dollar has been
-          returned.
+          The only cost the trip could not recover is $820.77: the $720.77 in trip shirts the students keep
+          and the $100 retained festival deposit. Every other dollar has been returned.
         </p>
         <p>
-          I will update families again when the CharterUP check arrives and when the family refund form opens.
+          Every family will get an email from me with the link to the refund form and a full update on where
+          things landed.
         </p>
       </section>
 
