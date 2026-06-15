@@ -69,6 +69,24 @@
   letter-spacing: 0.04em; font-size: clamp(2.2rem, 7.5vw, 5rem); line-height: 1.04; color: #33240f;
 }
 
+/* ── Concert program cards (intro slides wrapping the adventure) ── */
+.boh-prog-title {
+  font-family: 'Cinzel', Georgia, serif; font-weight: 900; text-transform: uppercase;
+  letter-spacing: 0.03em; font-size: clamp(2rem, 6.8vw, 4.6rem); line-height: 1.06; color: #6d1322;
+}
+.boh-prog-composer {
+  font-family: 'DM Serif Display', Georgia, serif; font-size: clamp(1.2rem, 3.6vw, 2.5rem);
+  color: #33240f; margin-top: 0.4em;
+}
+.boh-prog-year {
+  font-family: 'Cinzel', Georgia, serif; letter-spacing: 0.2em;
+  font-size: clamp(0.95rem, 2.6vw, 1.6rem); color: #4a2f12; margin-top: 0.2em;
+}
+.boh-prog-intermission {
+  font-family: 'Cinzel', Georgia, serif; font-weight: 900; text-transform: uppercase;
+  letter-spacing: 0.1em; font-size: clamp(2.6rem, 9vw, 6rem); color: #6d1322;
+}
+
 /* ── Top control strip (control view) ───────────────────── */
 .boh-bar {
   display: flex; align-items: center; gap: 12px;

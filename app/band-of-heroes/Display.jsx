@@ -77,7 +77,7 @@ export default function Display() {
           )}
         </div>
 
-        {voteUrl && (
+        {voteUrl && !slide.program && (
           <div className={`boh-qr ${voteOpen ? "is-big" : ""}`}>
             <QRCodeSVG value={voteUrl} size={voteOpen ? 240 : 132} bgColor="#f7f3e8" fgColor="#211609" />
             <span className="boh-qr-cap">Scan to vote</span>

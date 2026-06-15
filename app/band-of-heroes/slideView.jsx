@@ -1,10 +1,27 @@
 // Shared slide lookup + renderer for the Band of Heroes display and controller.
 import { slides } from "./slides";
+import { programSlides } from "./program";
 
-export const byId = new Map(slides.map((s) => [s.id, s]));
+// Concert program cards (ids 1001+) lead into the adventure deck (ids 1..102).
+export const deck = [...programSlides, ...slides];
+export const byId = new Map(deck.map((s) => [s.id, s]));
 
 export function renderSlide(slide) {
   if (!slide) return null;
+  if (slide.kind === "program") {
+    return (
+      <>
+        <span className="boh-prog-title">{slide.title}</span>
+        <span className="boh-prog-composer">
+          {slide.composer}{slide.life ? ` (${slide.life})` : ""}
+        </span>
+        {slide.year && <span className="boh-prog-year">{slide.year}</span>}
+      </>
+    );
+  }
+  if (slide.kind === "intermission") {
+    return <span className="boh-prog-intermission">{slide.title}</span>;
+  }
   if (slide.kind === "cover") {
     const [title, ...sub] = slide.lines;
     return (

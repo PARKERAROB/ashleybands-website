@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { byId, renderSlide } from "../slideView";
+import { PROGRAM_START } from "../program";
 import { getLiveClient, BOH_CHANNEL } from "@/lib/bandOfHeroes/live";
 
 function newSessionId() {
@@ -15,7 +16,7 @@ function newSessionId() {
 }
 
 export default function Controller() {
-  const [current, setCurrent] = useState(1);
+  const [current, setCurrent] = useState(PROGRAM_START);
   const [history, setHistory] = useState([]);
   const [status, setStatus] = useState("idle"); // idle | open | closed
   const [counts, setCounts] = useState({ a: 0, b: 0 });
@@ -33,7 +34,7 @@ export default function Controller() {
   // refs the broadcast + handlers read (avoid stale closures)
   const channelRef = useRef(null);
   const sessionRef = useRef(null);
-  const slideRef = useRef(1);
+  const slideRef = useRef(PROGRAM_START);
   const statusRef = useRef("idle");
   const optionsRef = useRef({ a: null, b: null });
   const countRef = useRef({ a: 0, b: 0 });
@@ -115,7 +116,7 @@ export default function Controller() {
         if (!initedRef.current) {
           initedRef.current = true;
           sessionRef.current = newSessionId();
-          applySlide(1);
+          applySlide(PROGRAM_START); // open on the concert program; Reset still returns to the BoH cover
         } else {
           broadcast();
         }
