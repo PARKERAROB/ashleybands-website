@@ -148,7 +148,7 @@
   background: var(--paper); padding: 10px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
 }
 .boh-qr.is-big { padding: 16px; }
-.boh-qr-cap { font-family: 'Cinzel', Georgia, serif; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.72rem; color: #4a2f12; font-weight: 700; }
+.boh-qr-cap { font-family: 'Cinzel', Georgia, serif; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.95rem; color: #4a2f12; font-weight: 700; }
 
 /* tally overlaid low on the parchment during a vote — dark subtitle-style
    backing so the light lettering + numbers pop against the bright parchment */
