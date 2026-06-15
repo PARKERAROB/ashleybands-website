@@ -5,15 +5,16 @@ import { useSearchParams } from "next/navigation";
 
 // ============================================================================
 // Submission gate.
-// FORM_OPEN = false renders the full form for review but blocks all submission:
+// FORM_OPEN renders the full form for review but blocks all submission when off:
 //   - the submit button is disabled
 //   - a closed banner is shown
 //   - the submit handler returns early and never calls the API
-// To open the form later: set FORM_OPEN = true AND create the backend write
-// path (api/spring-trip-refund/route.js + a Supabase table/RPC). Until that
-// backend exists, opening this flag would still fail safely (no endpoint).
+// Driven by NEXT_PUBLIC_SPRING_TRIP_REFUND_OPEN so go-live is a single Vercel env
+// flip + redeploy (no code edit), timed WITH the parent email. The backend
+// (api/spring-trip-refund + the spring_trip_refund_submissions table) is
+// capture-only: it records each family's choice; the treasurer processes them.
 // ============================================================================
-const FORM_OPEN = false;
+const FORM_OPEN = process.env.NEXT_PUBLIC_SPRING_TRIP_REFUND_OPEN === "true";
 
 const INITIAL_FORM = {
   student_first_name: "",
