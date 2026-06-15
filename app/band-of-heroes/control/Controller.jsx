@@ -116,7 +116,7 @@ export default function Controller() {
         if (!initedRef.current) {
           initedRef.current = true;
           sessionRef.current = newSessionId();
-          applySlide(PROGRAM_START); // open on the concert program; Reset still returns to the BoH cover
+          applySlide(PROGRAM_START); // open on the concert program (Start over returns here too)
         } else {
           broadcast();
         }
@@ -199,10 +199,12 @@ export default function Controller() {
     go(target);
   }, [slide, go]);
 
+  // "Start over": new session (clears rehearsal votes) + back to the top of the
+  // concert program. Always available in the top bar, even when Back is hidden.
   const reset = useCallback(() => {
     sessionRef.current = newSessionId();
     setHistory([]);
-    applySlide(1);
+    applySlide(PROGRAM_START);
   }, [applySlide]);
 
   // keyboard (iPad/laptop with keys)
@@ -230,7 +232,7 @@ export default function Controller() {
           <input type="number" min={5} max={120} value={duration}
             onChange={(e) => setDuration(Math.max(5, Math.min(120, Number(e.target.value) || 20)))} />s
         </label>
-        <button className="boh-btn boh-btn--ghost boh-btn--sm" onClick={reset}>Reset</button>
+        <button className="boh-btn boh-btn--ghost boh-btn--sm" onClick={reset}>⟲ Start over</button>
       </div>
 
       <div className="boh-control-stage">
