@@ -84,7 +84,8 @@
 }
 .boh-prog-intermission {
   font-family: 'Cinzel', Georgia, serif; font-weight: 900; text-transform: uppercase;
-  letter-spacing: 0.1em; font-size: clamp(2.6rem, 9vw, 6rem); color: #6d1322;
+  letter-spacing: 0.04em; font-size: clamp(1.6rem, 5vw, 4rem); color: #6d1322;
+  white-space: nowrap; max-width: 100%;
 }
 
 /* ── Top control strip (control view) ───────────────────── */
