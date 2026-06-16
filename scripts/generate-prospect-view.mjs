@@ -52,6 +52,6 @@ th{background:#fafafa;font-size:12px;text-transform:uppercase;color:#666} td.d{c
 .b{font-size:11px;padding:1px 6px;border-radius:8px;color:#fff} .hi{background:#2a7} .me{background:#e6a100}
 .legend{font-size:13px;color:#444;background:#f6f8fa;border:1px solid #e3e7eb;border-radius:8px;padding:8px 12px;margin:10px 0}
 </style>${body}`;
-const OUT = "/Users/parkerarob/Desktop/BandsofAHS/data/_work/sponsorship-prospects.html";
+const OUT = "/Users/parkerarob/Atlas/BandsofAHS/data/_work/sponsorship-prospects.html";
 writeFileSync(OUT, html);
 console.log("wrote", OUT, `(${ready.length} ready)`);

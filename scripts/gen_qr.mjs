@@ -5,7 +5,7 @@ const QRCode = require("qrcode");
 const fs = require("fs");
 const path = require("path");
 
-const OUTDIR = "/Users/parkerarob/Desktop/BandsofAHS/projects/instrument-inventory/QR Codes";
+const OUTDIR = "/Users/parkerarob/Atlas/BandsofAHS/projects/instrument-inventory/QR Codes";
 fs.mkdirSync(OUTDIR, { recursive: true });
 
 const pages = [

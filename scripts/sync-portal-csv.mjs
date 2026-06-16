@@ -16,7 +16,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { createClient } from "@supabase/supabase-js";
 
-const BDOS_DATA_DIR = "/Users/parkerarob/Desktop/BandsofAHS/data";
+const BDOS_DATA_DIR = "/Users/parkerarob/Atlas/BandsofAHS/data";
 const APPLY = process.argv.includes("--apply");
 const REPORT = process.argv.includes("--report");
 

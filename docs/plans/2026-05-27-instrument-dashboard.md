@@ -4,7 +4,7 @@
 
 **Goal:** Extend the existing instrument inventory page so students can browse all safe-to-show school instruments and submit repair/location updates for a selected instrument.
 
-**Architecture:** Keep BDOS CSVs as canonical. Generate a sanitized public JSON snapshot from `~/Desktop/BandsofAHS/data/instrument-inventory-merged.csv` into the website. The public API serves the snapshot and accepts student observations into Supabase `instrument_inventory`; observations remain a review queue and do not mutate canonical inventory.
+**Architecture:** Keep BDOS CSVs as canonical. Generate a sanitized public JSON snapshot from `~/Atlas/BandsofAHS/data/instrument-inventory-merged.csv` into the website. The public API serves the snapshot and accepts student observations into Supabase `instrument_inventory`; observations remain a review queue and do not mutate canonical inventory.
 
 **Tech Stack:** Next.js App Router, React client page, Supabase service client, Node CSV snapshot script, existing staff auth.
 
@@ -27,7 +27,7 @@
 
 **Steps:**
 1. Implement a small CSV parser or reuse a robust local parser in Node stdlib style.
-2. Read `/Users/parkerarob/Desktop/BandsofAHS/data/instrument-inventory-merged.csv`.
+2. Read `/Users/parkerarob/Atlas/BandsofAHS/data/instrument-inventory-merged.csv`.
 3. Map only safe public fields.
 4. Sort by `instrument_type`, then `brand`, then `asset_id`.
 5. Write JSON with `{ generatedAt, source, count, instruments }`.

@@ -16,7 +16,7 @@
  */
 import { readFileSync } from "node:fs";
 
-const CSV = "/Users/parkerarob/Desktop/BandsofAHS/data/_work/contact-enrichment.csv";
+const CSV = "/Users/parkerarob/Atlas/BandsofAHS/data/_work/contact-enrichment.csv";
 const DRY = process.argv.includes("--dry-run");
 const ENV = "/Users/parkerarob/Desktop/Band/band-website/.env.local";
 for (const line of readFileSync(ENV, "utf8").split("\n")) {

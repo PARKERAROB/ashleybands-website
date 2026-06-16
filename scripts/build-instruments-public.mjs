@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-const SOURCE = "/Users/parkerarob/Desktop/BandsofAHS/data/instrument-inventory-merged.csv";
+const SOURCE = "/Users/parkerarob/Atlas/BandsofAHS/data/instrument-inventory-merged.csv";
 const OUTPUT = path.join(process.cwd(), "content", "instruments-public.json");
 
 const PUBLIC_FIELDS = [
