@@ -9,7 +9,7 @@ Next.js + Vercel + Supabase. When in doubt, BDOS is the source of truth.
   then run `npm run content:build`. Never hand-edit the generated `content/*.json`.
 - Dated truth = `RobOS/store/events.jsonl` (store-as-master, 2026-06-10). `/calendar` +
   `public/calendar.ics` + `public/calendar-data.json` are GENERATED from it: run
-  `python3 ~/Desktop/RobOS/store/render_calendar.py`, copy `RobOS/calendar/program.{ics,json}`
+  `python3 ~/Atlas/RobOS/store/render_calendar.py`, copy `RobOS/calendar/program.{ics,json}`
   to `public/calendar.ics` / `public/calendar-data.json`, deploy. BDOS `data/calendar-2026.csv`
   is a generated projection of the same store (never hand-edit). Run `/check-site-dates`
   before shipping any date change.
