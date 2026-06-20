@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { createPortalSession, hashToken, readPortalSession, setPortalSessionCookie } from "@/lib/portalTokens";
+import { createPortalSession, hashCode, readPortalSession, setPortalSessionCookie, MAX_CODE_ATTEMPTS } from "@/lib/portalTokens";
 
 export const runtime = "nodejs";
+
+const BAD_CODE = "That code is incorrect or expired. Request a new one.";
 
 // Lightweight signed-in check for the site header.
 export async function GET(request) {
@@ -22,23 +24,39 @@ export async function GET(request) {
 
 export async function POST(request) {
   const body = await request.json().catch(() => ({}));
-  const token = String(body.token || "").trim();
-  if (!token) {
-    return NextResponse.json({ error: "Missing portal token." }, { status: 400 });
+  const email = String(body.email || "").trim().toLowerCase();
+  const code = String(body.code || "").trim();
+  if (!email || !code) {
+    return NextResponse.json({ error: "Enter your email and the code we sent." }, { status: 400 });
   }
 
+  // Codes aren't unique, so look up the latest active row for this email+purpose
+  // and compare the email-salted hash. (No token in the URL to detonate.)
   const { data: link, error } = await supabaseAdmin
     .from("portal_magic_links")
-    .select("id, contact_method_id, email, expires_at, consumed_at, portal_contact_methods(person_id)")
-    .eq("token_hash", hashToken(token))
+    .select("id, contact_method_id, email, token_hash, code_attempts, expires_at, portal_contact_methods(person_id)")
+    .eq("email", email)
     .eq("purpose", "known_contact_login")
+    .is("consumed_at", null)
+    .order("created_at", { ascending: false })
+    .limit(1)
     .maybeSingle();
 
   if (error) {
-    return NextResponse.json({ error: "Portal token lookup failed." }, { status: 500 });
+    return NextResponse.json({ error: "Portal code lookup failed." }, { status: 500 });
   }
-  if (!link || link.consumed_at || new Date(link.expires_at).getTime() < Date.now()) {
-    return NextResponse.json({ error: "This profile link is expired or has already been used." }, { status: 401 });
+  if (!link || new Date(link.expires_at).getTime() < Date.now()) {
+    return NextResponse.json({ error: BAD_CODE }, { status: 401 });
+  }
+
+  if (link.token_hash !== hashCode(email, code)) {
+    const attempts = (link.code_attempts || 0) + 1;
+    const lock = attempts >= MAX_CODE_ATTEMPTS;
+    await supabaseAdmin
+      .from("portal_magic_links")
+      .update({ code_attempts: attempts, ...(lock ? { consumed_at: new Date().toISOString() } : {}) })
+      .eq("id", link.id);
+    return NextResponse.json({ error: BAD_CODE }, { status: 401 });
   }
 
   const personId = link.portal_contact_methods?.person_id;
@@ -59,8 +77,8 @@ export async function POST(request) {
     supabaseAdmin
       .from("portal_contact_methods")
       .update({
-        verification_status: "verified_magic_link",
-        verification_source: "portal_magic_link",
+        verification_status: "verified_email_code",
+        verification_source: "portal_email_code",
         verified_at: now
       })
       .eq("id", link.contact_method_id)
@@ -68,7 +86,7 @@ export async function POST(request) {
   ]);
 
   if (linkError || contactError) {
-    return NextResponse.json({ error: "Could not verify portal link." }, { status: 500 });
+    return NextResponse.json({ error: "Could not verify the code." }, { status: 500 });
   }
 
   const session = createPortalSession({

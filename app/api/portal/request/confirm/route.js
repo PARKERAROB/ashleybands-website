@@ -1,27 +1,45 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { sendPortalReviewAlert } from "@/lib/portalEmail";
-import { hashToken } from "@/lib/portalTokens";
+import { hashCode, MAX_CODE_ATTEMPTS } from "@/lib/portalTokens";
 
 export const runtime = "nodejs";
 
+const BAD_CODE = "That code is incorrect or expired. Request a new one.";
+
 export async function POST(request) {
   const body = await request.json().catch(() => ({}));
-  const token = String(body.token || "").trim();
-  if (!token) {
-    return NextResponse.json({ error: "Missing confirmation token." }, { status: 400 });
+  const email = String(body.email || "").trim().toLowerCase();
+  const code = String(body.code || "").trim();
+  if (!email || !code) {
+    return NextResponse.json({ error: "Enter your email and the code we sent." }, { status: 400 });
   }
 
+  // Codes aren't unique, so look up the latest active row for this email+purpose
+  // and compare the email-salted hash.
   const { data: link, error: linkLookupError } = await supabaseAdmin
     .from("portal_magic_links")
-    .select("id, access_request_id, email, expires_at, consumed_at")
-    .eq("token_hash", hashToken(token))
+    .select("id, access_request_id, email, token_hash, code_attempts, expires_at")
+    .eq("email", email)
     .eq("purpose", "unknown_email_confirm")
+    .is("consumed_at", null)
+    .order("created_at", { ascending: false })
+    .limit(1)
     .maybeSingle();
 
   if (linkLookupError) return NextResponse.json({ error: "Confirmation lookup failed." }, { status: 500 });
-  if (!link || link.consumed_at || new Date(link.expires_at).getTime() < Date.now()) {
-    return NextResponse.json({ error: "This confirmation link is expired or has already been used." }, { status: 401 });
+  if (!link || new Date(link.expires_at).getTime() < Date.now()) {
+    return NextResponse.json({ error: BAD_CODE }, { status: 401 });
+  }
+
+  if (link.token_hash !== hashCode(email, code)) {
+    const attempts = (link.code_attempts || 0) + 1;
+    const lock = attempts >= MAX_CODE_ATTEMPTS;
+    await supabaseAdmin
+      .from("portal_magic_links")
+      .update({ code_attempts: attempts, ...(lock ? { consumed_at: new Date().toISOString() } : {}) })
+      .eq("id", link.id);
+    return NextResponse.json({ error: BAD_CODE }, { status: 401 });
   }
 
   const { data: accessRequest, error: accessError } = await supabaseAdmin

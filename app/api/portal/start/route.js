@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { sendPortalMagicLinkEmail } from "@/lib/portalEmail";
-import { createMagicToken } from "@/lib/portalTokens";
+import { sendPortalCodeEmail } from "@/lib/portalEmail";
+import { createNumericCode, hashCode } from "@/lib/portalTokens";
 import { checkRateLimit, clientIp } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
 
-const MAGIC_LINK_MINUTES = 30;
+const CODE_MINUTES = 15;
 
 export async function POST(request) {
   const body = await request.json().catch(() => ({}));
@@ -15,7 +15,7 @@ export async function POST(request) {
     return NextResponse.json({ error: "Enter a valid email address." }, { status: 400 });
   }
 
-  // Throttle magic-link spam: 6 / 15 min per email, 20 / 15 min per IP.
+  // Throttle code spam: 6 / 15 min per email, 20 / 15 min per IP.
   const emailLimit = await checkRateLimit({ key: `portal-start:${email}`, limit: 6, windowMs: 15 * 60 * 1000 });
   const ipLimit = await checkRateLimit({ key: `portal-start-ip:${clientIp(request)}`, limit: 20, windowMs: 15 * 60 * 1000 });
   if (!emailLimit.allowed || !ipLimit.allowed) {
@@ -39,14 +39,24 @@ export async function POST(request) {
   }
 
   const contact = contacts[0];
-  const { token, tokenHash } = createMagicToken();
-  const expiresAt = new Date(Date.now() + MAGIC_LINK_MINUTES * 60 * 1000).toISOString();
+  const code = createNumericCode();
+  const now = new Date().toISOString();
+  const expiresAt = new Date(Date.now() + CODE_MINUTES * 60 * 1000).toISOString();
+
+  // Supersede any earlier un-consumed login codes for this email so the verify
+  // step has exactly one active row to check.
+  await supabaseAdmin
+    .from("portal_magic_links")
+    .update({ consumed_at: now })
+    .eq("email", email)
+    .eq("purpose", "known_contact_login")
+    .is("consumed_at", null);
 
   const { error: insertError } = await supabaseAdmin
     .from("portal_magic_links")
     .insert({
       contact_method_id: contact.id,
-      token_hash: tokenHash,
+      token_hash: hashCode(email, code),
       purpose: "known_contact_login",
       email,
       expires_at: expiresAt,
@@ -55,12 +65,10 @@ export async function POST(request) {
     });
 
   if (insertError) {
-    return NextResponse.json({ error: "Could not create portal link." }, { status: 500 });
+    return NextResponse.json({ error: "Could not create sign-in code." }, { status: 500 });
   }
 
-  const origin = new URL(request.url).origin;
-  const link = `${origin}/portal/review?token=${encodeURIComponent(token)}`;
-  await sendPortalMagicLinkEmail({ to: email, link, expiresMinutes: MAGIC_LINK_MINUTES });
+  await sendPortalCodeEmail({ to: email, code, expiresMinutes: CODE_MINUTES });
 
   return NextResponse.json({ ok: true, status: "sent_if_known" });
 }

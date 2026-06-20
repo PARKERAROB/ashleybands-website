@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { sendPortalMagicLinkEmail } from "@/lib/portalEmail";
-import { createMagicToken } from "@/lib/portalTokens";
+import { sendPortalCodeEmail } from "@/lib/portalEmail";
+import { createNumericCode, hashCode } from "@/lib/portalTokens";
 
 export const runtime = "nodejs";
 
-const CONFIRM_LINK_MINUTES = 60;
+const CONFIRM_CODE_MINUTES = 30;
 
 export async function POST(request) {
   const body = await request.json().catch(() => ({}));
@@ -48,13 +48,23 @@ export async function POST(request) {
     return NextResponse.json({ error: "Could not create access request." }, { status: 500 });
   }
 
-  const { token, tokenHash } = createMagicToken();
-  const expiresAt = new Date(Date.now() + CONFIRM_LINK_MINUTES * 60 * 1000).toISOString();
+  const code = createNumericCode();
+  const expiresAt = new Date(Date.now() + CONFIRM_CODE_MINUTES * 60 * 1000).toISOString();
+
+  // Supersede any earlier un-consumed confirm codes for this email so verify is
+  // unambiguous (the family may have submitted the form more than once).
+  await supabaseAdmin
+    .from("portal_magic_links")
+    .update({ consumed_at: new Date().toISOString() })
+    .eq("email", guardianEmail)
+    .eq("purpose", "unknown_email_confirm")
+    .is("consumed_at", null);
+
   const { error: linkError } = await supabaseAdmin
     .from("portal_magic_links")
     .insert({
       access_request_id: accessRequest.id,
-      token_hash: tokenHash,
+      token_hash: hashCode(guardianEmail, code),
       purpose: "unknown_email_confirm",
       email: guardianEmail,
       expires_at: expiresAt,
@@ -63,12 +73,10 @@ export async function POST(request) {
     });
 
   if (linkError) {
-    return NextResponse.json({ error: "Could not create confirmation link." }, { status: 500 });
+    return NextResponse.json({ error: "Could not create confirmation code." }, { status: 500 });
   }
 
-  const origin = new URL(request.url).origin;
-  const link = `${origin}/portal/request/confirm?token=${encodeURIComponent(token)}`;
-  await sendPortalMagicLinkEmail({ to: guardianEmail, link, expiresMinutes: CONFIRM_LINK_MINUTES });
+  await sendPortalCodeEmail({ to: guardianEmail, code, expiresMinutes: CONFIRM_CODE_MINUTES });
 
   return NextResponse.json({ ok: true });
 }

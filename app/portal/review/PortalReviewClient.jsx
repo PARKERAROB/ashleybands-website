@@ -34,7 +34,7 @@ export default function PortalReviewClient() {
     const res = await fetch("/api/portal/me");
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      setState({ status: "error", message: data.error || "Profile access expired. Request a new link." });
+      setState({ status: "error", message: data.error || "Profile access expired. Go to the sign-in page and request a new code." });
       return;
     }
     setProfile(data);
@@ -43,25 +43,14 @@ export default function PortalReviewClient() {
 
   useEffect(() => {
     let cancelled = false;
-    async function open() {
-      const params = new URLSearchParams(window.location.search);
-      const token = params.get("token");
-      if (token) {
-        const sessionRes = await fetch("/api/portal/session", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token })
-        });
-        if (!sessionRes.ok) {
-          const data = await sessionRes.json().catch(() => ({}));
-          if (!cancelled) setState({ status: "error", message: data.error || "This profile link could not be opened." });
-          return;
-        }
-        window.history.replaceState({}, "", "/portal/review");
-      }
-      if (!cancelled) await loadProfile();
+    // Sign-in happens on /portal (email -> 6-digit code), which sets the session
+    // cookie before redirecting here. This page just loads the profile. A stray
+    // ?token= from an old magic link is ignored.
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("token")) {
+      window.history.replaceState({}, "", "/portal/review");
     }
-    open();
+    if (!cancelled) loadProfile();
     return () => {
       cancelled = true;
     };
