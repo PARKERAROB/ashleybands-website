@@ -1,17 +1,14 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { sendPortalReviewAlert } from "@/lib/portalEmail";
 import { readPortalSession } from "@/lib/portalTokens";
 
 export const runtime = "nodejs";
 
 // Fields a signed-in person may edit about themselves or their own students.
-// Each write hits the Supabase mirror immediately (so the family sees it) AND
-// queues a review request for Rob to push into the canonical CSV.
-// POLICY (Rob 2026-06-23): parent changes should AUTO-APPROVE — the login already
-// authorizes them; no review gate. Land approved + logged, not needs_review; the
-// queue is an audit log. See docs/decisions/2026-06-23-portal-parent-changes-auto-approve.md
-// (TODO: this flow still writes status:"needs_review" — change to auto-approve.)
+// Each write hits the Supabase mirror immediately (so the family sees it) and is
+// AUTO-APPROVED + logged (Rob 2026-06-23): the parent's login already authorizes the
+// edit, so there is no review gate. The portal_review_queue row is the audit log.
+// See docs/decisions/2026-06-23-portal-parent-changes-auto-approve.md
 const ALLOWED_FIELDS = {
   person_display_name: {
     label: "Your name",
@@ -85,7 +82,10 @@ export async function POST(request) {
       old_value: oldValue,
       new_value: newValue,
       sensitivity: config.sensitivity,
-      status: "needs_review"
+      // AUTO-APPROVE (Rob 2026-06-23): the parent is login-authorized; no manual gate. Logged for audit.
+      status: "approved",
+      reviewed_by: "auto-approve (login-authorized) 2026-06-23",
+      reviewed_at: new Date().toISOString()
     })
     .select("id")
     .single();
@@ -96,7 +96,7 @@ export async function POST(request) {
     .from("portal_review_queue")
     .insert({
       item_type: config.sensitivity === "contact" ? "contact_change" : "profile_conflict",
-      status: "needs_review",
+      status: "approved",
       student_id: studentId,
       person_id: session.personId,
       update_request_id: updateRequest.id,
@@ -120,31 +120,8 @@ export async function POST(request) {
     .update({ review_item_id: reviewItem.id })
     .eq("id", updateRequest.id);
 
-  const reviewUrl = `${new URL(request.url).origin}/admin/profile-requests`;
-  try {
-    await sendPortalReviewAlert({
-      subject: `Ashley Bands profile update needs review: ${config.label}`,
-      summary,
-      reviewUrl,
-      details: [
-        `Submitted by: ${session.email}`,
-        `Field: ${config.label}`,
-        `Old: ${oldValue || "blank"}`,
-        `New: ${newValue}`,
-        mirrorApplied ? "Already showing on the site; push to CSV when ready." : "Not yet applied on site - apply manually."
-      ]
-    });
-    await supabaseAdmin
-      .from("portal_review_queue")
-      .update({ email_alert_status: "sent", email_alert_sent_at: new Date().toISOString() })
-      .eq("id", reviewItem.id);
-  } catch (error) {
-    await supabaseAdmin
-      .from("portal_review_queue")
-      .update({ email_alert_status: "failed", email_alert_error: error.message })
-      .eq("id", reviewItem.id);
-  }
-
+  // No review alert: parent edits auto-approve (login-authorized). The review_queue row above is the
+  // audit log. See docs/decisions/2026-06-23-portal-parent-changes-auto-approve.md
   return NextResponse.json({ ok: true, mirrorApplied, value: newValue });
 }
 

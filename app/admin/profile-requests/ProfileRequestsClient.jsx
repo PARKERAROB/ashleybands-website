@@ -116,6 +116,7 @@ export default function ProfileRequestsClient() {
           <div>
             <p className="eyebrow">Staff only</p>
             <h1>Profile Requests</h1>
+            <p className="portal-copy">Audit log of parent portal changes. These auto-approve on submit (families control them via login) - this is the record, not an approval gate.</p>
             <p className="portal-copy">Signed in as {session.display_name}</p>
           </div>
           <button type="button" className="sponsors-btn" onClick={() => { writeSession(null); setSession(null); }}>
