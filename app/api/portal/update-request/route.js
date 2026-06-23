@@ -8,6 +8,10 @@ export const runtime = "nodejs";
 // Fields a signed-in person may edit about themselves or their own students.
 // Each write hits the Supabase mirror immediately (so the family sees it) AND
 // queues a review request for Rob to push into the canonical CSV.
+// POLICY (Rob 2026-06-23): parent changes should AUTO-APPROVE — the login already
+// authorizes them; no review gate. Land approved + logged, not needs_review; the
+// queue is an audit log. See docs/decisions/2026-06-23-portal-parent-changes-auto-approve.md
+// (TODO: this flow still writes status:"needs_review" — change to auto-approve.)
 const ALLOWED_FIELDS = {
   person_display_name: {
     label: "Your name",

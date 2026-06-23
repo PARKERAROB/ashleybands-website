@@ -27,5 +27,11 @@ Next.js + Vercel + Supabase. When in doubt, BDOS is the source of truth.
   (`vercel`) fail** here — env vars are scoped to Production only, so a preview `next build` exits 1
   even when the local build passes. Use prod, or fix preview-scoped env, don't chase the code.
 
+## Family portal
+- **Parent changes auto-approve instantly — no review gate (Rob 2026-06-23, so ordered).** A signed-in
+  parent is already authorized by their login; there is nothing for a human to approve. Portal writes land
+  `approved` + logged, NOT `needs_review`. The `/admin/profile-requests` queue is an **audit log**, not an
+  approval gate. Full decision + the files to change: `docs/decisions/2026-06-23-portal-parent-changes-auto-approve.md`.
+
 ## Comms
 - Resend broadcasts + send queue are L2: draft/stage only, Rob sends. Never send.
