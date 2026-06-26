@@ -315,15 +315,6 @@
   "location": "AHS"
  },
  {
-  "id": "evt-0035",
-  "title": "All-District Auditions (NCBA Eastern)",
-  "start": "2027-01-09",
-  "end": null,
-  "all_day": true,
-  "category": "AllDistrict",
-  "location": ""
- },
- {
   "id": "evt-0036",
   "title": "District Exam Week",
   "start": "2027-01-11",
@@ -333,8 +324,8 @@
   "location": "AHS"
  },
  {
-  "id": "evt-0037",
-  "title": "All-District Auditions snow date",
+  "id": "evt-0035",
+  "title": "All-District Auditions (NCBA Eastern)",
   "start": "2027-01-16",
   "end": null,
   "all_day": true,
@@ -414,6 +405,15 @@
   "location": ""
  },
  {
+  "id": "evt-0049",
+  "title": "All-State Jazz Clinic",
+  "start": "2027-04-09",
+  "end": "2027-04-17",
+  "all_day": true,
+  "category": "Jazz",
+  "location": ""
+ },
+ {
   "id": "evt-0048",
   "title": "Azalea Festival Parade",
   "start": "2027-04-10",
@@ -421,15 +421,6 @@
   "all_day": true,
   "category": "MB-Event",
   "location": "Downtown Wilmington"
- },
- {
-  "id": "evt-0049",
-  "title": "All-State Jazz Clinic",
-  "start": "2027-04-16",
-  "end": "2027-04-17",
-  "all_day": true,
-  "category": "Jazz",
-  "location": ""
  },
  {
   "id": "evt-0055",
@@ -452,7 +443,7 @@
  {
   "id": "evt-0051",
   "title": "Jazz MPA",
-  "start": "2027-05-07",
+  "start": "2027-05-06",
   "end": null,
   "all_day": true,
   "category": "MPA",
