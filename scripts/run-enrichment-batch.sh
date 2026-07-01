@@ -9,7 +9,7 @@
 # scripts read .env.local by absolute path.
 
 export PATH="/Users/parkerarob/.nvm/versions/node/v20.19.3/bin:/usr/local/bin:/usr/bin:/bin"
-APP="/Users/parkerarob/Desktop/Band/band-website"
+APP="/Users/parkerarob/Atlas/band-website"
 LOG="/Users/parkerarob/Atlas/BandsofAHS/data/_work/batch-$(date +%Y%m%d-%H%M).log"
 PLIST="$HOME/Library/LaunchAgents/com.ahsband.enrichment-resume.plist"
 

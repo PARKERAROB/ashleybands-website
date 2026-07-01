@@ -7,7 +7,7 @@
  * Output: data/_work/sponsorship-prospects.html
  */
 import { readFileSync, writeFileSync } from "node:fs";
-const ENV = "/Users/parkerarob/Desktop/Band/band-website/.env.local";
+const ENV = "/Users/parkerarob/Atlas/band-website/.env.local";
 for (const line of readFileSync(ENV, "utf8").split("\n")) {
   const m = line.match(/^([A-Z0-9_]+)=(.*)$/); if (m && !process.env[m[1]]) process.env[m[1]] = m[2];
 }

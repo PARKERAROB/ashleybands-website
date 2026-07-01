@@ -28,7 +28,7 @@ const LIMIT = (() => { const i = process.argv.indexOf("--limit"); return i > -1 
 const WITH_WEBSITE_ONLY = process.argv.includes("--with-website-only");
 
 // ---- env / supabase ----
-const ENV_PATH = "/Users/parkerarob/Desktop/Band/band-website/.env.local";
+const ENV_PATH = "/Users/parkerarob/Atlas/band-website/.env.local";
 try {
   for (const line of readFileSync(ENV_PATH, "utf8").split("\n")) {
     const m = line.match(/^([A-Z0-9_]+)=(.*)$/);

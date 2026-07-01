@@ -6,7 +6,7 @@
   <key>ProgramArguments</key>
   <array>
     <string>/bin/zsh</string>
-    <string>/Users/parkerarob/Desktop/Band/band-website/scripts/run-enrichment-batch.sh</string>
+    <string>/Users/parkerarob/Atlas/band-website/scripts/run-enrichment-batch.sh</string>
   </array>
   <key>StartCalendarInterval</key>
   <dict>

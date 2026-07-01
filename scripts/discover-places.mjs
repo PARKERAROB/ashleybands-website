@@ -24,7 +24,7 @@ import { readFileSync } from "node:fs";
 const ASHLEY = { lat: 34.1002820, lng: -77.9117205 };
 const DRY = process.argv.includes("--dry-run");
 const RADIUS = (() => { const i = process.argv.indexOf("--radius"); return i > -1 ? Number(process.argv[i + 1]) : 8000; })();
-const ENV = "/Users/parkerarob/Desktop/Band/band-website/.env.local";
+const ENV = "/Users/parkerarob/Atlas/band-website/.env.local";
 for (const line of readFileSync(ENV, "utf8").split("\n")) {
   const m = line.match(/^([A-Z0-9_]+)=(.*)$/); if (m && !process.env[m[1]]) process.env[m[1]] = m[2];
 }
