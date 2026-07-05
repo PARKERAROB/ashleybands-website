@@ -88,10 +88,12 @@ async function findStudentMatch({ studentFirst, studentLast, studentGrade }) {
     .ilike("legal_last", studentLast)
     .limit(10);
 
-  const firstNorm = norm(studentFirst);
+  // Parents write first names like "Riley (Vera)" or "Cassie" - compare every
+  // reasonable candidate form against both legal and preferred first names.
+  const firstCandidates = firstNameCandidates(studentFirst);
   const gradeNorm = norm(studentGrade);
   const matches = (data || []).filter((student) =>
-    [student.legal_first, student.preferred_first].some((name) => norm(name) === firstNorm)
+    [student.legal_first, student.preferred_first].some((name) => firstCandidates.includes(norm(name)))
   );
   if (matches.length === 1) {
     const gradeMatches = !gradeNorm || norm(matches[0].grade_fall26).includes(gradeNorm.replace("rising ", ""));
@@ -106,4 +108,11 @@ function clean(value) {
 
 function norm(value) {
   return String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+function firstNameCandidates(raw) {
+  const s = String(raw || "");
+  const inParen = (s.match(/\(([^)]+)\)/) || [])[1] || "";
+  const candidates = [norm(s), norm(s.replace(/\([^)]*\)/g, "")), norm(inParen)];
+  return [...new Set(candidates)].filter(Boolean);
 }

@@ -27,3 +27,23 @@ the existing trusted guardian). Default: auto-approve + log + notify.
 ## Supersedes
 The "Rob manually triages the portal review queue" framing (Atlas task ahs-378). The fix is to remove the
 gate, not to clear the queue by hand.
+
+## Addendum 2026-07-05 — the rule is ALL portal gates, and it covers outside-in access requests
+
+Recurred a third time: the `/portal/request` (new-email access request) lane still created
+`email_verified` review items and emailed Rob "profile review needed" — because the 6-23 fix was
+applied to the signed-in-parent lanes only, and this lane's gate was never even wired to grant
+access (the admin "approve" button only flipped the queue status; nothing promoted the
+`portal_student_people` link to `trusted`). Rob's order, restated as the general rule:
+
+> **No portal approval gates, period. Rob approves nothing. The review queue is an audit log.**
+
+Implemented 2026-07-05 in `app/api/portal/request/confirm/route.js`:
+- Email verified + roster match → the link is created **trusted** immediately, the queue item lands
+  `approved` (audit), the family gets an access-granted email, Rob's alert becomes FYI
+  ("no action needed").
+- Email verified + NO roster match → nothing to link; queue item lands `needs_followup` and Rob's
+  email says "follow up with the family" (a conversation, not an approval).
+- Matcher hardened (`app/api/portal/request/route.js`): parenthetical preferred names
+  ("Riley (Vera)") now match — the 7/3 Chemburkar request scored "none" on exactly this.
+- Backfilled the two stuck requests (Pritchard→Caleigh, Chemburkar→Riley) as trusted.

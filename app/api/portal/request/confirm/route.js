@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { sendPortalReviewAlert } from "@/lib/portalEmail";
+import { sendPortalReviewAlert, sendPortalAccessGrantedEmail } from "@/lib/portalEmail";
 import { hashCode, MAX_CODE_ATTEMPTS } from "@/lib/portalTokens";
 
 export const runtime = "nodejs";
@@ -54,14 +54,22 @@ export async function POST(request) {
   const now = new Date().toISOString();
   const person = await upsertClaimedPerson(accessRequest);
   const contact = await upsertVerifiedEmail(person.id, accessRequest, now);
-  await maybeCreateClaimedRelationship(accessRequest, person.id);
 
-  const reviewSummary = `${accessRequest.guardian_name} verified an email and requested access for ${accessRequest.student_first} ${accessRequest.student_last}.`;
+  // No approval gate (Rob 2026-06-23, extended 2026-07-05): a verified email that
+  // matched a roster student gets a TRUSTED link immediately. The review queue is
+  // an audit log. Only a request that matched NO roster student stays open, and
+  // that is a family follow-up, not an approval.
+  const granted = Boolean(accessRequest.claimed_student_id);
+  await upsertStudentRelationship(accessRequest, person.id, granted ? "trusted" : "claimed");
+
+  const reviewSummary = granted
+    ? `${accessRequest.guardian_name} verified an email and was auto-connected to ${accessRequest.student_first} ${accessRequest.student_last}.`
+    : `${accessRequest.guardian_name} verified an email but no roster student matched ${accessRequest.student_first} ${accessRequest.student_last} - follow up with the family.`;
   const { data: reviewItem, error: reviewError } = await supabaseAdmin
     .from("portal_review_queue")
     .insert({
       item_type: "email_verified_claim",
-      status: "email_verified",
+      status: granted ? "approved" : "needs_followup",
       student_id: accessRequest.claimed_student_id,
       person_id: person.id,
       access_request_id: accessRequest.id,
@@ -74,7 +82,10 @@ export async function POST(request) {
         student_grade: accessRequest.student_grade,
         instrument_or_note: accessRequest.instrument_or_note,
         match_confidence: accessRequest.match_confidence,
-        contact_method_id: contact.id
+        contact_method_id: contact.id,
+        ...(granted
+          ? { reviewed_by: "auto-approve (roster match) 2026-07-05", reviewed_at: now }
+          : {})
       }
     })
     .select("id")
@@ -95,7 +106,7 @@ export async function POST(request) {
       .update({
         email_verified_at: now,
         claimed_person_id: person.id,
-        status: "email_verified",
+        status: granted ? "approved" : "email_verified",
         review_item_id: reviewItem.id
       })
       .eq("id", accessRequest.id)
@@ -104,10 +115,23 @@ export async function POST(request) {
     return NextResponse.json({ error: "Could not finalize confirmation." }, { status: 500 });
   }
 
+  if (granted) {
+    // Tell the family they are in; failure here must not fail the grant.
+    try {
+      await sendPortalAccessGrantedEmail({
+        to: accessRequest.guardian_email,
+        studentName: `${accessRequest.student_first} ${accessRequest.student_last}`,
+        portalUrl: `${new URL(request.url).origin}/portal`
+      });
+    } catch {}
+  }
+
   const reviewUrl = `${new URL(request.url).origin}/admin/profile-requests`;
   try {
     await sendPortalReviewAlert({
-      subject: `Ashley Bands profile review needed: ${accessRequest.student_first} ${accessRequest.student_last}`,
+      subject: granted
+        ? `Ashley Bands access granted (no action needed): ${accessRequest.student_first} ${accessRequest.student_last}`
+        : `Ashley Bands follow-up needed (no roster match): ${accessRequest.student_first} ${accessRequest.student_last}`,
       summary: reviewSummary,
       reviewUrl,
       details: [
@@ -130,7 +154,7 @@ export async function POST(request) {
       .eq("id", reviewItem.id);
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, granted });
 }
 
 async function upsertClaimedPerson(accessRequest) {
@@ -176,15 +200,15 @@ async function upsertVerifiedEmail(personId, accessRequest, now) {
   return data;
 }
 
-async function maybeCreateClaimedRelationship(accessRequest, personId) {
+async function upsertStudentRelationship(accessRequest, personId, relationshipStatus) {
   if (!accessRequest.claimed_student_id) return;
   await supabaseAdmin
     .from("portal_student_people")
     .upsert({
       student_id: accessRequest.claimed_student_id,
       person_id: personId,
-      role: "claimed guardian",
-      relationship_status: "claimed",
+      role: "guardian",
+      relationship_status: relationshipStatus,
       primary_contact: false,
       source: "portal_access_request",
       source_row_hash: accessRequest.id

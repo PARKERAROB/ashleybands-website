@@ -57,7 +57,11 @@ export default function PortalRequestClient() {
     }
     setStep("done");
     setStatus("idle");
-    setMessage("Your email is verified. Mr. Parker has been notified and will review the profile connection.");
+    setMessage(
+      data.granted
+        ? "You're all set - your account is connected. Sign in from the portal page with this email any time."
+        : "Your email is verified, but we couldn't automatically match that student on the roster. Mr. Parker will follow up with you."
+    );
   }
 
   function update(field, value) {
@@ -73,7 +77,7 @@ export default function PortalRequestClient() {
         {step === "form" ? (
           <>
             <p className="portal-copy">
-              Use this when your email is new or not connected to the right student yet. You will verify the email first, then Mr. Parker will review the student connection.
+              Use this when your email is new or not connected to the right student yet. Verify your email and you are connected right away.
             </p>
             <form className="portal-request-form" onSubmit={submit}>
               <label>
