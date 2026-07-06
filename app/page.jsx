@@ -56,10 +56,12 @@ export default function HomePage() {
           <h1 className="chat-hero-headline">
             <span className="chat-hero-the">The Bands of</span>
             <span className="chat-hero-name">Ashley High School</span>
-            <span className="chat-hero-ensembles">Concert Bands · Marching Band · Percussion Ensemble · Jazz Band · Colorguard · Pep Band</span>
           </h1>
+          <p className="chat-hero-ensembles">
+            Concert Bands · Marching Band · Percussion · Jazz · Colorguard · Pep Band
+          </p>
           <p className="chat-hero-sub">
-            Ask anything about the program — dates, attire, trips, marching band, and more.
+            Ask anything about the program - dates, attire, trips, marching band, and more.
           </p>
           <form className="chat-hero-form" onSubmit={handleSubmit}>
             <input

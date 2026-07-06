@@ -1,4 +1,5 @@
 import SiteNav from "@/components/SiteNav";
+import SiteFooter from "@/components/SiteFooter";
 import "./styles.css";
 
 export const metadata = {
@@ -17,6 +18,7 @@ export default function RootLayout({ children }) {
       <body>
         <SiteNav />
         {children}
+        <SiteFooter />
       </body>
     </html>
   );

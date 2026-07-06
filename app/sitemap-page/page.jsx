@@ -16,6 +16,8 @@ export default function SitemapPage() {
 
   const mainPages = [
     { title: "Home", href: "/" },
+    { title: "Band Calendar", href: "/calendar" },
+    { title: "Band Boosters", href: "/boosters" },
     { title: "Family Profile", href: "/portal" },
     { title: "Request Profile Access", href: "/portal/request" },
     { title: "Performed Repertoire", href: "/repertoire" },
@@ -25,7 +27,6 @@ export default function SitemapPage() {
     { title: "Marching Band Sign-Up", href: "/marching-band-signup-2026" },
     { title: "Spring Trip Recovery", href: "/spring-trip-recovery" },
     { title: "Band Assistant", href: "/assistant" },
-    { title: "Member Area", href: "/members" },
     { title: "Instrument Inventory (submit)", href: "/instrument-inventory" },
     { title: "Music Library (submit)", href: "/music-library" }
   ];
@@ -40,6 +41,10 @@ export default function SitemapPage() {
   ];
 
   const staffPages = [
+    { title: "Staff Hub (all dashboards)", href: "/admin" },
+    { title: "Broadcast (email families)", href: "/admin/broadcast" },
+    { title: "Student Billing", href: "/admin/billing" },
+    { title: "Add / Edit Student", href: "/admin/students" },
     { title: "Profile Requests", href: "/admin/profile-requests" },
     { title: "Marching Band Dashboard", href: "/admin/marching-band" },
     { title: "Instrument Inventory (review)", href: "/admin/instrument-inventory" },
