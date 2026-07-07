@@ -42,6 +42,17 @@ export default function HomePage() {
 
   return (
     <main>
+      <section className="home-masthead">
+        <p className="home-masthead-eyebrow">Ashley High School · Wilmington, NC</p>
+        <h1 className="home-masthead-headline">
+          <span className="home-masthead-the">The Bands of</span>
+          <span className="home-masthead-name">Ashley High School</span>
+        </h1>
+        <p className="home-masthead-ensembles">
+          Concert Bands · Marching Band · Percussion · Jazz · Colorguard · Pep Band
+        </p>
+      </section>
+
       <section className="chat-hero">
         <Image
           src="/528048622_10108973219927428_7681318735311321118_n.jpg"
@@ -52,14 +63,6 @@ export default function HomePage() {
           className="chat-hero-bg"
         />
         <div className="chat-hero-inner">
-          <p className="chat-hero-eyebrow">Ashley High School · Wilmington, NC</p>
-          <h1 className="chat-hero-headline">
-            <span className="chat-hero-the">The Bands of</span>
-            <span className="chat-hero-name">Ashley High School</span>
-          </h1>
-          <p className="chat-hero-ensembles">
-            Concert Bands · Marching Band · Percussion · Jazz · Colorguard · Pep Band
-          </p>
           <p className="chat-hero-sub">
             Ask anything about the program - dates, attire, trips, marching band, and more.
           </p>
