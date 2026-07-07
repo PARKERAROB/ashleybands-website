@@ -48,15 +48,6 @@ body {
   background: var(--paper);
 }
 
-.home-masthead-eyebrow {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin: 0;
-}
-
 .home-masthead-headline {
   margin: 0;
   display: flex;
@@ -68,7 +59,7 @@ body {
 .home-masthead-the {
   font-family: 'Qwigley', cursive;
   font-style: normal;
-  font-size: clamp(34px, 4.5vw, 52px);
+  font-size: clamp(44px, 6vw, 68px);
   color: var(--gold);
   line-height: 1;
 }
@@ -94,6 +85,15 @@ body {
   color: var(--muted);
   margin: 0;
   line-height: 1.7;
+}
+
+.home-masthead-place {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0;
 }
 
 /* ── Chat Hero ─────────────────────────────────────── */

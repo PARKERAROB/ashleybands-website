@@ -43,7 +43,6 @@ export default function HomePage() {
   return (
     <main>
       <section className="home-masthead">
-        <p className="home-masthead-eyebrow">Ashley High School · Wilmington, NC</p>
         <h1 className="home-masthead-headline">
           <span className="home-masthead-the">The Bands of</span>
           <span className="home-masthead-name">Ashley High School</span>
@@ -51,6 +50,7 @@ export default function HomePage() {
         <p className="home-masthead-ensembles">
           Concert Bands · Marching Band · Percussion · Jazz · Colorguard · Pep Band
         </p>
+        <p className="home-masthead-place">Wilmington, North Carolina</p>
       </section>
 
       <section className="chat-hero">
