@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { validateStaffRequest } from "@/lib/staffAuth";
+import { logAudit, staffActor } from "@/lib/auditLog";
 
 export const runtime = "nodejs";
 
@@ -30,6 +31,25 @@ export async function GET(req) {
 
   // Attach guardians (trusted links + contacts) for the returned students.
   const ids = (students || []).map((s) => s.id);
+
+  // Touched-by-family indicator (view is live-derived, see 0028 migration).
+  // Best-effort: a missing/broken view must never break the roster search.
+  let touchByStudent = {};
+  if (ids.length) {
+    const { data: touch, error: touchError } = await supabaseAdmin
+      .from("portal_student_family_touch")
+      .select("student_id, touched_by_family, last_touch_at")
+      .in("student_id", ids);
+    if (touchError) {
+      console.warn("[admin/students] touch-signal lookup failed:", touchError.message);
+    } else {
+      touchByStudent = (touch || []).reduce((acc, t) => {
+        acc[t.student_id] = { touchedByFamily: t.touched_by_family, lastTouchAt: t.last_touch_at };
+        return acc;
+      }, {});
+    }
+  }
+
   let guardiansByStudent = {};
   if (ids.length) {
     const { data: links } = await supabaseAdmin
@@ -65,7 +85,23 @@ export async function GET(req) {
     }, {});
   }
 
-  const result = (students || []).map((s) => ({ ...s, guardians: guardiansByStudent[s.id] || [] }));
+  const result = (students || []).map((s) => ({
+    ...s,
+    guardians: guardiansByStudent[s.id] || [],
+    touchedByFamily: touchByStudent[s.id]?.touchedByFamily ?? false,
+    lastTouchAt: touchByStudent[s.id]?.lastTouchAt ?? null
+  }));
+
+  // Page-level read log (not per-query): one entry per admin view of student
+  // PII (roster/search + embedded guardian contacts).
+  await logAudit({
+    actor: staffActor(staff),
+    action: "view",
+    table: "portal_students",
+    recordId: q ? `search:${q}` : null,
+    route: "/api/admin/students"
+  });
+
   return NextResponse.json({ students: result });
 }
 
@@ -112,6 +148,20 @@ export async function POST(req) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  await logAudit({
+    actor: staffActor(staff),
+    action: "insert",
+    table: "portal_students",
+    recordId: data.id,
+    route: "/api/admin/students",
+    changes: {
+      legal_first: { old: null, new: legalFirst },
+      legal_last: { old: null, new: legalLast },
+      school_email: { old: null, new: schoolEmail || null }
+    }
+  });
+
   return NextResponse.json({ id: data.id });
 }
 
@@ -126,7 +176,7 @@ export async function PATCH(req) {
 
   const { data: current, error: loadError } = await supabaseAdmin
     .from("portal_students")
-    .select("legal_first, legal_last, preferred_first")
+    .select("legal_first, legal_last, preferred_first, grade_fall26, school_email, cell_phone, status, display_name")
     .eq("id", id)
     .maybeSingle();
   if (loadError || !current) return NextResponse.json({ error: "Student not found" }, { status: 404 });
@@ -149,5 +199,23 @@ export async function PATCH(req) {
 
   const { error } = await supabaseAdmin.from("portal_students").update(update).eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  const changes = {};
+  for (const field of Object.keys(update)) {
+    const oldValue = current[field] ?? null;
+    const newValue = update[field] ?? null;
+    if (oldValue !== newValue) changes[field] = { old: oldValue, new: newValue };
+  }
+  if (Object.keys(changes).length) {
+    await logAudit({
+      actor: staffActor(staff),
+      action: "update",
+      table: "portal_students",
+      recordId: id,
+      route: "/api/admin/students",
+      changes
+    });
+  }
+
   return NextResponse.json({ ok: true });
 }

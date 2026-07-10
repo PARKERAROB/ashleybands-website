@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { validateStaffRequest } from "@/lib/staffAuth";
 import { chargeKindForCategory } from "@/lib/billing";
+import { logAudit, staffActor } from "@/lib/auditLog";
 
 export const runtime = "nodejs";
 
@@ -67,6 +68,19 @@ export async function POST(req) {
   const { data, error } = await supabaseAdmin.from("fee_charges").insert(rows).select("id");
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
+  await logAudit({
+    actor: staffActor(staff),
+    action: "insert",
+    table: "fee_charges",
+    recordId: targets.join(","),
+    route: "/api/admin/billing/charges",
+    changes: {
+      student_ids: { old: null, new: targets },
+      category: { old: null, new: category },
+      amount_cents: { old: null, new: amountCents }
+    }
+  });
+
   return NextResponse.json({ inserted: data?.length || 0, skipped: studentIds.length - targets.length });
 }
 
@@ -85,11 +99,27 @@ export async function PATCH(req) {
   const id = String(body.id || "");
   if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
+  const { data: current } = await supabaseAdmin
+    .from("fee_charges")
+    .select("status")
+    .eq("id", id)
+    .maybeSingle();
+
   const { error } = await supabaseAdmin
     .from("fee_charges")
     .update({ status: "void", notes: String(body.notes || "").slice(0, 500) || undefined })
     .eq("id", id);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  await logAudit({
+    actor: staffActor(staff),
+    action: "update",
+    table: "fee_charges",
+    recordId: id,
+    route: "/api/admin/billing/charges",
+    changes: { status: { old: current?.status ?? null, new: "void" } }
+  });
+
   return NextResponse.json({ ok: true });
 }

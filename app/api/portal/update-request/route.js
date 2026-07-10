@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { readPortalSession } from "@/lib/portalTokens";
+import { logAudit } from "@/lib/auditLog";
 
 export const runtime = "nodejs";
 
@@ -119,6 +120,15 @@ export async function POST(request) {
     .from("portal_update_requests")
     .update({ review_item_id: reviewItem.id })
     .eq("id", updateRequest.id);
+
+  await logAudit({
+    actor: { type: "parent", id: session.personId, name: session.email },
+    action: "update",
+    table: config.targetTable,
+    recordId: targetId || studentId || session.personId,
+    route: "/api/portal/update-request",
+    changes: { [field]: { old: oldValue, new: newValue } }
+  });
 
   // No review alert: parent edits auto-approve (login-authorized). The review_queue row above is the
   // audit log. See docs/decisions/2026-06-23-portal-parent-changes-auto-approve.md

@@ -38,3 +38,17 @@ Next.js + Vercel + Supabase. When in doubt, BDOS is the source of truth.
 
 ## Comms
 - Resend broadcasts + send queue are L2: draft/stage only, Rob sends. Never send.
+
+## Data rules (compliant plan, 2026-07-10)
+- **No grades, ever.** No coursework, GPA, or required-for-class features, full stop. Verified
+  clean in the schema as of 2026-07-10; keep it that way.
+- **Contact values are family-owned, not CSV-mirrored.** `sync-portal-csv.mjs` is guarded to never
+  push parent/student email or phone from the BDOS CSVs into the hosted DB — those values come only
+  from the family via portal request/confirmation. Don't remove that guard.
+- **Every new person-data column/table carries a source/provenance tag.** A `source` (or
+  `source_*`) column on the table, or an explicit `-- provenance: ...` comment in the same
+  migration file. Enforced by `npm run lint:provenance` (`scripts/provenance-lint.mjs`) for
+  migrations after the 2026-07-10 baseline (0001-0028 are grandfathered — see the script header).
+- **Person-data reads/writes in admin routes call `logAudit`** (`lib/auditLog.js`). Every admin
+  route that selects or mutates a person-data table logs actor + action; a logging failure never
+  blocks the request, but the call itself is not optional.

@@ -1,5 +1,7 @@
 import { getSupabaseEnv } from "@/lib/supabaseEnv";
 import { supabaseHeaders } from "@/lib/supabaseRest";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { checkRateLimit, clientIp } from "@/lib/rateLimit";
 
 /**
  * POST /api/confirm
@@ -7,6 +9,27 @@ import { supabaseHeaders } from "@/lib/supabaseRest";
  * Body: { s: student_id, a: action, n?: student_name, p?: parent_name, e?: responder_email, note?: response_note }
  */
 const VALID_ACTIONS = new Set(["out", "talk", "band_only", "mb_info"]);
+
+// The `s` value must resolve to a real roster student (by source_student_id or
+// school_email, exact match case-insensitive) before we accept a write from an
+// anonymous sender. Fails CLOSED (unlike the rate limiter): an unmatched id is
+// rejected, since this is what stops spam/poisoned rows from reaching the admin
+// dashboard. Two separate .eq() calls (via ilike-free exact match) rather than
+// a single interpolated .or() filter string, so a comma/wildcard in the
+// attacker-controlled studentId can't reshape the query.
+async function isKnownStudent(studentId) {
+  const normalized = studentId.trim().toLowerCase();
+  if (!normalized) return false;
+  // Escape ilike wildcards so a studentId of e.g. "%" can't match every row.
+  const escaped = normalized.replace(/[%_]/g, (c) => `\\${c}`);
+
+  const [byId, byEmail] = await Promise.all([
+    supabaseAdmin.from("portal_students").select("id").eq("source_student_id", studentId).limit(1).maybeSingle(),
+    supabaseAdmin.from("portal_students").select("id").ilike("school_email", escaped).limit(1).maybeSingle()
+  ]);
+
+  return Boolean(byId.data) || Boolean(byEmail.data);
+}
 
 export async function POST(request) {
   try {
@@ -28,13 +51,26 @@ export async function POST(request) {
       return Response.json({ error: "invalid email" }, { status: 400 });
     }
 
+    const ip = request.headers.get("x-forwarded-for") || "";
+    const { allowed } = await checkRateLimit({
+      key: `confirm:${clientIp(request)}`,
+      limit: 10,
+      windowMs: 10 * 60 * 1000
+    });
+    if (!allowed) {
+      return Response.json({ error: "Too many submissions. Please try again in a little while." }, { status: 429 });
+    }
+
+    if (!(await isKnownStudent(studentId))) {
+      return Response.json({ error: "unknown student id" }, { status: 400 });
+    }
+
     const { url: supabaseUrl, key: supabaseKey } = getSupabaseEnv();
     if (!supabaseUrl || !supabaseKey) {
       return Response.json({ error: "Supabase not configured" }, { status: 500 });
     }
 
     const ua = request.headers.get("user-agent") || "";
-    const ip = request.headers.get("x-forwarded-for") || "";
 
     const res = await fetch(`${supabaseUrl}/rest/v1/band_recapture_2026`, {
       method: "POST",

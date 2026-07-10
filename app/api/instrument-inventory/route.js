@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { checkRateLimit, clientIp } from "@/lib/rateLimit";
 
 const PUBLIC_INSTRUMENTS_PATH = path.join(process.cwd(), "content", "instruments-public.json");
 
@@ -32,6 +33,14 @@ export async function GET() {
 }
 
 export async function POST(request) {
+  const { allowed } = await checkRateLimit({
+    key: `instrument-inventory:${clientIp(request)}`,
+    limit: 10,
+    windowMs: 10 * 60 * 1000
+  });
+  if (!allowed) {
+    return Response.json({ error: "Too many submissions. Please try again in a little while." }, { status: 429 });
+  }
   try {
     const payload = await request.json();
     const required = ["submitted_by", "instrument_type", "condition_notes"];

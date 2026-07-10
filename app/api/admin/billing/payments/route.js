@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { validateStaffRequest } from "@/lib/staffAuth";
 import { generateInvoiceId } from "@/lib/billing";
+import { logAudit, staffActor } from "@/lib/auditLog";
 
 export const runtime = "nodejs";
 
@@ -58,6 +59,21 @@ export async function POST(req) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  await logAudit({
+    actor: staffActor(staff),
+    action: "insert",
+    table: "fee_payments",
+    recordId: data.id,
+    route: "/api/admin/billing/payments",
+    changes: {
+      student_id: { old: null, new: studentId },
+      amount_cents: { old: null, new: amountCents },
+      method: { old: null, new: method },
+      is_sponsorship: { old: null, new: !!body.isSponsorship }
+    }
+  });
+
   return NextResponse.json({ id: data.id });
 }
 
@@ -82,7 +98,23 @@ export async function PATCH(req) {
   const update = { status };
   if (body.notes != null) update.notes = String(body.notes).slice(0, 500);
 
+  const { data: current } = await supabaseAdmin
+    .from("fee_payments")
+    .select("status, notes")
+    .eq("id", id)
+    .maybeSingle();
+
   const { error } = await supabaseAdmin.from("fee_payments").update(update).eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  await logAudit({
+    actor: staffActor(staff),
+    action: "update",
+    table: "fee_payments",
+    recordId: id,
+    route: "/api/admin/billing/payments",
+    changes: { status: { old: current?.status ?? null, new: status } }
+  });
+
   return NextResponse.json({ ok: true });
 }

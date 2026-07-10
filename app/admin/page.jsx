@@ -19,7 +19,8 @@ const SECTIONS = [
     title: "Students & Profiles",
     links: [
       { href: "/admin/profile-requests", emoji: "👤", label: "Profile Requests", desc: "Review portal access + profile edits" },
-      { href: "/admin/students", emoji: "➕", label: "Add / Edit Student", desc: "Create or update a student and guardians" }
+      { href: "/admin/students", emoji: "➕", label: "Add / Edit Student", desc: "Create or update a student and guardians" },
+      { href: "/admin/data-inventory", emoji: "🗂️", label: "Data Inventory", desc: "Where person-data lives, by table + source, touched vs never-touched" }
     ]
   },
   {

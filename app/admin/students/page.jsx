@@ -173,8 +173,16 @@ function StudentEditor({ student, session, onChanged }) {
 
   return (
     <div style={panel}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-        <strong>{displayLast || student.display_name}</strong>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: 6 }}>
+        <span style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+          <strong>{displayLast || student.display_name}</strong>
+          <span
+            title={student.lastTouchAt ? `Last family activity ${new Date(student.lastTouchAt).toLocaleDateString()}` : "No login, update, or self-supplied contact on record"}
+            style={student.touchedByFamily ? touchedBadge : untouchedBadge}
+          >
+            {student.touchedByFamily ? "touched" : "never touched"}
+          </span>
+        </span>
         <span style={{ fontSize: 12, color: "#6f675a" }}>
           {student.grade_fall26} {student.source === "manual" ? "· manual" : ""} ·{" "}
           <button onClick={() => setOpen((v) => !v)} style={link}>{open ? "close" : "manage"}</button>
@@ -254,3 +262,6 @@ const input = { boxSizing: "border-box", width: "100%", padding: "8px 10px", fon
 const btn = { padding: "8px 16px", fontSize: 13, fontWeight: 600, border: "none", borderRadius: 6, color: "#fff", background: "#7b1829", cursor: "pointer" };
 const link = { color: "#7b1829", fontSize: 13, textDecoration: "underline", background: "none", border: "none", cursor: "pointer", padding: 0 };
 const subhead = { fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#6f675a" };
+const badgeBase = { fontSize: 10.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.03em", borderRadius: 999, padding: "2px 8px" };
+const touchedBadge = { ...badgeBase, color: "#215732", background: "#e3efe4" };
+const untouchedBadge = { ...badgeBase, color: "#6f675a", background: "#eee7d8" };

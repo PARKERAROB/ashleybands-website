@@ -1,6 +1,15 @@
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { checkRateLimit, clientIp } from "@/lib/rateLimit";
 
 export async function POST(request) {
+  const { allowed } = await checkRateLimit({
+    key: `music-library:${clientIp(request)}`,
+    limit: 10,
+    windowMs: 10 * 60 * 1000
+  });
+  if (!allowed) {
+    return Response.json({ error: "Too many submissions. Please try again in a little while." }, { status: 429 });
+  }
   try {
     const payload = await request.json();
     if (!String(payload.title || "").trim()) {

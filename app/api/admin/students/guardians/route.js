@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { validateStaffRequest } from "@/lib/staffAuth";
+import { logAudit, staffActor } from "@/lib/auditLog";
 
 export const runtime = "nodejs";
 
@@ -106,6 +107,20 @@ export async function POST(req) {
       { onConflict: "student_id,person_id" }
     );
   if (linkError) return NextResponse.json({ error: linkError.message }, { status: 500 });
+
+  await logAudit({
+    actor: staffActor(staff),
+    action: "insert",
+    table: "portal_student_people",
+    recordId: `${studentId}:${personId}`,
+    route: "/api/admin/students/guardians",
+    changes: {
+      student_id: { old: null, new: studentId },
+      person_id: { old: null, new: personId },
+      name: { old: null, new: name },
+      role: { old: null, new: text(body.role) || "Parent" }
+    }
+  });
 
   return NextResponse.json({ ok: true, personId });
 }

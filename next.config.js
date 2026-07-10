@@ -1,4 +1,18 @@
 const nextConfig = {
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" }
+          // TODO CSP: enumerate third-party origins first (Supabase, PayPal, Resend, Anthropic)
+        ]
+      }
+    ];
+  },
   async redirects() {
     return [
       { source: "/info/corporate-sponsorship", destination: "/sponsors", permanent: true },

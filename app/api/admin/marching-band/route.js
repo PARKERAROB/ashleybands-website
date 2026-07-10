@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { validateStaffRequest } from "@/lib/staffAuth";
+import { logAudit, staffActor } from "@/lib/auditLog";
 
 export const runtime = "nodejs";
 
@@ -348,6 +349,12 @@ export async function PATCH(req) {
     return NextResponse.json({ error: "Valid student and status are required." }, { status: 400 });
   }
 
+  const { data: priorOverride } = await supabaseAdmin
+    .from("marching_band_status_overrides_2026")
+    .select("status")
+    .eq("source_student_id", sourceStudentId)
+    .maybeSingle();
+
   const { data, error } = await supabaseAdmin
     .from("marching_band_status_overrides_2026")
     .upsert({
@@ -383,6 +390,16 @@ export async function PATCH(req) {
       .single();
 
     if (fallback.error) return NextResponse.json({ error: fallback.error.message }, { status: 500 });
+
+    await logAudit({
+      actor: staffActor(staff),
+      action: "update",
+      table: "marching_band_status_overrides_2026",
+      recordId: sourceStudentId,
+      route: "/api/admin/marching-band",
+      changes: { status: { old: priorOverride?.status ?? null, new: status } }
+    });
+
     return NextResponse.json({
       override: {
         id: fallback.data.id,
@@ -396,5 +413,14 @@ export async function PATCH(req) {
   }
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  await logAudit({
+    actor: staffActor(staff),
+    action: "update",
+    table: "marching_band_status_overrides_2026",
+    recordId: sourceStudentId,
+    route: "/api/admin/marching-band",
+    changes: { status: { old: priorOverride?.status ?? null, new: status } }
+  });
   return NextResponse.json({ override: data });
 }
