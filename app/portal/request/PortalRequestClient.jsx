@@ -111,6 +111,10 @@ export default function PortalRequestClient() {
               <button type="submit" disabled={status === "sending"}>
                 {status === "sending" ? "Sending..." : "Send code"}
               </button>
+              <p className="portal-consent-note">
+                By submitting, you confirm this information is yours to share. See our{" "}
+                <a href="/privacy">Privacy Notice</a>.
+              </p>
             </form>
           </>
         ) : null}

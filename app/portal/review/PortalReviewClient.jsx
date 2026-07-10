@@ -63,6 +63,11 @@ export default function PortalReviewClient() {
       <section className="portal-panel portal-panel-wide">
         <p className="eyebrow">Ashley Bands</p>
         <h1>My Profile</h1>
+        <p className="portal-consent-note">
+          Review and update your family&apos;s details anytime. Changes take effect immediately.
+          To remove something entirely, ask and it&apos;s deleted right away.{" "}
+          <a href="/privacy">Privacy Notice</a>
+        </p>
         {state.status !== "ready" ? (
           <p className={`portal-message ${state.status === "error" ? "error" : ""}`}>{state.message}</p>
         ) : null}
@@ -721,6 +726,10 @@ function GuardianAdd({ studentId, studentName, onAdded }) {
         <button type="submit" disabled={status === "sending"}>
           {status === "sending" ? "Submitting..." : "Submit for review"}
         </button>
+        <p className="portal-consent-note">
+          By submitting, you confirm this information is yours to share. See our{" "}
+          <a href="/privacy">Privacy Notice</a>.
+        </p>
         <button type="button" className="portal-link-btn" onClick={() => setOpen(false)}>
           Cancel
         </button>

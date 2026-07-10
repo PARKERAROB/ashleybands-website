@@ -1,50 +1,63 @@
-// DRAFT privacy notice — NOT linked from any nav. Reachable only by direct
-// URL until Mr. Parker approves the real copy (see
-// ~/Atlas/BandsofAHS/projects/placement-authority-2026-27/provenance-lane-map.md
-// §4 item 6 / §6 "consent copy"). Swap the placeholder text below for the
-// approved wording, then link it from the footer/sitemap and drop this notice.
+// Privacy Notice — approved by Mr. Parker 2026-07-10 (word-by-word, v4).
+// Source of record: BandsofAHS/projects/placement-authority-2026-27/privacy-notice-DRAFT.md
+// Any wording change goes back through Mr. Parker.
 
 export const metadata = {
-  title: "Privacy Notice (Draft) | Bands of AHS",
-  robots: { index: false, follow: false }
+  title: "Privacy Notice | Bands of AHS",
+  description: "What information ashleybands.com collects, how it is used, and the choices available to families."
 };
 
 export default function PrivacyNoticePage() {
   return (
     <main className="narrow-page">
-      <p className="eyebrow">Draft — Not Yet Published</p>
       <h1>Privacy Notice</h1>
-      <p
-        className="lede"
-        style={{
-          background: "#fff3cd",
-          border: "1px solid #f0c36d",
-          borderRadius: "6px",
-          padding: "0.75rem 1rem",
-          color: "#664d03"
-        }}
-      >
-        DRAFT — pending Mr. Parker&rsquo;s approval. This page is not linked anywhere on the site
-        and is not final. Do not treat this text as the program&rsquo;s policy.
+      <p className="lede">Effective date: July 10, 2026 · ashleybands.com</p>
+
+      <p>
+        This site supports the Ashley High School band program. This notice describes the
+        information the site collects, how it is used, and the choices available to families.
       </p>
 
-      <h2>What this notice will cover</h2>
-      <p>
-        This placeholder marks where the approved privacy notice will live once Mr. Parker signs
-        off on the wording. It will explain, in plain language:
-      </p>
+      <h2>Information we collect</h2>
       <ul>
-        <li>What family and student information the band program collects, and why.</li>
-        <li>Where that information is stored, and who can see it.</li>
-        <li>That the program collects no grades, GPA, or coursework data — ever.</li>
-        <li>How families can review, correct, or ask questions about their information.</li>
-        <li>How to reach Mr. Parker with a privacy question or concern.</li>
+        <li>
+          <strong>Program records</strong>: rosters, instrument, uniform, and locker assignments,
+          music checkouts, and schedules.
+        </li>
+        <li>
+          <strong>Contact information</strong> provided by your family through the portal, such as
+          names, email addresses, and phone numbers.
+        </li>
+        <li>
+          <strong>Payment records</strong>: fees charged, payments received, and sponsorships.
+          Payments are processed by PayPal; this site does not store card or bank account numbers.
+        </li>
       </ul>
+      <p>This site does not collect grades, coursework, or academic records.</p>
 
-      <h2>Status</h2>
+      <h2>How information is used and shared</h2>
       <p>
-        Placeholder copy only. The real notice is drafted separately and swapped in here once
-        approved — nothing on this page is final policy.
+        Information is used only to operate the band program. It is not sold, shared with third
+        parties for marketing, or used for advertising.
+      </p>
+      <p>
+        Access is limited by role. Families can view and manage their own information. The
+        director can view program records. The booster treasurer can view payment records. Booster
+        board officers, such as the president, vice president, and fundraising and chaperone
+        coordinators, can access the information their role requires, including sending program
+        communications and coordinating events, fundraising, and volunteers. Access to family
+        information is logged.
+      </p>
+
+      <h2>Your choices</h2>
+      <p>
+        You can review and update your information at any time in the portal. To request deletion
+        of your information, contact Mr. Parker; requests are honored promptly.
+      </p>
+
+      <h2>Contact</h2>
+      <p>
+        Questions about this notice: <a href="mailto:robert.parker@nhcs.net">robert.parker@nhcs.net</a>.
       </p>
     </main>
   );

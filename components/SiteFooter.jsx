@@ -44,6 +44,7 @@ const COLUMNS = [
     links: [
       { href: "/assistant", label: "Ask the Band Assistant" },
       { href: "/sitemap-page", label: "Site Map (every page)" },
+      { href: "/privacy", label: "Privacy Notice" },
       { href: "/admin", label: "Staff Sign-In" }
     ]
   }
