@@ -1,7 +1,13 @@
 import { getSupabaseEnv } from "@/lib/supabaseEnv";
 import { supabaseHeaders } from "@/lib/supabaseRest";
+import { validateStaffRequest } from "@/lib/staffAuth";
 
-export async function GET() {
+export async function GET(request) {
+  const staff = await validateStaffRequest(request);
+  if (!staff) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { url: supabaseUrl, key: supabaseKey } = getSupabaseEnv();
 
   if (!supabaseUrl || !supabaseKey) {
@@ -18,6 +24,11 @@ export async function GET() {
 }
 
 export async function DELETE(request) {
+  const staff = await validateStaffRequest(request);
+  if (!staff) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { url: supabaseUrl, key: supabaseKey } = getSupabaseEnv();
 
   if (!supabaseUrl || !supabaseKey) {
