@@ -107,8 +107,10 @@ const portalStudents = students.map((row) => {
     preferred_first: row.preferred_first || null,
     display_name: displayName || row.id,
     grade_fall26: row.grade_fall26 || null,
-    school_email: row.school_email || null,
-    cell_phone: row.cell_phone || null,
+    // COMPLIANCE GUARD (2026-07-10): contact values are family-owned, never mirrored from the
+    // IC-derived CSV. Kept null here so a re-sync can't repopulate what Phase 1.1 deleted.
+    school_email: null,
+    cell_phone: null,
     status: row.status || null,
     notes: row.notes || null,
     source: "bdos_students_csv",
@@ -253,7 +255,17 @@ async function applySync() {
         last_seen_sync_id: syncId
       }))
       .filter((row) => row.person_id && row.value_normalized);
-    await upsert("portal_contact_methods", contactRows, "person_id,contact_type,value_normalized");
+    // COMPLIANCE GUARD (2026-07-10): contact methods (emails/phones) are now FAMILY-OWNED —
+    // provided by families through the portal with consent, never pushed from the IC-derived CSV.
+    // The IC-sourced contact rows were deleted from prod on 2026-07-10 (Phase 1.1, delete-and-
+    // re-enter). Do NOT re-mirror contact methods here. Person/student/relationship structure still
+    // syncs from the roster; contact VALUES do not. See BandsofAHS/projects/placement-authority-2026-27.
+    const SYNC_CONTACT_METHODS = false;
+    if (SYNC_CONTACT_METHODS) {
+      await upsert("portal_contact_methods", contactRows, "person_id,contact_type,value_normalized");
+    } else {
+      console.log(`contact_methods: SKIPPED ${contactRows.length} rows (family-owned since 2026-07-10; see compliance guard)`);
+    }
 
     await finishSyncRun(syncId, "completed", {
       students_seen: portalStudents.length,
