@@ -1,3 +1,8 @@
+> ✅ SHIPPED — plan executed (routes/features live: `app/instrument-inventory`,
+> `app/admin/instrument-inventory`, `app/api/instrument-inventory`); kept as build record.
+> 🪦 Do not follow as instructions (2026-07-13 v2 clean). The Hermes/OWL-Alpha invocation
+> instructions below name retired machinery — never invoke them.
+
 # Student Instrument Dashboard Implementation Plan
 
 > **For Hermes:** Use subagent-driven-development skill to implement this plan task-by-task.

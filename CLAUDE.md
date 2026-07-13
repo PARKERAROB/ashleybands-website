@@ -1,6 +1,6 @@
 # band-website — ashleybands.com (LIVE site)
 
-Downstream of BandDirectorOS (BDOS) at `~/Atlas/BandsofAHS` — the canonical brain.
+Downstream of BandsofAHS (BDOS) at `~/Atlas/BandsofAHS` — the canonical brain.
 Next.js + Vercel + Supabase. When in doubt, BDOS is the source of truth.
 
 ## Before changing content or structure
