@@ -36,6 +36,15 @@
   "location": ""
  },
  {
+  "id": "evt-0106",
+  "title": "Uniform Fittings (Marching Band)",
+  "start": "2026-07-16T10:00",
+  "end": "2026-07-16T14:00",
+  "all_day": false,
+  "category": "MB",
+  "location": ""
+ },
+ {
   "id": "evt-0006",
   "title": "Leadership Week",
   "start": "2026-07-27",
