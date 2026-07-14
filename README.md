@@ -10,16 +10,13 @@ npm run content:build
 npm run dev
 ```
 
-The content builder reads curated public-facing source files from the sibling `../PKA` folder by default and writes:
+The content build is self-contained (PKA retired 2026-06-01; this README's old "reads from
+a sibling `../PKA` folder" instruction was stale — no such folder exists). Source markdown
+lives in `content/sources/` (e.g. `marching-band-2026.md`): edit the SOURCE, run
+`npm run content:build`, never hand-edit the generated outputs:
 
 - `content/site-data.json`
 - `public/chatbot-knowledge.txt`
-
-Override the source folder with:
-
-```bash
-PKA_ROOT=/path/to/PKA npm run content:build
-```
 
 ## Environment Variables
 
