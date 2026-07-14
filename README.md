@@ -31,4 +31,4 @@ Optional question logging:
 
 ## Boundary
 
-This site is public by default. Do not publish student-specific details, internal PKA notes, financial balances, accommodation details, private decisions, or family-specific information.
+This site is public by default. Do not publish student-specific details, internal BandsofAHS/RobOS working notes, financial balances, accommodation details, private decisions, or family-specific information.
