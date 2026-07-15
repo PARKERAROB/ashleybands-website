@@ -24,7 +24,6 @@ export default function SitemapPage() {
     { title: "Program Archive", href: "/programs" },
     { title: "Spring Concert 2026 Program", href: "/programs/spring-concert-2026" },
     { title: "Handbook", href: "/handbook" },
-    { title: "Marching Band Sign-Up", href: "/marching-band-signup-2026" },
     { title: "Spring Trip Recovery", href: "/spring-trip-recovery" },
     { title: "Band Assistant", href: "/assistant" },
     { title: "Instrument Inventory (submit)", href: "/instrument-inventory" },

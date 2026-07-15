@@ -25,7 +25,6 @@ const COLUMNS = [
       { href: "/portal/request", label: "Request Portal Access" },
       { href: "/info/required-items", label: "Required Items" },
       { href: "/info/the-band-folder", label: "The Band Folder" },
-      { href: "/marching-band-signup-2026", label: "Marching Band Sign-Up" },
       { href: "https://www.mymusicoffice.com/", label: "My Music Office", external: true },
       { href: "https://ashleybandshirts.printify.me/", label: "Band Shirts Store", external: true }
     ]
