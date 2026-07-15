@@ -57,6 +57,14 @@ function coveredDates(ev) {
   return out;
 }
 
+// Start time, or a "start – end" range when the event carries a real end time.
+function timeRange(ev) {
+  const t = timeLabel(ev.start);
+  if (!t) return null;
+  const te = ev.end && String(ev.end).includes("T") ? timeLabel(ev.end) : null;
+  return te ? `${t} – ${te}` : t;
+}
+
 function whenLabel(ev) {
   const a = ymd(ev.start);
   if (ev.end && ev.all_day) {
@@ -64,8 +72,8 @@ function whenLabel(ev) {
     const estr = e.m === a.m ? `${e.d}` : `${MONTHS[e.m]} ${e.d}`;
     return `${MONTHS[a.m]} ${a.d}–${estr}, ${a.y}`;
   }
-  const t = timeLabel(ev.start);
-  return t ? `${MONTHS[a.m]} ${a.d}, ${a.y} · ${t}` : `${MONTHS[a.m]} ${a.d}, ${a.y}`;
+  const tr = timeRange(ev);
+  return tr ? `${MONTHS[a.m]} ${a.d}, ${a.y} · ${tr}` : `${MONTHS[a.m]} ${a.d}, ${a.y}`;
 }
 
 // --- "Add to my calendar" link builders ---
@@ -94,7 +102,9 @@ function dateRange(ev) {
     const endEx = addDays(ev.end ? ymd(ev.end) : s, 1);
     return { start: gdate(s), end: gdate(endEx), allDay: true };
   }
-  return { start: gdatetime(ev.start), end: addHourStr(ev.start), allDay: false };
+  // Use the event's real end time; fall back to a 1-hour block only if none is set.
+  const end = ev.end && String(ev.end).includes("T") ? gdatetime(ev.end) : addHourStr(ev.start);
+  return { start: gdatetime(ev.start), end, allDay: false };
 }
 function gcalLink(ev) {
   const r = dateRange(ev);
@@ -293,7 +303,7 @@ export default function CalendarView() {
                         <span className="cal-legend-dot" style={{ background: g.color }} />{ev.title}
                       </span>
                       <span className="cal-agenda-meta">
-                        {timeLabel(ev.start) && <span>{timeLabel(ev.start)}</span>}
+                        {timeRange(ev) && <span>{timeRange(ev)}</span>}
                         {ev.location && <span>{ev.location}</span>}
                       </span>
                     </span>
@@ -319,7 +329,7 @@ export default function CalendarView() {
                     <span className="cal-agenda-title">
                       <span className="cal-legend-dot" style={{ background: groupFor(ev.category).color }} />{ev.title}
                     </span>
-                    <span className="cal-agenda-meta">{timeLabel(ev.start) && <span>{timeLabel(ev.start)}</span>}{ev.location && <span>{ev.location}</span>}</span>
+                    <span className="cal-agenda-meta">{timeRange(ev) && <span>{timeRange(ev)}</span>}{ev.location && <span>{ev.location}</span>}</span>
                   </span>
                 </button>
               ))}
