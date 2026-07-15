@@ -46,10 +46,73 @@
  },
  {
   "id": "evt-0006",
-  "title": "Leadership Week",
-  "start": "2026-07-27",
-  "end": "2026-07-31",
-  "all_day": true,
+  "title": "Colorguard Camp",
+  "start": "2026-07-27T08:00",
+  "end": "2026-07-27T12:30",
+  "all_day": false,
+  "category": "MB-Preseason",
+  "location": "AHS"
+ },
+ {
+  "id": "evt-0006",
+  "title": "Colorguard Camp",
+  "start": "2026-07-28T08:00",
+  "end": "2026-07-28T12:30",
+  "all_day": false,
+  "category": "MB-Preseason",
+  "location": "AHS"
+ },
+ {
+  "id": "evt-0107",
+  "title": "Leadership",
+  "start": "2026-07-28T08:00",
+  "end": "2026-07-28T12:30",
+  "all_day": false,
+  "category": "MB-Preseason",
+  "location": "AHS"
+ },
+ {
+  "id": "evt-0006",
+  "title": "Colorguard Camp",
+  "start": "2026-07-29T08:00",
+  "end": "2026-07-29T12:30",
+  "all_day": false,
+  "category": "MB-Preseason",
+  "location": "AHS"
+ },
+ {
+  "id": "evt-0107",
+  "title": "Leadership",
+  "start": "2026-07-29T08:00",
+  "end": "2026-07-29T12:30",
+  "all_day": false,
+  "category": "MB-Preseason",
+  "location": "AHS"
+ },
+ {
+  "id": "evt-0006",
+  "title": "Colorguard Camp",
+  "start": "2026-07-30T08:00",
+  "end": "2026-07-30T12:30",
+  "all_day": false,
+  "category": "MB-Preseason",
+  "location": "AHS"
+ },
+ {
+  "id": "evt-0107",
+  "title": "Leadership",
+  "start": "2026-07-30T08:00",
+  "end": "2026-07-30T12:30",
+  "all_day": false,
+  "category": "MB-Preseason",
+  "location": "AHS"
+ },
+ {
+  "id": "evt-0006",
+  "title": "Colorguard Camp",
+  "start": "2026-07-31T08:00",
+  "end": "2026-07-31T12:30",
+  "all_day": false,
   "category": "MB-Preseason",
   "location": "AHS"
  },
