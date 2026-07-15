@@ -207,6 +207,24 @@
   "location": "AHS"
  },
  {
+  "id": "evt-0108",
+  "title": "Marching Rehearsal",
+  "start": "2026-08-25T16:00",
+  "end": "2026-08-25T19:00",
+  "all_day": false,
+  "category": "MB-Rehearsal",
+  "location": "AHS"
+ },
+ {
+  "id": "evt-0108",
+  "title": "Marching Rehearsal",
+  "start": "2026-08-27T16:00",
+  "end": "2026-08-27T19:00",
+  "all_day": false,
+  "category": "MB-Rehearsal",
+  "location": "AHS"
+ },
+ {
   "id": "evt-0009",
   "title": "Football Home vs EE Smith",
   "start": "2026-08-28T19:00",
@@ -216,12 +234,84 @@
   "location": "AHS"
  },
  {
+  "id": "evt-0108",
+  "title": "Marching Rehearsal",
+  "start": "2026-09-01T16:00",
+  "end": "2026-09-01T19:00",
+  "all_day": false,
+  "category": "MB-Rehearsal",
+  "location": "AHS"
+ },
+ {
+  "id": "evt-0108",
+  "title": "Marching Rehearsal",
+  "start": "2026-09-03T16:00",
+  "end": "2026-09-03T19:00",
+  "all_day": false,
+  "category": "MB-Rehearsal",
+  "location": "AHS"
+ },
+ {
+  "id": "evt-0108",
+  "title": "Marching Rehearsal",
+  "start": "2026-09-08T16:00",
+  "end": "2026-09-08T19:00",
+  "all_day": false,
+  "category": "MB-Rehearsal",
+  "location": "AHS"
+ },
+ {
+  "id": "evt-0108",
+  "title": "Marching Rehearsal",
+  "start": "2026-09-10T16:00",
+  "end": "2026-09-10T19:00",
+  "all_day": false,
+  "category": "MB-Rehearsal",
+  "location": "AHS"
+ },
+ {
   "id": "evt-0010",
   "title": "Football Home vs Fike",
   "start": "2026-09-11T19:00",
   "end": "2026-09-11T22:00",
   "all_day": false,
   "category": "MB-Football",
+  "location": "AHS"
+ },
+ {
+  "id": "evt-0108",
+  "title": "Marching Rehearsal",
+  "start": "2026-09-15T16:00",
+  "end": "2026-09-15T19:00",
+  "all_day": false,
+  "category": "MB-Rehearsal",
+  "location": "AHS"
+ },
+ {
+  "id": "evt-0108",
+  "title": "Marching Rehearsal",
+  "start": "2026-09-17T16:00",
+  "end": "2026-09-17T19:00",
+  "all_day": false,
+  "category": "MB-Rehearsal",
+  "location": "AHS"
+ },
+ {
+  "id": "evt-0108",
+  "title": "Marching Rehearsal",
+  "start": "2026-09-22T16:00",
+  "end": "2026-09-22T19:00",
+  "all_day": false,
+  "category": "MB-Rehearsal",
+  "location": "AHS"
+ },
+ {
+  "id": "evt-0108",
+  "title": "Marching Rehearsal",
+  "start": "2026-09-24T16:00",
+  "end": "2026-09-24T19:00",
+  "all_day": false,
+  "category": "MB-Rehearsal",
   "location": "AHS"
  },
  {
@@ -243,6 +333,24 @@
   "location": "AHS"
  },
  {
+  "id": "evt-0108",
+  "title": "Marching Rehearsal",
+  "start": "2026-09-29T16:00",
+  "end": "2026-09-29T19:00",
+  "all_day": false,
+  "category": "MB-Rehearsal",
+  "location": "AHS"
+ },
+ {
+  "id": "evt-0108",
+  "title": "Marching Rehearsal",
+  "start": "2026-10-01T16:00",
+  "end": "2026-10-01T19:00",
+  "all_day": false,
+  "category": "MB-Rehearsal",
+  "location": "AHS"
+ },
+ {
   "id": "evt-0014",
   "title": "Saturday Rehearsal (stadium)",
   "start": "2026-10-03",
@@ -252,6 +360,24 @@
   "location": "AHS stadium"
  },
  {
+  "id": "evt-0108",
+  "title": "Marching Rehearsal",
+  "start": "2026-10-06T16:00",
+  "end": "2026-10-06T19:00",
+  "all_day": false,
+  "category": "MB-Rehearsal",
+  "location": "AHS"
+ },
+ {
+  "id": "evt-0108",
+  "title": "Marching Rehearsal",
+  "start": "2026-10-08T16:00",
+  "end": "2026-10-08T19:00",
+  "all_day": false,
+  "category": "MB-Rehearsal",
+  "location": "AHS"
+ },
+ {
   "id": "evt-0015",
   "title": "White Oak competition",
   "start": "2026-10-10",
@@ -259,6 +385,24 @@
   "all_day": true,
   "category": "MB-Competition",
   "location": "White Oak HS"
+ },
+ {
+  "id": "evt-0108",
+  "title": "Marching Rehearsal",
+  "start": "2026-10-13T16:00",
+  "end": "2026-10-13T19:00",
+  "all_day": false,
+  "category": "MB-Rehearsal",
+  "location": "AHS"
+ },
+ {
+  "id": "evt-0108",
+  "title": "Marching Rehearsal",
+  "start": "2026-10-15T16:00",
+  "end": "2026-10-15T19:00",
+  "all_day": false,
+  "category": "MB-Rehearsal",
+  "location": "AHS"
  },
  {
   "id": "evt-0016",
@@ -480,7 +624,7 @@
   "id": "evt-0049",
   "title": "All-State Jazz Clinic",
   "start": "2027-04-09",
-  "end": "2027-04-11",
+  "end": "2027-04-10",
   "all_day": true,
   "category": "Jazz",
   "location": ""
