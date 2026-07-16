@@ -7,9 +7,9 @@ import { staffAuthHeaders } from "@/lib/staffSession";
 
 // Grouped by what the hands are doing, so a fitting stops tool-switching: wrap the
 // tape for every field in one group, run it along for the next, put it down for the
-// last. Girth + weight removed 2026-07-16 (Rob) -- neither Band Shoppe guide asks
-// for them. Their columns stay in the table (empty, nullable), so restoring either
-// is a UI line, not a migration.
+// last. Girth, weight, and back length removed 2026-07-16 (Rob) -- no Band Shoppe
+// guide asks for them. Their columns stay in the table (empty, nullable), so
+// restoring any of them is a UI line, not a migration.
 const FIELD_GROUPS = [
   {
     title: "Student",
@@ -31,7 +31,6 @@ const FIELD_GROUPS = [
     title: "Length (run the tape)",
     fields: [
       { key: "armLengthIn", label: "Arm Length", type: "number", hint: "Shoulder to wrist" },
-      { key: "backLengthIn", label: "Back Length", type: "number", hint: "Base of the neck to the natural waistline" },
       { key: "inseamIn", label: "Inseam", type: "number", hint: "Inside of the leg, crotch to the bottom of the ankle bone" }
     ]
   },
@@ -209,7 +208,6 @@ function MeasurementForm({ student, session, onSaved }) {
             waistIn: m.waist_in ?? "",
             hipsIn: m.hips_in ?? "",
             inseamIn: m.inseam_in ?? "",
-            backLengthIn: m.back_length_in ?? "",
             neckIn: m.neck_in ?? "",
             armLengthIn: m.arm_length_in ?? "",
             shoeSize: m.shoe_size || "",

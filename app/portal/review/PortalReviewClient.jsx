@@ -545,8 +545,9 @@ const SIZE_GUIDES = [
 
 // Same grouping as the staff form (app/admin/measurements/page.jsx): by what the
 // hands are doing, so a family measuring at home wraps the tape for one group,
-// runs it along for the next, then puts it down. Girth + weight removed 2026-07-16
-// (Rob) -- neither Band Shoppe guide asks for them. Columns stay in the table.
+// runs it along for the next, then puts it down. Girth, weight, and back length
+// removed 2026-07-16 (Rob) -- no Band Shoppe guide asks for them. Columns stay in
+// the table.
 const MEASUREMENT_GROUPS = [
   {
     title: "Student",
@@ -592,12 +593,6 @@ const MEASUREMENT_GROUPS = [
         label: "Arm Length (in)",
         type: "number",
         hint: "Shoulder to wrist"
-      },
-      {
-        key: "backLengthIn",
-        label: "Back Length (in)",
-        type: "number",
-        hint: "Base of the neck to the natural waistline"
       },
       {
         key: "inseamIn",
@@ -646,7 +641,6 @@ function measurementsFromRow(row) {
     waistIn: row.waist_in ?? "",
     hipsIn: row.hips_in ?? "",
     inseamIn: row.inseam_in ?? "",
-    backLengthIn: row.back_length_in ?? "",
     neckIn: row.neck_in ?? "",
     armLengthIn: row.arm_length_in ?? "",
     shoeSize: row.shoe_size || "",
