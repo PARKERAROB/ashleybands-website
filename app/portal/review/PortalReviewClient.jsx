@@ -525,6 +525,176 @@ function PayPalButton({ clientId, studentId, amountRef, onPaid }) {
   );
 }
 
+const MEASUREMENT_FIELDS = [
+  { key: "gender", label: "Gender", type: "text" },
+  { key: "height", label: "Height", type: "text", placeholder: "e.g. 5-9" },
+  { key: "weightLbs", label: "Weight (lbs)", type: "number" },
+  {
+    key: "chestIn",
+    label: "Chest (in)",
+    type: "number",
+    hint: "Arms at sides, around the fullest part of the chest, tape parallel to the floor"
+  },
+  {
+    key: "waistIn",
+    label: "Waist (in)",
+    type: "number",
+    hint: "Around the narrowest part of the natural waist, at the navel"
+  },
+  {
+    key: "hipsIn",
+    label: "Hips (in)",
+    type: "number",
+    hint: "Heels together, around the fullest part of the hips"
+  },
+  {
+    key: "inseamIn",
+    label: "Inseam (in)",
+    type: "number",
+    hint: "Inside of the leg, crotch to the bottom of the ankle bone"
+  },
+  {
+    key: "backLengthIn",
+    label: "Back Length (in)",
+    type: "number",
+    hint: "Base of the neck to the natural waistline"
+  },
+  {
+    key: "girthIn",
+    label: "Girth (in)",
+    type: "number",
+    hint: "Center of one shoulder, through the crotch, up to the same shoulder"
+  }
+];
+
+const EMPTY_MEASUREMENTS = {
+  gender: "",
+  height: "",
+  weightLbs: "",
+  chestIn: "",
+  waistIn: "",
+  hipsIn: "",
+  inseamIn: "",
+  backLengthIn: "",
+  girthIn: "",
+  notes: ""
+};
+
+function measurementsFromRow(row) {
+  if (!row) return { ...EMPTY_MEASUREMENTS };
+  return {
+    gender: row.gender || "",
+    height: row.height || "",
+    weightLbs: row.weight_lbs ?? "",
+    chestIn: row.chest_in ?? "",
+    waistIn: row.waist_in ?? "",
+    hipsIn: row.hips_in ?? "",
+    inseamIn: row.inseam_in ?? "",
+    backLengthIn: row.back_length_in ?? "",
+    girthIn: row.girth_in ?? "",
+    notes: row.notes || ""
+  };
+}
+
+function MeasurementsPanel({ studentId }) {
+  const [status, setStatus] = useState("loading");
+  const [error, setError] = useState("");
+  const [form, setForm] = useState(EMPTY_MEASUREMENTS);
+  const [updatedAt, setUpdatedAt] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      setStatus("loading");
+      setError("");
+      const res = await fetch(`/api/portal/measurements?studentId=${encodeURIComponent(studentId)}`);
+      const data = await res.json().catch(() => ({}));
+      if (cancelled) return;
+      if (!res.ok) {
+        setError(data.error || "Could not load measurements.");
+        setStatus("ready");
+        return;
+      }
+      setForm(measurementsFromRow(data.measurement));
+      setUpdatedAt(data.measurement?.updated_at || null);
+      setStatus("ready");
+    }
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [studentId]);
+
+  function setField(key, val) {
+    setForm((f) => ({ ...f, [key]: val }));
+  }
+
+  async function save() {
+    setStatus("saving");
+    setError("");
+    const res = await fetch("/api/portal/measurements", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentId, ...form })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setStatus("ready");
+      setError(data.error || "Could not save measurements.");
+      return;
+    }
+    setUpdatedAt(new Date().toISOString());
+    setStatus("saved");
+  }
+
+  const formattedUpdated = updatedAt
+    ? new Date(updatedAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
+    : null;
+
+  return (
+    <div className="portal-measurements">
+      <h3>Uniform Measurements</h3>
+      <p className="portal-consent-note">
+        Measuring at home? Enter your uniform measurements below and we&apos;ll use them for fitting.
+      </p>
+      {status === "loading" ? <p className="portal-field-pending">Loading measurements...</p> : null}
+      {formattedUpdated ? <p className="portal-field-note">Last updated {formattedUpdated}</p> : null}
+
+      <div className="portal-measurement-grid">
+        {MEASUREMENT_FIELDS.map((f) => (
+          <div className="portal-field" key={f.key}>
+            <span className="portal-field-label">{f.label}</span>
+            <input
+              type={f.type === "number" ? "number" : "text"}
+              step={f.type === "number" ? "0.5" : undefined}
+              value={form[f.key]}
+              placeholder={f.placeholder || ""}
+              onChange={(e) => setField(f.key, e.target.value)}
+            />
+            {f.hint ? <span className="portal-field-note">{f.hint}</span> : null}
+          </div>
+        ))}
+        <div className="portal-field">
+          <span className="portal-field-label">Notes</span>
+          <textarea
+            value={form.notes}
+            placeholder="Anything else that helps with fitting"
+            onChange={(e) => setField("notes", e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="portal-field-edit">
+        <button type="button" onClick={save} disabled={status === "saving" || status === "loading"}>
+          {status === "saving" ? "Saving..." : "Save measurements"}
+        </button>
+      </div>
+      {status === "saved" ? <span className="portal-field-pending">Saved. Thanks!</span> : null}
+      {error ? <span className="portal-field-error">{error}</span> : null}
+    </div>
+  );
+}
+
 function StudentCard({ student, onChanged }) {
   const guardians = student.guardians || [];
   const guardianCount = guardians.length;
@@ -558,6 +728,8 @@ function StudentCard({ student, onChanged }) {
           <span className="portal-field-note">Medical and travel details get their own forms soon. To change this now, message Mr. Parker.</span>
         </div>
       ) : null}
+
+      <MeasurementsPanel studentId={student.id} />
 
       <div className="portal-guardians">
         <h3>Guardians</h3>

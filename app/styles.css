@@ -3145,6 +3145,39 @@ h2 {
   border-radius: 8px;
   background: #fff;
 }
+.portal-measurements {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border: 1px solid #e1e7dd;
+  border-radius: 8px;
+  background: #fff;
+}
+.portal-measurements h3 {
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+.portal-measurement-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 4px 16px;
+  margin-top: 10px;
+}
+.portal-measurement-grid .portal-field {
+  padding: 8px 0;
+}
+.portal-measurements input,
+.portal-measurements textarea {
+  width: 100%;
+  border: 1px solid #b9c5b7;
+  border-radius: 6px;
+  padding: 9px 12px;
+  font: inherit;
+  box-sizing: border-box;
+}
+.portal-measurements textarea {
+  resize: vertical;
+  min-height: 60px;
+}
 
 /* ===== Marching band staff dashboard ===== */
 .mb-admin {
