@@ -107,6 +107,10 @@ const portalStudents = students.map((row) => {
     preferred_first: row.preferred_first || null,
     display_name: displayName || row.id,
     grade_fall26: row.grade_fall26 || null,
+    // Program role, mirrored like grade_fall26 (NOT a contact value, so the guard below
+    // does not apply). Uniform sizing needs it to pick the guard vs band Synced Up chart
+    // -- see lib/uniformSizing.js and migration 0032.
+    mb_role_2026: row.mb_role_2026 || null,
     // COMPLIANCE GUARD (2026-07-10): contact values are family-owned, never mirrored from the
     // IC-derived CSV. Kept null here so a re-sync can't repopulate what Phase 1.1 deleted.
     school_email: null,

@@ -128,7 +128,11 @@ function MeasurementsAdmin({ session }) {
     <div style={page}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
         <h1 style={{ margin: 0 }}>Uniform Measurements</h1>
-        <a href="/admin" style={link}>← Staff home</a>
+        <span>
+          <a href="/admin/sizes" style={link}>Uniform sizes →</a>
+          <span style={{ color: "#ded4bf", margin: "0 8px" }}>|</span>
+          <a href="/admin" style={link}>Staff home</a>
+        </span>
       </div>
       <p style={{ color: "#6f675a", fontSize: 14 }}>
         {measuredCount != null ? `${measuredCount} students measured` : "Loading progress…"}
