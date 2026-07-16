@@ -5,14 +5,16 @@ import { logAudit } from "@/lib/auditLog";
 
 export const runtime = "nodejs";
 
+// girth_in + weight_lbs dropped from the form 2026-07-16 (Rob) -- neither Band
+// Shoppe guide asks for them. Deliberately NOT listed here: the columns remain in
+// the table, and leaving them out of the payload means an upsert preserves any
+// existing value instead of nulling it. Restoring either field is one line.
 const NUMERIC_FIELDS = [
-  ["weightLbs", "weight_lbs"],
   ["chestIn", "chest_in"],
   ["waistIn", "waist_in"],
   ["hipsIn", "hips_in"],
   ["inseamIn", "inseam_in"],
   ["backLengthIn", "back_length_in"],
-  ["girthIn", "girth_in"],
   ["neckIn", "neck_in"],
   ["armLengthIn", "arm_length_in"]
 ];

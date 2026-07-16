@@ -5,22 +5,47 @@ import { useSearchParams } from "next/navigation";
 import { StaffGate } from "@/components/StaffGate";
 import { staffAuthHeaders } from "@/lib/staffSession";
 
-const FIELDS = [
-  { key: "gender", label: "Gender", type: "text", hint: "" },
-  { key: "height", label: "Height", type: "text", hint: "e.g. 5-9" },
-  { key: "weightLbs", label: "Weight (lbs)", type: "number", hint: "" },
-  { key: "chestIn", label: "Chest", type: "number", hint: "Arms at sides, around the fullest part of the chest, tape parallel to the floor" },
-  { key: "waistIn", label: "Waist", type: "number", hint: "Around the narrowest part of the natural waist, at the navel" },
-  { key: "hipsIn", label: "Hips", type: "number", hint: "Heels together, around the fullest part of the hips" },
-  { key: "inseamIn", label: "Inseam", type: "number", hint: "Inside of the leg, crotch to the bottom of the ankle bone" },
-  { key: "backLengthIn", label: "Back Length", type: "number", hint: "Base of the neck to the natural waistline" },
-  { key: "girthIn", label: "Girth", type: "number", hint: "Center of one shoulder, through the crotch, up to the same shoulder" },
-  { key: "neckIn", label: "Neck", type: "number", hint: "Around the base of the neck" },
-  { key: "armLengthIn", label: "Arm Length", type: "number", hint: "Shoulder to wrist" },
-  { key: "shoeSize", label: "Shoe Size", type: "text", hint: "Include the scale, e.g. 10.5 M or 8 W" },
-  { key: "gloveSize", label: "Glove Size", type: "text", hint: "S / M / L / XL" },
-  { key: "shirtSize", label: "T-Shirt Size", type: "text", hint: "S / M / L / XL / 2XL" }
+// Grouped by what the hands are doing, so a fitting stops tool-switching: wrap the
+// tape for every field in one group, run it along for the next, put it down for the
+// last. Girth + weight removed 2026-07-16 (Rob) -- neither Band Shoppe guide asks
+// for them. Their columns stay in the table (empty, nullable), so restoring either
+// is a UI line, not a migration.
+const FIELD_GROUPS = [
+  {
+    title: "Student",
+    fields: [
+      { key: "gender", label: "Gender", type: "text", hint: "" },
+      { key: "height", label: "Height", type: "text", hint: "e.g. 5-9" }
+    ]
+  },
+  {
+    title: "Around (wrap the tape)",
+    fields: [
+      { key: "neckIn", label: "Neck", type: "number", hint: "Around the base of the neck" },
+      { key: "chestIn", label: "Chest", type: "number", hint: "Arms at sides, around the fullest part of the chest, tape parallel to the floor" },
+      { key: "waistIn", label: "Waist", type: "number", hint: "Around the narrowest part of the natural waist, at the navel" },
+      { key: "hipsIn", label: "Hips", type: "number", hint: "Heels together, around the fullest part of the hips" }
+    ]
+  },
+  {
+    title: "Length (run the tape)",
+    fields: [
+      { key: "armLengthIn", label: "Arm Length", type: "number", hint: "Shoulder to wrist" },
+      { key: "backLengthIn", label: "Back Length", type: "number", hint: "Base of the neck to the natural waistline" },
+      { key: "inseamIn", label: "Inseam", type: "number", hint: "Inside of the leg, crotch to the bottom of the ankle bone" }
+    ]
+  },
+  {
+    title: "Sizes (no tape)",
+    fields: [
+      { key: "shoeSize", label: "Shoe Size", type: "text", hint: "Include the scale, e.g. 10.5 M or 8 W" },
+      { key: "gloveSize", label: "Glove Size", type: "text", hint: "S / M / L / XL" },
+      { key: "shirtSize", label: "T-Shirt Size", type: "text", hint: "S / M / L / XL / 2XL" }
+    ]
+  }
 ];
+
+const FIELDS = FIELD_GROUPS.flatMap((g) => g.fields);
 
 const BLANK_FORM = FIELDS.reduce((acc, f) => ({ ...acc, [f.key]: "" }), { notes: "" });
 
@@ -180,13 +205,11 @@ function MeasurementForm({ student, session, onSaved }) {
           setForm({
             gender: m.gender || "",
             height: m.height || "",
-            weightLbs: m.weight_lbs ?? "",
             chestIn: m.chest_in ?? "",
             waistIn: m.waist_in ?? "",
             hipsIn: m.hips_in ?? "",
             inseamIn: m.inseam_in ?? "",
             backLengthIn: m.back_length_in ?? "",
-            girthIn: m.girth_in ?? "",
             neckIn: m.neck_in ?? "",
             armLengthIn: m.arm_length_in ?? "",
             shoeSize: m.shoe_size || "",
@@ -237,21 +260,26 @@ function MeasurementForm({ student, session, onSaved }) {
         </p>
       )}
       <SizeGuideLinks />
-      <div style={formGrid}>
-        {FIELDS.map((f) => (
-          <div key={f.key}>
-            <label style={fieldLabel}>{f.label}</label>
-            <input
-              type={f.type}
-              step={f.type === "number" ? "0.5" : undefined}
-              value={form[f.key]}
-              onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
-              style={input}
-            />
-            {f.hint && <p style={hintText}>{f.hint}</p>}
+      {FIELD_GROUPS.map((group) => (
+        <fieldset key={group.title} style={groupBox}>
+          <legend style={groupLegend}>{group.title}</legend>
+          <div style={formGrid}>
+            {group.fields.map((f) => (
+              <div key={f.key}>
+                <label style={fieldLabel}>{f.label}</label>
+                <input
+                  type={f.type}
+                  step={f.type === "number" ? "0.5" : undefined}
+                  value={form[f.key]}
+                  onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
+                  style={input}
+                />
+                {f.hint && <p style={hintText}>{f.hint}</p>}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </fieldset>
+      ))}
       <div style={{ marginTop: 10 }}>
         <label style={fieldLabel}>Notes</label>
         <textarea
@@ -277,4 +305,6 @@ const btn = { padding: "8px 16px", fontSize: 13, fontWeight: 600, border: "none"
 const link = { color: "#7b1829", fontSize: 13, textDecoration: "underline", background: "none", border: "none", cursor: "pointer", padding: 0 };
 const fieldLabel = { display: "block", fontSize: 12.5, fontWeight: 600, marginBottom: 3 };
 const guideBar = { display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap", padding: "8px 12px", border: "1px solid #ded4bf", borderRadius: 8, background: "#fffaf0", margin: "0 0 12px" };
+const groupBox = { border: "1px solid #e6dcc8", borderRadius: 8, padding: "4px 12px 12px", margin: "0 0 14px", minInlineSize: 0 };
+const groupLegend = { fontSize: 12, fontWeight: 700, letterSpacing: 0.3, textTransform: "uppercase", color: "#7b1829", padding: "0 6px" };
 const hintText = { fontSize: 11, color: "#6f675a", margin: "3px 0 0" };

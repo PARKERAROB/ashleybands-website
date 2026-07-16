@@ -543,109 +543,110 @@ const SIZE_GUIDES = [
   }
 ];
 
-const MEASUREMENT_FIELDS = [
-  { key: "gender", label: "Gender", type: "text" },
-  { key: "height", label: "Height", type: "text", placeholder: "e.g. 5-9" },
-  { key: "weightLbs", label: "Weight (lbs)", type: "number" },
+// Same grouping as the staff form (app/admin/measurements/page.jsx): by what the
+// hands are doing, so a family measuring at home wraps the tape for one group,
+// runs it along for the next, then puts it down. Girth + weight removed 2026-07-16
+// (Rob) -- neither Band Shoppe guide asks for them. Columns stay in the table.
+const MEASUREMENT_GROUPS = [
   {
-    key: "chestIn",
-    label: "Chest (in)",
-    type: "number",
-    hint: "Arms at sides, around the fullest part of the chest, tape parallel to the floor"
+    title: "Student",
+    fields: [
+      { key: "gender", label: "Gender", type: "text" },
+      { key: "height", label: "Height", type: "text", placeholder: "e.g. 5-9" }
+    ]
   },
   {
-    key: "waistIn",
-    label: "Waist (in)",
-    type: "number",
-    hint: "Around the narrowest part of the natural waist, at the navel"
+    title: "Around (wrap the tape)",
+    fields: [
+      {
+        key: "neckIn",
+        label: "Neck (in)",
+        type: "number",
+        hint: "Around the base of the neck"
+      },
+      {
+        key: "chestIn",
+        label: "Chest (in)",
+        type: "number",
+        hint: "Arms at sides, around the fullest part of the chest, tape parallel to the floor"
+      },
+      {
+        key: "waistIn",
+        label: "Waist (in)",
+        type: "number",
+        hint: "Around the narrowest part of the natural waist, at the navel"
+      },
+      {
+        key: "hipsIn",
+        label: "Hips (in)",
+        type: "number",
+        hint: "Heels together, around the fullest part of the hips"
+      }
+    ]
   },
   {
-    key: "hipsIn",
-    label: "Hips (in)",
-    type: "number",
-    hint: "Heels together, around the fullest part of the hips"
+    title: "Length (run the tape)",
+    fields: [
+      {
+        key: "armLengthIn",
+        label: "Arm Length (in)",
+        type: "number",
+        hint: "Shoulder to wrist"
+      },
+      {
+        key: "backLengthIn",
+        label: "Back Length (in)",
+        type: "number",
+        hint: "Base of the neck to the natural waistline"
+      },
+      {
+        key: "inseamIn",
+        label: "Inseam (in)",
+        type: "number",
+        hint: "Inside of the leg, crotch to the bottom of the ankle bone"
+      }
+    ]
   },
   {
-    key: "inseamIn",
-    label: "Inseam (in)",
-    type: "number",
-    hint: "Inside of the leg, crotch to the bottom of the ankle bone"
-  },
-  {
-    key: "backLengthIn",
-    label: "Back Length (in)",
-    type: "number",
-    hint: "Base of the neck to the natural waistline"
-  },
-  {
-    key: "girthIn",
-    label: "Girth (in)",
-    type: "number",
-    hint: "Center of one shoulder, through the crotch, up to the same shoulder"
-  },
-  {
-    key: "neckIn",
-    label: "Neck (in)",
-    type: "number",
-    hint: "Around the base of the neck"
-  },
-  {
-    key: "armLengthIn",
-    label: "Arm Length (in)",
-    type: "number",
-    hint: "Shoulder to wrist"
-  },
-  {
-    key: "shoeSize",
-    label: "Shoe Size",
-    type: "text",
-    placeholder: "e.g. 10.5 M",
-    hint: "Include the scale, e.g. 10.5 M or 8 W"
-  },
-  {
-    key: "gloveSize",
-    label: "Glove Size",
-    type: "text",
-    placeholder: "S / M / L / XL"
-  },
-  {
-    key: "shirtSize",
-    label: "T-Shirt Size",
-    type: "text",
-    placeholder: "S / M / L / XL / 2XL"
+    title: "Sizes (no tape)",
+    fields: [
+      {
+        key: "shoeSize",
+        label: "Shoe Size",
+        type: "text",
+        placeholder: "e.g. 10.5 M",
+        hint: "Include the scale, e.g. 10.5 M or 8 W"
+      },
+      {
+        key: "gloveSize",
+        label: "Glove Size",
+        type: "text",
+        placeholder: "S / M / L / XL"
+      },
+      {
+        key: "shirtSize",
+        label: "T-Shirt Size",
+        type: "text",
+        placeholder: "S / M / L / XL / 2XL"
+      }
+    ]
   }
 ];
 
-const EMPTY_MEASUREMENTS = {
-  gender: "",
-  height: "",
-  weightLbs: "",
-  chestIn: "",
-  waistIn: "",
-  hipsIn: "",
-  inseamIn: "",
-  backLengthIn: "",
-  girthIn: "",
-  neckIn: "",
-  armLengthIn: "",
-  shoeSize: "",
-  gloveSize: "",
-  shirtSize: "",
-  notes: ""
-};
+const MEASUREMENT_FIELDS = MEASUREMENT_GROUPS.flatMap((g) => g.fields);
+
+const EMPTY_MEASUREMENTS = MEASUREMENT_FIELDS.reduce((acc, f) => ({ ...acc, [f.key]: "" }), { notes: "" });
 
 function measurementsFromRow(row) {
   if (!row) return { ...EMPTY_MEASUREMENTS };
   return {
     gender: row.gender || "",
     height: row.height || "",
-    weightLbs: row.weight_lbs ?? "",
     chestIn: row.chest_in ?? "",
     waistIn: row.waist_in ?? "",
     hipsIn: row.hips_in ?? "",
     inseamIn: row.inseam_in ?? "",
     backLengthIn: row.back_length_in ?? "",
-    girthIn: row.girth_in ?? "",
     neckIn: row.neck_in ?? "",
     armLengthIn: row.arm_length_in ?? "",
     shoeSize: row.shoe_size || "",
@@ -731,20 +732,27 @@ function MeasurementsPanel({ studentId }) {
       {status === "loading" ? <p className="portal-field-pending">Loading measurements...</p> : null}
       {formattedUpdated ? <p className="portal-field-note">Last updated {formattedUpdated}</p> : null}
 
-      <div className="portal-measurement-grid">
-        {MEASUREMENT_FIELDS.map((f) => (
-          <div className="portal-field" key={f.key}>
-            <span className="portal-field-label">{f.label}</span>
-            <input
-              type={f.type === "number" ? "number" : "text"}
-              step={f.type === "number" ? "0.5" : undefined}
-              value={form[f.key]}
-              placeholder={f.placeholder || ""}
-              onChange={(e) => setField(f.key, e.target.value)}
-            />
-            {f.hint ? <span className="portal-field-note">{f.hint}</span> : null}
+      {MEASUREMENT_GROUPS.map((group) => (
+        <fieldset className="portal-measurement-group" key={group.title}>
+          <legend>{group.title}</legend>
+          <div className="portal-measurement-grid">
+            {group.fields.map((f) => (
+              <div className="portal-field" key={f.key}>
+                <span className="portal-field-label">{f.label}</span>
+                <input
+                  type={f.type === "number" ? "number" : "text"}
+                  step={f.type === "number" ? "0.5" : undefined}
+                  value={form[f.key]}
+                  placeholder={f.placeholder || ""}
+                  onChange={(e) => setField(f.key, e.target.value)}
+                />
+                {f.hint ? <span className="portal-field-note">{f.hint}</span> : null}
+              </div>
+            ))}
           </div>
-        ))}
+        </fieldset>
+      ))}
+      <div className="portal-measurement-grid">
         <div className="portal-field">
           <span className="portal-field-label">Notes</span>
           <textarea

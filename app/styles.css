@@ -3161,6 +3161,21 @@ h2 {
   line-height: 1.6;
   margin: 6px 0 10px;
 }
+.portal-measurement-group {
+  border: 1px solid #e1e7dd;
+  border-radius: 8px;
+  padding: 2px 12px 10px;
+  margin: 0 0 12px;
+  min-inline-size: 0;
+}
+.portal-measurement-group legend {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #446349;
+  padding: 0 6px;
+}
 .portal-size-guides a {
   text-decoration: underline;
 }
