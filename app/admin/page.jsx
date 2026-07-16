@@ -20,7 +20,8 @@ const SECTIONS = [
     links: [
       { href: "/admin/profile-requests", emoji: "👤", label: "Profile Requests", desc: "Review portal access + profile edits" },
       { href: "/admin/students", emoji: "➕", label: "Add / Edit Student", desc: "Create or update a student and guardians" },
-      { href: "/admin/data-inventory", emoji: "🗂️", label: "Data Inventory", desc: "Where person-data lives, by table + source, touched vs never-touched" }
+      { href: "/admin/data-inventory", emoji: "🗂️", label: "Data Inventory", desc: "Where person-data lives, by table + source, touched vs never-touched" },
+      { href: "/admin/measurements", emoji: "📏", label: "Uniform Measurements", desc: "Staff-entered Band Shoppe measurements, per student" }
     ]
   },
   {

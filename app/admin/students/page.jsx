@@ -185,7 +185,8 @@ function StudentEditor({ student, session, onChanged }) {
         </span>
         <span style={{ fontSize: 12, color: "#6f675a" }}>
           {student.grade_fall26} {student.source === "manual" ? "· manual" : ""} ·{" "}
-          <button onClick={() => setOpen((v) => !v)} style={link}>{open ? "close" : "manage"}</button>
+          <button onClick={() => setOpen((v) => !v)} style={link}>{open ? "close" : "manage"}</button> ·{" "}
+          <a href={`/admin/measurements?studentId=${student.id}&name=${encodeURIComponent(student.display_name || "")}`} style={link}>Measurements →</a>
         </span>
       </div>
       {student.guardians?.length ? (
