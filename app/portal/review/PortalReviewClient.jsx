@@ -564,6 +564,37 @@ const MEASUREMENT_FIELDS = [
     label: "Girth (in)",
     type: "number",
     hint: "Center of one shoulder, through the crotch, up to the same shoulder"
+  },
+  {
+    key: "neckIn",
+    label: "Neck (in)",
+    type: "number",
+    hint: "Around the base of the neck"
+  },
+  {
+    key: "armLengthIn",
+    label: "Arm Length (in)",
+    type: "number",
+    hint: "Shoulder to wrist"
+  },
+  {
+    key: "shoeSize",
+    label: "Shoe Size",
+    type: "text",
+    placeholder: "e.g. 10.5 M",
+    hint: "Include the scale, e.g. 10.5 M or 8 W"
+  },
+  {
+    key: "gloveSize",
+    label: "Glove Size",
+    type: "text",
+    placeholder: "S / M / L / XL"
+  },
+  {
+    key: "shirtSize",
+    label: "T-Shirt Size",
+    type: "text",
+    placeholder: "S / M / L / XL / 2XL"
   }
 ];
 
@@ -577,6 +608,11 @@ const EMPTY_MEASUREMENTS = {
   inseamIn: "",
   backLengthIn: "",
   girthIn: "",
+  neckIn: "",
+  armLengthIn: "",
+  shoeSize: "",
+  gloveSize: "",
+  shirtSize: "",
   notes: ""
 };
 
@@ -592,6 +628,11 @@ function measurementsFromRow(row) {
     inseamIn: row.inseam_in ?? "",
     backLengthIn: row.back_length_in ?? "",
     girthIn: row.girth_in ?? "",
+    neckIn: row.neck_in ?? "",
+    armLengthIn: row.arm_length_in ?? "",
+    shoeSize: row.shoe_size || "",
+    gloveSize: row.glove_size || "",
+    shirtSize: row.shirt_size || "",
     notes: row.notes || ""
   };
 }

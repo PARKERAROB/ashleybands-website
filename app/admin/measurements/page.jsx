@@ -14,7 +14,12 @@ const FIELDS = [
   { key: "hipsIn", label: "Hips", type: "number", hint: "Heels together, around the fullest part of the hips" },
   { key: "inseamIn", label: "Inseam", type: "number", hint: "Inside of the leg, crotch to the bottom of the ankle bone" },
   { key: "backLengthIn", label: "Back Length", type: "number", hint: "Base of the neck to the natural waistline" },
-  { key: "girthIn", label: "Girth", type: "number", hint: "Center of one shoulder, through the crotch, up to the same shoulder" }
+  { key: "girthIn", label: "Girth", type: "number", hint: "Center of one shoulder, through the crotch, up to the same shoulder" },
+  { key: "neckIn", label: "Neck", type: "number", hint: "Around the base of the neck" },
+  { key: "armLengthIn", label: "Arm Length", type: "number", hint: "Shoulder to wrist" },
+  { key: "shoeSize", label: "Shoe Size", type: "text", hint: "Include the scale, e.g. 10.5 M or 8 W" },
+  { key: "gloveSize", label: "Glove Size", type: "text", hint: "S / M / L / XL" },
+  { key: "shirtSize", label: "T-Shirt Size", type: "text", hint: "S / M / L / XL / 2XL" }
 ];
 
 const BLANK_FORM = FIELDS.reduce((acc, f) => ({ ...acc, [f.key]: "" }), { notes: "" });
@@ -149,6 +154,11 @@ function MeasurementForm({ student, session, onSaved }) {
             inseamIn: m.inseam_in ?? "",
             backLengthIn: m.back_length_in ?? "",
             girthIn: m.girth_in ?? "",
+            neckIn: m.neck_in ?? "",
+            armLengthIn: m.arm_length_in ?? "",
+            shoeSize: m.shoe_size || "",
+            gloveSize: m.glove_size || "",
+            shirtSize: m.shirt_size || "",
             notes: m.notes || ""
           });
           setMeasuredBy(m.measured_by || "");

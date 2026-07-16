@@ -12,7 +12,17 @@ const NUMERIC_FIELDS = [
   ["hipsIn", "hips_in"],
   ["inseamIn", "inseam_in"],
   ["backLengthIn", "back_length_in"],
-  ["girthIn", "girth_in"]
+  ["girthIn", "girth_in"],
+  ["neckIn", "neck_in"],
+  ["armLengthIn", "arm_length_in"]
+];
+
+// Vendor sizes, not tape measurements: kept as text so "10.5 M" / "2XL" survive
+// intact (same reasoning as height). See migration 0031.
+const TEXT_FIELDS = [
+  ["shoeSize", "shoe_size"],
+  ["gloveSize", "glove_size"],
+  ["shirtSize", "shirt_size"]
 ];
 
 function text(v) {
@@ -91,6 +101,10 @@ export async function PUT(req) {
       return NextResponse.json({ error: `Invalid number for ${key}` }, { status: 400 });
     }
     payload[column] = num;
+  }
+
+  for (const [key, column] of TEXT_FIELDS) {
+    payload[column] = text(body[key]) || null;
   }
 
   const { error } = await supabaseAdmin
