@@ -24,6 +24,37 @@ const FIELDS = [
 
 const BLANK_FORM = FIELDS.reduce((acc, f) => ({ ...acc, [f.key]: "" }), { notes: "" });
 
+// Band Shoppe's own size guides, linked (not mirrored) on purpose: these are the
+// charts the vendor fills the order against, so a local copy could silently go
+// stale against a sizing revision and we'd measure to an outdated chart. A dead
+// link fails loudly; a stale chart fails quietly. Band guide is ~10MB, so the
+// size is called out for anyone opening it on cell data in the band room.
+const SIZE_GUIDES = [
+  {
+    label: "Band — Classic Top / Full Length",
+    note: "PDF, 10 MB",
+    href: "https://cdn.shopify.com/s/files/1/0333/9540/9031/files/Size_Guide_-_Classic_Top_Full_Length.pdf?v=1722619657"
+  },
+  {
+    label: "Guard — Unitard",
+    note: "PDF, 1.6 MB",
+    href: "https://cdn.shopify.com/s/files/1/0333/9540/9031/files/Size_Guide_-_Unitard_Unisex.pdf?v=1722619651"
+  }
+];
+
+function SizeGuideLinks() {
+  return (
+    <div style={guideBar}>
+      <strong style={{ fontSize: 12.5 }}>Size guides:</strong>
+      {SIZE_GUIDES.map((g) => (
+        <a key={g.href} href={g.href} target="_blank" rel="noopener noreferrer" style={link}>
+          {g.label} <span style={{ color: "#6f675a", textDecoration: "none" }}>({g.note})</span>
+        </a>
+      ))}
+    </div>
+  );
+}
+
 export default function AdminMeasurementsPage() {
   return (
     <StaffGate>
@@ -78,6 +109,8 @@ function MeasurementsAdmin({ session }) {
       <p style={{ color: "#6f675a", fontSize: 14 }}>
         {measuredCount != null ? `${measuredCount} students measured` : "Loading progress…"}
       </p>
+
+      <SizeGuideLinks />
 
       {selected && (
         <div style={{ ...panel, marginBottom: 16 }}>
@@ -203,6 +236,7 @@ function MeasurementForm({ student, session, onSaved }) {
           Measured by {measuredBy}{measuredAt ? ` on ${new Date(measuredAt).toLocaleDateString()}` : ""}
         </p>
       )}
+      <SizeGuideLinks />
       <div style={formGrid}>
         {FIELDS.map((f) => (
           <div key={f.key}>
@@ -242,4 +276,5 @@ const input = { boxSizing: "border-box", width: "100%", padding: "8px 10px", fon
 const btn = { padding: "8px 16px", fontSize: 13, fontWeight: 600, border: "none", borderRadius: 6, color: "#fff", background: "#7b1829", cursor: "pointer" };
 const link = { color: "#7b1829", fontSize: 13, textDecoration: "underline", background: "none", border: "none", cursor: "pointer", padding: 0 };
 const fieldLabel = { display: "block", fontSize: 12.5, fontWeight: 600, marginBottom: 3 };
+const guideBar = { display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap", padding: "8px 12px", border: "1px solid #ded4bf", borderRadius: 8, background: "#fffaf0", margin: "0 0 12px" };
 const hintText = { fontSize: 11, color: "#6f675a", margin: "3px 0 0" };

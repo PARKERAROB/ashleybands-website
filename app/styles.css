@@ -3156,6 +3156,14 @@ h2 {
   font-size: 1rem;
   margin-bottom: 4px;
 }
+.portal-size-guides {
+  font-size: 0.82rem;
+  line-height: 1.6;
+  margin: 6px 0 10px;
+}
+.portal-size-guides a {
+  text-decoration: underline;
+}
 .portal-measurement-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));

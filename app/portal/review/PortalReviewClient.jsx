@@ -525,6 +525,24 @@ function PayPalButton({ clientId, studentId, amountRef, onPaid }) {
   );
 }
 
+// Band Shoppe's own size guides, linked (not mirrored) on purpose: these are the
+// charts the vendor fills the order against, so a local copy could silently go
+// stale against a sizing revision and a family would measure to an outdated
+// chart. A dead link fails loudly; a stale chart fails quietly. Sizes are called
+// out because the band guide is ~10MB on a phone.
+const SIZE_GUIDES = [
+  {
+    label: "Band — Classic Top / Full Length",
+    note: "PDF, 10 MB",
+    href: "https://cdn.shopify.com/s/files/1/0333/9540/9031/files/Size_Guide_-_Classic_Top_Full_Length.pdf?v=1722619657"
+  },
+  {
+    label: "Guard — Unitard",
+    note: "PDF, 1.6 MB",
+    href: "https://cdn.shopify.com/s/files/1/0333/9540/9031/files/Size_Guide_-_Unitard_Unisex.pdf?v=1722619651"
+  }
+];
+
 const MEASUREMENT_FIELDS = [
   { key: "gender", label: "Gender", type: "text" },
   { key: "height", label: "Height", type: "text", placeholder: "e.g. 5-9" },
@@ -697,6 +715,18 @@ function MeasurementsPanel({ studentId }) {
       <h3>Uniform Measurements</h3>
       <p className="portal-consent-note">
         Measuring at home? Enter your uniform measurements below and we&apos;ll use them for fitting.
+      </p>
+      <p className="portal-size-guides">
+        <strong>Size guides:</strong>{" "}
+        {SIZE_GUIDES.map((g, i) => (
+          <span key={g.href}>
+            {i > 0 ? " · " : ""}
+            <a href={g.href} target="_blank" rel="noopener noreferrer">
+              {g.label}
+            </a>{" "}
+            <span className="portal-field-note">({g.note})</span>
+          </span>
+        ))}
       </p>
       {status === "loading" ? <p className="portal-field-pending">Loading measurements...</p> : null}
       {formattedUpdated ? <p className="portal-field-note">Last updated {formattedUpdated}</p> : null}
