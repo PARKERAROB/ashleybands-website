@@ -197,8 +197,8 @@ function ContactMethodRow({ contact, personId, session, onChanged }) {
       ) : (
         <span style={{ fontSize: 13 }}>{contact.valueDisplay}</span>
       )}
-      <ProvenanceChip contact={contact} />
-      {contact.verificationStatus && (
+      {editing && <ProvenanceChip contact={contact} />}
+      {editing && contact.verificationStatus && (
         <span style={{ fontSize: 11, color: "#6f675a" }}>{contact.verificationStatus}</span>
       )}
       {editing ? (
