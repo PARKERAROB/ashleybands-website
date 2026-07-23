@@ -35,7 +35,7 @@ Families should also review the Marching Band 2026 page for fall dates and expec
 
 Working dates include:
 
-- July 27, 2026 - leadership week begins
+- July 27-31, 2026 - colorguard camp (all week); leadership Jul 28-30
 - August 3, 2026 - band camp
 - August 10, 2026 - band camp
 - September 26, 2026 - mattress fundraiser
