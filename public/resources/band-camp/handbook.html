@@ -1,0 +1,1937 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A decision-oriented synthesis of Ashley Band Camp research.">
+  <title>Ashley Band Camp Research Handbook</title>
+  <style>
+    :root {
+      --navy-950: #081426;
+      --navy-900: #0d2038;
+      --navy-800: #183653;
+      --paper: #f7f4ec;
+      --paper-2: #fffdf8;
+      --ink: #17202a;
+      --muted: #607080;
+      --gold: #d9a62e;
+      --gold-soft: #f3dfaa;
+      --teal: #237c78;
+      --teal-soft: #dcefed;
+      --blue-soft: #e6eef7;
+      --rose-soft: #f5e5e1;
+      --line: #d8d2c5;
+      --shadow: 0 16px 44px rgba(8, 20, 38, .10);
+      --radius: 18px;
+      --sidebar: 300px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+    }
+    button, input, textarea { font: inherit; }
+    a { color: #145e70; }
+    a:hover { color: #0b3e4a; }
+    :focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+
+    .skip-link {
+      position: fixed;
+      left: 12px;
+      top: -80px;
+      z-index: 1000;
+      padding: 10px 14px;
+      color: white;
+      background: var(--navy-950);
+      border-radius: 8px;
+    }
+    .skip-link:focus { top: 12px; }
+
+    .app {
+      display: grid;
+      grid-template-columns: var(--sidebar) minmax(0, 1fr);
+      min-height: 100vh;
+    }
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: var(--sidebar);
+      overflow-y: auto;
+      padding: 28px 20px 24px;
+      color: #f7fbff;
+      background:
+        radial-gradient(circle at 15% 5%, rgba(217, 166, 46, .18), transparent 28%),
+        linear-gradient(165deg, var(--navy-800), var(--navy-950) 58%);
+    }
+    .brand {
+      display: grid;
+      gap: 7px;
+      padding: 0 8px 22px;
+      border-bottom: 1px solid rgba(255,255,255,.14);
+    }
+    .eyebrow {
+      margin: 0;
+      color: var(--gold);
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+    .brand h1 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.62rem;
+      line-height: 1.05;
+    }
+    .brand p {
+      margin: 0;
+      color: #bdcad7;
+      font-size: .84rem;
+    }
+    .progress-wrap {
+      display: grid;
+      gap: 7px;
+      margin: 18px 8px;
+    }
+    .progress-row {
+      display: flex;
+      justify-content: space-between;
+      color: #c7d3df;
+      font-size: .76rem;
+    }
+    .progress-track {
+      height: 7px;
+      overflow: hidden;
+      background: rgba(255,255,255,.13);
+      border-radius: 99px;
+    }
+    .progress-bar {
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), #f7d778);
+      transition: width .25s ease;
+    }
+    .nav-label {
+      margin: 18px 8px 8px;
+      color: #8296a9;
+      font-size: .68rem;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    .nav {
+      display: grid;
+      gap: 3px;
+    }
+    .nav button {
+      width: 100%;
+      padding: 10px 11px;
+      color: #dbe5ee;
+      text-align: left;
+      background: transparent;
+      border: 0;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .nav button:hover { background: rgba(255,255,255,.08); }
+    .nav button.active {
+      color: white;
+      background: rgba(255,255,255,.13);
+      box-shadow: inset 3px 0 var(--gold);
+    }
+    .nav .number {
+      display: inline-grid;
+      width: 25px;
+      height: 25px;
+      place-items: center;
+      margin-right: 8px;
+      color: var(--gold-soft);
+      background: rgba(255,255,255,.08);
+      border-radius: 50%;
+      font-size: .72rem;
+      font-weight: 800;
+    }
+    .sidebar-footer {
+      margin: 20px 8px 0;
+      padding-top: 16px;
+      color: #8da0b2;
+      border-top: 1px solid rgba(255,255,255,.12);
+      font-size: .72rem;
+    }
+
+    .main {
+      grid-column: 2;
+      min-width: 0;
+    }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      min-height: 72px;
+      padding: 12px clamp(22px, 5vw, 72px);
+      background: rgba(247, 244, 236, .94);
+      border-bottom: 1px solid rgba(80, 70, 50, .12);
+      backdrop-filter: blur(12px);
+      min-width: 0;
+    }
+    .menu-button {
+      display: none;
+      width: 42px;
+      height: 42px;
+      color: var(--navy-900);
+      background: var(--paper-2);
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      cursor: pointer;
+    }
+    .search-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 0;
+      max-width: 720px;
+    }
+    .search {
+      width: 100%;
+      min-width: 0;
+      padding: 12px 44px 12px 16px;
+      color: var(--ink);
+      background: var(--paper-2);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+    .search::placeholder { color: #7b8791; }
+    .search-mark {
+      position: absolute;
+      right: 15px;
+      top: 11px;
+      color: #71808d;
+      pointer-events: none;
+    }
+    .search-results {
+      position: absolute;
+      inset: calc(100% + 8px) 0 auto 0;
+      display: none;
+      max-height: min(460px, 60vh);
+      overflow-y: auto;
+      padding: 8px;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+    }
+    .search-results.open { display: block; }
+    .search-result {
+      display: block;
+      width: 100%;
+      padding: 11px 12px;
+      text-align: left;
+      background: transparent;
+      border: 0;
+      border-radius: 9px;
+      cursor: pointer;
+    }
+    .search-result:hover { background: var(--blue-soft); }
+    .search-result strong { display: block; color: var(--navy-900); }
+    .search-result small { color: var(--muted); }
+    .top-actions { display: flex; gap: 8px; margin-left: auto; }
+    .small-button {
+      padding: 9px 12px;
+      color: var(--navy-900);
+      background: var(--paper-2);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      font-size: .82rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .small-button:hover { border-color: #9aa8b3; }
+
+    .content {
+      width: min(1120px, calc(100% - 44px));
+      margin: 0 auto;
+      padding: 56px 0 90px;
+    }
+    .page { display: none; animation: rise .24s ease; }
+    .page.active { display: block; }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(7px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .page-header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 30px;
+      align-items: end;
+      margin-bottom: 30px;
+      padding-bottom: 28px;
+      border-bottom: 1px solid var(--line);
+    }
+    .page-kicker {
+      margin: 0 0 8px;
+      color: var(--teal);
+      font-size: .75rem;
+      font-weight: 850;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    .page-header h2 {
+      max-width: 800px;
+      margin: 0;
+      color: var(--navy-950);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.1rem, 5vw, 4rem);
+      line-height: .98;
+      letter-spacing: -.03em;
+    }
+    .page-intro {
+      max-width: 820px;
+      margin: 16px 0 0;
+      color: #4e5c68;
+      font-size: 1.06rem;
+    }
+    .page-number {
+      color: #c9c2b2;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 4rem;
+      line-height: 1;
+    }
+    .lead {
+      margin: 0 0 28px;
+      padding: 22px 24px;
+      color: #f8fbff;
+      background: linear-gradient(135deg, var(--navy-900), var(--navy-800));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .lead strong { color: #ffe5a2; }
+    .lead p { margin: 0; }
+    .lead p + p { margin-top: 9px; }
+    .section-title {
+      margin: 38px 0 14px;
+      color: var(--navy-900);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.55rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 17px;
+    }
+    .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .topic {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      padding: 21px;
+      background: var(--paper-2);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 8px 22px rgba(8, 20, 38, .055);
+      scroll-margin-top: 100px;
+    }
+    .topic[data-state="use"] { border-color: #76aaa5; box-shadow: inset 0 4px var(--teal); }
+    .topic[data-state="explore"] { border-color: #d2ac55; box-shadow: inset 0 4px var(--gold); }
+    .topic[data-state="park"] { opacity: .72; box-shadow: inset 0 4px #a6aeb5; }
+    .topic-top {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+    .topic h3 {
+      margin: 0;
+      color: var(--navy-900);
+      font-size: 1.08rem;
+      line-height: 1.25;
+    }
+    .tag {
+      flex: 0 0 auto;
+      padding: 4px 8px;
+      color: #3e5464;
+      background: var(--blue-soft);
+      border-radius: 99px;
+      font-size: .65rem;
+      font-weight: 850;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+    }
+    .tag.core { color: #15534f; background: var(--teal-soft); }
+    .tag.decision { color: #6b4b08; background: var(--gold-soft); }
+    .tag.reference { color: #68544d; background: var(--rose-soft); }
+    .topic p { margin: 11px 0 0; color: #485762; }
+    .topic ul, .topic ol { margin: 12px 0 0; padding-left: 21px; }
+    .topic li + li { margin-top: 6px; }
+    .topic details {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid #e4dfd4;
+    }
+    .topic summary {
+      color: #1f6170;
+      font-size: .85rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .topic blockquote {
+      margin: 13px 0 0;
+      padding: 10px 14px;
+      color: #46545d;
+      background: #f1eee5;
+      border-left: 4px solid var(--gold);
+      border-radius: 0 8px 8px 0;
+    }
+    .decision-tools {
+      margin-top: auto !important;
+      padding-top: 16px !important;
+    }
+    .decision-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .decision-button {
+      padding: 6px 9px;
+      color: #41515e;
+      background: white;
+      border: 1px solid #ccd2d4;
+      border-radius: 8px;
+      font-size: .72rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .decision-button:hover { border-color: #71818d; }
+    .decision-button.selected[data-choice="use"] { color: white; background: var(--teal); border-color: var(--teal); }
+    .decision-button.selected[data-choice="explore"] { color: #332402; background: var(--gold); border-color: var(--gold); }
+    .decision-button.selected[data-choice="park"] { color: white; background: #6f7b84; border-color: #6f7b84; }
+    .note-toggle {
+      margin-top: 10px;
+      color: #667680;
+      font-size: .76rem;
+    }
+    .note {
+      width: 100%;
+      min-height: 80px;
+      margin-top: 8px;
+      padding: 10px;
+      resize: vertical;
+      color: var(--ink);
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+    }
+    .sequence {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin: 16px 0 0;
+    }
+    .sequence span {
+      padding: 7px 10px;
+      color: var(--navy-900);
+      background: var(--blue-soft);
+      border-radius: 8px;
+      font-size: .8rem;
+      font-weight: 750;
+    }
+    .sequence i { color: #83919b; font-style: normal; }
+    .matrix {
+      width: 100%;
+      margin-top: 16px;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 7px 20px rgba(8, 20, 38, .05);
+    }
+    .matrix th, .matrix td {
+      padding: 12px 14px;
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid #e5e0d6;
+    }
+    .matrix th {
+      color: white;
+      background: var(--navy-800);
+      font-size: .78rem;
+      letter-spacing: .04em;
+    }
+    .matrix tr:last-child td { border-bottom: 0; }
+    .callout {
+      margin: 22px 0;
+      padding: 18px 20px;
+      color: #55410e;
+      background: #fff0c9;
+      border: 1px solid #e3c46f;
+      border-radius: 14px;
+    }
+    .callout strong { color: #3d2d07; }
+    .schedule {
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .schedule div {
+      display: grid;
+      grid-template-columns: 130px 1fr;
+      gap: 10px;
+      padding: 9px 11px;
+      background: #f2eee5;
+      border-radius: 9px;
+    }
+    .schedule time { color: var(--navy-900); font-weight: 850; }
+    .source-group {
+      margin: 0 0 18px;
+      padding: 20px;
+      background: var(--paper-2);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+    .source-group h3 { margin: 0 0 10px; color: var(--navy-900); }
+    .source-group ul { margin: 0; padding-left: 20px; }
+    .source-group li + li { margin-top: 7px; }
+    .source-note { color: var(--muted); font-size: .84rem; }
+    .review-summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .review-stat {
+      padding: 16px;
+      background: var(--paper-2);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+    }
+    .review-stat strong {
+      display: block;
+      color: var(--navy-900);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 2rem;
+    }
+    .review-stat span { color: var(--muted); font-size: .78rem; font-weight: 750; text-transform: uppercase; }
+    .review-list { display: grid; gap: 9px; }
+    .review-item {
+      display: grid;
+      grid-template-columns: 100px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 14px;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+    }
+    .review-item .state {
+      font-size: .72rem;
+      font-weight: 850;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .review-item button {
+      color: #1f6170;
+      background: transparent;
+      border: 0;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .empty {
+      padding: 24px;
+      color: var(--muted);
+      text-align: center;
+      background: #efebe2;
+      border-radius: 12px;
+    }
+    .page-jump {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 42px;
+      padding-top: 22px;
+      border-top: 1px solid var(--line);
+    }
+    .page-jump button {
+      max-width: 48%;
+      padding: 11px 14px;
+      color: var(--navy-900);
+      background: var(--paper-2);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .page-jump button:hover { border-color: #83919c; }
+
+    @media (max-width: 980px) {
+      :root { --sidebar: 280px; }
+      .grid.three { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .review-summary { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 780px) {
+      .app { display: block; }
+      .sidebar {
+        z-index: 50;
+        width: min(88vw, 320px);
+        transform: translateX(-105%);
+        transition: transform .22s ease;
+        box-shadow: 20px 0 60px rgba(0,0,0,.25);
+      }
+      .sidebar.open { transform: translateX(0); }
+      .main { grid-column: auto; }
+      .menu-button { display: block; }
+      .topbar { padding: 10px 14px; }
+      .top-actions .small-button:first-child { display: none; }
+      .content { width: min(calc(100% - 28px), 720px); padding-top: 34px; }
+      .page-header { grid-template-columns: 1fr; gap: 10px; }
+      .page-number { display: none; }
+      .grid, .grid.three { grid-template-columns: 1fr; }
+      .matrix { display: block; overflow-x: auto; }
+      .review-item { grid-template-columns: 82px 1fr; }
+      .review-item button { grid-column: 2; justify-self: start; }
+    }
+    @media (max-width: 520px) {
+      .page-header h2 { font-size: 2.25rem; }
+      .top-actions { display: none; }
+      .schedule div { grid-template-columns: 1fr; gap: 2px; }
+      .review-summary { grid-template-columns: 1fr 1fr; }
+    }
+    @media print {
+      .sidebar, .topbar, .decision-tools, .page-jump { display: none !important; }
+      .main, .content { width: 100%; margin: 0; padding: 0; }
+      .page { display: block !important; break-before: page; }
+      .page:first-child { break-before: auto; }
+      .topic, .lead, .source-group { box-shadow: none; break-inside: avoid; }
+      details > * { display: block !important; }
+      .page-number { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <div class="app">
+    <aside class="sidebar" id="sidebar" aria-label="Handbook navigation">
+      <div class="brand">
+        <p class="eyebrow">Ashley Band Camp 2026</p>
+        <h1>Research Handbook</h1>
+        <p>From accumulated ideas to deliberate choices.</p>
+      </div>
+      <div class="progress-wrap" aria-label="Decision progress">
+        <div class="progress-row"><span>Ideas reviewed</span><span id="progressText">0%</span></div>
+        <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+      </div>
+      <p class="nav-label">Curriculum path</p>
+      <nav class="nav" id="nav">
+        <button data-target="start"><span class="number">00</span>Start here</button>
+        <button data-target="outcomes"><span class="number">01</span>Outcome-focused rehearsal</button>
+        <button data-target="visual"><span class="number">02</span>Visual capability</button>
+        <button data-target="physical"><span class="number">03</span>Physical preparation</button>
+        <button data-target="drill"><span class="number">04</span>Drill learning & UDB</button>
+        <button data-target="music"><span class="number">05</span>Musical capability</button>
+        <button data-target="effect"><span class="number">06</span>Design & general effect</button>
+        <button data-target="cleaning"><span class="number">07</span>Cleaning & readiness</button>
+        <button data-target="leadership"><span class="number">08</span>Distributed leadership</button>
+      </nav>
+      <p class="nav-label">Separate track</p>
+      <nav class="nav">
+        <button data-target="operations"><span class="number">09</span>Season operations</button>
+        <button data-target="review"><span class="number">10</span>Decision review</button>
+        <button data-target="sources"><span class="number">11</span>Source shelf</button>
+      </nav>
+      <p class="sidebar-footer">Choices and notes stay in this browser. The handbook itself remains a single portable file.</p>
+    </aside>
+
+    <main class="main" id="main-content">
+      <header class="topbar">
+        <button class="menu-button" id="menuButton" aria-label="Open navigation" aria-expanded="false">☰</button>
+        <div class="search-wrap">
+          <input class="search" id="search" type="search" placeholder="Search ideas: AC/DC, general effect, outcomes…" aria-label="Search handbook">
+          <span class="search-mark" aria-hidden="true">⌕</span>
+          <div class="search-results" id="searchResults" role="listbox" aria-label="Search results"></div>
+        </div>
+        <div class="top-actions">
+          <button class="small-button" id="openAll">Open details</button>
+          <button class="small-button" onclick="window.print()">Print / PDF</button>
+        </div>
+      </header>
+
+      <div class="content">
+        <section class="page" data-page="start">
+          <div class="page-header">
+            <div>
+              <p class="page-kicker">Orientation</p>
+              <h2>A camp that builds an ensemble capable of running itself.</h2>
+              <p class="page-intro">This handbook is the distilled working layer between accumulated research and Ashley's eventual Band Camp curriculum. Read for decisions, not compliance.</p>
+            </div>
+            <div class="page-number">00</div>
+          </div>
+          <div class="lead">
+            <p><strong>Core idea:</strong> Band camp is not primarily about covering the show. It installs, validates, and stress-tests the ensemble's operating system while building reusable musical and visual capabilities.</p>
+            <p>The show, drill, and music are the workloads used to exercise that system.</p>
+          </div>
+
+          <h3 class="section-title">How to use this handbook</h3>
+          <div class="grid three">
+            <article class="topic" data-topic="review-method" data-title="Review ideas by future usefulness">
+              <div class="topic-top"><h3>Make a lightweight decision</h3><span class="tag core">How to use</span></div>
+              <p>Each major concept can be marked <strong>Use</strong>, <strong>Explore</strong>, or <strong>Park</strong>. Notes stay on this device.</p>
+              <ul>
+                <li><strong>Use:</strong> likely belongs in the system.</li>
+                <li><strong>Explore:</strong> promising but unresolved.</li>
+                <li><strong>Park:</strong> preserve without spending attention now.</li>
+              </ul>
+            </article>
+            <article class="topic" data-topic="ownership-arc" data-title="Choose Commit Learn Try Do Own">
+              <div class="topic-top"><h3>Follow the ownership arc</h3><span class="tag core">Foundation</span></div>
+              <div class="sequence">
+                <span>Choose</span><i>→</i><span>Commit</span><i>→</i><span>Learn</span><i>→</i><span>Try</span><i>→</i><span>Do</span><i>→</i><span>Own</span>
+              </div>
+              <p>Teachers teach, guide, assess, and release. Ownership is demonstrated, not announced.</p>
+            </article>
+            <article class="topic" data-topic="three-layers" data-title="Operating system capabilities and applications">
+              <div class="topic-top"><h3>Keep three layers distinct</h3><span class="tag core">Architecture</span></div>
+              <ol>
+                <li><strong>Operating system:</strong> how the organization functions.</li>
+                <li><strong>Capability engines:</strong> reusable musical and visual skills.</li>
+                <li><strong>Applications:</strong> this year's show, drill, and music.</li>
+              </ol>
+            </article>
+          </div>
+
+          <h3 class="section-title">The fixed daily frame</h3>
+          <article class="topic" data-topic="daily-frame" data-title="Typical camp day and explicit transitions">
+            <div class="topic-top"><h3>The schedule is a constraint, not yet the curriculum</h3><span class="tag core">Fixed frame</span></div>
+            <div class="schedule">
+              <div><time>7:00–10:00</time><span>Outdoor visual rehearsal</span></div>
+              <div><time>10:00–10:15</time><span>Transition indoors</span></div>
+              <div><time>10:15–11:45</time><span>Music rehearsal</span></div>
+              <div><time>11:45–12:30</time><span>Lunch, including transition</span></div>
+              <div><time>12:30–1:50</time><span>Discipline-specific work</span></div>
+              <div><time>1:50–2:00</time><span>Transition to full band</span></div>
+              <div><time>2:00–2:50</time><span>Combined band</span></div>
+              <div><time>2:50–3:00</time><span>Cleanup, announcements, dismissal</span></div>
+              <div><time>3:00</time><span>Camp ends; students released</span></div>
+            </div>
+            <details><summary>Rules embedded in the schedule</summary>
+              <ul>
+                <li>Start times and the 3:00 ending are firm.</li>
+                <li>Transitions are visible work and cannot be borrowed quietly.</li>
+                <li>The last ten minutes are an operational teaching block, not leftover time.</li>
+                <li>Each start time requires a defined readiness condition.</li>
+              </ul>
+            </details>
+          </article>
+
+          <h3 class="section-title">First decisions worth making</h3>
+          <div class="grid">
+            <article class="topic" data-topic="first-decisions-curriculum" data-title="First curriculum decisions">
+              <div class="topic-top"><h3>Curriculum decisions</h3><span class="tag decision">Decide early</span></div>
+              <ul>
+                <li>Approve the end-of-camp capability categories.</li>
+                <li>Name the small visual and musical vocabularies the show requires.</li>
+                <li>Choose the drill-learning cycle students will own.</li>
+                <li>Identify the show's few defining effect moments.</li>
+              </ul>
+            </article>
+            <article class="topic" data-topic="first-decisions-operations" data-title="First operational decisions">
+              <div class="topic-top"><h3>Operational decisions</h3><span class="tag decision">Decide early</span></div>
+              <ul>
+                <li>Adopt one outcome-focused block template.</li>
+                <li>Define how priorities are cut when time runs short.</li>
+                <li>Assign staff observation and correction lanes.</li>
+                <li>Define voluntary leadership roles by needs, authority, and boundaries.</li>
+              </ul>
+            </article>
+          </div>
+          <div class="page-jump"><span></span><button data-next="outcomes">Next: Outcome-focused rehearsal →</button></div>
+        </section>
+
+        <section class="page" data-page="outcomes">
+          <div class="page-header">
+            <div>
+              <p class="page-kicker">Rehearsal system</p>
+              <h2>Plan the capability before planning the activity.</h2>
+              <p class="page-intro">The antidote to overfilling is not lower ambition. It is choosing fewer outcomes, budgeting enough learning and repetition, and protecting completion.</p>
+            </div>
+            <div class="page-number">01</div>
+          </div>
+          <div class="lead">
+            <p><strong>Design question:</strong> What independent capability will students possess after this block?</p>
+            <p>“What did we cover?” is useful only when coverage produced observable change.</p>
+          </div>
+
+          <div class="grid">
+            <article class="topic" data-topic="outcome-chain" data-title="Outcome planning chain">
+              <div class="topic-top"><h3>Build downward from the destination</h3><span class="tag core">Core method</span></div>
+              <div class="sequence">
+                <span>End of camp</span><i>→</i><span>Week</span><i>→</i><span>Day</span><i>→</i><span>Block</span><i>→</i><span>Activity</span>
+              </div>
+              <p>Activities earn time only after the intended capability is clear.</p>
+            </article>
+            <article class="topic" data-topic="block-contract" data-title="Block outcome contract">
+              <div class="topic-top"><h3>Write a block contract</h3><span class="tag core">Planning</span></div>
+              <p>Every block needs six answers:</p>
+              <ol>
+                <li>Students will be able to…</li>
+                <li>This matters because…</li>
+                <li>Evidence will look/sound like…</li>
+                <li>We need approximately ___ good attempts.</li>
+                <li>If time compresses, we cut…</li>
+                <li>If evidence fails, the next move is…</li>
+              </ol>
+            </article>
+            <article class="topic" data-topic="why-at-scale" data-title="Explain why at the useful scale">
+              <div class="topic-top"><h3>Put the why at the right scale</h3><span class="tag core">Meaning</span></div>
+              <p>Not every instruction needs a speech. The block and the larger sequence should make the purpose legible.</p>
+              <details><summary>Useful pattern</summary>
+                <ul>
+                  <li><strong>Season why:</strong> the contribution to the ensemble.</li>
+                  <li><strong>Block why:</strong> the capability being built.</li>
+                  <li><strong>Rep cue:</strong> the one thing to change now.</li>
+                </ul>
+              </details>
+            </article>
+            <article class="topic" data-topic="repetition-budget" data-title="Budget repetitions and feedback">
+              <div class="topic-top"><h3>Budget attempts, not just minutes</h3><span class="tag core">Scope</span></div>
+              <p>A block can contain many minutes and too few meaningful repetitions. Plan the cycle:</p>
+              <div class="sequence">
+                <span>Attempt</span><i>→</i><span>Notice</span><i>→</i><span>Feedback</span><i>→</i><span>Reset</span><i>→</i><span>Retry</span>
+              </div>
+              <p>Transitions, explanation, water, and reset time must be counted honestly.</p>
+            </article>
+            <article class="topic" data-topic="scope-cut-line" data-title="Use an explicit cut line">
+              <div class="topic-top"><h3>Pre-decide the cut line</h3><span class="tag decision">High leverage</span></div>
+              <p>Rank the block before it starts:</p>
+              <ol>
+                <li><strong>Must own:</strong> protect enough time to assess it.</li>
+                <li><strong>Should reach:</strong> pursue after the must-own evidence appears.</li>
+                <li><strong>Could touch:</strong> first thing removed.</li>
+              </ol>
+              <blockquote>Finishing one capability deeply is not “getting less done.” It creates something the next block can use.</blockquote>
+            </article>
+            <article class="topic" data-topic="release-gates" data-title="Release ownership through evidence">
+              <div class="topic-top"><h3>Use release gates</h3><span class="tag core">Assessment</span></div>
+              <ul>
+                <li><strong>Teach:</strong> students can describe and recognize it.</li>
+                <li><strong>Guide:</strong> students can do it with cues.</li>
+                <li><strong>Assess:</strong> students can reproduce it under named conditions.</li>
+                <li><strong>Release:</strong> students initiate, monitor, and repair it.</li>
+              </ul>
+            </article>
+          </div>
+
+          <h3 class="section-title">A practical rehearsal loop</h3>
+          <article class="topic" data-topic="outcome-rehearsal-loop" data-title="Outcome rehearsal loop">
+            <div class="topic-top"><h3>Plan → teach → accumulate → test → retain</h3><span class="tag core">Daily loop</span></div>
+            <table class="matrix">
+              <thead><tr><th>Phase</th><th>Director/staff work</th><th>Student evidence</th></tr></thead>
+              <tbody>
+                <tr><td>Frame</td><td>Name capability, why, evidence, and constraints.</td><td>Can state the target and what success requires.</td></tr>
+                <tr><td>Acquire</td><td>Model, sequence, and reduce complexity.</td><td>Can perform the component with support.</td></tr>
+                <tr><td>Accumulate</td><td>Provide enough focused repetitions and concise feedback.</td><td>Can repeat with improving consistency.</td></tr>
+                <tr><td>Test</td><td>Change context, starting point, tempo, fatigue, or simultaneity.</td><td>Can retain the capability without rescue.</td></tr>
+                <tr><td>Retain</td><td>Record what stays, what returns, and what gets released.</td><td>Can bring the learning into the next rehearsal.</td></tr>
+              </tbody>
+            </table>
+          </article>
+
+          <div class="callout"><strong>Planning warning:</strong> A beautifully detailed activity list can still be underplanned if it does not reserve time for student attempts, diagnosis, correction, and proof.</div>
+          <div class="page-jump"><button data-next="start">← Start here</button><button data-next="visual">Next: Visual capability →</button></div>
+        </section>
+
+        <section class="page" data-page="visual">
+          <div class="page-header">
+            <div>
+              <p class="page-kicker">Capability engine</p>
+              <h2>Teach the visual language the show will actually demand.</h2>
+              <p class="page-intro">Dynamic Marching is the technique authority. The outside research clarifies prerequisites, physical demands, sequencing, and evidence of ownership.</p>
+            </div>
+            <div class="page-number">02</div>
+          </div>
+          <div class="lead">
+            <p><strong>Scope rule:</strong> A small, shared, cleanable visual vocabulary is more valuable than exposure to every possible marching or movement skill.</p>
+          </div>
+
+          <div class="grid">
+            <article class="topic" data-topic="visual-sequence" data-title="Dynamic Marching visual sequence">
+              <div class="topic-top"><h3>Working source sequence</h3><span class="tag core">Starting point</span></div>
+              <ol>
+                <li>Posture and grid awareness</li>
+                <li>Instrument carriage and mark time</li>
+                <li>Forward marching</li>
+                <li>Backward marching</li>
+                <li>Slides</li>
+                <li>Effort changes</li>
+                <li>Body movement</li>
+                <li>Stretch, pre-show, and fitness routines</li>
+              </ol>
+              <p>This is a source sequence, not automatically the camp sequence.</p>
+            </article>
+            <article class="topic" data-topic="visual-show-filter" data-title="Filter visual vocabulary through show needs">
+              <div class="topic-top"><h3>Filter against the actual show</h3><span class="tag decision">Scope</span></div>
+              <ul>
+                <li>Which step techniques appear?</li>
+                <li>Which facings and upper/lower separations appear?</li>
+                <li>Which tempos, step sizes, and direction changes recur?</li>
+                <li>Which choreography or floor transitions appear?</li>
+                <li>Which skills must coexist with exposed playing?</li>
+              </ul>
+            </article>
+            <article class="topic" data-topic="straight-leg-meaning" data-title="Straight leg does not mean locked knee">
+              <div class="topic-top"><h3>Define straight leg precisely</h3><span class="tag core">Safety + clarity</span></div>
+              <p>Comparable corps-style guides distinguish a long/straight visual line from a locked or hyperextended knee.</p>
+              <ul>
+                <li>Forward: controlled push, toes up, heel contact, continuous roll-through.</li>
+                <li>Backward: elevated platform, controlled weight, stable upper body.</li>
+                <li>Both: rhythmic foot passage and consistent upper-body carriage.</li>
+              </ul>
+            </article>
+            <article class="topic" data-topic="visual-slide" data-title="Slides require upper lower body separation">
+              <div class="topic-top"><h3>Slides are a dissociation skill</h3><span class="tag core">Technique</span></div>
+              <p>The feet follow the travel path while the upper body and instrument maintain their assigned orientation.</p>
+              <details><summary>What must be taught separately</summary>
+                <ul>
+                  <li>Travel direction and foot pathway.</li>
+                  <li>Pelvic and hip organization.</li>
+                  <li>Thoracic and shoulder orientation.</li>
+                  <li>Instrument carriage and air.</li>
+                  <li>The specific transition into and out of the slide.</li>
+                </ul>
+              </details>
+            </article>
+            <article class="topic" data-topic="visual-teaching-cycle" data-title="Visual teaching cycle">
+              <div class="topic-top"><h3>Use one teaching cycle</h3><span class="tag core">Instruction</span></div>
+              <ol>
+                <li>Define the shape and reason.</li>
+                <li>Model an exemplar and a common error.</li>
+                <li>Build the movement in prerequisite steps.</li>
+                <li>Repeat with one concise feedback lens.</li>
+                <li>Apply to show tempo/path/music.</li>
+                <li>Assess, release, and revisit.</li>
+              </ol>
+            </article>
+            <article class="topic" data-topic="visual-evidence" data-title="Visual ownership evidence">
+              <div class="topic-top"><h3>Evidence of visual ownership</h3><span class="tag core">Assessment</span></div>
+              <ul>
+                <li>Initiates the technique from the established cue.</li>
+                <li>Maintains timing, posture, and pathway without constant correction.</li>
+                <li>Names and repairs a known error.</li>
+                <li>Retains the technique when tempo, direction, music, or fatigue changes.</li>
+                <li>Transitions cleanly into the next demand.</li>
+              </ul>
+            </article>
+          </div>
+
+          <h3 class="section-title">Technique-to-capacity snapshot</h3>
+          <table class="matrix">
+            <thead><tr><th>Visual demand</th><th>Supporting capacities</th><th>Failure signals to notice</th></tr></thead>
+            <tbody>
+              <tr><td>Posture + carriage</td><td>Trunk, upper-back, shoulder and breathing endurance.</td><td>Back arch, collapsed chest, locked knees, changing horn angle.</td></tr>
+              <tr><td>Forward straight leg</td><td>Ankle control, toes-up endurance, foot control, hip coordination, balance.</td><td>Reaching, bouncing, knee lock, lost roll-through, upper-body motion.</td></tr>
+              <tr><td>Backward platform</td><td>Calf/soleus endurance, ankle stability, posterior-chain control, spatial awareness.</td><td>Heel collapse, shrinking steps, leaning, unstable timing.</td></tr>
+              <tr><td>Slides</td><td>Hip mobility/control, lateral stability, trunk dissociation, thoracic rotation.</td><td>Twisting through knees, drifting path, lost shoulder/instrument orientation.</td></tr>
+              <tr><td>Halts and direction changes</td><td>Braking capacity, single-leg control, balance reorganization.</td><td>Extra steps, knee collapse, pulse loss, disrupted carriage.</td></tr>
+              <tr><td>Body movement</td><td>Task-specific mobility, coordination, floor transfer, return-to-playing control.</td><td>Movement cannot resolve into the next musical/visual responsibility.</td></tr>
+            </tbody>
+          </table>
+          <div class="page-jump"><button data-next="outcomes">← Outcome-focused rehearsal</button><button data-next="physical">Next: Physical preparation →</button></div>
+        </section>
+
+        <section class="page" data-page="physical">
+          <div class="page-header">
+            <div>
+              <p class="page-kicker">Preparation + recovery</p>
+              <h2>Prepare the body for the technique, then help it downshift.</h2>
+              <p class="page-intro">Morning work should progressively approach the task. Later floor work can support range of motion and a deliberate cooldown without making promises the evidence cannot support.</p>
+            </div>
+            <div class="page-number">03</div>
+          </div>
+          <div class="lead">
+            <p><strong>Important boundary:</strong> This is a candidate curriculum layer, not medical treatment or a final workout prescription. Qualified supervision, school policy, individual modification, and heat procedures govern implementation.</p>
+          </div>
+
+          <h3 class="section-title">Dynamic preparation</h3>
+          <div class="grid">
+            <article class="topic" data-topic="dynamic-warmup-arc" data-title="Dynamic warmup task progression">
+              <div class="topic-top"><h3>Move from general to specific</h3><span class="tag core">Morning</span></div>
+              <div class="sequence">
+                <span>Raise temperature</span><i>→</i><span>Mobilize</span><i>→</i><span>Activate</span><i>→</i><span>Balance</span><i>→</i><span>Rehearse technique</span>
+              </div>
+              <details><summary>Candidate movement families</summary>
+                <ul>
+                  <li>Brisk walking and easy cadence.</li>
+                  <li>Ankle rocks, leg swings, hip open/close, hamstring sweeps.</li>
+                  <li>Heel/toe walks, calf and tibialis raises.</li>
+                  <li>Reverse/lateral lunges, controlled single-leg balance.</li>
+                  <li>Low-amplitude forward/backward/slide patterns.</li>
+                </ul>
+              </details>
+            </article>
+            <article class="topic" data-topic="strength-capacity-menu" data-title="Strength balance and control menu">
+              <div class="topic-top"><h3>Build movement capacity</h3><span class="tag core">Candidate pool</span></div>
+              <ul>
+                <li>Tempo squat, split squat, step-up/down.</li>
+                <li>Heel raise, toe raise, foot intrinsic work.</li>
+                <li>Hip hike, bridge, lateral hip work.</li>
+                <li>Supported single-leg hinge and balance.</li>
+                <li>Bird dog, front/side plank, controlled trunk work.</li>
+                <li>Section-specific shoulder/back carriage work.</li>
+              </ul>
+            </article>
+            <article class="topic" data-topic="forte-foundation" data-title="Forte Athletics foundation and gaps">
+              <div class="topic-top"><h3>Forte is a useful small foundation</h3><span class="tag core">Recovered source</span></div>
+              <ul>
+                <li><strong>Tempo squat:</strong> hip/knee and postural control.</li>
+                <li><strong>Heel raise with reach:</strong> calf endurance and tall posture.</li>
+                <li><strong>Hip hike:</strong> pelvic and lateral-hip control.</li>
+              </ul>
+              <details><summary>Candidate gaps in the free sample</summary>
+                <p>Toes-up endurance, intrinsic feet, unilateral braking, posterior chain, trunk anti-rotation, balance progression, instrument carriage, aerobic progression, and full cooldown mobility. These may exist in the paid program; only the free sample was reviewed.</p>
+              </details>
+            </article>
+            <article class="topic" data-topic="conditioning-specificity" data-title="Conditioning should preserve technique">
+              <div class="topic-top"><h3>Condition through the task</h3><span class="tag decision">Programming</span></div>
+              <p>Candidate modes:</p>
+              <ul>
+                <li>Short excellent-technique intervals with recovery.</li>
+                <li>Continuous easy-to-moderate marching.</li>
+                <li>Forward/backward/slide circuits.</li>
+                <li>Instrument-off then instrument-on progression.</li>
+                <li>Talk-test or simple effort monitoring.</li>
+              </ul>
+              <blockquote>Conditioning is never punishment, and fatigue should not rehearse faulty mechanics.</blockquote>
+            </article>
+          </div>
+
+          <h3 class="section-title">Later floor-based mobility</h3>
+          <article class="topic" data-topic="floor-recovery-pool" data-title="Floor mobility and cooldown pool">
+            <div class="topic-top"><h3>A broad menu, then a small chosen sequence</h3><span class="tag decision">Second half</span></div>
+            <table class="matrix">
+              <thead><tr><th>Area</th><th>Primary floor candidate</th><th>Important note</th></tr></thead>
+              <tbody>
+                <tr><td>Quadriceps / hip flexor</td><td>Side-lying combined stretch or padded half-kneeling.</td><td>Control pelvis; do not arch or force.</td></tr>
+                <tr><td>Hamstrings</td><td>Supine strap/towel or wall-assisted stretch.</td><td>Do not pull at the knee; stop for radiating symptoms.</td></tr>
+                <tr><td>Glutes / deep hip</td><td>Supine figure four or knee-to-chest.</td><td>Use self-controlled range.</td></tr>
+                <tr><td>Adductors</td><td>Reclined butterfly, supported as needed.</td><td>Do not press knees down.</td></tr>
+                <tr><td>Calves / ankle</td><td>Long-seated towel stretch; ankle circles/alphabet.</td><td>Mobility and gentle tension, not forced end range.</td></tr>
+                <tr><td>Feet / toes</td><td>Seated toe-extension/plantar stretch; optional ball roll.</td><td>Equipment and hygiene matter for shared balls.</td></tr>
+                <tr><td>Lateral hip</td><td>Usually strength/individual guidance rather than a universal IT-band stretch.</td><td>Cross-body stretching may aggravate lateral-hip pain.</td></tr>
+              </tbody>
+            </table>
+            <p>Possible universal pool: side-lying quad/hip flexor, supine hamstring, figure four, reclined butterfly, towel calf, ankle circles, gentle toe/plantar stretch.</p>
+          </article>
+
+          <div class="grid">
+            <article class="topic" data-topic="recovery-claim-boundary" data-title="Static stretching claim boundary">
+              <div class="topic-top"><h3>Name the benefit honestly</h3><span class="tag core">Evidence boundary</span></div>
+              <p>Static stretching can support flexibility, range of motion, body awareness, and a calm closing ritual. It is not reliably proven to prevent soreness or accelerate next-day recovery.</p>
+            </article>
+            <article class="topic" data-topic="physical-safety" data-title="Physical preparation safety system">
+              <div class="topic-top"><h3>Safety is part of the curriculum</h3><span class="tag core">Non-negotiable</span></div>
+              <ul>
+                <li>Qualified adult supervision and school procedures.</li>
+                <li>Meaningful easier versions and rest without stigma.</li>
+                <li>Gradual changes in heat, duration, intensity, and instrument load.</li>
+                <li>No partner-forced stretching.</li>
+                <li>Stop for pain, neurological symptoms, significant weakness, dizziness, chest symptoms, or heat-illness signs.</li>
+              </ul>
+            </article>
+          </div>
+          <div class="page-jump"><button data-next="visual">← Visual capability</button><button data-next="drill">Next: Drill learning →</button></div>
+        </section>
+
+        <section class="page" data-page="drill">
+          <div class="page-header">
+            <div>
+              <p class="page-kicker">Visual operations</p>
+              <h2>Make learning drill a capability students can own.</h2>
+              <p class="page-intro">UDB is most valuable when it teaches performers to understand destinations, paths, counts, and relationships—not when it merely replaces paper coordinates.</p>
+            </div>
+            <div class="page-number">04</div>
+          </div>
+          <div class="lead">
+            <p><strong>Ashley starting position:</strong> dot over form, with both required. The dot establishes independent responsibility; pathway and form establish how that responsibility becomes an ensemble result.</p>
+          </div>
+
+          <div class="grid">
+            <article class="topic" data-topic="dot-path-form" data-title="Dot path form intentional adjustment">
+              <div class="topic-top"><h3>Use four layers of responsibility</h3><span class="tag core">Working synthesis</span></div>
+              <ol>
+                <li><strong>Dot:</strong> independently verifiable endpoint.</li>
+                <li><strong>Path:</strong> counts, step size, midsets, cross counts, and travel type.</li>
+                <li><strong>Form:</strong> interval, cover, alignment, curvature, and orientation.</li>
+                <li><strong>Adjustment:</strong> intentional and communicated—not blind following.</li>
+              </ol>
+            </article>
+            <article class="topic" data-topic="acdc" data-title="AC/DC Animation Cross Count Direction Change">
+              <div class="topic-top"><h3>AC/DC after every new dot</h3><span class="tag core">UDB process</span></div>
+              <ol>
+                <li><strong>Animation:</strong> watch the pathway.</li>
+                <li><strong>Cross Count:</strong> identify and point to the critical crossing.</li>
+                <li><strong>Direction Change:</strong> rehearse step −1 into the set and step +1 leaving it.</li>
+              </ol>
+              <p>Students engage with movement information immediately instead of memorizing disconnected destinations.</p>
+            </article>
+            <article class="topic" data-topic="drill-information" data-title="Drill information students need">
+              <div class="topic-top"><h3>Teach the information inventory</h3><span class="tag core">Literacy</span></div>
+              <p>Students may need to know:</p>
+              <ul>
+                <li>start/end coordinate, counts, and measure;</li>
+                <li>path type, step size, midset, and hard-line crossing;</li>
+                <li>travel and upper-body orientation;</li>
+                <li>direction change and entrance/exit;</li>
+                <li>form, interval, and collision relationships.</li>
+              </ul>
+            </article>
+            <article class="topic" data-topic="udb-preparation" data-title="UDB preparation before rehearsal">
+              <div class="topic-top"><h3>Teach pre-rehearsal preparation</h3><span class="tag decision">Ownership</span></div>
+              <p>A possible student preparation routine:</p>
+              <ol>
+                <li>Preview the phrase with music.</li>
+                <li>Locate every destination.</li>
+                <li>Inspect paths and count structure.</li>
+                <li>Mark midsets, crossings, and direction changes.</li>
+                <li>Arrive with one question—not no preparation.</li>
+              </ol>
+            </article>
+            <article class="topic" data-topic="set-vs-batch" data-title="Set by set versus batch drill learning">
+              <div class="topic-top"><h3>Choose the acquisition model deliberately</h3><span class="tag decision">Open choice</span></div>
+              <p><strong>Set by set:</strong> common pace and frequent staff verification.</p>
+              <p><strong>Batch learning:</strong> four to six sets learned independently while staff targets support; advanced students proceed into path, cross-count, and step-size layers.</p>
+              <p>A staged combination may fit mixed experience levels.</p>
+            </article>
+            <article class="topic" data-topic="batch-progression" data-title="Six stage batch drill progression">
+              <div class="topic-top"><h3>Batch-learning progression</h3><span class="tag core">Collected process</span></div>
+              <ol>
+                <li>Self-guided coordinates.</li>
+                <li>Run to sets and verbalize.</li>
+                <li>Turn transitions into fundamentals.</li>
+                <li>Run continuously with counts and direction changes.</li>
+                <li>Add music after stationary success.</li>
+                <li>Clean with midsets, crossings, and priority lenses.</li>
+              </ol>
+            </article>
+          </div>
+
+          <h3 class="section-title">One neutral learning cycle</h3>
+          <article class="topic" data-topic="drill-cycle" data-title="Complete drill learning cycle">
+            <div class="topic-top"><h3>A full operational index</h3><span class="tag decision">Build later</span></div>
+            <div class="sequence">
+              <span>Prepare</span><i>→</i><span>Acquire</span><i>→</i><span>Confirm</span><i>→</i><span>AC/DC</span><i>→</i><span>Rehearse</span><i>→</i><span>Check</span><i>→</i><span>Adjust</span><i>→</i><span>Reset</span><i>→</i><span>Repeat</span><i>→</i><span>Link</span><i>→</i><span>Integrate</span><i>→</i><span>Clean</span>
+            </div>
+            <details><summary>Why CHECK and ADJUST should be separate</summary>
+              <p>Checking first preserves diagnostic evidence. A student notices where they actually arrived before moving to the correct place. Immediate adjustment can erase the information needed for self-correction.</p>
+            </details>
+          </article>
+
+          <div class="grid">
+            <article class="topic" data-topic="drill-reset" data-title="Resetting is a rehearsed skill">
+              <div class="topic-top"><h3>Define the reset</h3><span class="tag core">Efficiency</span></div>
+              <ul>
+                <li>Which set and route?</li>
+                <li>Instrument position?</li>
+                <li>Who may speak?</li>
+                <li>Where does counting begin?</li>
+                <li>Does the rep include minus one and plus one?</li>
+                <li>What posture signals ready?</li>
+              </ul>
+            </article>
+            <article class="topic" data-topic="drill-ownership" data-title="Drill ownership evidence">
+              <div class="topic-top"><h3>Evidence students own drill learning</h3><span class="tag core">Assessment</span></div>
+              <ul>
+                <li>Finds and explains a coordinate without placement.</li>
+                <li>Identifies path, counts, step size, and checkpoints.</li>
+                <li>Completes AC/DC and diagnoses arrival before adjusting.</li>
+                <li>Resets correctly on the first instruction.</li>
+                <li>Links transitions and adds music without abandoning established information.</li>
+              </ul>
+            </article>
+          </div>
+          <div class="page-jump"><button data-next="physical">← Physical preparation</button><button data-next="music">Next: Musical capability →</button></div>
+        </section>
+
+        <section class="page" data-page="music">
+          <div class="page-header">
+            <div>
+              <p class="page-kicker">Capability engine</p>
+              <h2>Musical fundamentals must survive movement.</h2>
+              <p class="page-intro">A fundamental block succeeds only when it changes the music students perform. Marching should strengthen the year-round musical system, not suspend it.</p>
+            </div>
+            <div class="page-number">05</div>
+          </div>
+          <div class="lead">
+            <p><strong>Transfer test:</strong> Did the day's fundamental skill appear in show music within minutes, and did students hear how it improved the result?</p>
+          </div>
+
+          <div class="grid">
+            <article class="topic" data-topic="musical-nonnegotiables" data-title="Musical non-negotiables">
+              <div class="topic-top"><h3>Name a compact vocabulary</h3><span class="tag decision">Define</span></div>
+              <ul>
+                <li>Characteristic tone and supported air.</li>
+                <li>Immediate response and intentional release.</li>
+                <li>Consistent note length and style family.</li>
+                <li>Internal subdivision and rhythmic agreement.</li>
+                <li>Balance to the priority voice.</li>
+                <li>Phrase direction and ensemble listening.</li>
+              </ul>
+            </article>
+            <article class="topic" data-topic="music-transfer" data-title="Fundamental to literature transfer">
+              <div class="topic-top"><h3>Build transfer into every music block</h3><span class="tag core">Instruction</span></div>
+              <div class="sequence">
+                <span>Isolate</span><i>→</i><span>Name</span><i>→</i><span>Hear</span><i>→</i><span>Apply</span><i>→</i><span>Retain</span>
+              </div>
+              <p>Use the same language in fundamentals, show excerpts, section work, and combined band.</p>
+            </article>
+            <article class="topic" data-topic="daily-music-drill" data-title="Daily music drill structure">
+              <div class="topic-top"><h3>A daily drill should build independence</h3><span class="tag core">Candidate sequence</span></div>
+              <ol>
+                <li>Breathing, posture, and air flow.</li>
+                <li>Response and release.</li>
+                <li>Unison tone and pitch center.</li>
+                <li>Articulation and note length.</li>
+                <li>Key/rhythm/style from current music.</li>
+                <li>Chord, balance, and listening.</li>
+                <li>Immediate show transfer.</li>
+              </ol>
+            </article>
+            <article class="topic" data-topic="part-function" data-title="Teach part function and balance">
+              <div class="topic-top"><h3>Teach students what their part is doing</h3><span class="tag core">Listening</span></div>
+              <ul>
+                <li>Who owns the melody or arrival?</li>
+                <li>Where is the bass line?</li>
+                <li>Who has motion, pulse, color, or support?</li>
+                <li>Is the role primary, secondary, or background?</li>
+                <li>Should the student match across or balance down?</li>
+              </ul>
+              <p>Many apparent tuning problems are first tone, balance, or voicing problems.</p>
+            </article>
+            <article class="topic" data-topic="simultaneous-demand" data-title="Layer music and movement deliberately">
+              <div class="topic-top"><h3>Stage simultaneous demand</h3><span class="tag core">Progression</span></div>
+              <ol>
+                <li>Music stationary with the intended sound.</li>
+                <li>Feet/body alone with the intended timing.</li>
+                <li>Moving air, singing, or reduced musical layer.</li>
+                <li>Music and movement together in a small chunk.</li>
+                <li>Context, transition, and recovery.</li>
+              </ol>
+            </article>
+            <article class="topic" data-topic="musical-evidence" data-title="Musical ownership evidence">
+              <div class="topic-top"><h3>Evidence of musical ownership</h3><span class="tag core">Assessment</span></div>
+              <ul>
+                <li>Describes the sound, style, pulse, and part function.</li>
+                <li>Diagnoses a mismatch before director correction.</li>
+                <li>Transfers the shared vocabulary into show music.</li>
+                <li>Maintains sound through movement and fatigue.</li>
+                <li>Listens and adjusts without abandoning individual responsibility.</li>
+              </ul>
+            </article>
+          </div>
+          <div class="callout"><strong>Scope rule:</strong> Do not build a long rotating fundamentals menu. Build a small vocabulary that students recognize everywhere and can use without waiting for the director to translate it again.</div>
+          <div class="page-jump"><button data-next="drill">← Drill learning</button><button data-next="effect">Next: Design & general effect →</button></div>
+        </section>
+
+        <section class="page" data-page="effect">
+          <div class="page-header">
+            <div>
+              <p class="page-kicker">Design → teaching → achievement</p>
+              <h2>General effect is designed once and rehearsed many times.</h2>
+              <p class="page-intro">A moment does not become effective because the design team intended it. Students must understand, coordinate, repeat, and communicate the intended perception reliably.</p>
+            </div>
+            <div class="page-number">06</div>
+          </div>
+          <div class="lead">
+            <p><strong>Design test:</strong> Can the students we have make this idea clear, musical, intentional, and repeatable with the rehearsal time we actually possess?</p>
+          </div>
+
+          <div class="grid">
+            <article class="topic" data-topic="design-for-band" data-title="Design for the band in front of you">
+              <div class="topic-top"><h3>Design for available achievement</h3><span class="tag core">Fit</span></div>
+              <ul>
+                <li>Characteristic sound remains possible.</li>
+                <li>Visual demand is teachable and cleanable.</li>
+                <li>Transitions are designed, not merely connected.</li>
+                <li>The payoff justifies the rehearsal cost.</li>
+                <li>Effect comes from clarity, timing, and confidence—not clutter.</li>
+              </ul>
+            </article>
+            <article class="topic" data-topic="design-cost" data-title="Name the rehearsal cost of design">
+              <div class="topic-top"><h3>Price every ambitious idea</h3><span class="tag decision">Control</span></div>
+              <p>Before accepting an element, name:</p>
+              <ul>
+                <li>new vocabulary and prerequisites;</li>
+                <li>equipment, staging, or technology dependencies;</li>
+                <li>musical compromise or exposed risk;</li>
+                <li>estimated acquisition and cleaning repetitions;</li>
+                <li>what will receive less time because this exists.</li>
+              </ul>
+            </article>
+            <article class="topic" data-topic="effect-intent" data-title="Define effect as intended audience perception">
+              <div class="topic-top"><h3>Start with the intended perception</h3><span class="tag core">General effect</span></div>
+              <p>For every defining moment, finish this sentence:</p>
+              <blockquote>The audience should notice / feel / understand ______ because the ensemble ______.</blockquote>
+              <p>The second blank converts design intention into student action.</p>
+            </article>
+            <article class="topic" data-topic="effect-map" data-title="Effect moment teaching map">
+              <div class="topic-top"><h3>Build an effect teaching map</h3><span class="tag core">Translation</span></div>
+              <ul>
+                <li><strong>Focus:</strong> where attention should go.</li>
+                <li><strong>Sound:</strong> priority voice, balance, style, and shape.</li>
+                <li><strong>Visual:</strong> form, motion, body, staging, and clarity.</li>
+                <li><strong>Timing:</strong> preparation, arrival, sustain, and release.</li>
+                <li><strong>Transition:</strong> what sets it up and what follows.</li>
+                <li><strong>Evidence:</strong> what an observer can perceive.</li>
+              </ul>
+            </article>
+            <article class="topic" data-topic="effect-hierarchy" data-title="Choose a small hierarchy of effect moments">
+              <div class="topic-top"><h3>Not every moment can be the moment</h3><span class="tag decision">Priority</span></div>
+              <ol>
+                <li><strong>Defining moments:</strong> identity of the production.</li>
+                <li><strong>Structural moments:</strong> necessary arrivals and transitions.</li>
+                <li><strong>Texture moments:</strong> detail that enriches after the structure works.</li>
+              </ol>
+              <p>Protect defining moments first; texture is the first layer removed when time is insufficient.</p>
+            </article>
+            <article class="topic" data-topic="design-vs-rehearsal" data-title="Separate design problems from rehearsal problems">
+              <div class="topic-top"><h3>Diagnose the right owner</h3><span class="tag core">Efficiency</span></div>
+              <p><strong>Design problem:</strong> unclear intent, impossible transition, bad orchestration/staging, insufficient payoff.</p>
+              <p><strong>Rehearsal problem:</strong> students have a viable task but lack skill, clarity, repetitions, feedback, or consistency.</p>
+              <p>Do not punish students with more repetitions of an idea that needs rewriting.</p>
+            </article>
+          </div>
+
+          <h3 class="section-title">The achievement ladder</h3>
+          <article class="topic" data-topic="achievement-ladder" data-title="Readable coordinated consistent intentional compelling">
+            <div class="topic-top"><h3>Build effect through achievement</h3><span class="tag core">Performance</span></div>
+            <table class="matrix">
+              <thead><tr><th>Level</th><th>What becomes true</th><th>Rehearsal emphasis</th></tr></thead>
+              <tbody>
+                <tr><td>Readable</td><td>The intended event can be identified.</td><td>Correct material, staging, focus, and arrival.</td></tr>
+                <tr><td>Coordinated</td><td>Sound, motion, timing, and orientation agree.</td><td>Relationships and simultaneity.</td></tr>
+                <tr><td>Consistent</td><td>The event survives repetition and context.</td><td>Retrieval, varied starts, transition and recovery.</td></tr>
+                <tr><td>Intentional</td><td>Students communicate direction rather than execute neutrally.</td><td>Shape, focus, pacing, and role.</td></tr>
+                <tr><td>Compelling</td><td>The audience receives a clear, sustained, earned effect.</td><td>Whole-context performance and refinement.</td></tr>
+              </tbody>
+            </table>
+          </article>
+
+          <div class="grid">
+            <article class="topic" data-topic="effect-outcome-example" data-title="General effect rehearsal outcome example">
+              <div class="topic-top"><h3>Write effect as an outcome</h3><span class="tag core">Example</span></div>
+              <p><strong>Weak:</strong> Clean the closer impact.</p>
+              <p><strong>Stronger:</strong> Students will coordinate the final 16-count build so the brass arrival, form expansion, guard release, and visual focus reach their peak together, then hold the result through the release.</p>
+            </article>
+            <article class="topic" data-topic="cut-rewrite-release" data-title="Repeat rewrite cut or release decision">
+              <div class="topic-top"><h3>Choose the correct next action</h3><span class="tag decision">Director judgment</span></div>
+              <ul>
+                <li><strong>Repeat:</strong> task is clear; execution needs attempts.</li>
+                <li><strong>Reteach:</strong> prerequisite or mental model is missing.</li>
+                <li><strong>Rewrite:</strong> task is viable only after design change.</li>
+                <li><strong>Cut:</strong> cost exceeds payoff.</li>
+                <li><strong>Release:</strong> evidence is stable enough to move on.</li>
+              </ul>
+            </article>
+          </div>
+          <div class="page-jump"><button data-next="music">← Musical capability</button><button data-next="cleaning">Next: Cleaning & readiness →</button></div>
+        </section>
+
+        <section class="page" data-page="cleaning">
+          <div class="page-header">
+            <div>
+              <p class="page-kicker">Achievement system</p>
+              <h2>Clean by priority, one lens at a time.</h2>
+              <p class="page-intro">Cleaning is not generalized repetition. It is choosing the most valuable observable mismatch, applying enough focused attempts, and verifying that the correction transfers.</p>
+            </div>
+            <div class="page-number">07</div>
+          </div>
+          <div class="lead">
+            <p><strong>Cleaning priority:</strong> protect the arrivals and transitions that carry the show's musical and visual meaning. Detail without structural clarity is expensive camouflage.</p>
+          </div>
+
+          <div class="grid">
+            <article class="topic" data-topic="cleaning-lenses" data-title="Independent cleaning lenses">
+              <div class="topic-top"><h3>Choose one observation lens</h3><span class="tag core">Feedback</span></div>
+              <ul>
+                <li>Endpoint coordinate.</li>
+                <li>Interval, cover, curvature, and form.</li>
+                <li>Pathway, cross count, midpoint, and step size.</li>
+                <li>Timing and feet.</li>
+                <li>Body and instrument orientation.</li>
+                <li>Tone, balance, style, rhythm, and phrase.</li>
+                <li>Simultaneous demand and transition recovery.</li>
+              </ul>
+            </article>
+            <article class="topic" data-topic="rep-temperatures" data-title="Frozen cold warm and hot repetitions">
+              <div class="topic-top"><h3>Use different repetition temperatures</h3><span class="tag core">Scaffolding</span></div>
+              <ul>
+                <li><strong>Frozen:</strong> positions and relationships without travel.</li>
+                <li><strong>Cold:</strong> movement and counts without full playing.</li>
+                <li><strong>Warm:</strong> percussion, singing, air, or reduced musical layer.</li>
+                <li><strong>Hot:</strong> full music, drill, body, and performance intent.</li>
+              </ul>
+            </article>
+            <article class="topic" data-topic="blocked-varied" data-title="Blocked acquisition and varied retrieval">
+              <div class="topic-top"><h3>Acquire, then vary</h3><span class="tag core">Retention</span></div>
+              <p>Blocked repetition helps students acquire a new transition. Durable performance also needs:</p>
+              <ul>
+                <li>different starting sets;</li>
+                <li>linked chunks and minus-one/plus-one context;</li>
+                <li>cold starts after time away;</li>
+                <li>tempo and environmental variation;</li>
+                <li>full runs without interruption.</li>
+              </ul>
+            </article>
+            <article class="topic" data-topic="feedback-hierarchy" data-title="Feedback hierarchy and staff lanes">
+              <div class="topic-top"><h3>Prevent competing feedback</h3><span class="tag decision">Staff process</span></div>
+              <p>A possible hierarchy:</p>
+              <ol>
+                <li>Students check privately.</li>
+                <li>Adjustment period has one command owner.</li>
+                <li>Primary instructor addresses the ensemble.</li>
+                <li>Specialists add only their assigned lens.</li>
+                <li>Individual help occurs during the defined reset/support window.</li>
+              </ol>
+            </article>
+            <article class="topic" data-topic="cleaning-priority-card" data-title="Movement cleaning priority card">
+              <div class="topic-top"><h3>Give each movement a priority card</h3><span class="tag decision">Season use</span></div>
+              <ul>
+                <li>Top musical arrival.</li>
+                <li>Top visual arrival.</li>
+                <li>Weakest/highest-cost transition.</li>
+                <li>Greatest simultaneous-demand risk.</li>
+                <li>Defining general-effect moment.</li>
+                <li>Student ownership target.</li>
+              </ul>
+            </article>
+            <article class="topic" data-topic="completion-rule" data-title="Define completion and revisit rules">
+              <div class="topic-top"><h3>Know when the rep sequence is done</h3><span class="tag core">Pacing</span></div>
+              <ul>
+                <li>State the number or purpose of repetitions.</li>
+                <li>Do not restart for every error.</li>
+                <li>Record unresolved items instead of hiding them in overtime.</li>
+                <li>Move on when the block's evidence threshold is met.</li>
+                <li>Return through planned retrieval, not anxious rehashing.</li>
+              </ul>
+            </article>
+          </div>
+          <div class="page-jump"><button data-next="effect">← Design & general effect</button><button data-next="leadership">Next: Distributed leadership →</button></div>
+        </section>
+
+        <section class="page" data-page="leadership">
+          <div class="page-header">
+            <div>
+              <p class="page-kicker">Organizational capability</p>
+              <h2>Leadership is chosen contribution, not a ladder.</h2>
+              <p class="page-intro">Students become leaders by noticing a real need, choosing to serve it, developing capability, and earning trust through action. Roles can emerge without requiring a rigid hierarchy.</p>
+            </div>
+            <div class="page-number">08</div>
+          </div>
+          <div class="lead">
+            <p><strong>Ashley adaptation:</strong> Preserve the strongest leadership research—service, communication, peer teaching, accountability, boundaries, and follow-through—without importing title-heavy selection systems that conflict with Rob's practice.</p>
+          </div>
+
+          <div class="grid">
+            <article class="topic" data-topic="leadership-invitation" data-title="Leadership through voluntary contribution">
+              <div class="topic-top"><h3>Begin with invitation</h3><span class="tag core">Philosophy</span></div>
+              <div class="sequence">
+                <span>Notice</span><i>→</i><span>Choose</span><i>→</i><span>Commit</span><i>→</i><span>Contribute</span><i>→</i><span>Improve</span><i>→</i><span>Earn trust</span>
+              </div>
+              <p>Leadership exists wherever someone accepts responsibility for helping the ensemble function.</p>
+            </article>
+            <article class="topic" data-topic="role-definition" data-title="Define leadership roles by problem and boundary">
+              <div class="topic-top"><h3>Define a role without creating rank</h3><span class="tag core">Structure</span></div>
+              <p>Every useful role answers:</p>
+              <ul>
+                <li>What problem or need does this serve?</li>
+                <li>What may this person initiate or decide?</li>
+                <li>What support and training are available?</li>
+                <li>What must be escalated?</li>
+                <li>What evidence shows the role is helping?</li>
+              </ul>
+            </article>
+            <article class="topic" data-topic="leadership-domains" data-title="Possible distributed leadership domains">
+              <div class="topic-top"><h3>Let roles emerge around work</h3><span class="tag decision">Candidate pool</span></div>
+              <ul>
+                <li>New-member connection and belonging.</li>
+                <li>Equipment, setup, and reset readiness.</li>
+                <li>Visual or musical peer-practice support.</li>
+                <li>UDB and drill-information help.</li>
+                <li>Hydration, shade, and pacing awareness.</li>
+                <li>Communication acknowledgement and questions.</li>
+                <li>Section morale and “who needs help?” noticing.</li>
+              </ul>
+            </article>
+            <article class="topic" data-topic="leadership-training" data-title="Leadership training targets">
+              <div class="topic-top"><h3>Train the behavior, not the title</h3><span class="tag core">Curriculum</span></div>
+              <ul>
+                <li>Ask before commanding.</li>
+                <li>Give specific, private, behavior-focused feedback.</li>
+                <li>Model, observe, and debrief peer teaching.</li>
+                <li>Repair effects instead of seeking punishment.</li>
+                <li>Recognize the limits of one's authority.</li>
+                <li>Escalate safety, harassment, sensitive information, and repeated conflict.</li>
+              </ul>
+            </article>
+            <article class="topic" data-topic="leadership-release" data-title="Leadership release and adult coaching">
+              <div class="topic-top"><h3>Release real work gradually</h3><span class="tag core">Ownership</span></div>
+              <ol>
+                <li>Adult names and models the function.</li>
+                <li>Student practices a narrow version.</li>
+                <li>Adult observes and gives feedback.</li>
+                <li>Student owns routine execution.</li>
+                <li>Adult remains available for exception and judgment.</li>
+              </ol>
+            </article>
+            <article class="topic" data-topic="leadership-boundaries" data-title="Student leadership boundaries">
+              <div class="topic-top"><h3>Protect the boundary</h3><span class="tag core">Non-negotiable</span></div>
+              <p>Students should not independently handle discipline consequences, family/private information, money, medical decisions, bullying/harassment, or emotionally loaded peer conflict.</p>
+              <p>They are contributors and developing leaders—not substitute directors.</p>
+            </article>
+          </div>
+
+          <h3 class="section-title">A lightweight cadence</h3>
+          <article class="topic" data-topic="leadership-cadence" data-title="Distributed leadership weekly cadence">
+            <div class="topic-top"><h3>Keep leadership attached to current work</h3><span class="tag decision">Possible system</span></div>
+            <ul>
+              <li><strong>Opening:</strong> What needs to work this week?</li>
+              <li><strong>Choose:</strong> Who wants to contribute to which need?</li>
+              <li><strong>Clarify:</strong> authority, support, and boundary.</li>
+              <li><strong>Act:</strong> complete real work during rehearsal and operations.</li>
+              <li><strong>Reflect:</strong> what helped, what needs repair, what should change?</li>
+            </ul>
+          </article>
+          <div class="page-jump"><button data-next="cleaning">← Cleaning & readiness</button><button data-next="operations">Next: Season operations →</button></div>
+        </section>
+
+        <section class="page" data-page="operations">
+          <div class="page-header">
+            <div>
+              <p class="page-kicker">Separate operational track</p>
+              <h2>Protect rehearsal by managing the season outside it.</h2>
+              <p class="page-intro">These systems matter, but they should not crowd the curriculum-design conversation. Keep one operational view that prevents logistics and uncertainty from consuming teaching time.</p>
+            </div>
+            <div class="page-number">09</div>
+          </div>
+          <div class="lead">
+            <p><strong>Operating principle:</strong> Most recurring emergencies are unmanaged context, unclear ownership, late communication, or missing checkpoints—not failures of musical expertise.</p>
+          </div>
+
+          <div class="grid">
+            <article class="topic" data-topic="season-control" data-title="One season control view">
+              <div class="topic-top"><h3>Create one season-control view</h3><span class="tag core">Administration</span></div>
+              <ul>
+                <li>Show idea and design intent.</li>
+                <li>Musical and visual non-negotiables.</li>
+                <li>Top effect moments and risk points.</li>
+                <li>Weekly pacing targets.</li>
+                <li>Staff ownership lanes.</li>
+                <li>Open design and logistics dependencies.</li>
+                <li>Safety, communication, and event priorities.</li>
+              </ul>
+            </article>
+            <article class="topic" data-topic="design-dependencies" data-title="Separate design dependencies from student work">
+              <div class="topic-top"><h3>Track design dependencies</h3><span class="tag core">Protection</span></div>
+              <p>Keep a short list of items waiting on music, drill, guard, props, electronics, or logistics. For each, identify what students can productively improve now.</p>
+            </article>
+            <article class="topic" data-topic="staff-lanes" data-title="Staff observation and ownership lanes">
+              <div class="topic-top"><h3>Give staff visible lanes</h3><span class="tag decision">Before camp</span></div>
+              <ul>
+                <li>Tower / ensemble perception.</li>
+                <li>Pulse and timing.</li>
+                <li>Field-level music.</li>
+                <li>Field-level visual.</li>
+                <li>Percussion/guard/equipment specialty.</li>
+                <li>Pacing, hydration, and fatigue awareness.</li>
+              </ul>
+              <p>Name both the job and the boundary.</p>
+            </article>
+            <article class="topic" data-topic="communication-chain" data-title="Communication chain">
+              <div class="topic-top"><h3>Use a communication chain</h3><span class="tag reference">Operational</span></div>
+              <p>For every consequential item: who needs to know, what, by when, through which channel, who owns the update, and where the official version lives?</p>
+            </article>
+            <article class="topic" data-topic="risk-prevention" data-title="Prevent predictable fires">
+              <div class="topic-top"><h3>Manage predictable risk early</h3><span class="tag core">Operational</span></div>
+              <ul>
+                <li>Calendar and facility conflicts.</li>
+                <li>Transportation and equipment details.</li>
+                <li>Parent/staff uncertainty.</li>
+                <li>Supplies, money, or electronics ownership.</li>
+                <li>Eligibility and academic support.</li>
+                <li>Heat, medical, and emergency readiness.</li>
+              </ul>
+            </article>
+            <article class="topic" data-topic="parked-topics" data-title="Useful topics intentionally parked">
+              <div class="topic-top"><h3>Keep lower-priority systems available</h3><span class="tag reference">Reference shelf</span></div>
+              <p>Useful but not central to the current curriculum pass:</p>
+              <ul>
+                <li>Electronics/amplification system.</li>
+                <li>Contest sheets and warmup framing.</li>
+                <li>Football-game experience.</li>
+                <li>Recruiting and retention.</li>
+                <li>Long-range purchasing and resources.</li>
+                <li>Traditional titled leadership structures.</li>
+              </ul>
+            </article>
+          </div>
+          <div class="page-jump"><button data-next="leadership">← Distributed leadership</button><button data-next="review">Next: Decision review →</button></div>
+        </section>
+
+        <section class="page" data-page="review">
+          <div class="page-header">
+            <div>
+              <p class="page-kicker">Your working decisions</p>
+              <h2>Turn reading into a shortlist.</h2>
+              <p class="page-intro">This page gathers every concept you have marked. An unmarked concept is not a rejection; it simply has not been sorted yet.</p>
+            </div>
+            <div class="page-number">10</div>
+          </div>
+
+          <div class="review-summary">
+            <div class="review-stat"><strong id="countUse">0</strong><span>Use</span></div>
+            <div class="review-stat"><strong id="countExplore">0</strong><span>Explore</span></div>
+            <div class="review-stat"><strong id="countPark">0</strong><span>Park</span></div>
+            <div class="review-stat"><strong id="countOpen">0</strong><span>Unsorted</span></div>
+          </div>
+
+          <div class="grid">
+            <article class="topic" data-topic="review-first-pass" data-title="Suggested first pass through the handbook">
+              <div class="topic-top"><h3>Suggested first pass</h3><span class="tag core">Review order</span></div>
+              <ol>
+                <li>Outcome-focused rehearsal.</li>
+                <li>Design and general effect.</li>
+                <li>Drill learning and UDB.</li>
+                <li>Visual and musical capability.</li>
+                <li>Physical preparation.</li>
+                <li>Distributed leadership.</li>
+                <li>Season operations last.</li>
+              </ol>
+            </article>
+            <article class="topic" data-topic="review-next-build" data-title="What the next design pass should produce">
+              <div class="topic-top"><h3>What comes after review</h3><span class="tag decision">Next phase</span></div>
+              <ul>
+                <li>Approved capability and operating-system components.</li>
+                <li>End-of-camp evidence for each.</li>
+                <li>Week-level progression.</li>
+                <li>One rehearsal-block template.</li>
+                <li>Visual, music, drill, and leadership procedures.</li>
+                <li>A realistic workload and cut strategy.</li>
+              </ul>
+            </article>
+          </div>
+
+          <h3 class="section-title">Sorted concepts</h3>
+          <div class="review-list" id="reviewList"></div>
+          <div class="page-jump"><button data-next="operations">← Season operations</button><button data-next="sources">Next: Source shelf →</button></div>
+        </section>
+
+        <section class="page" data-page="sources">
+          <div class="page-header">
+            <div>
+              <p class="page-kicker">Quiet reference layer</p>
+              <h2>Sources are available when a question needs them.</h2>
+              <p class="page-intro">The main handbook intentionally minimizes citations. This shelf preserves the path back to the research without making source management part of ordinary reading.</p>
+            </div>
+            <div class="page-number">11</div>
+          </div>
+
+          <div class="source-group">
+            <h3>Core Band Camp working documents</h3>
+            <ul>
+              <li><a href="BAND-CAMP-OS.md">Ashley Band Camp OS</a></li>
+              <li><a href="SOURCE-CONVERSATION-SUMMARY.md">Original conversation summary</a></li>
+              <li><a href="VISUAL-CURRICULUM-SOURCES.md">Dynamic Marching source map</a></li>
+              <li><a href="VISUAL-PHYSICAL-RESEARCH-COLLECTION.md">Visual and physical research collection</a></li>
+              <li><a href="DRILL-LEARNING-RESEARCH-COLLECTION.md">Drill-learning research collection</a></li>
+              <li><a href="PHYSICAL-CONDITIONING-SOURCES.md">Forte source notes</a></li>
+            </ul>
+          </div>
+          <div class="source-group">
+            <h3>Archived primary material</h3>
+            <ul>
+              <li><a href="source-material/drill-learning/2023-Atkinson-ACDC-Drill-Learning.pdf">AC/DC drill-learning handout</a></li>
+              <li><a href="source-material/forte-athletics/SAMPLE-Marching-Strong-Rehearsal-Workout-System-2026.pdf">Forte Marching Strong free sample</a></li>
+              <li><a href="source-material/texas-bandmasters/TBA-MARCHING-BAND-114-SOURCE-SYNTHESIS.md">Complete 114-source TBA marching-band synthesis</a></li>
+              <li><a href="source-material/texas-bandmasters/tba-marching-band-season-planning.md">TBA season-planning synthesis</a></li>
+              <li><a href="source-material/texas-bandmasters/tba-ensemble-pedagogy.md">TBA ensemble-pedagogy synthesis</a></li>
+              <li><a href="source-material/texas-bandmasters/tba-student-leadership.md">TBA student-leadership synthesis</a></li>
+              <li><a href="source-material/texas-bandmasters/tba-program-management.md">TBA program-management synthesis</a></li>
+            </ul>
+          </div>
+          <div class="source-group">
+            <h3>Useful external starting points</h3>
+            <ul>
+              <li><a href="https://apps.texasbandmasters.org/archives/pdfs/clinic/2023_atkinson.pdf" target="_blank" rel="noopener">TBA / UDB AC/DC clinic handout</a></li>
+              <li><a href="https://www.kennesaw.edu/marching-owls/athletic-bands/marching-handbook.php" target="_blank" rel="noopener">Kennesaw State marching handbook</a></li>
+              <li><a href="https://apps.texasbandmasters.org/archives/pdfs/clinic/2003-troyka1.pdf" target="_blank" rel="noopener">Troyka drill-learning and rehearsal process</a></li>
+              <li><a href="https://help.ultimatedrillbook.com/kb/guide/en/selecting-a-performer-nIBTod4cJI/Steps/1236912" target="_blank" rel="noopener">UDB performer information guide</a></li>
+              <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8010928/" target="_blank" rel="noopener">Marching-band heat research</a></li>
+              <li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8133317/" target="_blank" rel="noopener">Post-exercise stretching evidence review</a></li>
+            </ul>
+            <p class="source-note">The detailed research collections contain additional direct links by topic.</p>
+          </div>
+          <div class="source-group">
+            <h3>What was deliberately de-emphasized</h3>
+            <p>Repeated article summaries, detailed citation trails, product marketing, traditional leadership-ranking advice, military-style technique, specialized electronics and contest material, and medical/exercise claims beyond the evidence boundary remain available in source material but do not lead the handbook.</p>
+          </div>
+          <div class="page-jump"><button data-next="review">← Decision review</button><button data-next="start">Return to start ↺</button></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    (() => {
+      const storageKey = "ashley-band-camp-handbook-v1";
+      const pages = [...document.querySelectorAll(".page")];
+      const navButtons = [...document.querySelectorAll("[data-target]")];
+      const topics = [...document.querySelectorAll(".topic[data-topic]")];
+      const sidebar = document.getElementById("sidebar");
+      const menuButton = document.getElementById("menuButton");
+      const search = document.getElementById("search");
+      const searchResults = document.getElementById("searchResults");
+      let state = { decisions: {}, notes: {} };
+
+      try {
+        const saved = JSON.parse(localStorage.getItem(storageKey) || "{}");
+        state = { decisions: saved.decisions || {}, notes: saved.notes || {} };
+      } catch (_) {}
+
+      const save = () => {
+        try { localStorage.setItem(storageKey, JSON.stringify(state)); } catch (_) {}
+      };
+
+      const pageTitle = page => page.querySelector("h2")?.textContent.trim() || page.dataset.page;
+
+      const decisionTools = topic => {
+        const id = topic.dataset.topic;
+        const wrap = document.createElement("details");
+        wrap.className = "decision-tools";
+        const summary = document.createElement("summary");
+        summary.textContent = "Your decision";
+        wrap.appendChild(summary);
+
+        const row = document.createElement("div");
+        row.className = "decision-row";
+        [
+          ["use", "Use"],
+          ["explore", "Explore"],
+          ["park", "Park"],
+          ["", "Clear"]
+        ].forEach(([choice, label]) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "decision-button";
+          button.dataset.choice = choice;
+          button.textContent = label;
+          button.addEventListener("click", () => {
+            if (choice) state.decisions[id] = choice;
+            else delete state.decisions[id];
+            save();
+            applyTopicState(topic);
+            updateProgress();
+            updateReview();
+          });
+          row.appendChild(button);
+        });
+        wrap.appendChild(row);
+
+        const noteLabel = document.createElement("label");
+        noteLabel.className = "note-toggle";
+        noteLabel.textContent = "Private note";
+        const note = document.createElement("textarea");
+        note.className = "note";
+        note.placeholder = "What interests you, what would need to change, or why this is not a fit…";
+        note.value = state.notes[id] || "";
+        note.setAttribute("aria-label", `Note for ${topic.dataset.title}`);
+        note.addEventListener("input", () => {
+          if (note.value.trim()) state.notes[id] = note.value;
+          else delete state.notes[id];
+          save();
+        });
+        wrap.append(noteLabel, note);
+        topic.appendChild(wrap);
+      };
+
+      const applyTopicState = topic => {
+        const selected = state.decisions[topic.dataset.topic] || "";
+        topic.dataset.state = selected;
+        topic.querySelectorAll(".decision-button").forEach(button => {
+          button.classList.toggle("selected", button.dataset.choice === selected && selected !== "");
+        });
+      };
+
+      topics.forEach(topic => {
+        decisionTools(topic);
+        applyTopicState(topic);
+      });
+
+      const navigate = (name, focusId) => {
+        const valid = pages.some(page => page.dataset.page === name);
+        const targetName = valid ? name : "start";
+        pages.forEach(page => page.classList.toggle("active", page.dataset.page === targetName));
+        navButtons.forEach(button => button.classList.toggle("active", button.dataset.target === targetName));
+        history.replaceState(null, "", `#${targetName}${focusId ? `/${focusId}` : ""}`);
+        document.title = `${pageTitle(pages.find(page => page.dataset.page === targetName))} | Ashley Band Camp`;
+        sidebar.classList.remove("open");
+        menuButton.setAttribute("aria-expanded", "false");
+        window.scrollTo({ top: 0, behavior: "instant" });
+        if (targetName === "review") updateReview();
+        if (focusId) {
+          requestAnimationFrame(() => {
+            const element = document.querySelector(`[data-topic="${CSS.escape(focusId)}"]`);
+            if (element) {
+              element.scrollIntoView({ behavior: "smooth", block: "center" });
+              element.animate([{ backgroundColor: "#fff0c9" }, { backgroundColor: "#fffdf8" }], { duration: 1200 });
+            }
+          });
+        }
+      };
+
+      navButtons.forEach(button => button.addEventListener("click", () => navigate(button.dataset.target)));
+      document.querySelectorAll("[data-next]").forEach(button => button.addEventListener("click", () => navigate(button.dataset.next)));
+      menuButton.addEventListener("click", () => {
+        const open = sidebar.classList.toggle("open");
+        menuButton.setAttribute("aria-expanded", String(open));
+      });
+
+      const updateProgress = () => {
+        const reviewed = Object.keys(state.decisions).filter(id => topics.some(topic => topic.dataset.topic === id)).length;
+        const percent = topics.length ? Math.round((reviewed / topics.length) * 100) : 0;
+        document.getElementById("progressText").textContent = `${percent}%`;
+        document.getElementById("progressBar").style.width = `${percent}%`;
+      };
+
+      const updateReview = () => {
+        const counts = { use: 0, explore: 0, park: 0 };
+        Object.values(state.decisions).forEach(choice => { if (counts[choice] !== undefined) counts[choice]++; });
+        document.getElementById("countUse").textContent = counts.use;
+        document.getElementById("countExplore").textContent = counts.explore;
+        document.getElementById("countPark").textContent = counts.park;
+        document.getElementById("countOpen").textContent = Math.max(0, topics.length - counts.use - counts.explore - counts.park);
+
+        const list = document.getElementById("reviewList");
+        list.replaceChildren();
+        const sorted = topics
+          .filter(topic => state.decisions[topic.dataset.topic])
+          .sort((a, b) => {
+            const order = { use: 0, explore: 1, park: 2 };
+            return order[state.decisions[a.dataset.topic]] - order[state.decisions[b.dataset.topic]]
+              || a.dataset.title.localeCompare(b.dataset.title);
+          });
+        if (!sorted.length) {
+          const empty = document.createElement("div");
+          empty.className = "empty";
+          empty.textContent = "No concepts sorted yet. Use the decision controls throughout the handbook.";
+          list.appendChild(empty);
+          return;
+        }
+        sorted.forEach(topic => {
+          const choice = state.decisions[topic.dataset.topic];
+          const page = topic.closest(".page").dataset.page;
+          const item = document.createElement("div");
+          item.className = "review-item";
+          const stateLabel = document.createElement("span");
+          stateLabel.className = "state";
+          stateLabel.textContent = choice;
+          stateLabel.style.color = choice === "use" ? "#237c78" : choice === "explore" ? "#8a640c" : "#6f7b84";
+          const text = document.createElement("div");
+          const strong = document.createElement("strong");
+          strong.textContent = topic.dataset.title;
+          text.appendChild(strong);
+          if (state.notes[topic.dataset.topic]) {
+            const note = document.createElement("small");
+            note.style.display = "block";
+            note.style.color = "#607080";
+            note.textContent = state.notes[topic.dataset.topic];
+            text.appendChild(note);
+          }
+          const go = document.createElement("button");
+          go.type = "button";
+          go.textContent = "Open";
+          go.addEventListener("click", () => navigate(page, topic.dataset.topic));
+          item.append(stateLabel, text, go);
+          list.appendChild(item);
+        });
+      };
+
+      const runSearch = () => {
+        const query = search.value.trim().toLowerCase();
+        searchResults.replaceChildren();
+        if (query.length < 2) {
+          searchResults.classList.remove("open");
+          return;
+        }
+        const matches = topics
+          .map(topic => ({
+            topic,
+            title: topic.dataset.title,
+            page: topic.closest(".page"),
+            text: topic.textContent.toLowerCase()
+          }))
+          .filter(item => item.text.includes(query))
+          .slice(0, 12);
+        if (!matches.length) {
+          const empty = document.createElement("div");
+          empty.className = "empty";
+          empty.textContent = "No matching concepts.";
+          searchResults.appendChild(empty);
+        } else {
+          matches.forEach(item => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "search-result";
+            const strong = document.createElement("strong");
+            strong.textContent = item.title;
+            const small = document.createElement("small");
+            small.textContent = pageTitle(item.page);
+            button.append(strong, small);
+            button.addEventListener("click", () => {
+              search.value = "";
+              searchResults.classList.remove("open");
+              navigate(item.page.dataset.page, item.topic.dataset.topic);
+            });
+            searchResults.appendChild(button);
+          });
+        }
+        searchResults.classList.add("open");
+      };
+
+      search.addEventListener("input", runSearch);
+      search.addEventListener("keydown", event => {
+        if (event.key === "Escape") {
+          search.value = "";
+          searchResults.classList.remove("open");
+        }
+      });
+      document.addEventListener("click", event => {
+        if (!event.target.closest(".search-wrap")) searchResults.classList.remove("open");
+      });
+
+      let detailsOpen = false;
+      document.getElementById("openAll").addEventListener("click", event => {
+        detailsOpen = !detailsOpen;
+        document.querySelectorAll(".page.active details:not(.decision-tools)").forEach(detail => detail.open = detailsOpen);
+        event.currentTarget.textContent = detailsOpen ? "Close details" : "Open details";
+      });
+
+      window.addEventListener("hashchange", () => {
+        const [page, topic] = location.hash.slice(1).split("/");
+        navigate(page, topic);
+      });
+
+      const [initialPage, initialTopic] = location.hash.slice(1).split("/");
+      updateProgress();
+      updateReview();
+      navigate(initialPage || "start", initialTopic);
+    })();
+  </script>
+</body>
+</html>

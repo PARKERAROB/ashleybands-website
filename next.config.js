@@ -15,6 +15,11 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      {
+        source: "/band-camp-handbook",
+        destination: "/resources/band-camp/handbook.html",
+        permanent: false
+      },
       { source: "/info/corporate-sponsorship", destination: "/sponsors", permanent: true },
       { source: "/info/family-sponsorship", destination: "/sponsors", permanent: true },
       // Retired routes (IA cleanup 2026-05-29). /members was a dead placeholder.
