@@ -1,9 +1,9 @@
 import LeadershipBriefClient from "./LeadershipBriefClient";
 
 export const metadata = {
-  title: "Leadership Brief | Bands of AHS",
+  title: "Regiment OS: where we are | Bands of AHS",
   description:
-    "Where the 2026 marching band operating system stands, what is settled, and what is still open.",
+    "Leadership review copy. Every decision made so far, the two hierarchies, the rehearsal day block by block, and the full library of terms.",
   robots: { index: false, follow: false },
 };
 
