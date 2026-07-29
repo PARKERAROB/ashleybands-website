@@ -1,0 +1,25 @@
+{
+  "_note": "Area rails, ported from the retired RobOS user-level layer 2026-07-29 (workshop#24). This is the one Area with a live public surface, so its irreversible mistakes are real: a bad deploy is seen by families, and generated files hand-edited here are silently overwritten on the next build.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -c 'if ((.tool_input.command // \"\") | test(\"next dev|run dev|yarn dev|pnpm dev|bun dev\")) then {hookSpecificOutput:{hookEventName:\"PreToolUse\",additionalContext:\"DEV-SERVER: Rob reviews on the LIVE site by default. Ask before starting a dev server - confirm he wants localhost for this back-and-forth rather than a prod deploy. Once he has said yes, start it and give him the URL. Never start one unprompted just to show him a change; deploy to prod for that. Also: a preview deploy FAILS here (env vars are Production-scoped), so do not chase the code when vercel without --prod exits 1.\"}} else empty end' 2>/dev/null || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -c 'if ((.tool_input.file_path // \"\") | test(\"band-website/content/[^/]*[.]json$|public/calendar[.]ics$|public/calendar-data[.]json$\")) then {hookSpecificOutput:{hookEventName:\"PreToolUse\",additionalContext:\"GENERATED FILE - do not hand-edit. Page content is built from content/sources/*.md via npm run content:build. Calendar output is rendered from the events store. Editing the artifact means the next build silently reverts you. Edit the SOURCE and rebuild. See this repo CLAUDE.md.\"}} else empty end' 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  }
+}
