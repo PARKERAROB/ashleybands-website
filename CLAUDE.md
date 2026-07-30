@@ -52,3 +52,26 @@ Next.js + Vercel + Supabase. When in doubt, BDOS is the source of truth.
 - **Person-data reads/writes in admin routes call `logAudit`** (`lib/auditLog.js`). Every admin
   route that selects or mutates a person-data table logs actor + action; a logging failure never
   blocks the request, but the call itself is not optional.
+
+## Reading the portal database (standing permission, Rob 7/29)
+
+Rob granted standing permission to **query this database read-only** to answer questions about program
+data. Writes are not covered. Credentials: `.env.local` → `NEXT_PUBLIC_SUPABASE_URL` +
+`SUPABASE_SECRET_KEY`, used against the PostgREST endpoint `"$URL"/rest/v1/<table>?select=*`.
+
+**The trap, found 7/29: there are two student tables and measurements key to the wrong-looking one.**
+
+- `students` (the CSV-sourced roster: `first_name`, `last_name`, `instrument`, `student_email`)
+- `portal_students` (160 rows; the portal's own identity table: `legal_first`, `legal_last`,
+  `grade_fall26`, `mb_role_2026`, `family_confirmed_at`)
+
+`portal_student_measurements.student_id` → **`portal_students.id`**, not `students.id`. All 49
+measurement rows resolve against `portal_students` and none against `students`. Querying by a `students`
+id returns zero and looks exactly like "the student never submitted." Verified: Joshua Worley returned 0
+rows keyed by `students.id` and 1 row keyed by `portal_students.id`.
+
+`source` on a measurement row tells you how it arrived — `portal_self_edit` means the family entered it
+themselves through the portal.
+
+**When reporting on a minor, report presence and provenance, not the numbers.** Whether measurements
+exist, and when they were submitted, is the answer to the question. Body measurements are not.
