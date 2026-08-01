@@ -28,7 +28,8 @@ export function StaffLogin({ onAuthed }) {
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const login = async () => {
+  const login = async (event) => {
+    event?.preventDefault();
     setErr("");
     setBusy(true);
     try {
@@ -50,27 +51,37 @@ export function StaffLogin({ onAuthed }) {
   };
 
   return (
-    <div style={{ maxWidth: 400, margin: "100px auto", padding: "0 16px", fontFamily: "system-ui, sans-serif" }}>
+    <form onSubmit={login} style={{ maxWidth: 400, margin: "100px auto", padding: "0 16px", fontFamily: "system-ui, sans-serif" }}>
       <h2>Staff Login</h2>
+      <label htmlFor="staff-email" style={loginLabel}>Email</label>
       <input
-        placeholder="Email"
+        id="staff-email"
+        name="email"
+        type="email"
+        autoComplete="email"
+        required
         value={form.email}
         onChange={(e) => setForm({ ...form, email: e.target.value })}
         style={loginInput}
       />
+      <label htmlFor="staff-pin" style={{ ...loginLabel, marginTop: 12 }}>PIN</label>
       <input
-        placeholder="PIN"
+        id="staff-pin"
+        name="pin"
         type="password"
+        inputMode="numeric"
+        autoComplete="current-password"
+        required
         value={form.pin}
         onChange={(e) => setForm({ ...form, pin: e.target.value })}
-        onKeyDown={(e) => e.key === "Enter" && login()}
-        style={{ ...loginInput, marginTop: 8 }}
+        style={loginInput}
       />
-      {err && <p style={{ color: "#e74c3c", fontSize: 13 }}>{err}</p>}
-      <button onClick={login} disabled={busy} style={loginBtn}>{busy ? "Signing in…" : "Sign In"}</button>
-    </div>
+      {err && <p style={{ color: "#a3242f", fontSize: 13 }} aria-live="polite">{err}</p>}
+      <button type="submit" disabled={busy} style={loginBtn}>{busy ? "Signing in…" : "Sign In"}</button>
+    </form>
   );
 }
 
+const loginLabel = { display: "block", marginBottom: 5, fontSize: 13, fontWeight: 700, color: "#4b584d" };
 const loginInput = { boxSizing: "border-box", width: "100%", padding: "10px 12px", fontSize: 14, border: "1px solid #ccc", borderRadius: 6, fontFamily: "system-ui, sans-serif" };
 const loginBtn = { marginTop: 12, width: "100%", padding: "10px 16px", fontSize: 14, fontWeight: 600, border: "none", borderRadius: 6, color: "#fff", background: "#7b1829", cursor: "pointer" };

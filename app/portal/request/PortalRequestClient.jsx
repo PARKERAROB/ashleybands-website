@@ -24,44 +24,54 @@ export default function PortalRequestClient() {
     event.preventDefault();
     setStatus("sending");
     setMessage("");
-    const res = await fetch("/api/portal/request", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form)
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) {
+    try {
+      const res = await fetch("/api/portal/request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form)
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setStatus("error");
+        setMessage(data.error || "Could not submit the request.");
+        return;
+      }
+      setStep("code");
+      setStatus("idle");
+      setMessage("We emailed a 6-digit code to verify your email. Enter it below - it expires in 30 minutes.");
+    } catch {
       setStatus("error");
-      setMessage(data.error || "Could not submit the request.");
-      return;
+      setMessage("We could not reach the portal. Check your connection and try again.");
     }
-    setStep("code");
-    setStatus("idle");
-    setMessage("We emailed a 6-digit code to verify your email. Enter it below — it expires in 30 minutes.");
   }
 
   async function verify(event) {
     event.preventDefault();
     setStatus("verifying");
     setMessage("");
-    const res = await fetch("/api/portal/request/confirm", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: guardianEmail, code })
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) {
+    try {
+      const res = await fetch("/api/portal/request/confirm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: guardianEmail, code })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setStatus("error");
+        setMessage(data.error || "That code did not work. Try again.");
+        return;
+      }
+      setStep("done");
+      setStatus("idle");
+      setMessage(
+        data.granted
+          ? "You're all set - your account is connected. Sign in from the portal page with this email any time."
+          : "Your email is verified, but we couldn't automatically match that student on the roster. Mr. Parker will follow up with you."
+      );
+    } catch {
       setStatus("error");
-      setMessage(data.error || "That code did not work. Try again.");
-      return;
+      setMessage("We could not reach the portal. Check your connection and try again.");
     }
-    setStep("done");
-    setStatus("idle");
-    setMessage(
-      data.granted
-        ? "You're all set - your account is connected. Sign in from the portal page with this email any time."
-        : "Your email is verified, but we couldn't automatically match that student on the roster. Mr. Parker will follow up with you."
-    );
   }
 
   function update(field, value) {
@@ -77,7 +87,7 @@ export default function PortalRequestClient() {
         {step === "form" ? (
           <>
             <p className="portal-copy">
-              Use this when your email is new or not connected to the right student yet. Verify your email and you are connected right away.
+              Use this when your email is new or not connected to the right student yet. If the student matches the roster, you&apos;ll be connected as soon as your email is verified. If not, Mr. Parker will follow up.
             </p>
             <form className="portal-request-form" onSubmit={submit}>
               <label>
@@ -168,7 +178,7 @@ export default function PortalRequestClient() {
           </p>
         ) : null}
 
-        {message ? <p className={`portal-message ${status === "error" ? "error" : ""}`}>{message}</p> : null}
+        {message ? <p className={`portal-message ${status === "error" ? "error" : ""}`} aria-live="polite">{message}</p> : null}
       </section>
     </main>
   );

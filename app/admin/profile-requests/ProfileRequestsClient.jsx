@@ -74,7 +74,8 @@ export default function ProfileRequestsClient() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    setSession(readSession());
+    const timer = window.setTimeout(() => setSession(readSession()), 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   const load = useCallback(async () => {
@@ -94,7 +95,8 @@ export default function ProfileRequestsClient() {
   }, [session]);
 
   useEffect(() => {
-    load();
+    const timer = window.setTimeout(load, 0);
+    return () => window.clearTimeout(timer);
   }, [load]);
 
   if (!session) {
@@ -119,7 +121,15 @@ export default function ProfileRequestsClient() {
             <p className="portal-copy">Audit log of parent portal changes. These auto-approve on submit (families control them via login) - this is the record, not an approval gate.</p>
             <p className="portal-copy">Signed in as {session.display_name}</p>
           </div>
-          <button type="button" className="sponsors-btn" onClick={() => { writeSession(null); setSession(null); }}>
+          <button
+            type="button"
+            className="sponsors-btn"
+            onClick={() => {
+              fetch("/api/sponsors/staff-signout", { method: "POST" }).catch(() => {});
+              writeSession(null);
+              setSession(null);
+            }}
+          >
             Log out
           </button>
         </header>

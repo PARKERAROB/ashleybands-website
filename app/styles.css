@@ -126,6 +126,59 @@ body {
   z-index: 1;
 }
 
+/* Family portal is the primary family operations door, not a footer-only link. */
+.family-portal-callout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(24px, 5vw, 72px);
+  padding: clamp(30px, 4vw, 48px) clamp(18px, 5vw, 72px);
+  background: var(--garnet-dark);
+  color: var(--paper-strong);
+}
+
+.family-portal-callout > div {
+  max-width: 760px;
+}
+
+.family-portal-label {
+  margin: 0 0 8px;
+  color: var(--gold);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.family-portal-callout h2 {
+  margin-bottom: 10px;
+  color: var(--paper-strong);
+  text-wrap: balance;
+}
+
+.family-portal-callout p:last-child {
+  max-width: 68ch;
+  margin: 0;
+  color: rgba(255, 250, 240, 0.86);
+}
+
+.family-portal-cta {
+  flex: 0 0 auto;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 18px;
+  border-radius: 8px;
+  background: var(--paper-strong);
+  color: var(--garnet-dark);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.family-portal-cta:hover {
+  background: var(--gold);
+  color: #211a08;
+}
+
 .chat-hero-inner {
   position: relative;
   z-index: 2;
@@ -1004,6 +1057,18 @@ h2 {
 
   nav a {
     padding: 6px 8px;
+  }
+
+  .site-header nav a,
+  .site-header .nav-signout {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .family-portal-callout {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .hero,
@@ -2722,15 +2787,15 @@ h2 {
   border: 1px solid #d8dfd2;
   border-radius: 8px;
   padding: 32px;
-  box-shadow: 0 12px 30px rgba(23, 32, 24, 0.08);
 }
 .portal-panel-wide {
   max-width: 920px;
 }
 .portal-panel h1 {
   margin: 0 0 12px;
-  font-size: clamp(2rem, 5vw, 3.4rem);
+  font-size: 2.5rem;
   line-height: 1;
+  text-wrap: balance;
 }
 .portal-panel h2,
 .portal-panel h3 {
@@ -2915,6 +2980,9 @@ h2 {
   }
   .portal-panel {
     padding: 22px;
+  }
+  .portal-panel h1 {
+    font-size: 2rem;
   }
   .portal-row {
     grid-template-columns: 1fr;

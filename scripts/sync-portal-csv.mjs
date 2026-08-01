@@ -273,11 +273,84 @@ async function applySync() {
   const run = await insertSyncRun();
   try {
     const syncId = run.id;
-    const studentRows = portalStudents.map((row) => ({ ...row, last_seen_sync_id: syncId }));
-    await upsert("portal_students", studentRows, "source_student_id");
+    // The roster owns program facts, but family-entered contact values and any
+    // approved-yet-unmerged profile edits must survive a roster refresh. Load
+    // the hosted overlay before writing so the sync cannot roll those back.
+    const [{ data: existingStudents, error: existingStudentError }, { data: existingPeople, error: existingPeopleError }, { data: openFamilyUpdates, error: familyUpdateError }] = await Promise.all([
+      supabase
+        .from("portal_students")
+        .select("id, source_student_id, preferred_first, display_name, school_email, cell_phone"),
+      supabase
+        .from("portal_people")
+        .select("id, source_person_key, display_name, first_name, last_name"),
+      supabase
+        .from("portal_update_requests")
+        .select("student_id, target_id, field_name")
+        .eq("status", "approved")
+        .in("field_name", ["student_preferred_first", "person_display_name"])
+    ]);
+    if (existingStudentError) throw existingStudentError;
+    if (existingPeopleError) throw existingPeopleError;
+    if (familyUpdateError) throw familyUpdateError;
 
-    const personRows = portalPeople.map((row) => ({ ...row, last_seen_sync_id: syncId }));
-    await upsert("portal_people", personRows, "source_person_key");
+    const existingStudentBySource = new Map((existingStudents || []).map((row) => [row.source_student_id, row]));
+    const existingPersonBySource = new Map((existingPeople || []).map((row) => [row.source_person_key, row]));
+    const protectedStudentIds = new Set(
+      (openFamilyUpdates || [])
+        .filter((row) => row.field_name === "student_preferred_first" && row.student_id)
+        .map((row) => row.student_id)
+    );
+    const protectedPersonIds = new Set(
+      (openFamilyUpdates || [])
+        .filter((row) => row.field_name === "person_display_name" && row.target_id)
+        .map((row) => row.target_id)
+    );
+
+    const existingStudentRows = [];
+    const newStudentRows = [];
+    for (const row of portalStudents) {
+      const existing = existingStudentBySource.get(row.source_student_id);
+      if (!existing) {
+        newStudentRows.push({ ...row, last_seen_sync_id: syncId });
+        continue;
+      }
+
+      // Omit both contact columns for existing rows. `null` would erase a phone
+      // number the family entered in the portal, which is exactly what the
+      // 2026-07-10 contact-value guard is meant to prevent.
+      const safeRow = { ...row };
+      delete safeRow.school_email;
+      delete safeRow.cell_phone;
+      if (protectedStudentIds.has(existing.id)) {
+        safeRow.preferred_first = existing.preferred_first;
+        safeRow.display_name = [existing.preferred_first || safeRow.legal_first, safeRow.legal_last]
+          .filter(Boolean)
+          .join(" ")
+          .trim() || existing.display_name;
+      }
+      existingStudentRows.push({ ...safeRow, last_seen_sync_id: syncId });
+    }
+    await upsert("portal_students", existingStudentRows, "source_student_id");
+    await upsert("portal_students", newStudentRows, "source_student_id");
+
+    const existingPersonRows = [];
+    const newPersonRows = [];
+    for (const row of portalPeople) {
+      const existing = existingPersonBySource.get(row.source_person_key);
+      if (!existing) {
+        newPersonRows.push({ ...row, last_seen_sync_id: syncId });
+        continue;
+      }
+      const safeRow = { ...row, last_seen_sync_id: syncId };
+      if (protectedPersonIds.has(existing.id)) {
+        safeRow.display_name = existing.display_name;
+        safeRow.first_name = existing.first_name;
+        safeRow.last_name = existing.last_name;
+      }
+      existingPersonRows.push(safeRow);
+    }
+    await upsert("portal_people", existingPersonRows, "source_person_key");
+    await upsert("portal_people", newPersonRows, "source_person_key");
 
     const [{ data: dbStudents }, { data: dbPeople }] = await Promise.all([
       supabase.from("portal_students").select("id, source_student_id"),
@@ -324,6 +397,10 @@ async function applySync() {
     } else {
       console.log(`contact_methods: SKIPPED ${contactRows.length} rows (family-owned since 2026-07-10; see compliance guard)`);
     }
+    console.log(
+      `family overlay: preserved contact columns on ${existingStudentRows.length} existing students; ` +
+      `${protectedStudentIds.size} open preferred-name edit(s); ${protectedPersonIds.size} open person-name edit(s)`
+    );
 
     await finishSyncRun(syncId, "completed", {
       students_seen: portalStudents.length,

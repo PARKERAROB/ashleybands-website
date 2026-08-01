@@ -10,7 +10,7 @@ const NAV_LINKS = [
   { href: "/info/2026-2027-band-information", label: "Info" },
   { href: "/info/marching-band-2026", label: "Marching Band" },
   { href: "/calendar", label: "Calendar" },
-  { href: "/portal", label: "My Band", profile: true },
+  { href: "/portal", label: "Family Portal", profile: true },
   { href: "/sponsors", label: "Support" },
   { href: "/info/the-band-folder", label: "Resources" },
   { href: "/assistant", label: "Ask" }
@@ -26,13 +26,16 @@ export default function SiteNav() {
 
   useEffect(() => {
     let cancelled = false;
+    // Staff access is independent of the family session. Surface the Manage
+    // door immediately even if the family-session check is slow or unavailable.
+    queueMicrotask(() => {
+      if (!cancelled) setIsStaff(Boolean(readStaffSession()));
+    });
     fetch("/api/portal/session")
       .then((res) => (res.ok ? res.json() : { signedIn: false }))
       .then((data) => {
         if (cancelled) return;
         setSession(data || { signedIn: false });
-        // Staff session lives in localStorage, independent of the portal session.
-        setIsStaff(Boolean(readStaffSession()));
       })
       .catch(() => {});
     return () => {

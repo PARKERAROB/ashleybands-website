@@ -91,6 +91,20 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="family-portal-callout" aria-labelledby="family-portal-title">
+        <div>
+          <p className="family-portal-label">For Ashley Bands families</p>
+          <h2 id="family-portal-title">Keep your band information current.</h2>
+          <p>
+            Review family contacts and student details, track marching band funding and payments,
+            and check uniform measurements in one secure place.
+          </p>
+        </div>
+        <Link className="family-portal-cta" href="/portal">
+          Open Family Portal
+        </Link>
+      </section>
+
       <section className="photo-band">
         <div className="photo-band-img-wrap">
           <Image

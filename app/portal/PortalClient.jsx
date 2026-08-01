@@ -30,50 +30,60 @@ export default function PortalClient() {
     event.preventDefault();
     setStatus("sending");
     setMessage("");
-    const res = await fetch("/api/portal/start", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email })
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) {
+    try {
+      const res = await fetch("/api/portal/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setStatus("error");
+        setMessage(data.error || "Something went wrong. Try again.");
+        return;
+      }
+      setStep("code");
+      setStatus("idle");
+      setMessage("If that email is in the Ashley Bands profile system, a 6-digit code is on the way. Enter it below.");
+    } catch {
       setStatus("error");
-      setMessage(data.error || "Something went wrong. Try again.");
-      return;
+      setMessage("We could not reach the portal. Check your connection and try again.");
     }
-    setStep("code");
-    setStatus("idle");
-    setMessage("If that email is in the Ashley Bands profile system, a 6-digit code is on the way. Enter it below.");
   }
 
   async function verifyCode(event) {
     event.preventDefault();
     setStatus("verifying");
     setMessage("");
-    const res = await fetch("/api/portal/session", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, code })
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) {
+    try {
+      const res = await fetch("/api/portal/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, code })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setStatus("error");
+        setMessage(data.error || "That code did not work. Try again or request a new one.");
+        return;
+      }
+      router.replace("/portal/review");
+    } catch {
       setStatus("error");
-      setMessage(data.error || "That code did not work. Try again or request a new one.");
-      return;
+      setMessage("We could not reach the portal. Check your connection and try again.");
     }
-    router.replace("/portal/review");
   }
 
   return (
     <main className="portal-shell">
       <section className="portal-panel">
         <p className="eyebrow">Ashley Bands</p>
-        <h1>Family Profile</h1>
+        <h1>Family Portal</h1>
 
         {step === "email" ? (
           <>
             <p className="portal-copy">
-              Enter the email address where you receive Ashley Bands messages. We&apos;ll email a 6-digit code if it matches a current profile record.
+              Review family contacts, student information, marching band funding, payments, and uniform measurements. Enter an email already connected to your family and we&apos;ll send a 6-digit code.
             </p>
             <form className="portal-form" onSubmit={sendCode}>
               <label htmlFor="portal-email">Email address</label>
@@ -135,9 +145,9 @@ export default function PortalClient() {
           </>
         )}
 
-        {message ? <p className={`portal-message ${status === "error" ? "error" : ""}`}>{message}</p> : null}
+        {message ? <p className={`portal-message ${status === "error" ? "error" : ""}`} aria-live="polite">{message}</p> : null}
         <p className="portal-footnote">
-          New email or family change? <Link href="/portal/request">Request profile access</Link>. Unknown access requests go through Mr. Parker&apos;s review before any private record is shown.
+          New email or another student to connect? <Link href="/portal/request">Request profile access</Link>. A verified email with a roster match connects immediately. If no roster match is found, Mr. Parker will follow up.
         </p>
       </section>
     </main>

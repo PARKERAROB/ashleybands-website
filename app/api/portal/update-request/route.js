@@ -177,7 +177,11 @@ async function applyMirrorWrite({ field, session, studentId, targetId, newValue 
   if (field === "student_preferred_first") {
     const { error } = await supabaseAdmin
       .from("portal_students")
-      .update({ preferred_first: newValue, updated_at: now })
+      .update({
+        preferred_first: newValue,
+        display_name: await studentDisplayName(studentId, newValue),
+        updated_at: now
+      })
       .eq("id", studentId);
     if (error) throw new Error(error.message);
     return;
@@ -190,6 +194,16 @@ async function applyMirrorWrite({ field, session, studentId, targetId, newValue 
       .eq("id", studentId);
     if (error) throw new Error(error.message);
   }
+}
+
+async function studentDisplayName(studentId, preferredFirst) {
+  const { data, error } = await supabaseAdmin
+    .from("portal_students")
+    .select("legal_first, legal_last")
+    .eq("id", studentId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return [preferredFirst || data?.legal_first, data?.legal_last].filter(Boolean).join(" ").trim();
 }
 
 async function hasTrustedStudentAccess(personId, studentId) {
