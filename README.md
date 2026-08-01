@@ -31,4 +31,15 @@ Optional question logging:
 
 ## Boundary
 
-This site is public by default. Do not publish student-specific details, internal BandsofAHS/RobOS working notes, financial balances, accommodation details, private decisions, or family-specific information.
+This site is public by default. Do not publish student-specific details, internal BandsofAHS working
+notes, financial balances, accommodation details, private decisions, or family-specific information.
+
+## AshleyBands integration
+
+- `npm run integration:doctor` checks calendar, generated content, instruments, portal drift,
+  provenance, and the public/private boundary without writing hosted data.
+- `npm run integration:sync` refreshes safe local projections. It does not write Supabase.
+- `npm run integration:doctor:online` additionally proves the live calendar matches the repository.
+
+Workspace paths resolve from the sibling `BandsofAHS` repository. Set `BANDSOFAHS_DIR` or
+`BAND_WEBSITE_DIR` only for a nonstandard checkout.

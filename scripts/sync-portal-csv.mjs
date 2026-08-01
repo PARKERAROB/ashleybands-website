@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Mirror BDOS canonical CSV records into the Family Portal Supabase tables.
+ * Mirror BandsofAHS canonical CSV records into the Family Portal Supabase tables.
  *
  * Dry-run by default:
  *   node scripts/sync-portal-csv.mjs
@@ -15,17 +15,20 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { createClient } from "@supabase/supabase-js";
+import { bandsofAHSDataDir, loadBandWebsiteEnv } from "./lib/workspace-paths.mjs";
 
-const BDOS_DATA_DIR = "/Users/parkerarob/Atlas/BandsofAHS/data";
+const BAND_DATA_DIR = bandsofAHSDataDir;
 const APPLY = process.argv.includes("--apply");
 const REPORT = process.argv.includes("--report");
+const CHECK = process.argv.includes("--check");
+const SUMMARY = process.argv.includes("--summary");
 
-loadLocalEnv();
+loadBandWebsiteEnv();
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
 const supabaseSecret = process.env.SUPABASE_SECRET_KEY;
 
-if ((APPLY || REPORT) && (!supabaseUrl || !supabaseSecret)) {
+if ((APPLY || REPORT || CHECK) && (!supabaseUrl || !supabaseSecret)) {
   console.error("Missing NEXT_PUBLIC_SUPABASE_URL and/or SUPABASE_SECRET_KEY in .env.local.");
   process.exit(1);
 }
@@ -36,7 +39,7 @@ const supabase = supabaseUrl && supabaseSecret
     })
   : null;
 
-if (REPORT) {
+if (REPORT && !CHECK && !APPLY) {
   const reportOk = await printReport();
   if (!reportOk && !APPLY) process.exit(1);
   if (!APPLY) process.exit(0);
@@ -202,15 +205,66 @@ console.log(`relationships=${dedupedRelationships.length}`);
 console.log(`contact_methods=${dedupedContactMethods.length}`);
 console.log(`conflicts=${conflicts.length}`);
 
-if (conflicts.length) {
+if (conflicts.length && !SUMMARY) {
   console.log("\nConflicts:");
   for (const conflict of conflicts.slice(0, 20)) console.log(JSON.stringify(conflict));
   if (conflicts.length > 20) console.log(`... ${conflicts.length - 20} more`);
 }
 
+if (CHECK) {
+  const mirrorCurrent = await checkMirror();
+  if (!APPLY) process.exit(mirrorCurrent ? 0 : 1);
+}
+
 if (!APPLY) {
   console.log("\nNo writes made. Re-run with --apply after migration 0006 is installed.");
   process.exit(0);
+}
+
+async function checkMirror() {
+  const [{ data: dbStudents, error: studentError }, { data: dbPeople, error: peopleError }] =
+    await Promise.all([
+      supabase.from("portal_students").select("source_student_id,source_row_hash"),
+      supabase.from("portal_people").select("source_person_key,source_row_hash")
+    ]);
+  if (studentError) throw studentError;
+  if (peopleError) throw peopleError;
+
+  const compare = (expectedRows, actualRows, key) => {
+    const expected = new Map(expectedRows.map((row) => [row[key], row.source_row_hash]));
+    const actual = new Map((actualRows || []).map((row) => [row[key], row.source_row_hash]));
+    let missing = 0;
+    let changed = 0;
+    for (const [id, hash] of expected) {
+      if (!actual.has(id)) missing += 1;
+      else if (actual.get(id) !== hash) changed += 1;
+    }
+    let extra = 0;
+    for (const id of actual.keys()) if (!expected.has(id)) extra += 1;
+    return { expected: expected.size, actual: actual.size, missing, changed, extra };
+  };
+
+  const studentsResult = compare(portalStudents, dbStudents, "source_student_id");
+  const peopleResult = compare(portalPeople, dbPeople, "source_person_key");
+  const current =
+    studentsResult.missing === 0 &&
+    studentsResult.changed === 0 &&
+    peopleResult.missing === 0 &&
+    peopleResult.changed === 0 &&
+    conflicts.length === 0;
+
+  console.log("Portal mirror drift check (read-only):");
+  console.log(
+    `students expected=${studentsResult.expected} hosted=${studentsResult.actual} ` +
+      `missing=${studentsResult.missing} changed=${studentsResult.changed} extra=${studentsResult.extra}`
+  );
+  console.log(
+    `people expected=${peopleResult.expected} hosted=${peopleResult.actual} ` +
+      `missing=${peopleResult.missing} changed=${peopleResult.changed} extra=${peopleResult.extra}`
+  );
+  console.log(`local conflicts=${conflicts.length}`);
+  console.log(current ? "Portal mirror OK" : "Portal mirror DRIFTED (no writes made)");
+  return current;
 }
 
 await applySync();
@@ -277,7 +331,7 @@ async function applySync() {
       relationships_seen: relationshipRows.length,
       contact_methods_seen: contactRows.length,
       conflicts,
-      notes: "CSV mirror sync completed from BDOS students.csv and parents.csv."
+      notes: "CSV mirror sync completed from BandsofAHS students.csv and parents.csv."
     });
     console.log("\nSync applied.");
     await printReport();
@@ -335,17 +389,8 @@ async function printReport() {
   return true;
 }
 
-function loadLocalEnv() {
-  try {
-    for (const line of readFileSync(join(process.cwd(), ".env.local"), "utf8").split("\n")) {
-      const m = line.match(/^([A-Z0-9_]+)=(.*)$/);
-      if (m && !process.env[m[1]]) process.env[m[1]] = m[2];
-    }
-  } catch {}
-}
-
 function readCsv(name) {
-  const text = readFileSync(join(BDOS_DATA_DIR, name), "utf8");
+  const text = readFileSync(join(BAND_DATA_DIR, name), "utf8");
   const rows = [];
   let row = [];
   let field = "";

@@ -6,11 +6,10 @@
  *
  * Output: data/_work/sponsorship-prospects.html
  */
-import { readFileSync, writeFileSync } from "node:fs";
-const ENV = "/Users/parkerarob/Atlas/band-website/.env.local";
-for (const line of readFileSync(ENV, "utf8").split("\n")) {
-  const m = line.match(/^([A-Z0-9_]+)=(.*)$/); if (m && !process.env[m[1]]) process.env[m[1]] = m[2];
-}
+import { writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { bandsofAHSDataDir, loadBandWebsiteEnv } from "./lib/workspace-paths.mjs";
+loadBandWebsiteEnv();
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL, secret = process.env.SUPABASE_SECRET_KEY;
 const rows = await (await fetch(`${url}/rest/v1/businesses?select=*&order=distance_mi.asc`, { headers: { apikey: secret, Authorization: `Bearer ${secret}` } })).json();
 const has = (f) => (r) => r[f] && String(r[f]).trim();
@@ -52,6 +51,6 @@ th{background:#fafafa;font-size:12px;text-transform:uppercase;color:#666} td.d{c
 .b{font-size:11px;padding:1px 6px;border-radius:8px;color:#fff} .hi{background:#2a7} .me{background:#e6a100}
 .legend{font-size:13px;color:#444;background:#f6f8fa;border:1px solid #e3e7eb;border-radius:8px;padding:8px 12px;margin:10px 0}
 </style>${body}`;
-const OUT = "/Users/parkerarob/Atlas/BandsofAHS/data/_work/sponsorship-prospects.html";
+const OUT = join(bandsofAHSDataDir, "_work", "sponsorship-prospects.html");
 writeFileSync(OUT, html);
 console.log("wrote", OUT, `(${ready.length} ready)`);

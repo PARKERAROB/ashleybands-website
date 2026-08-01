@@ -19,15 +19,12 @@
  *   node scripts/discover-places.mjs               # insert net-new
  *   node scripts/discover-places.mjs --radius 8000 # meters (default 8000 = ~5mi)
  */
-import { readFileSync } from "node:fs";
+import { loadBandWebsiteEnv } from "./lib/workspace-paths.mjs";
 
 const ASHLEY = { lat: 34.1002820, lng: -77.9117205 };
 const DRY = process.argv.includes("--dry-run");
 const RADIUS = (() => { const i = process.argv.indexOf("--radius"); return i > -1 ? Number(process.argv[i + 1]) : 8000; })();
-const ENV = "/Users/parkerarob/Atlas/band-website/.env.local";
-for (const line of readFileSync(ENV, "utf8").split("\n")) {
-  const m = line.match(/^([A-Z0-9_]+)=(.*)$/); if (m && !process.env[m[1]]) process.env[m[1]] = m[2];
-}
+loadBandWebsiteEnv();
 const KEY = process.env.GOOGLE_PLACES_API_KEY;
 const SUPA = process.env.NEXT_PUBLIC_SUPABASE_URL, SECRET = process.env.SUPABASE_SECRET_KEY;
 if (!KEY) { console.error("Missing GOOGLE_PLACES_API_KEY"); process.exit(1); }

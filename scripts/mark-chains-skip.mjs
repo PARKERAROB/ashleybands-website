@@ -7,12 +7,9 @@
  *
  * Usage: node scripts/mark-chains-skip.mjs [--dry-run]
  */
-import { readFileSync } from "node:fs";
+import { loadBandWebsiteEnv } from "./lib/workspace-paths.mjs";
 const DRY = process.argv.includes("--dry-run");
-const ENV = "/Users/parkerarob/Atlas/band-website/.env.local";
-for (const line of readFileSync(ENV, "utf8").split("\n")) {
-  const m = line.match(/^([A-Z0-9_]+)=(.*)$/); if (m && !process.env[m[1]]) process.env[m[1]] = m[2];
-}
+loadBandWebsiteEnv();
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL, secret = process.env.SUPABASE_SECRET_KEY;
 const base = `${url}/rest/v1/businesses`;
 const H = { apikey: secret, Authorization: `Bearer ${secret}`, "Content-Type": "application/json" };

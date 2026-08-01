@@ -1,32 +1,25 @@
 #!/usr/bin/env node
 /**
  * Sync-back: read the live sponsorship data from Supabase and write a generated
- * status view into BDOS, so the canonical brain reflects raised-vs-goal without
- * anyone querying the database. BDOS stays the source of truth for everything
+ * status view into BandsofAHS, so the private Area reflects raised-vs-goal without
+ * anyone querying the database. BandsofAHS stays the source of truth for everything
  * else; this file is a read-only mirror of the live numbers.
  *
  * Run on demand (e.g. from /start or a weekly review):
  *   node scripts/export-sponsorship-status.mjs
  *   node scripts/export-sponsorship-status.mjs --dry-run   # print, don't write
  *
- * Output: <BDOS>/projects/marching-band/sponsorship-packet-2026-2027/sponsorship-status.md
+ * Output: <BandsofAHS>/projects/marching-band/sponsorship-packet-2026-2027/sponsorship-status.md
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { homedir } from "node:os";
+import { bandsofAHSRoot, loadBandWebsiteEnv } from "./lib/workspace-paths.mjs";
 
-// Load .env.local for Supabase creds.
-try {
-  for (const line of readFileSync(join(process.cwd(), ".env.local"), "utf8").split("\n")) {
-    const m = line.match(/^([A-Z0-9_]+)=(.*)$/);
-    if (m && !process.env[m[1]]) process.env[m[1]] = m[2];
-  }
-} catch {}
+loadBandWebsiteEnv();
 
 const DRY_RUN = process.argv.includes("--dry-run");
-const BDOS_DIR = process.env.BDOS_DIR || join(homedir(), "Desktop", "BandDirectorOS");
 const OUT_PATH = join(
-  BDOS_DIR,
+  bandsofAHSRoot,
   "projects/marching-band/sponsorship-packet-2026-2027/sponsorship-status.md"
 );
 const GOAL = Number(process.env.SPONSORSHIP_GOAL || 35000); // ~$500 x ~70 students

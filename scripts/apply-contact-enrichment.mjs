@@ -15,13 +15,12 @@
  * Usage: node scripts/apply-contact-enrichment.mjs [--dry-run]
  */
 import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { bandsofAHSDataDir, loadBandWebsiteEnv } from "./lib/workspace-paths.mjs";
 
-const CSV = "/Users/parkerarob/Atlas/BandsofAHS/data/_work/contact-enrichment.csv";
+const CSV = join(bandsofAHSDataDir, "_work", "contact-enrichment.csv");
 const DRY = process.argv.includes("--dry-run");
-const ENV = "/Users/parkerarob/Atlas/band-website/.env.local";
-for (const line of readFileSync(ENV, "utf8").split("\n")) {
-  const m = line.match(/^([A-Z0-9_]+)=(.*)$/); if (m && !process.env[m[1]]) process.env[m[1]] = m[2];
-}
+loadBandWebsiteEnv();
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const secret = process.env.SUPABASE_SECRET_KEY;
 const base = `${url}/rest/v1/businesses`;

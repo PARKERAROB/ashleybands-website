@@ -1,6 +1,6 @@
 BEGIN:VCALENDAR
 VERSION:2.0
-PRODID:-//RobOS//calendar//ashleybands.com
+PRODID:-//AshleyBands//calendar//ashleybands.com
 X-WR-CALNAME:Ashley Bands
 BEGIN:VTIMEZONE
 TZID:America/New_York

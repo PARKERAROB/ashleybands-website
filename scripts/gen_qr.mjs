@@ -1,11 +1,12 @@
 #!/usr/bin/env node
+import { bandsofAHSRoot } from "./lib/workspace-paths.mjs";
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 const QRCode = require("qrcode");
 const fs = require("fs");
 const path = require("path");
 
-const OUTDIR = "/Users/parkerarob/Atlas/BandsofAHS/projects/instrument-inventory/QR Codes";
+const OUTDIR = path.join(bandsofAHSRoot, "projects", "instrument-inventory", "QR Codes");
 fs.mkdirSync(OUTDIR, { recursive: true });
 
 const pages = [

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Apply offline business-prospect enrichment CSVs from BandDirectorOS to the
+ * Apply offline business-prospect enrichment CSVs from BandsofAHS to the
  * Supabase-backed businesses table used by /sponsors/dashboard/businesses.
  *
  * Usage:
@@ -9,16 +9,12 @@
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { bandsofAHSDataDir, loadBandWebsiteEnv } from "./lib/workspace-paths.mjs";
 
-const DATA_DIR = "/Users/parkerarob/Atlas/BandsofAHS/data";
+const DATA_DIR = bandsofAHSDataDir;
 const DRY_RUN = process.argv.includes("--dry-run");
 
-try {
-  for (const line of readFileSync(join(process.cwd(), ".env.local"), "utf8").split("\n")) {
-    const m = line.match(/^([A-Z0-9_]+)=(.*)$/);
-    if (m && !process.env[m[1]]) process.env[m[1]] = m[2];
-  }
-} catch {}
+loadBandWebsiteEnv();
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const secret = process.env.SUPABASE_SECRET_KEY;

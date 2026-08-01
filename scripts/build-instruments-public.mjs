@@ -1,8 +1,10 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { bandsofAHSDataDir, bandWebsiteRoot } from "./lib/workspace-paths.mjs";
 
-const SOURCE = "/Users/parkerarob/Atlas/BandsofAHS/data/instrument-inventory-merged.csv";
-const OUTPUT = path.join(process.cwd(), "content", "instruments-public.json");
+const SOURCE = path.join(bandsofAHSDataDir, "instrument-inventory-merged.csv");
+const OUTPUT = path.join(bandWebsiteRoot, "content", "instruments-public.json");
+const CHECK = process.argv.includes("--check");
 
 const PUBLIC_FIELDS = [
   "asset_id",
@@ -86,11 +88,34 @@ const instruments = rows
     return a.asset_id.localeCompare(b.asset_id, undefined, { numeric: true, sensitivity: "base" });
   });
 
-const snapshot = {
-  generatedAt: new Date().toISOString(),
-  source: "BDOS instrument-inventory-merged.csv sanitized public snapshot",
+const body = {
+  source: "BandsofAHS instrument-inventory-merged.csv sanitized public snapshot",
   count: instruments.length,
   instruments,
+};
+
+let existing = null;
+try {
+  existing = JSON.parse(await readFile(OUTPUT, "utf8"));
+} catch {}
+
+const existingBody = existing
+  ? Object.fromEntries(Object.entries(existing).filter(([key]) => key !== "generatedAt"))
+  : null;
+const current = existingBody && JSON.stringify(existingBody) === JSON.stringify(body);
+
+if (CHECK) {
+  if (!current) {
+    console.error(`Instrument projection drift: ${OUTPUT}`);
+    process.exit(1);
+  }
+  console.log(`Instrument projection OK: ${instruments.length} public records`);
+  process.exit(0);
+}
+
+const snapshot = {
+  generatedAt: current && existing?.generatedAt ? existing.generatedAt : new Date().toISOString(),
+  ...body,
 };
 
 await mkdir(path.dirname(OUTPUT), { recursive: true });

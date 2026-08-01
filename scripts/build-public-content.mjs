@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
+const CHECK = process.argv.includes("--check");
 // PKA was retired 2026-06-01. The handful of pages that originated there are now
 // vendored into this repo at content/pka-sources (same relative layout) so the
 // content build is self-contained and needs no external PKA folder. PKA_ROOT can
@@ -148,9 +149,8 @@ const pages = [
   }
 ];
 
-const siteData = {
-  generatedAt: new Date().toISOString(),
-  sourceRoot: pkaRoot,
+const siteDataBody = {
+  sourceRoot: process.env.PKA_ROOT ? "external PKA_ROOT override" : "content/pka-sources",
   program: {
     name: "Bands of Ashley High School",
     school: "Ashley High School",
@@ -193,15 +193,29 @@ const siteData = {
       href: "https://ashleybandshirts.printify.me/"
     }
   ],
-  pages
+  pages,
 };
 
 const contentDir = path.join(root, "content");
 const publicDir = path.join(root, "public");
-mkdirSync(contentDir, { recursive: true });
-mkdirSync(publicDir, { recursive: true });
+const siteDataPath = path.join(contentDir, "site-data.json");
+const chatbotPath = path.join(publicDir, "chatbot-knowledge.txt");
 
-writeFileSync(path.join(contentDir, "site-data.json"), JSON.stringify(siteData, null, 2));
+let existingSiteData = null;
+try {
+  existingSiteData = JSON.parse(readFileSync(siteDataPath, "utf8"));
+} catch {}
+const existingBody = existingSiteData
+  ? Object.fromEntries(Object.entries(existingSiteData).filter(([key]) => key !== "generatedAt"))
+  : null;
+const siteDataCurrent = existingBody && JSON.stringify(existingBody) === JSON.stringify(siteDataBody);
+const siteData = {
+  generatedAt:
+    siteDataCurrent && existingSiteData?.generatedAt
+      ? existingSiteData.generatedAt
+      : new Date().toISOString(),
+  ...siteDataBody,
+};
 
 const chatbotKnowledge = [
   "ASHLEY HIGH SCHOOL BAND PUBLIC KNOWLEDGE BASE",
@@ -219,6 +233,21 @@ const chatbotKnowledge = [
   ...pages.map((page) => `\n\n${page.title.toUpperCase()}\n${page.body}`)
 ].join("\n").replace(/\n{3,}/g, "\n\n");
 
-writeFileSync(path.join(publicDir, "chatbot-knowledge.txt"), chatbotKnowledge);
+const chatbotCurrent = existsSync(chatbotPath) && readFileSync(chatbotPath, "utf8") === chatbotKnowledge;
+
+if (CHECK) {
+  if (!siteDataCurrent || !chatbotCurrent) {
+    if (!siteDataCurrent) console.error(`Public content projection drift: ${siteDataPath}`);
+    if (!chatbotCurrent) console.error(`Chatbot projection drift: ${chatbotPath}`);
+    process.exit(1);
+  }
+  console.log(`Public content projection OK: ${pages.length} pages`);
+  process.exit(0);
+}
+
+mkdirSync(contentDir, { recursive: true });
+mkdirSync(publicDir, { recursive: true });
+writeFileSync(siteDataPath, JSON.stringify(siteData, null, 2));
+writeFileSync(chatbotPath, chatbotKnowledge);
 
 console.log(`Built public site content from ${pkaRoot}`);

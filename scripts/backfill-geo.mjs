@@ -13,14 +13,11 @@
  *
  * Usage: node scripts/backfill-geo.mjs [--dry-run]
  */
-import { readFileSync } from "node:fs";
+import { loadBandWebsiteEnv } from "./lib/workspace-paths.mjs";
 
 const ASHLEY = { lat: 34.1002820, lon: -77.9117205 };
 const DRY = process.argv.includes("--dry-run");
-const ENV = "/Users/parkerarob/Atlas/band-website/.env.local";
-for (const line of readFileSync(ENV, "utf8").split("\n")) {
-  const m = line.match(/^([A-Z0-9_]+)=(.*)$/); if (m && !process.env[m[1]]) process.env[m[1]] = m[2];
-}
+loadBandWebsiteEnv();
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const secret = process.env.SUPABASE_SECRET_KEY;
 const base = `${url}/rest/v1/businesses`;

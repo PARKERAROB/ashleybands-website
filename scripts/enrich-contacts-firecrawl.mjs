@@ -22,19 +22,14 @@
 import { readFileSync, existsSync, appendFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { execFileSync } from "node:child_process";
+import { bandsofAHSDataDir, loadBandWebsiteEnv } from "./lib/workspace-paths.mjs";
 
-const OUT = "/Users/parkerarob/Atlas/BandsofAHS/data/_work/contact-enrichment.csv";
+const OUT = join(bandsofAHSDataDir, "_work", "contact-enrichment.csv");
 const LIMIT = (() => { const i = process.argv.indexOf("--limit"); return i > -1 ? Number(process.argv[i + 1]) : Infinity; })();
 const WITH_WEBSITE_ONLY = process.argv.includes("--with-website-only");
 
 // ---- env / supabase ----
-const ENV_PATH = "/Users/parkerarob/Atlas/band-website/.env.local";
-try {
-  for (const line of readFileSync(ENV_PATH, "utf8").split("\n")) {
-    const m = line.match(/^([A-Z0-9_]+)=(.*)$/);
-    if (m && !process.env[m[1]]) process.env[m[1]] = m[2];
-  }
-} catch {}
+loadBandWebsiteEnv();
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const secret = process.env.SUPABASE_SECRET_KEY;
 if (!url || !secret) { console.error("Missing Supabase env in .env.local"); process.exit(1); }

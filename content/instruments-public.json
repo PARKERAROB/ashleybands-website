@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-05-27T23:30:21.058Z",
-  "source": "BDOS instrument-inventory-merged.csv sanitized public snapshot",
+  "generatedAt": "2026-08-01T03:19:29.198Z",
+  "source": "BandsofAHS instrument-inventory-merged.csv sanitized public snapshot",
   "count": 175,
   "instruments": [
     {
