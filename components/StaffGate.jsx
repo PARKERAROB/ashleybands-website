@@ -1,23 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { readStaffSession, saveStaffSession, clearStaffSession } from "@/lib/staffSession";
 
 // Wraps any staff-only UI. Renders a login form until the staff member is
 // authenticated, then calls children(session, signOut). Reuses the shared
 // localStorage session so signing in once covers every admin dashboard.
 export function StaffGate({ children }) {
-  const [session, setSession] = useState(() => readStaffSession());
+  // Keep the server render and first browser render identical. localStorage is
+  // browser-only; reading it in the state initializer causes a hydration
+  // mismatch whenever an already-signed-in staff member opens an admin page.
+  const [auth, setAuth] = useState({ ready: false, session: null });
+
+  useEffect(() => {
+    const loadTimer = window.setTimeout(() => {
+      setAuth({ ready: true, session: readStaffSession() });
+    }, 0);
+    return () => window.clearTimeout(loadTimer);
+  }, []);
+
+  if (!auth.ready) {
+    return <p style={loadingState}>Loading staff access…</p>;
+  }
+
+  const session = auth.session;
 
   if (!session) {
-    return <StaffLogin onAuthed={setSession} />;
+    return <StaffLogin onAuthed={(nextSession) => setAuth({ ready: true, session: nextSession })} />;
   }
 
   const signOut = () => {
     // Clear the httpOnly cookie server-side, then the local display copy.
     fetch("/api/sponsors/staff-signout", { method: "POST" }).catch(() => {});
     clearStaffSession();
-    setSession(null);
+    setAuth({ ready: true, session: null });
   };
 
   return children(session, signOut);
@@ -85,3 +101,4 @@ export function StaffLogin({ onAuthed }) {
 const loginLabel = { display: "block", marginBottom: 5, fontSize: 13, fontWeight: 700, color: "#4b584d" };
 const loginInput = { boxSizing: "border-box", width: "100%", padding: "10px 12px", fontSize: 14, border: "1px solid #ccc", borderRadius: 6, fontFamily: "system-ui, sans-serif" };
 const loginBtn = { marginTop: 12, width: "100%", padding: "10px 16px", fontSize: 14, fontWeight: 600, border: "none", borderRadius: 6, color: "#fff", background: "#7b1829", cursor: "pointer" };
+const loadingState = { maxWidth: 400, margin: "100px auto", padding: "0 16px", color: "#4b584d", fontFamily: "system-ui, sans-serif" };

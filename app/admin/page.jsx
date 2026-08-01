@@ -44,6 +44,7 @@ const SECTIONS = [
   {
     title: "Marching Band 2026",
     links: [
+      { href: "/admin/marching-band/funding", emoji: "📈", label: "MB Roster & Funding", desc: "Every marching student, placement, goal, and amount raised" },
       { href: "/admin/marching-band", emoji: "🥁", label: "MB Signups & Status", desc: "Signup status, overrides, recapture" }
     ]
   },

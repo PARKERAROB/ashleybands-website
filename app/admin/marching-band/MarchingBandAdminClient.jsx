@@ -361,7 +361,7 @@ export default function MarchingBandAdminClient() {
               </table>
             </div>
             <p className="portal-footnote">
-              Showing {rows.length} of {data.totals.total} active students. <Link href="/admin/profile-requests">Profile requests</Link> · <Link href="/sponsors/dashboard">Sponsorship dashboard</Link>
+              Showing {rows.length} of {data.totals.total} active students. <Link href="/admin/marching-band/funding">Roster and funding</Link> · <Link href="/admin/profile-requests">Profile requests</Link> · <Link href="/sponsors/dashboard">Sponsorship dashboard</Link>
             </p>
           </>
         ) : null}
