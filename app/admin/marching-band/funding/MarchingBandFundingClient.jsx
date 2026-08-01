@@ -27,6 +27,18 @@ function gradeRank(grade) {
   return match ? Number(match[0]) : 99;
 }
 
+const alphabetical = new Intl.Collator("en-US", { sensitivity: "base", numeric: true });
+
+function compareStudentNames(a, b) {
+  return alphabetical.compare(a.legalLast || "", b.legalLast || "")
+    || alphabetical.compare(a.preferredFirst || a.legalFirst || "", b.preferredFirst || b.legalFirst || "")
+    || alphabetical.compare(a.displayName || "", b.displayName || "");
+}
+
+function instrumentSection(row) {
+  return row.instrument || row.role || "Not listed";
+}
+
 function csvCell(value) {
   const text = String(value ?? "");
   return /[",\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
@@ -67,7 +79,7 @@ function FundingRoster({ session, signOut }) {
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
   const [grade, setGrade] = useState("");
-  const [sortBy, setSortBy] = useState("name");
+  const [sortBy, setSortBy] = useState("instrument");
 
   useEffect(() => {
     let cancelled = false;
@@ -106,10 +118,13 @@ function FundingRoster({ session, signOut }) {
         .includes(term);
     });
     return [...filtered].sort((a, b) => {
-      if (sortBy === "grade") return gradeRank(a.grade) - gradeRank(b.grade) || studentName(a).localeCompare(studentName(b));
-      if (sortBy === "raised") return b.raisedCents - a.raisedCents || studentName(a).localeCompare(studentName(b));
-      if (sortBy === "remaining") return b.remainingCents - a.remainingCents || studentName(a).localeCompare(studentName(b));
-      return studentName(a).localeCompare(studentName(b));
+      if (sortBy === "instrument") {
+        return alphabetical.compare(instrumentSection(a), instrumentSection(b)) || compareStudentNames(a, b);
+      }
+      if (sortBy === "grade") return gradeRank(a.grade) - gradeRank(b.grade) || compareStudentNames(a, b);
+      if (sortBy === "raised") return b.raisedCents - a.raisedCents || compareStudentNames(a, b);
+      if (sortBy === "remaining") return b.remainingCents - a.remainingCents || compareStudentNames(a, b);
+      return compareStudentNames(a, b);
     });
   }, [data, grade, query, sortBy]);
 
@@ -161,7 +176,8 @@ function FundingRoster({ session, signOut }) {
             <label>
               <span>Sort</span>
               <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
-                <option value="name">Student name</option>
+                <option value="instrument">Instrument section, then last name</option>
+                <option value="name">Last name</option>
                 <option value="grade">Grade</option>
                 <option value="raised">Amount raised</option>
                 <option value="remaining">Amount remaining</option>
