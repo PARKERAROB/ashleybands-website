@@ -1,8 +1,39 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
-const PENDING_NOTE = "Saved. Showing now; Mr. Parker reviews before it updates the official record.";
+const SAVED_NOTE = "Saved. Your family record is updated.";
+
+function initials(name) {
+  return String(name || "Student")
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
+}
+
+function programValue(value, fallback = "Not listed") {
+  const normalized = String(value || "").trim();
+  return normalized || fallback;
+}
+
+function statusValue(value) {
+  const normalized = String(value || "").trim();
+  if (!normalized) return "Not listed";
+  return `${normalized[0].toUpperCase()}${normalized.slice(1)}`;
+}
+
+function enrollmentValue(value) {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (normalized === "yes") return "Enrolled";
+  if (normalized === "no") return "Not enrolled";
+  if (normalized === "interested") return "Interested";
+  if (normalized === "unknown") return "Not confirmed";
+  return normalized ? value : "Not listed";
+}
 
 function formatUsd(cents) {
   return `$${((Number(cents) || 0) / 100).toFixed(2)}`;
@@ -29,6 +60,7 @@ function loadPaypalSdk(clientId) {
 export default function PortalReviewClient() {
   const [state, setState] = useState({ status: "loading", message: "Opening your profile..." });
   const [profile, setProfile] = useState(null);
+  const [selectedStudentId, setSelectedStudentId] = useState("");
 
   async function loadProfile() {
     const res = await fetch("/api/portal/me");
@@ -50,83 +82,79 @@ export default function PortalReviewClient() {
     if (params.has("token")) {
       window.history.replaceState({}, "", "/portal/review");
     }
-    if (!cancelled) loadProfile();
+    const loadTimer = window.setTimeout(() => {
+      if (!cancelled) loadProfile();
+    }, 0);
     return () => {
       cancelled = true;
+      window.clearTimeout(loadTimer);
     };
   }, []);
 
   const ownPhone = profile?.contacts?.phones?.[0]?.value || "";
+  const students = profile?.students || [];
+  const selectedStudent = students.find((student) => student.id === selectedStudentId) || students[0] || null;
 
   return (
-    <main className="portal-shell">
-      <section className="portal-panel portal-panel-wide">
-        <p className="eyebrow">Ashley Bands</p>
-        <h1>My Profile</h1>
-        <p className="portal-consent-note">
-          Review and update your family&apos;s details anytime. Changes take effect immediately.
-          To remove something entirely, ask and it&apos;s deleted right away.{" "}
-          <a href="/privacy">Privacy Notice</a>
-        </p>
+    <main className="portal-shell portal-review-shell">
+      <section className="portal-family-page">
+        <header className="portal-family-header">
+          <div>
+            <p className="eyebrow">Ashley Bands</p>
+            <h1>Family Portal</h1>
+            <p>
+              Review your student&apos;s information, band participation, uniforms, and payments in one place.
+            </p>
+          </div>
+          {profile ? (
+            <p className="portal-account-summary">
+              Signed in as <strong>{profile.person?.display_name || profile.email}</strong>
+              <span>{profile.email}</span>
+            </p>
+          ) : null}
+        </header>
         {state.status !== "ready" ? (
           <p className={`portal-message ${state.status === "error" ? "error" : ""}`}>{state.message}</p>
         ) : null}
 
-        {profile ? (
-          <div className="portal-profile">
-            <p className="portal-signed-in">
-              Signed in as <strong>{profile.person?.display_name || profile.email}</strong>
-              <span className="portal-signed-email">{profile.email}</span>
-            </p>
-
-            <section className="portal-section">
-              <h2>Quick Links</h2>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                {[
-                  { href: "/info/marching-band-2026", label: "Marching Band" },
-                  { href: "/info/the-band-folder", label: "Resources" },
-                  { href: "/assistant", label: "Ask the Band Assistant" },
-                  { href: "/staff-sprint", label: "Staff Sprint (note race)" }
-                ].map((link) => (
-                  <a
-                    key={link.href}
-                    href={link.href}
-                    style={{
-                      padding: "6px 12px",
-                      border: "1px solid #7b1829",
-                      borderRadius: 16,
-                      color: "#7b1829",
-                      textDecoration: "none",
-                      fontSize: 14,
-                      fontWeight: 600
-                    }}
-                  >
-                    {link.label}
-                  </a>
-                ))}
+        {profile && selectedStudent ? (
+          <>
+            {students.length > 1 ? (
+              <div className="portal-student-picker">
+                <label htmlFor="portal-student">Viewing student</label>
+                <select
+                  id="portal-student"
+                  value={selectedStudent.id}
+                  onChange={(event) => setSelectedStudentId(event.target.value)}
+                >
+                  {students.map((student) => (
+                    <option key={student.id} value={student.id}>{student.displayName}</option>
+                  ))}
+                </select>
               </div>
-            </section>
+            ) : null}
 
-            <section className="portal-section">
-              <h2>You</h2>
-              <EditableField field="person_display_name" label="Your name" value={profile.person?.display_name || ""} />
-              <EditableField field="person_phone" label="Your phone" value={ownPhone} placeholder="Add a phone number" />
-              <div className="portal-field">
-                <span className="portal-field-label">Your email</span>
-                <span className="portal-field-value">{profile.email}</span>
-                <span className="portal-field-note">Used to sign in. Contact Mr. Parker to change it.</span>
+            <div className="portal-family-workspace">
+              <StudentRail
+                key={selectedStudent.id}
+                student={selectedStudent}
+                profile={profile}
+                ownPhone={ownPhone}
+                onChanged={loadProfile}
+              />
+              <div className="portal-workspace-main">
+                <ParticipationSection student={selectedStudent} />
+                <UniformSection student={selectedStudent} />
+                <BillingSection studentId={selectedStudent.id} studentName={selectedStudent.displayName} />
+                <FamilyResources />
               </div>
-            </section>
-
-            {profile.students?.length ? (
-              profile.students.map((student) => (
-                <StudentCard key={student.id} student={student} onChanged={loadProfile} />
-              ))
-            ) : (
-              <p className="portal-copy">No student is connected to this profile yet.</p>
-            )}
-
-            <BillingSection />
+            </div>
+          </>
+        ) : profile ? (
+          <div className="portal-empty-state">
+            <h2>No student connected yet</h2>
+            <p>Your sign-in works, but this family profile is not connected to a student record.</p>
+            <Link className="portal-action-link" href="/portal/request">Request access</Link>
           </div>
         ) : null}
       </section>
@@ -134,7 +162,19 @@ export default function PortalReviewClient() {
   );
 }
 
-function BillingSection() {
+function FamilyResources() {
+  return (
+    <nav className="portal-family-resources" aria-label="Family resources">
+      <strong>Family resources</strong>
+      <Link href="/info/marching-band-2026">Marching Band information</Link>
+      <Link href="/calendar">Band calendar</Link>
+      <Link href="/info/the-band-folder">The Band Folder</Link>
+      <Link href="/assistant">Ask the Band Assistant</Link>
+    </nav>
+  );
+}
+
+function BillingSection({ studentId, studentName }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
 
@@ -172,24 +212,31 @@ function BillingSection() {
     };
   }, []);
 
-  if (error) return null;
-  if (!data) return null;
-  const students = (data.students || []).filter(
-    (s) => s.charges.length || s.payments.length || s.springTripRefund
+  const student = (data?.students || []).find((item) => item.id === studentId);
+  const hasActivity = Boolean(
+    student && (student.charges.length || student.payments.length || student.springTripRefund)
   );
-  if (!students.length) return null;
 
   return (
-    <section className="portal-section">
-      <h2>Fees &amp; Payments</h2>
-      {students.map((s) => (
+    <section className="portal-workspace-section" aria-labelledby="portal-funding-heading">
+      <div className="portal-section-heading">
+        <div>
+          <h2 id="portal-funding-heading">Funding and payments</h2>
+          <p>Fees, fundraising credit, and payment history for {studentName}.</p>
+        </div>
+      </div>
+      {error ? <p className="portal-field-error">{error}</p> : null}
+      {!data && !error ? <p className="portal-muted-status">Loading financial record…</p> : null}
+      {data && !hasActivity ? (
+        <p className="portal-muted-status">No fees, payments, or funding activity is listed.</p>
+      ) : null}
+      {hasActivity ? (
         <StudentFeeCard
-          key={s.id}
-          student={s}
+          student={student}
           paymentsEnabled={data.paymentsEnabled}
           onPaid={load}
         />
-      ))}
+      ) : null}
     </section>
   );
 }
@@ -213,7 +260,6 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
   const fee = kindTotals("fee");
   const hasGoal = goal.charges.length > 0 || goal.paid > 0;
   const hasFee = fee.charges.length > 0 || fee.paid > 0;
-  const enrolledMB = (student.charges || []).some((c) => /marching band/i.test(c.label || ""));
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
   const canPayOnline = owes && paymentsEnabled && Boolean(clientId);
 
@@ -254,10 +300,10 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
   }
 
   return (
-    <article className="portal-student-card">
-      <div className="portal-student-head">
-        <h3>{student.name}</h3>
-        <span className="portal-tag">
+    <article className="portal-finance-record">
+      <div className="portal-finance-summary">
+        <strong>Current summary</strong>
+        <span className="portal-status-pill">
           {fee.remaining > 0
             ? `Balance ${formatUsd(fee.remaining)}`
             : goal.remaining > 0
@@ -265,13 +311,6 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
               : "All set"}
         </span>
       </div>
-
-      {enrolledMB ? (
-        <div className="portal-field">
-          <span className="portal-field-label">2026 sign-ups</span>
-          <span className="portal-field-value">Marching Band 2026 ✓</span>
-        </div>
-      ) : null}
 
       {hasGoal ? (
         <div className="portal-field">
@@ -318,7 +357,7 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
       ) : null}
 
       {refund ? (
-        <div className="portal-field" style={{ borderTop: "1px solid #eee", paddingTop: 14, marginTop: 6 }}>
+        <div className="portal-field portal-refund-field">
           <span className="portal-field-label">Spring Trip 2026 refund</span>
 
           {refund.status === "applied_mb" ? (
@@ -356,17 +395,7 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
               </span>
               <button
                 type="button"
-                style={{
-                  marginTop: 10,
-                  alignSelf: "flex-start",
-                  background: "#7b1829",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: 6,
-                  padding: "10px 16px",
-                  fontWeight: 600,
-                  cursor: "pointer"
-                }}
+                className="portal-primary-action"
                 onClick={() => {
                   setForgoError("");
                   setConfirmOpen(true);
@@ -375,7 +404,7 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
                 Apply my refund to marching band
               </button>
               {forgoError ? (
-                <span className="portal-field-note" style={{ color: "#7b1829" }}>
+                <span className="portal-field-note portal-error-text">
                   {forgoError}
                 </span>
               ) : null}
@@ -386,7 +415,7 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
 
       {canPayOnline ? (
         showPay ? (
-          <div className="portal-field-edit" style={{ flexDirection: "column", alignItems: "stretch" }}>
+          <div className="portal-field-edit portal-pay-form">
             <label className="portal-field-label" htmlFor={`pay-${student.id}`}>
               Amount to pay (you can pay any amount toward the balance)
             </label>
@@ -409,7 +438,7 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
             />
           </div>
         ) : (
-          <button type="button" onClick={() => setShowPay(true)}>
+          <button type="button" className="portal-primary-action" onClick={() => setShowPay(true)}>
             Pay online
           </button>
         )
@@ -419,18 +448,18 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
 
       {confirmOpen && refund ? (
         <div
-          style={{
-            position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)",
-            display: "flex", alignItems: "center", justifyContent: "center", padding: 20, zIndex: 50
-          }}
+          className="portal-modal-backdrop"
           onClick={() => (forgoBusy ? null : setConfirmOpen(false))}
         >
           <div
-            style={{ background: "#fff", borderRadius: 10, padding: "22px", maxWidth: 440, width: "100%" }}
+            className="portal-modal-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="portal-refund-title"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 style={{ marginTop: 0 }}>Apply your Spring Trip refund?</h3>
-            <p style={{ color: "#333", lineHeight: 1.5 }}>
+            <h3 id="portal-refund-title">Apply your Spring Trip refund?</h3>
+            <p className="portal-modal-copy">
               You are choosing to <strong>forgo your refund check</strong>. The boosters keep that amount and
               credit <strong>{formatUsd(refund.confirmedCents)}</strong> toward {student.name}&rsquo;s marching
               band funding goal
@@ -438,9 +467,9 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
               This cannot be sent back to you as cash once applied.
             </p>
             {forgoError ? (
-              <p style={{ color: "#7b1829", fontWeight: 600 }}>{forgoError}</p>
+              <p className="portal-modal-error">{forgoError}</p>
             ) : null}
-            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 18 }}>
+            <div className="portal-modal-actions">
               <button
                 type="button"
                 className="portal-link-btn"
@@ -452,11 +481,7 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
               <button
                 type="button"
                 disabled={forgoBusy}
-                style={{
-                  background: "#7b1829", color: "#fff", border: "none", borderRadius: 6,
-                  padding: "10px 16px", fontWeight: 600, cursor: forgoBusy ? "default" : "pointer",
-                  opacity: forgoBusy ? 0.7 : 1
-                }}
+                className="portal-primary-action"
                 onClick={() => submitRefundChoice("forgo")}
               >
                 {forgoBusy ? "Applying…" : `Yes, apply ${formatUsd(refund.confirmedCents)}`}
@@ -768,44 +793,66 @@ function MeasurementsPanel({ studentId }) {
   );
 }
 
-function StudentCard({ student, onChanged }) {
+function StudentRail({ student, profile, ownPhone, onChanged }) {
   const guardians = student.guardians || [];
   const guardianCount = guardians.length;
 
   return (
-    <section className="portal-section portal-student-card">
-      <div className="portal-student-head">
+    <aside className="portal-profile-rail" aria-label={`${student.displayName} profile information`}>
+      <div className="portal-student-identity">
+        <span className="portal-student-avatar" aria-hidden="true">{initials(student.displayName)}</span>
         <h2>{student.displayName}</h2>
-        <span className="portal-tag">{student.grade || "Grade not listed"}</span>
+        <p>{student.grade || "Grade not listed"}</p>
       </div>
 
-      <EditableField
-        field="student_preferred_first"
-        studentId={student.id}
-        label="Preferred name"
-        value={student.preferredFirst || ""}
-        placeholder="What they go by"
-      />
-      <EditableField
-        field="student_cell_phone"
-        studentId={student.id}
-        label="Student cell phone"
-        value={student.cellPhone || ""}
-        placeholder="Add a cell number"
-      />
+      <section className="portal-rail-group" aria-labelledby="portal-demographics-heading">
+        <h3 id="portal-demographics-heading">Demographics</h3>
+        <EditableField
+          key={`preferred-${student.id}`}
+          field="student_preferred_first"
+          studentId={student.id}
+          label="Preferred name"
+          value={student.preferredFirst || ""}
+          placeholder="What they go by"
+        />
+        <ReadOnlyField label="Grade" value={student.grade || "Not listed"} />
+        <ReadOnlyField label="Student status" value={statusValue(student.status)} />
+      </section>
+
+      <section className="portal-rail-group" aria-labelledby="portal-personal-heading">
+        <h3 id="portal-personal-heading">Personal information</h3>
+        <EditableField
+          key={`phone-${student.id}`}
+          field="student_cell_phone"
+          studentId={student.id}
+          label="Student cell phone"
+          value={student.cellPhone || ""}
+          placeholder="Add a cell number"
+        />
+        <EditableField
+          field="person_display_name"
+          label="Your name"
+          value={profile.person?.display_name || ""}
+        />
+        <EditableField
+          field="person_phone"
+          label="Your phone"
+          value={ownPhone}
+          placeholder="Add a phone number"
+        />
+        <ReadOnlyField label="Your email" value={profile.email} note="Used to sign in. Contact Mr. Parker to change it." />
+      </section>
 
       {student.note ? (
-        <div className="portal-field">
-          <span className="portal-field-label">Notes on file</span>
-          <span className="portal-field-value">{student.note}</span>
-          <span className="portal-field-note">Medical and travel details get their own forms soon. To change this now, message Mr. Parker.</span>
-        </div>
+        <section className="portal-rail-group" aria-labelledby="portal-notes-heading">
+          <h3 id="portal-notes-heading">Notes on file</h3>
+          <p className="portal-rail-note">{student.note}</p>
+          <p className="portal-field-note">To change this, contact Mr. Parker.</p>
+        </section>
       ) : null}
 
-      <MeasurementsPanel studentId={student.id} />
-
-      <div className="portal-guardians">
-        <h3>Guardians</h3>
+      <section className="portal-rail-group portal-guardians" aria-labelledby="portal-family-heading">
+        <h3 id="portal-family-heading">Family contacts</h3>
         {guardianCount ? (
           <div className="portal-guardian-list">
             {guardians.map((g) => (
@@ -836,7 +883,73 @@ function StudentCard({ student, onChanged }) {
         ) : null}
 
         <GuardianAdd studentId={student.id} studentName={student.displayName} onAdded={onChanged} />
+      </section>
+
+      <p className="portal-privacy-note">
+        Changes take effect immediately. To remove information, contact Mr. Parker. <Link href="/privacy">Privacy Notice</Link>
+      </p>
+    </aside>
+  );
+}
+
+function ReadOnlyField({ label, value, note }) {
+  return (
+    <div className="portal-field">
+      <span className="portal-field-label">{label}</span>
+      <span className="portal-field-value">{value}</span>
+      {note ? <span className="portal-field-note">{note}</span> : null}
+    </div>
+  );
+}
+
+function ParticipationSection({ student }) {
+  return (
+    <section className="portal-workspace-section" aria-labelledby="portal-participation-heading">
+      <div className="portal-section-heading">
+        <div>
+          <h2 id="portal-participation-heading">Band participation</h2>
+          <p>{student.displayName}&apos;s current 2026–27 program record.</p>
+        </div>
+        <a
+          className="portal-text-action"
+          href={`mailto:robert.parker@nhcs.net?subject=${encodeURIComponent(`Family portal update for ${student.displayName}`)}`}
+        >
+          Report a change
+        </a>
       </div>
+      <dl className="portal-program-grid">
+        <div><dt>Band class</dt><dd>{enrollmentValue(student.bandClass2026)}</dd></div>
+        <div><dt>Ensemble</dt><dd>{programValue(student.ensemble2026)}</dd></div>
+        <div><dt>Instrument</dt><dd>{programValue(student.instrument2026)}</dd></div>
+        <div><dt>Marching Band</dt><dd>{enrollmentValue(student.marching2026)}</dd></div>
+        <div><dt>Marching role</dt><dd>{programValue(student.marchingRole2026)}</dd></div>
+      </dl>
+    </section>
+  );
+}
+
+function UniformSection({ student }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <section className="portal-workspace-section" aria-labelledby="portal-uniform-heading">
+      <div className="portal-section-heading">
+        <div>
+          <h2 id="portal-uniform-heading">Uniform readiness</h2>
+          <p>Review or enter the measurements used for uniform fitting.</p>
+        </div>
+        <button
+          type="button"
+          className="portal-secondary-action"
+          aria-expanded={open}
+          onClick={() => setOpen((current) => !current)}
+        >
+          {open ? "Close measurements" : "Open measurements"}
+        </button>
+      </div>
+      {open ? <MeasurementsPanel studentId={student.id} /> : (
+        <p className="portal-muted-status">The full measurement form stays closed until you need it.</p>
+      )}
     </section>
   );
 }
@@ -847,11 +960,6 @@ function EditableField({ field, studentId, label, value, placeholder }) {
   const [current, setCurrent] = useState(value);
   const [status, setStatus] = useState("idle");
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    setCurrent(value);
-    setDraft(value);
-  }, [value]);
 
   async function save() {
     setStatus("saving");
@@ -901,7 +1009,7 @@ function EditableField({ field, studentId, label, value, placeholder }) {
           </button>
         </div>
       )}
-      {status === "saved" ? <span className="portal-field-pending">{PENDING_NOTE}</span> : null}
+      {status === "saved" ? <span className="portal-field-pending">{SAVED_NOTE}</span> : null}
       {error ? <span className="portal-field-error">{error}</span> : null}
     </div>
   );
@@ -925,11 +1033,15 @@ function GuardianAdd({ studentId, studentName, onAdded }) {
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       setStatus("idle");
-      setMessage(data.error || "Could not submit.");
+      setMessage(data.error || "Could not add this guardian.");
       return;
     }
     setStatus("done");
-    setMessage("Submitted. Mr. Parker will add this guardian after a quick review.");
+    setMessage(
+      form.email
+        ? "Added to this student's family record. They can use this email to sign in."
+        : "Added to this student's family record."
+    );
     setForm({ name: "", relationship: "", phone: "", email: "" });
     if (onAdded) onAdded();
   }
@@ -969,11 +1081,11 @@ function GuardianAdd({ studentId, studentName, onAdded }) {
       />
       <div className="portal-field-edit">
         <button type="submit" disabled={status === "sending"}>
-          {status === "sending" ? "Submitting..." : "Submit for review"}
+          {status === "sending" ? "Adding..." : "Add guardian"}
         </button>
         <p className="portal-consent-note">
-          By submitting, you confirm this information is yours to share. See our{" "}
-          <a href="/privacy">Privacy Notice</a>.
+          By adding this person, you confirm the information is yours to share. See our{" "}
+          <Link href="/privacy">Privacy Notice</Link>.
         </p>
         <button type="button" className="portal-link-btn" onClick={() => setOpen(false)}>
           Cancel

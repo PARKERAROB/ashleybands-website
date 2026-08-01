@@ -35,7 +35,7 @@ export async function GET(request) {
       supabaseAdmin
         .from("portal_student_people")
         .select(
-          "student_id, relationship_status, role, primary_contact, portal_students(id, display_name, preferred_first, grade_fall26, status, cell_phone, notes)"
+          "student_id, relationship_status, role, primary_contact, portal_students(id, display_name, preferred_first, grade_fall26, status, cell_phone, notes, band_class_2026, ensemble_2026, instrument_2026, marching_2026, mb_role_2026)"
         )
         .eq("person_id", session.personId)
         .eq("relationship_status", "trusted")
@@ -54,6 +54,11 @@ export async function GET(request) {
       status: link.portal_students?.status,
       cellPhone: link.portal_students?.cell_phone,
       note: link.portal_students?.notes || "",
+      bandClass2026: link.portal_students?.band_class_2026 || "",
+      ensemble2026: link.portal_students?.ensemble_2026 || "",
+      instrument2026: link.portal_students?.instrument_2026 || "",
+      marching2026: link.portal_students?.marching_2026 || "",
+      marchingRole2026: link.portal_students?.mb_role_2026 || "",
       guardians: []
     }))
     .filter((student) => student.id);

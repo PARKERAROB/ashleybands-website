@@ -1,8 +1,8 @@
 import PortalReviewClient from "./PortalReviewClient";
 
 export const metadata = {
-  title: "My Profile | Ashley Bands",
-  description: "View and update your Ashley Bands family profile."
+  title: "Family Portal | Ashley Bands",
+  description: "Review student information, band participation, uniforms, and payments."
 };
 
 export default function PortalReviewPage() {
