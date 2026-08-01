@@ -19,6 +19,9 @@ sanitized public projections, website-owned content, and application code.
 - `/deploy-website` only. Never deploy spring-concert-2026.vercel.app.
 - The checked production command is `npm run deploy:checked`; it refreshes safe local projections,
   runs the integration/privacy checks, lints, builds, and invokes Vercel production.
+- Production requires a Rob-authored HEAD commit (`parkerarob` / `robert.parker@nhcs.net`). An
+  Atlas-authored HEAD is rejected by Vercel as an `UNKNOWN` deployment with a zero-millisecond build.
+  The identity rail applies to GitHub issues and comments, not commit authorship in this repository.
 - **CONSOLIDATED 2026-06-15: `main` now has ALL content** (`band-of-heroes-live` merged into `main`,
   no history rewrite). The old "deploying `main` drops live content" warning is now STALE — `main` is
   the full superset. Prod stays aliased from the last `band-of-heroes-live` deploy until the next
