@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 
-const HIDDEN_FOOTER_ROUTES = ["/raleigh-brief", "/attendance"];
+const HIDDEN_FOOTER_ROUTES = ["/raleigh-brief", "/attendance", "/day-1-agenda"];
 
 const COLUMNS = [
   {
