@@ -25,4 +25,4 @@ Warm, credible, and school-specific: paper neutrals, Ashley garnet, restrained g
 
 ## Day 1 attendance success
 
-For Band Camp Day 1 on August 3, 2026, staff and leadership can open a private link, enter an established program PIN, see the 60 committed students plus three provisional/pending students with name, section or placement state, and grade, mark each student Present, Tardy, or Absent, and deliberately email the director the complete marked-absent list.
+For Band Camp Day 1 on August 3, 2026, staff and leadership can open a private link, enter the dedicated program PIN, see the 60 committed students plus three provisional/pending students in score order with battery and front ensemble separated, mark each student Present, Tardy, Absent, or back to Unmarked, save a staff note on any student, and deliberately email the director all marked absences and saved notes.

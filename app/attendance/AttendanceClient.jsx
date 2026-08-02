@@ -16,6 +16,9 @@ export default function AttendanceClient() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [saving, setSaving] = useState(new Set());
+  const [noteSaving, setNoteSaving] = useState(new Set());
+  const [openNotes, setOpenNotes] = useState(new Set());
+  const [noteDrafts, setNoteDrafts] = useState({});
   const [sending, setSending] = useState(false);
   const [lastSynced, setLastSynced] = useState(null);
   const hasLoaded = useRef(false);
@@ -59,14 +62,15 @@ export default function AttendanceClient() {
 
   const counts = useMemo(() => students.reduce((total, student) => {
     total[student.status || "unmarked"] += 1;
+    if (String(student.note || "").trim()) total.notes += 1;
     return total;
-  }, { present: 0, tardy: 0, absent: 0, unmarked: 0 }), [students]);
+  }, { present: 0, tardy: 0, absent: 0, unmarked: 0, notes: 0 }), [students]);
 
   const visible = useMemo(() => {
     const needle = query.trim().toLowerCase();
     if (!needle) return students;
     return students.filter((student) =>
-      [student.name, student.section, student.assignment, student.grade]
+      [student.name, student.section, student.assignment, student.grade, student.note]
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(needle)));
   }, [query, students]);
@@ -103,11 +107,58 @@ export default function AttendanceClient() {
     }
   };
 
+  const toggleNote = (student) => {
+    setOpenNotes((current) => {
+      const next = new Set(current);
+      if (next.has(student.id)) next.delete(student.id);
+      else next.add(student.id);
+      return next;
+    });
+    setNoteDrafts((current) => Object.prototype.hasOwnProperty.call(current, student.id)
+      ? current
+      : { ...current, [student.id]: student.note || "" });
+  };
+
+  const saveNote = async (studentId) => {
+    const note = String(noteDrafts[studentId] || "").trim();
+    setNoteSaving((current) => new Set(current).add(studentId));
+    setError("");
+    setNotice("");
+    try {
+      const response = await fetch("/api/attendance", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ studentId, note })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "That note did not save.");
+      setStudents((current) => current.map((student) => student.id === studentId
+        ? { ...student, note: data.note || "" }
+        : student));
+      setOpenNotes((current) => {
+        const next = new Set(current);
+        next.delete(studentId);
+        return next;
+      });
+      setNotice(note ? "Staff note saved." : "Staff note cleared.");
+      setLastSynced(new Date());
+    } catch (saveError) {
+      setError(saveError.message);
+    } finally {
+      setNoteSaving((current) => {
+        const next = new Set(current);
+        next.delete(studentId);
+        return next;
+      });
+    }
+  };
+
   const sendAbsentList = async () => {
     const absentCount = counts.absent;
-    if (!absentCount) return;
+    const noteCount = counts.notes;
+    if (!absentCount && !noteCount) return;
     const confirmed = window.confirm(
-      `Send Mr. Parker the current list of ${absentCount} student${absentCount === 1 ? "" : "s"} marked absent?`
+      `Send Mr. Parker the current report with ${absentCount} marked absent and ${noteCount} staff note${noteCount === 1 ? "" : "s"}?`
     );
     if (!confirmed) return;
 
@@ -118,7 +169,7 @@ export default function AttendanceClient() {
       const response = await fetch("/api/attendance/report", { method: "POST" });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || "The absent list could not be sent.");
-      setNotice(`Sent Mr. Parker the list of ${data.count} marked absent.`);
+      setNotice(`Sent Mr. Parker ${data.absentCount} marked absent and ${data.noteCount} staff note${data.noteCount === 1 ? "" : "s"}.`);
     } catch (sendError) {
       setError(sendError.message);
     } finally {
@@ -194,29 +245,64 @@ export default function AttendanceClient() {
                 </h2>
               )}
               <article className={`${styles.student} ${student.provisional ? styles.provisionalStudent : ""}`}>
-                <div className={styles.identity}>
-                  <h3>{student.name}</h3>
-                  <p>
-                    <span>Grade {student.grade}</span>
-                    <span aria-hidden="true">·</span>
-                    <span>{student.assignment || student.section}</span>
-                  </p>
+                <div className={styles.studentMain}>
+                  <div className={styles.identity}>
+                    <h3>{student.name}</h3>
+                    <p>
+                      <span>Grade {student.grade}</span>
+                      <span aria-hidden="true">·</span>
+                      <span>{student.assignment || student.section}</span>
+                    </p>
+                  </div>
+                  <div className={styles.statusGroup} aria-label={`Attendance for ${student.name}`}>
+                    {Object.entries(STATUS).map(([value, option]) => (
+                      <button
+                        key={value}
+                        type="button"
+                        className={`${styles.statusButton} ${styles[value]} ${student.status === value ? styles.selected : ""}`}
+                        aria-label={`${student.name}: ${option.label}`}
+                        aria-pressed={student.status === value}
+                        disabled={saving.has(student.id)}
+                        onClick={() => mark(student.id, student.status === value ? null : value)}
+                      >
+                        <span aria-hidden="true">{option.short}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <div className={styles.statusGroup} aria-label={`Attendance for ${student.name}`}>
-                  {Object.entries(STATUS).map(([value, option]) => (
-                    <button
-                      key={value}
-                      type="button"
-                      className={`${styles.statusButton} ${styles[value]} ${student.status === value ? styles.selected : ""}`}
-                      aria-label={`${student.name}: ${option.label}`}
-                      aria-pressed={student.status === value}
-                      disabled={saving.has(student.id)}
-                      onClick={() => mark(student.id, student.status === value ? null : value)}
-                    >
-                      <span aria-hidden="true">{option.short}</span>
-                    </button>
-                  ))}
-                </div>
+                <button
+                  className={`${styles.noteToggle} ${student.note ? styles.hasNote : ""}`}
+                  type="button"
+                  aria-expanded={openNotes.has(student.id)}
+                  onClick={() => toggleNote(student)}
+                >
+                  {student.note ? `Staff note: ${student.note}` : "+ Add staff note"}
+                </button>
+                {openNotes.has(student.id) && (
+                  <div className={styles.noteEditor}>
+                    <label htmlFor={`attendance-note-${student.id}`}>Note about {student.name}</label>
+                    <textarea
+                      id={`attendance-note-${student.id}`}
+                      maxLength={1000}
+                      value={noteDrafts[student.id] || ""}
+                      onChange={(event) => setNoteDrafts((current) => ({
+                        ...current,
+                        [student.id]: event.target.value
+                      }))}
+                      placeholder="What should Mr. Parker know?"
+                    />
+                    <div className={styles.noteActions}>
+                      <span>{(noteDrafts[student.id] || "").length}/1000</span>
+                      <button
+                        type="button"
+                        disabled={noteSaving.has(student.id)}
+                        onClick={() => saveNote(student.id)}
+                      >
+                        {noteSaving.has(student.id) ? "Saving…" : "Save note"}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </article>
             </div>
           );
@@ -226,15 +312,15 @@ export default function AttendanceClient() {
 
       <div className={styles.reportBar}>
         <div>
-          <strong>{counts.absent} marked absent</strong>
-          <span>The email includes everyone currently marked A.</span>
+          <strong>{counts.absent} absent · {counts.notes} notes</strong>
+          <span>The email includes marked absences and every saved staff note.</span>
         </div>
         <button
           type="button"
-          disabled={!counts.absent || sending || saving.size > 0}
+          disabled={(!counts.absent && !counts.notes) || sending || saving.size > 0 || noteSaving.size > 0}
           onClick={sendAbsentList}
         >
-          {sending ? "Sending…" : "Send absent list to Mr. Parker"}
+          {sending ? "Sending…" : "Send report to Mr. Parker"}
         </button>
       </div>
     </main>

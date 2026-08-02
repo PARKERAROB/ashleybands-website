@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { validateAttendanceRequest } from "@/lib/attendanceAuth";
 import { logAudit } from "@/lib/auditLog";
-import { compareMarchingSections } from "@/lib/marchingBandOrder";
+import { attendanceSectionForStudent, compareMarchingSections } from "@/lib/marchingBandOrder";
 
 export const runtime = "nodejs";
 
@@ -39,7 +39,7 @@ export async function GET(request) {
       .or("notes.ilike.%provisional%,notes.ilike.%pending and not counted%"),
     supabaseAdmin
       .from("band_camp_attendance_2026")
-      .select("portal_student_id, status, updated_at")
+      .select("portal_student_id, status, note, updated_at")
       .eq("attendance_date", ATTENDANCE_DATE)
   ]);
 
@@ -62,10 +62,14 @@ export async function GET(request) {
       name: student.display_name,
       lastName: student.legal_last || student.display_name,
       grade: displayGrade(student.grade_fall26),
-      section: student.mb_role_2026 || "Provisional / placement pending",
+      section: attendanceSectionForStudent({
+        role: student.mb_role_2026,
+        instrument: student.instrument_2026
+      }),
       assignment: student.mb_role_2026 ? null : (student.instrument_2026 || "Placement pending"),
       provisional: !student.mb_role_2026,
       status: marks.get(student.id)?.status || null,
+      note: marks.get(student.id)?.note || "",
       updatedAt: marks.get(student.id)?.updated_at || null
     }))
     .sort((a, b) => compareMarchingSections(a.section, b.section)
@@ -93,8 +97,9 @@ export async function PATCH(request) {
   const body = await request.json().catch(() => ({}));
   const studentId = String(body.studentId || "").trim();
   const status = String(body.status || "").trim().toLowerCase();
+  const hasNote = Object.prototype.hasOwnProperty.call(body, "note");
   const clearing = status === "unmarked";
-  if (!studentId || (!VALID_STATUSES.has(status) && !clearing)) {
+  if (!studentId || (!hasNote && !VALID_STATUSES.has(status) && !clearing)) {
     return NextResponse.json({ error: "Choose Present, Tardy, Absent, or Unmarked." }, { status: 400 });
   }
 
@@ -108,12 +113,70 @@ export async function PATCH(request) {
     return NextResponse.json({ error: "Student is not on the active marching-band roster." }, { status: 404 });
   }
 
+  if (hasNote) {
+    const note = String(body.note || "").trim().slice(0, 1000);
+    const { data: existing, error: existingError } = await supabaseAdmin
+      .from("band_camp_attendance_2026")
+      .select("status")
+      .eq("attendance_date", ATTENDANCE_DATE)
+      .eq("portal_student_id", student.id)
+      .maybeSingle();
+    if (existingError) return NextResponse.json({ error: existingError.message }, { status: 500 });
+
+    if (!note && !existing?.status) {
+      const { error } = await supabaseAdmin
+        .from("band_camp_attendance_2026")
+        .delete()
+        .eq("attendance_date", ATTENDANCE_DATE)
+        .eq("portal_student_id", student.id);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    } else {
+      const { error } = await supabaseAdmin
+        .from("band_camp_attendance_2026")
+        .upsert({
+          attendance_date: ATTENDANCE_DATE,
+          portal_student_id: student.id,
+          status: existing?.status || null,
+          note: note || null,
+          source: "attendance_web",
+          updated_at: new Date().toISOString()
+        }, { onConflict: "attendance_date,portal_student_id" });
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    await logAudit({
+      actor: session.actor,
+      action: note ? "attendance.note.updated" : "attendance.note.cleared",
+      table: "band_camp_attendance_2026",
+      recordId: student.id,
+      changes: { attendance_date: ATTENDANCE_DATE, note_present: Boolean(note) },
+      route: "/api/attendance"
+    });
+
+    return NextResponse.json({ studentId: student.id, note });
+  }
+
   if (clearing) {
-    const { error } = await supabaseAdmin
+    const { data: existing, error: existingError } = await supabaseAdmin
+      .from("band_camp_attendance_2026")
+      .select("note")
+      .eq("attendance_date", ATTENDANCE_DATE)
+      .eq("portal_student_id", student.id)
+      .maybeSingle();
+    if (existingError) return NextResponse.json({ error: existingError.message }, { status: 500 });
+
+    const query = existing?.note
+      ? supabaseAdmin
+        .from("band_camp_attendance_2026")
+        .update({ status: null, updated_at: new Date().toISOString() })
+        .eq("attendance_date", ATTENDANCE_DATE)
+        .eq("portal_student_id", student.id)
+      : supabaseAdmin
       .from("band_camp_attendance_2026")
       .delete()
       .eq("attendance_date", ATTENDANCE_DATE)
       .eq("portal_student_id", student.id);
+    const { error } = await query;
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
     await logAudit({

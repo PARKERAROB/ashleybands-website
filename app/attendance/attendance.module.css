@@ -170,16 +170,19 @@
 }
 
 .student {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
   min-height: 68px;
   margin-bottom: 5px;
   padding: 9px 10px 9px 14px;
   border: 1px solid #ddd4c4;
   border-radius: 8px;
   background: #fffdf8;
+}
+
+.studentMain {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
 }
 
 .provisionalStudent {
@@ -233,6 +236,89 @@
 .statusButton.present.selected { color: #fff; border-color: #36543d; background: #446349; }
 .statusButton.tardy.selected { color: #251d05; border-color: #b68e16; background: #e2bd45; }
 .statusButton.absent.selected { color: #fff; border-color: #7d1e2a; background: #a32436; }
+
+.noteToggle {
+  display: block;
+  max-width: 100%;
+  min-height: 44px;
+  margin: 5px 0 -3px;
+  padding: 7px 4px;
+  overflow: hidden;
+  border: 0;
+  color: #6f675a;
+  background: transparent;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 750;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.noteToggle.hasNote {
+  color: #5b4500;
+}
+
+.noteEditor {
+  margin: 8px 0 3px;
+  padding: 11px;
+  border-radius: 7px;
+  background: #f2ede2;
+}
+
+.noteEditor label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.noteEditor textarea {
+  display: block;
+  width: 100%;
+  min-height: 84px;
+  padding: 9px 10px;
+  resize: vertical;
+  border: 1px solid #c8bda8;
+  border-radius: 7px;
+  color: #191716;
+  background: #fff;
+  font: inherit;
+  font-size: 16px;
+}
+
+.noteActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 7px;
+}
+
+.noteActions span {
+  color: #756d60;
+  font-size: 0.7rem;
+}
+
+.noteActions button {
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 7px;
+  color: #fff;
+  background: #7b1829;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.noteActions button:disabled {
+  color: #8b8375;
+  background: #ddd6c9;
+  cursor: wait;
+}
 
 .empty,
 .loading {
@@ -348,7 +434,8 @@
   .titleRow { align-items: center; }
   .titleRow h1 { font-size: 2rem; }
   .titleRow p { font-size: 0.85rem; }
-  .student { gap: 8px; padding-left: 11px; }
+  .student { padding-left: 11px; }
+  .studentMain { gap: 8px; }
   .statusGroup { gap: 4px; }
   .identity h3 { font-size: 0.93rem; }
   .reportBar { justify-content: space-between; gap: 10px; }

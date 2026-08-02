@@ -3,7 +3,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { validateAttendanceRequest } from "@/lib/attendanceAuth";
 import { logAudit } from "@/lib/auditLog";
 import { sendPortalReviewAlert } from "@/lib/portalEmail";
-import { compareMarchingSections } from "@/lib/marchingBandOrder";
+import { attendanceSectionForStudent, compareMarchingSections } from "@/lib/marchingBandOrder";
 
 export const runtime = "nodejs";
 
@@ -23,40 +23,51 @@ export async function POST(request) {
 
   const { data, error } = await supabaseAdmin
     .from("band_camp_attendance_2026")
-    .select("portal_student_id, portal_students(display_name, grade_fall26, mb_role_2026)")
+    .select("portal_student_id, status, note, portal_students(display_name, grade_fall26, mb_role_2026, instrument_2026)")
     .eq("attendance_date", ATTENDANCE_DATE)
-    .eq("status", "absent");
+    .or("status.eq.absent,note.not.is.null");
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  const absent = (data || [])
-    .map((row) => row.portal_students)
-    .filter(Boolean)
+  const reportRows = (data || [])
+    .filter((row) => row.portal_students && (row.status === "absent" || String(row.note || "").trim()))
     .sort((a, b) => compareMarchingSections(
-      a.mb_role_2026 || "Provisional / placement pending",
-      b.mb_role_2026 || "Provisional / placement pending"
+      attendanceSectionForStudent({ role: a.portal_students.mb_role_2026, instrument: a.portal_students.instrument_2026 }),
+      attendanceSectionForStudent({ role: b.portal_students.mb_role_2026, instrument: b.portal_students.instrument_2026 })
     )
-      || String(a.display_name).localeCompare(String(b.display_name)));
+      || String(a.portal_students.display_name).localeCompare(String(b.portal_students.display_name)));
+  const absentCount = reportRows.filter((row) => row.status === "absent").length;
+  const noteCount = reportRows.filter((row) => String(row.note || "").trim()).length;
 
   await logAudit({
     actor: session.actor,
     action: "attendance.absent_report.read",
     table: "band_camp_attendance_2026,portal_students",
-    changes: { attendance_date: ATTENDANCE_DATE, absent_count: absent.length },
+    changes: { attendance_date: ATTENDANCE_DATE, absent_count: absentCount, note_count: noteCount },
     route: "/api/attendance/report"
   });
 
-  if (!absent.length) {
-    return NextResponse.json({ error: "No students are currently marked absent." }, { status: 400 });
+  if (!reportRows.length) {
+    return NextResponse.json({ error: "There are no marked absences or staff notes to send." }, { status: 400 });
   }
 
-  const details = absent.map((student) =>
-    `${student.display_name} — ${student.mb_role_2026 || "Provisional / placement pending"}, Grade ${displayGrade(student.grade_fall26)}`
-  );
+  const details = reportRows.flatMap((row) => {
+    const student = row.portal_students;
+    const section = attendanceSectionForStudent({
+      role: student.mb_role_2026,
+      instrument: student.instrument_2026
+    });
+    const lines = [];
+    if (row.status === "absent") {
+      lines.push(`ABSENT — ${student.display_name} — ${section}, Grade ${displayGrade(student.grade_fall26)}`);
+    }
+    if (String(row.note || "").trim()) lines.push(`NOTE — ${student.display_name}: ${String(row.note).trim()}`);
+    return lines;
+  });
 
   try {
     await sendPortalReviewAlert({
-      subject: `Band Camp Day 1 — ${absent.length} marked absent`,
-      summary: `${absent.length} student${absent.length === 1 ? " is" : "s are"} marked absent for Monday, August 3, 2026.`,
+      subject: `Band Camp Day 1 — ${absentCount} absent, ${noteCount} staff note${noteCount === 1 ? "" : "s"}`,
+      summary: `Attendance report for Monday, August 3, 2026: ${absentCount} marked absent and ${noteCount} staff note${noteCount === 1 ? "" : "s"}.`,
       details
     });
   } catch (emailError) {
@@ -67,9 +78,9 @@ export async function POST(request) {
     actor: session.actor,
     action: "attendance.absent_report.sent",
     table: "band_camp_attendance_2026,portal_students",
-    changes: { attendance_date: ATTENDANCE_DATE, absent_count: absent.length },
+    changes: { attendance_date: ATTENDANCE_DATE, absent_count: absentCount, note_count: noteCount },
     route: "/api/attendance/report"
   });
 
-  return NextResponse.json({ ok: true, count: absent.length });
+  return NextResponse.json({ ok: true, absentCount, noteCount });
 }
