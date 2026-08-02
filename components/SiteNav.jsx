@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { readStaffSession } from "@/lib/staffSession";
 
-const HIDDEN_NAV_ROUTES = ["/raleigh-brief"];
+const HIDDEN_NAV_ROUTES = ["/raleigh-brief", "/attendance"];
 const NAV_LINKS = [
   { href: "/info/2026-2027-band-information", label: "Info" },
   { href: "/info/marching-band-2026", label: "Marching Band" },
