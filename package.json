@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "node scripts/build-public-content.mjs",
+    "prebuild": "node scripts/build-public-content.mjs && node scripts/build-regiment-os-review.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
@@ -26,6 +26,8 @@
     "qrcode.react": "^4.2.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
     "resend": "^6.12.3",
     "vexflow": "^5.0.0"
   },

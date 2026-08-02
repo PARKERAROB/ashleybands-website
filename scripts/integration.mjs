@@ -130,6 +130,7 @@ async function doctor() {
   run("calendar safety tests", "python3", [calendarScript, "--selftest"]);
   run("calendar projections", "python3", [calendarScript, "--check"]);
   run("public content projection", process.execPath, ["scripts/build-public-content.mjs", "--check"]);
+  run("Regiment OS projection", process.execPath, ["scripts/build-regiment-os-review.mjs", "--check"]);
   run("instrument projection", process.execPath, ["scripts/build-instruments-public.mjs", "--check"]);
   run("data provenance lint", process.execPath, ["scripts/provenance-lint.mjs"]);
   checkPrivacyBoundary();
@@ -176,6 +177,7 @@ async function sync() {
   if (!run("calendar safety tests", "python3", [calendarScript, "--selftest"])) return 1;
   if (!run("calendar write", "python3", [calendarScript, "--write"])) return 1;
   if (!run("public content write", process.execPath, ["scripts/build-public-content.mjs"])) return 1;
+  if (!run("Regiment OS write", process.execPath, ["scripts/build-regiment-os-review.mjs"])) return 1;
   if (!run("instrument write", process.execPath, ["scripts/build-instruments-public.mjs"])) return 1;
 
   if (portalApply) {
