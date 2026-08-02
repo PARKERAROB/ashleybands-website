@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { validateAttendanceRequest } from "@/lib/attendanceAuth";
 import { logAudit } from "@/lib/auditLog";
+import { compareMarchingSections } from "@/lib/marchingBandOrder";
 
 export const runtime = "nodejs";
 
@@ -67,8 +68,7 @@ export async function GET(request) {
       status: marks.get(student.id)?.status || null,
       updatedAt: marks.get(student.id)?.updated_at || null
     }))
-    .sort((a, b) => Number(a.provisional) - Number(b.provisional)
-      || a.section.localeCompare(b.section)
+    .sort((a, b) => compareMarchingSections(a.section, b.section)
       || a.lastName.localeCompare(b.lastName));
 
   await logAudit({
@@ -93,8 +93,9 @@ export async function PATCH(request) {
   const body = await request.json().catch(() => ({}));
   const studentId = String(body.studentId || "").trim();
   const status = String(body.status || "").trim().toLowerCase();
-  if (!studentId || !VALID_STATUSES.has(status)) {
-    return NextResponse.json({ error: "Choose Present, Tardy, or Absent." }, { status: 400 });
+  const clearing = status === "unmarked";
+  if (!studentId || (!VALID_STATUSES.has(status) && !clearing)) {
+    return NextResponse.json({ error: "Choose Present, Tardy, Absent, or Unmarked." }, { status: 400 });
   }
 
   const { data: student, error: studentError } = await supabaseAdmin
@@ -105,6 +106,26 @@ export async function PATCH(request) {
   const provisional = /provisional|pending and not counted/i.test(student?.notes || "");
   if (studentError || !student || student.status !== "active" || (!student.mb_role_2026 && !provisional)) {
     return NextResponse.json({ error: "Student is not on the active marching-band roster." }, { status: 404 });
+  }
+
+  if (clearing) {
+    const { error } = await supabaseAdmin
+      .from("band_camp_attendance_2026")
+      .delete()
+      .eq("attendance_date", ATTENDANCE_DATE)
+      .eq("portal_student_id", student.id);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    await logAudit({
+      actor: session.actor,
+      action: "attendance.mark.cleared",
+      table: "band_camp_attendance_2026",
+      recordId: student.id,
+      changes: { attendance_date: ATTENDANCE_DATE, status: null },
+      route: "/api/attendance"
+    });
+
+    return NextResponse.json({ studentId: student.id, status: null, updatedAt: null });
   }
 
   const { data, error } = await supabaseAdmin

@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { verifyPin } from "@/lib/sponsorAuth";
 import { checkRateLimit, clientIp } from "@/lib/rateLimit";
 import {
@@ -25,12 +24,12 @@ export async function POST(request) {
     return NextResponse.json({ error: "Too many attempts. Wait a few minutes and try again." }, { status: 429 });
   }
 
-  const { data: staffRows, error } = await supabaseAdmin
-    .from("staff")
-    .select("pin_hash");
-  if (error) return NextResponse.json({ error: "Attendance access is temporarily unavailable." }, { status: 500 });
+  const attendancePinHash = process.env.ATTENDANCE_PIN_HASH;
+  if (!attendancePinHash) {
+    return NextResponse.json({ error: "Attendance access is not configured." }, { status: 503 });
+  }
 
-  const recognized = (staffRows || []).some((staff) => verifyPin(pin, staff.pin_hash));
+  const recognized = verifyPin(pin, attendancePinHash);
   if (!recognized) return NextResponse.json({ error: "PIN not recognized." }, { status: 401 });
 
   const response = NextResponse.json({ ok: true });
@@ -38,7 +37,7 @@ export async function POST(request) {
   await logAudit({
     actor: { type: "system", name: "Shared attendance PIN" },
     action: "attendance.access.granted",
-    table: "staff",
+    table: "attendance_access",
     route: "/api/attendance/access"
   });
   return response;

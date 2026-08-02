@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { validateAttendanceRequest } from "@/lib/attendanceAuth";
 import { logAudit } from "@/lib/auditLog";
 import { sendPortalReviewAlert } from "@/lib/portalEmail";
+import { compareMarchingSections } from "@/lib/marchingBandOrder";
 
 export const runtime = "nodejs";
 
@@ -30,7 +31,10 @@ export async function POST(request) {
   const absent = (data || [])
     .map((row) => row.portal_students)
     .filter(Boolean)
-    .sort((a, b) => String(a.mb_role_2026).localeCompare(String(b.mb_role_2026))
+    .sort((a, b) => compareMarchingSections(
+      a.mb_role_2026 || "Provisional / placement pending",
+      b.mb_role_2026 || "Provisional / placement pending"
+    )
       || String(a.display_name).localeCompare(String(b.display_name)));
 
   await logAudit({

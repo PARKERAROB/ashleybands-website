@@ -84,7 +84,7 @@ export default function AttendanceClient() {
       const response = await fetch("/api/attendance", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ studentId, status })
+        body: JSON.stringify({ studentId, status: status || "unmarked" })
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || "That mark did not save.");
@@ -180,7 +180,7 @@ export default function AttendanceClient() {
 
       <div className={styles.listHeader}>
         <span>{visible.length} of {students.length} students</span>
-        <span>Tap P, T, or A</span>
+        <span>Tap selected letter again to clear</span>
       </div>
 
       <section className={styles.roster} aria-label="Student attendance roster">
@@ -211,7 +211,7 @@ export default function AttendanceClient() {
                       aria-label={`${student.name}: ${option.label}`}
                       aria-pressed={student.status === value}
                       disabled={saving.has(student.id)}
-                      onClick={() => mark(student.id, value)}
+                      onClick={() => mark(student.id, student.status === value ? null : value)}
                     >
                       <span aria-hidden="true">{option.short}</span>
                     </button>
