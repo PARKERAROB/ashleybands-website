@@ -41,6 +41,52 @@
   color: rgba(255, 250, 240, 0.78);
 }
 
+.eventHeading {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pastLabel,
+.provisionalBadge {
+  padding: 4px 7px;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pastLabel { color: #4f101c; background: #f4e5b6; }
+.provisionalBadge { color: #735700; background: #f4e5b6; }
+
+.eventPicker {
+  display: grid;
+  grid-template-columns: auto minmax(220px, 420px);
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.eventPicker span {
+  color: rgba(255, 250, 240, 0.75);
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.eventPicker select {
+  min-height: 44px;
+  padding: 8px 34px 8px 11px;
+  border: 1px solid rgba(255, 250, 240, 0.35);
+  border-radius: 8px;
+  color: #191716;
+  background: #fffaf0;
+  font: inherit;
+  font-size: 0.9rem;
+}
+
 .signOut {
   min-height: 44px;
   padding: 8px 14px;
@@ -62,6 +108,90 @@
   background: rgba(255, 250, 240, 0.97);
   box-shadow: 0 8px 24px rgba(35, 27, 18, 0.07);
   backdrop-filter: blur(10px);
+}
+
+.expected {
+  max-width: 920px;
+  margin: 18px auto;
+  padding: 16px;
+  border: 1px solid #d8cfbe;
+  border-radius: 9px;
+  background: #fffaf0;
+}
+
+.expected .eyebrow { color: #7b1829; }
+
+.expectedHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.expectedHeading h2 { margin: 0; color: #4f101c; font-size: 1.15rem; }
+.expectedHeading > strong { color: #4f101c; font-size: 1.7rem; }
+
+.expected ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 8px;
+  margin: 13px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.expected li {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 12px;
+  border: 1px solid #ded0a0;
+  border-radius: 5px;
+  background: #f4eedf;
+}
+
+.expected li span { color: #5e5548; font-size: 0.8rem; }
+.expected li small { margin-top: 4px; color: #6f675a; }
+.noExpected { margin: 10px 0 0; color: #6f675a; font-size: 0.85rem; }
+
+.exceptionManager { margin-top: 14px; border-top: 1px solid #ded4c2; padding-top: 12px; }
+.exceptionManager summary { color: #6b1725; font-weight: 800; cursor: pointer; }
+
+.exceptionManager form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.exceptionManager label {
+  display: grid;
+  gap: 5px;
+  color: #5e5548;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.exceptionManager input,
+.exceptionManager select {
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid #c8bda8;
+  border-radius: 7px;
+  background: #fff;
+  font: inherit;
+  font-size: 16px;
+}
+
+.exceptionManager button {
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 7px;
+  color: #fff;
+  background: #7b1829;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
 }
 
 .counts {
@@ -256,6 +386,81 @@
   cursor: pointer;
 }
 
+.studentExpected {
+  margin: 7px 0 1px;
+  padding: 6px 8px;
+  border-radius: 5px;
+  color: #5b4500;
+  background: #f8edc5;
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.studentTools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 16px;
+}
+
+.studentTools .noteToggle { width: auto; }
+
+.departureToggle {
+  min-height: 44px;
+  padding: 7px 4px;
+  border: 0;
+  color: #6f675a;
+  background: transparent;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.departureToggle.hasDeparture { color: #244e2b; }
+
+.departureEditor {
+  margin: 8px 0 3px;
+  padding: 11px;
+  border-radius: 7px;
+  background: #e8efe5;
+}
+
+.departureEditor > label {
+  display: block;
+  margin: 8px 0 7px;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.departureEditor > label:first-child { margin-top: 0; }
+
+.departureEditor > div { display: flex; gap: 8px; }
+
+.departureEditor input {
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid #aebca9;
+  border-radius: 7px;
+  background: #fff;
+  font: inherit;
+  font-size: 16px;
+}
+
+.departureEditor > input { width: 100%; }
+
+.departureEditor button {
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 7px;
+  color: #fff;
+  background: #446349;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+
 .noteToggle.hasNote {
   color: #5b4500;
 }
@@ -441,4 +646,7 @@
   .reportBar { justify-content: space-between; gap: 10px; }
   .reportBar span { display: none; }
   .reportBar button { max-width: 220px; padding-inline: 12px; font-size: 0.8rem; }
+  .eventPicker { grid-template-columns: 1fr; }
+  .expected { margin: 12px 10px; }
+  .exceptionManager form { grid-template-columns: 1fr; }
 }

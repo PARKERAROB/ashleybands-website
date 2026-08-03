@@ -13,6 +13,7 @@
     "content:build": "node scripts/build-public-content.mjs",
     "portal:sync": "node scripts/sync-portal-csv.mjs",
     "lint:provenance": "node scripts/provenance-lint.mjs",
+    "test:attendance": "node --test scripts/attendance-events.test.mjs",
     "integration:doctor": "node scripts/integration.mjs doctor",
     "integration:doctor:online": "node scripts/integration.mjs doctor --online",
     "integration:sync": "node scripts/integration.mjs sync",
