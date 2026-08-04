@@ -22,6 +22,9 @@ sanitized public projections, website-owned content, and application code.
 - Production requires a Rob-authored HEAD commit (`parkerarob` / `robert.parker@nhcs.net`). An
   Atlas-authored HEAD is rejected by Vercel as an `UNKNOWN` deployment with a zero-millisecond build.
   The identity rail applies to GitHub issues and comments, not commit authorship in this repository.
+  Workdesk's standing publication approval covers the narrow Rob-authored authorization commit after
+  the substantive Atlas-authored commit; do not raise again unless Rob withheld publication for the
+  current change or Atlas knows a non-obvious material risk. — Rob, 2026-08-04
 - **CONSOLIDATED 2026-06-15: `main` now has ALL content** (`band-of-heroes-live` merged into `main`,
   no history rewrite). The old "deploying `main` drops live content" warning is now STALE — `main` is
   the full superset. Prod stays aliased from the last `band-of-heroes-live` deploy until the next
