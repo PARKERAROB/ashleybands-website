@@ -223,7 +223,7 @@ export default async function SponsorsHubPage() {
       <footer className="sponsors-footer">
         <p>
           Band family running outreach? →{" "}
-          <Link href="/sponsors/campaign">Open the family campaign tools</Link>
+          <Link href="/portal/sponsorship">Open family sponsorship</Link>
         </p>
         <p className="sponsors-footer-staff">
           <Link href="/sponsors/dashboard">Staff dashboard</Link>

@@ -166,6 +166,7 @@ function FamilyResources() {
   return (
     <nav className="portal-family-resources" aria-label="Family resources">
       <strong>Family resources</strong>
+      <Link href="/portal/sponsorship">Business sponsorship</Link>
       <Link href="/info/marching-band-2026">Marching Band information</Link>
       <Link href="/calendar">Band calendar</Link>
       <Link href="/info/the-band-folder">The Band Folder</Link>

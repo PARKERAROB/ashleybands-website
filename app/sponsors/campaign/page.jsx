@@ -15,12 +15,12 @@ export default function CampaignPage() {
         <h1>Family Campaign Tools</h1>
         <p className="sponsors-lede">
           Everything you need to run sponsorship outreach for your student. Pick 5 local
-          businesses you already do business with, drop off a packet, follow up, and send any
-          commitments to Mr. Parker. The tracker keeps it organized.
+          businesses you already know, choose whether to contact them yourself or have the band
+          make the introduction, and keep the follow-up organized in your Family Portal.
         </p>
         <div className="sponsors-cta-row">
-          <Link href="/sponsors/tracker" className="sponsors-btn sponsors-btn-primary">
-            Open my sponsorship tracker
+          <Link href="/portal/sponsorship" className="sponsors-btn sponsors-btn-primary">
+            Open family sponsorship
           </Link>
           <Link href="/sponsors" className="sponsors-btn">
             ← Back to sponsor info
@@ -58,14 +58,13 @@ export default function CampaignPage() {
         <p className="eyebrow">Tools</p>
         <h2>Online tracker</h2>
         <p>
-          Track your 5 businesses, log drop-offs and follow-ups, record committed amounts, and
-          flag when you've sent a signed form to Mr. Parker. One account per student. Mr.
-          Parker can see roll-up progress on the staff dashboard and flag when two students
-          are pitching the same business (likely siblings — that's expected, just coordinate).
+          Add businesses your family knows, ask the band to make the first introduction when
+          that helps, browse businesses that are already open to hearing from an Ashley family,
+          and mark each business after you make contact. Everything lives in the Family Portal.
         </p>
         <div className="sponsors-cta-row">
-          <Link href="/sponsors/tracker" className="sponsors-btn sponsors-btn-primary">
-            Open my sponsorship tracker
+          <Link href="/portal/sponsorship" className="sponsors-btn sponsors-btn-primary">
+            Open family sponsorship
           </Link>
         </div>
       </section>
@@ -118,7 +117,7 @@ export default function CampaignPage() {
             Email it to <a href={`mailto:${SPONSOR_CONTACT.email}`}>{SPONSOR_CONTACT.email}</a> with
             subject: <em>Sponsor commit — [Business Name] — [Your Student Name]</em>
           </li>
-          <li>Mark the prospect "Yes" in your tracker and check "Sent to Mr. Parker".</li>
+          <li>Mark “I contacted them” in your Family Sponsorship dashboard.</li>
           <li>
             Mr. Parker takes it from there: thank-you call, recognition setup, intake, tax
             receipt within two weeks.
