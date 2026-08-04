@@ -207,6 +207,15 @@
   "location": "AHS"
  },
  {
+  "id": "evt-0109",
+  "title": "Ashley High School Open House",
+  "start": "2026-08-18T17:30",
+  "end": "2026-08-18T19:45",
+  "all_day": false,
+  "category": "School",
+  "location": "Ashley High School"
+ },
+ {
   "id": "evt-0108",
   "title": "Marching Rehearsal",
   "start": "2026-08-25T16:00",
