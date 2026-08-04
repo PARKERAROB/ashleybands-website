@@ -43,13 +43,17 @@ export async function PATCH(req, { params }) {
   if (typeof body.payer_email === "string") pre.payer_email = body.payer_email.trim();
   if (typeof body.notes === "string") pre.notes = body.notes;
   if (Object.keys(pre).length) {
-    const { error } = await supabaseAdmin.from("sponsor_gifts").update(pre).eq("id", id);
+    const { error } = await supabaseAdmin.from("sponsor_gifts").update(pre).eq("id", id).eq("status", "pending");
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
   if (body.action === "confirm") {
     try {
-      const result = await confirmGift(id, { confirmedBy: staff.display_name || "staff", origin: siteOrigin(req) });
+      const result = await confirmGift(id, {
+        confirmedBy: staff.display_name || "staff",
+        origin: siteOrigin(req),
+        listOnSite: true
+      });
       return NextResponse.json(result);
     } catch (err) {
       return NextResponse.json({ error: String(err?.message || err) }, { status: 500 });
@@ -72,6 +76,19 @@ export async function PATCH(req, { params }) {
       .eq("id", id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ ok: true });
+  }
+
+  if (body.action === "list") {
+    const { data, error } = await supabaseAdmin
+      .from("sponsor_gifts")
+      .update({ listed_on_site: true })
+      .eq("id", id)
+      .eq("status", "confirmed")
+      .select("id")
+      .maybeSingle();
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (!data) return NextResponse.json({ error: "Only confirmed gifts can be published." }, { status: 409 });
+    return NextResponse.json({ ok: true, listed_on_site: true });
   }
 
   return NextResponse.json({ ok: true, updated: Object.keys(pre) });

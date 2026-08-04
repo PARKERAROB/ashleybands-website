@@ -3,6 +3,8 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { sponsorOnlineGiveLive } from "@/lib/sponsorFamily";
 import { parseGiftAmountCents, createPendingGift } from "@/lib/sponsorGifts";
 import { createOrder } from "@/lib/paypal";
+import { normalizePublicGiftInput } from "@/lib/sponsorGiftPolicy.mjs";
+import { checkRateLimit, clientIp } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
 
@@ -22,33 +24,57 @@ export async function POST(req) {
   const amount = parseGiftAmountCents(body);
   if (amount.error) return NextResponse.json({ error: amount.error }, { status: 400 });
 
+  let input;
+  try {
+    input = normalizePublicGiftInput(body);
+  } catch (error) {
+    return NextResponse.json({ error: String(error?.message || error) }, { status: 400 });
+  }
+  const rate = await checkRateLimit({
+    key: `sponsor-order:${clientIp(req)}`,
+    limit: 10,
+    windowMs: 15 * 60 * 1000,
+    failOpen: false
+  });
+  if (!rate.allowed) {
+    return NextResponse.json({ error: "Too many payment attempts. Please try again later." }, { status: 429 });
+  }
+
   const result = await createPendingGift({
     amountCents: amount.cents,
     method: "online",
-    businessId: String(body.business_id || "").trim() || null,
-    prospectId: String(body.prospect_id || "").trim() || null,
-    businessName: body.business_name,
-    payerName: body.payer_name,
-    payerEmail: body.payer_email,
+    requestKey: input.requestKey,
+    attributionToken: String(body.attribution_token || "").trim() || null,
+    businessName: input.businessName,
+    payerName: input.payerName,
+    payerEmail: input.payerEmail,
     recordedBy: "business_online"
   });
-  if (result.error) return NextResponse.json({ error: result.error }, { status: 400 });
+  if (result.error) return NextResponse.json({ error: result.error }, { status: result.status || 400 });
+  if (result.existing && result.gift.paypal_order_id) {
+    return NextResponse.json({ orderId: result.gift.paypal_order_id, invoiceId: result.gift.invoice_id });
+  }
+  if (result.existing) {
+    return NextResponse.json({ error: "This payment is already starting. Please wait a moment." }, { status: 409 });
+  }
 
   try {
     const order = await createOrder({
       amountCents: amount.cents,
       studentId: result.gift.id, // PayPal custom_id — our gift id, for reconciliation
       invoiceId: result.gift.invoice_id,
-      description: `Sponsorship — ${result.gift.business_name}`.slice(0, 127)
+      description: `Sponsorship — ${result.gift.business_name}`.slice(0, 127),
+      requestId: input.requestKey
     });
-    await supabaseAdmin
+    const { error: updateError } = await supabaseAdmin
       .from("sponsor_gifts")
       .update({ paypal_order_id: order.id })
       .eq("id", result.gift.id);
+    if (updateError) throw new Error("Could not attach the PayPal order to the sponsorship gift.");
     return NextResponse.json({ orderId: order.id, invoiceId: result.gift.invoice_id });
-  } catch (err) {
+  } catch {
     // Roll the pending gift back so a failed order doesn't leave an orphan.
     await supabaseAdmin.from("sponsor_gifts").delete().eq("id", result.gift.id);
-    return NextResponse.json({ error: String(err?.message || err) }, { status: 502 });
+    return NextResponse.json({ error: "Could not start the PayPal gift. Please try again." }, { status: 502 });
   }
 }

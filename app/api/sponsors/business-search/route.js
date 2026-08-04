@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { resolveSponsorFamily } from "@/lib/sponsorFamily";
+import { resolveSponsorFamily, sponsorFunnelLive } from "@/lib/sponsorFamily";
 
 export const runtime = "nodejs";
 
@@ -9,6 +9,9 @@ export const runtime = "nodejs";
 // near-duplicate. Returns names only — no family or outreach data. Authed (portal
 // session or legacy PIN) so it isn't a public directory scrape.
 export async function GET(req) {
+  if (!sponsorFunnelLive()) {
+    return NextResponse.json({ error: "Sponsorship area is not open yet." }, { status: 404 });
+  }
   const resolved = await resolveSponsorFamily(req);
   if (!resolved?.family) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
 

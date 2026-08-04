@@ -48,7 +48,8 @@ export default function SponsorshipClient() {
   }, []);
 
   useEffect(() => {
-    load();
+    const timer = window.setTimeout(load, 0);
+    return () => window.clearTimeout(timer);
   }, [load]);
 
   return (
@@ -79,7 +80,7 @@ export default function SponsorshipClient() {
           </div>
         ) : null}
 
-        {status === "error" ? <p className="sp-error">{error}</p> : null}
+        {status === "error" ? <p className="sp-error" role="alert">{error}</p> : null}
 
         {status === "ready" && data ? <Dashboard data={data} reload={load} /> : null}
       </div>
@@ -107,7 +108,7 @@ function Dashboard({ data, reload }) {
           <strong>{usd(data.confirmedCents)} of {usd(data.goalCents)}</strong>
         </div>
         <div className="sp-bar">
-          <div className="sp-bar-fill" style={{ width: `${goalPct}%` }} />
+          <div className="sp-bar-fill" style={{ transform: `scaleX(${goalPct / 100})` }} />
         </div>
         <p className="sp-muted">
           {data.confirmedGifts > 0
@@ -159,6 +160,7 @@ function Dashboard({ data, reload }) {
 
 function ProspectCard({ prospect, reload }) {
   const [busy, setBusy] = useState(false);
+  const [copied, setCopied] = useState(false);
   const claimed = prospect.lead_kind === "claimed_warm";
   const biz = prospect.business || {};
   const reclaimAt = biz.reclaim_at;
@@ -217,6 +219,17 @@ function ProspectCard({ prospect, reload }) {
     }
   }
 
+  async function copyGiveLink() {
+    if (!prospect.give_path) return;
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}${prospect.give_path}`);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2500);
+    } catch {
+      window.open(prospect.give_path, "_blank", "noopener,noreferrer");
+    }
+  }
+
   return (
     <article className="sp-prospect">
       <div className="sp-prospect-head">
@@ -240,6 +253,12 @@ function ProspectCard({ prospect, reload }) {
           {prospect.contact_email ? <li>Email: {prospect.contact_email}</li> : null}
           {prospect.business_address ? <li>Visit: {prospect.business_address}</li> : null}
         </ul>
+      ) : null}
+
+      {prospect.give_path ? (
+        <button type="button" className="sp-link" onClick={copyGiveLink}>
+          {copied ? "Sponsor payment link copied" : "Copy sponsor payment link"}
+        </button>
       ) : null}
 
       {contacted ? (
@@ -451,7 +470,7 @@ function AddBusiness({ reload }) {
         </div>
       </div>
 
-      {message ? <p className="sp-error">{message}</p> : null}
+      {message ? <p className="sp-error" role="alert">{message}</p> : null}
       <div className="sp-actions-row">
         <button type="submit" className="sp-btn sp-btn-primary" disabled={status === "saving"}>
           {status === "saving" ? "Adding…" : "Add business"}
@@ -482,7 +501,8 @@ function WarmedList({ reload }) {
   }, []);
 
   useEffect(() => {
-    fetchList("");
+    const timer = window.setTimeout(() => fetchList(""), 0);
+    return () => window.clearTimeout(timer);
   }, [fetchList]);
 
   function onSearch(value) {
@@ -516,7 +536,7 @@ function WarmedList({ reload }) {
   return (
     <div className="sp-warmed">
       <input className="sp-search" placeholder="Search warmed leads…" value={q} onChange={(e) => onSearch(e.target.value)} />
-      {message ? <p className="sp-error">{message}</p> : null}
+      {message ? <p className="sp-error" role="alert">{message}</p> : null}
       {results === null ? (
         <p className="sp-muted">Loading…</p>
       ) : results.length === 0 ? (
@@ -598,9 +618,11 @@ function Styles() {
         overflow: hidden;
       }
       .sp-bar-fill {
+        width: 100%;
         height: 100%;
         background: linear-gradient(90deg, #b8893b, #d8b46a);
-        transition: width 0.3s;
+        transform-origin: left center;
+        transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
       }
       .sp-progress-row {
         display: flex;
@@ -698,6 +720,7 @@ function Styles() {
         font-weight: 600;
         cursor: pointer;
         color: #3a2f26;
+        min-height: 44px;
       }
       .sp-chip.on {
         background: #7b1829;
@@ -714,7 +737,10 @@ function Styles() {
         font-weight: 600;
         cursor: pointer;
         text-decoration: none;
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
       }
       .sp-btn-primary {
         background: #7b1829;
@@ -733,8 +759,11 @@ function Styles() {
         color: #7b1829;
         font-weight: 600;
         cursor: pointer;
-        padding: 0;
+        padding: 8px 0;
         font-size: 14px;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
       }
       .sp-form label {
         display: block;
@@ -744,6 +773,7 @@ function Styles() {
       }
       .sp-form input {
         width: 100%;
+        min-height: 44px;
         box-sizing: border-box;
         margin-top: 5px;
         padding: 10px 12px;
@@ -784,6 +814,7 @@ function Styles() {
       }
       .sp-search {
         width: 100%;
+        min-height: 44px;
         box-sizing: border-box;
         padding: 9px 12px;
         border: 1px solid #cabfad;
@@ -819,8 +850,13 @@ function Styles() {
       .sp-foot {
         margin-top: 24px;
       }
-      .sp-shell a {
+      .sp-shell a:not(.sp-btn) {
         color: #7b1829;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .sp-bar-fill {
+          transition: none;
+        }
       }
     `}</style>
   );

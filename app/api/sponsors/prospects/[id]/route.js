@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { readStaffSession } from "@/lib/sponsorAuth";
-import { resolveSponsorFamily } from "@/lib/sponsorFamily";
+import { resolveSponsorFamily, sponsorFunnelLive } from "@/lib/sponsorFamily";
 
 export const runtime = "nodejs";
 
@@ -22,6 +22,9 @@ const ALLOWED = [
 ];
 
 async function authorize(req, prospectId) {
+  if (!sponsorFunnelLive()) {
+    return { ok: false, status: 404, error: "Sponsorship area is not open yet." };
+  }
   const { data: prospect } = await supabaseAdmin
     .from("prospects")
     .select("id, family_id, business_id, lead_kind")

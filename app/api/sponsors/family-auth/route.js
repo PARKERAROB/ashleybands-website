@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { hashPin, verifyPin } from "@/lib/sponsorAuth";
 import { checkRateLimit, clientIp } from "@/lib/rateLimit";
 import { createFamilyCookieValue, setFamilyCookie } from "@/lib/familyAuthCookie";
+import { sponsorLegacyPinLive } from "@/lib/sponsorFamily";
 
 export const runtime = "nodejs";
 
@@ -29,6 +30,9 @@ function issueSession(fam) {
 }
 
 export async function POST(req) {
+  if (!sponsorLegacyPinLive()) {
+    return bad("Use the Family Portal to open sponsorship.", 404);
+  }
   let body;
   try {
     body = await req.json();

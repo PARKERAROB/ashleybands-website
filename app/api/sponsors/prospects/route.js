@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin, canonicalName } from "@/lib/supabaseAdmin";
-import { resolveSponsorFamily } from "@/lib/sponsorFamily";
+import { resolveSponsorFamily, sponsorFunnelLive } from "@/lib/sponsorFamily";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
 
@@ -13,6 +14,7 @@ async function validateFamily(req) {
 }
 
 export async function GET(req) {
+  if (!sponsorFunnelLive()) return NextResponse.json({ error: "Sponsorship area is not open yet." }, { status: 404 });
   const fam = await validateFamily(req);
   if (!fam) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
 
@@ -27,8 +29,19 @@ export async function GET(req) {
 }
 
 export async function POST(req) {
+  if (!sponsorFunnelLive()) return NextResponse.json({ error: "Sponsorship area is not open yet." }, { status: 404 });
   const fam = await validateFamily(req);
   if (!fam) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+
+  const rate = await checkRateLimit({
+    key: `sponsor-prospect:${fam.id}`,
+    limit: 15,
+    windowMs: 24 * 60 * 60 * 1000,
+    failOpen: false
+  });
+  if (!rate.allowed) {
+    return NextResponse.json({ error: "Too many businesses were added today. Try again tomorrow." }, { status: 429 });
+  }
 
   const body = await req.json().catch(() => ({}));
   const businessName = String(body.business_name || "").trim();

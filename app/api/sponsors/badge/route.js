@@ -1,10 +1,12 @@
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
+
 export const runtime = "nodejs";
 
 // "Proud Sponsor of the Bands of Ashley" badge (build-spec §6 Lane A.3). A self-contained
 // SVG — no image deps — that a sponsor can post on their storefront/socials. The sponsor
 // self-markets the program for free. Linked from the auto receipt.
 //
-//   GET /api/sponsors/badge?name=Flaming%20Amy%27s
+// A badge is issued only for a confirmed gift that staff approved for public recognition.
 function esc(value) {
   return String(value || "")
     .replaceAll("&", "&amp;")
@@ -25,8 +27,18 @@ function nameFontSize(name) {
 
 export async function GET(req) {
   const url = new URL(req.url);
-  const name = (url.searchParams.get("name") || "Proud Sponsor").trim();
-  const year = url.searchParams.get("year") || String(new Date().getFullYear());
+  const id = (url.searchParams.get("id") || "").trim();
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return new Response("Not found", { status: 404 });
+  const { data: gift } = await supabaseAdmin
+    .from("sponsor_gifts")
+    .select("business_name, confirmed_at")
+    .eq("id", id)
+    .eq("status", "confirmed")
+    .eq("listed_on_site", true)
+    .maybeSingle();
+  if (!gift?.business_name) return new Response("Not found", { status: 404 });
+  const name = gift.business_name.trim();
+  const year = String(new Date(gift.confirmed_at || Date.now()).getFullYear());
 
   const svg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000" role="img" aria-label="Proud Sponsor of the Bands of Ashley — ${esc(name)}">

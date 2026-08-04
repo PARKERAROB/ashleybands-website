@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveSponsorFamily, sponsorFunnelLive } from "@/lib/sponsorFamily";
+import { signSponsorGiveToken } from "@/lib/sponsorGiveToken.mjs";
 
 export const runtime = "nodejs";
 
@@ -44,9 +45,16 @@ export async function GET(req) {
 
   if (pErr) return NextResponse.json({ error: pErr.message }, { status: 500 });
 
+  const linkedProspects = (prospects || []).map((prospect) => {
+    const businessId = prospect.business?.id;
+    if (!businessId) return prospect;
+    const token = signSponsorGiveToken({ businessId, prospectId: prospect.id });
+    return { ...prospect, give_path: `/sponsors/give?a=${encodeURIComponent(token)}` };
+  });
+
   return NextResponse.json({
     family: { id: fam.id, display_name: fam.display_name, actor: resolved.actor },
-    prospects: prospects || [],
+    prospects: linkedProspects,
     warmedAvailable: warmedCount || 0,
     confirmedCents: Number(totals?.confirmed_cents || 0),
     confirmedGifts: Number(totals?.confirmed_gifts || 0),

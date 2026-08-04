@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveSponsorFamily, sponsorFunnelLive } from "@/lib/sponsorFamily";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
 
@@ -28,6 +29,16 @@ export async function POST(req) {
     return NextResponse.json({ error: "Sign in to the Family Portal to open sponsorship." }, { status: 401 });
   }
   const fam = resolved.family;
+
+  const rate = await checkRateLimit({
+    key: `sponsor-warm:${fam.id}`,
+    limit: 5,
+    windowMs: 24 * 60 * 60 * 1000,
+    failOpen: false
+  });
+  if (!rate.allowed) {
+    return NextResponse.json({ error: "Too many email requests were queued today. Try again tomorrow." }, { status: 429 });
+  }
 
   const body = await req.json().catch(() => ({}));
   const prospectId = String(body.prospect_id || "").trim();

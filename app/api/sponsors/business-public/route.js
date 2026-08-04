@@ -1,23 +1,26 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { sponsorFunnelLive } from "@/lib/sponsorFamily";
+import { verifySponsorGiveToken } from "@/lib/sponsorGiveToken.mjs";
 
 export const runtime = "nodejs";
 
-// Public name lookup so the business give page can show "You're giving to support
-// <business>" when reached from a kid's QR/card link (?b=<id>). Returns the display NAME
-// ONLY — never contacts, status, families, or any other business field.
+// Public name lookup for a signed family sponsor-payment link. The HMAC token binds the
+// business to the family's prospect; raw database ids are never accepted from the browser.
+// Returns the display NAME ONLY, never contacts, status, families, or other business fields.
 export async function GET(req) {
   if (!sponsorFunnelLive()) {
     return NextResponse.json({ error: "not_open" }, { status: 404 });
   }
-  const id = (new URL(req.url).searchParams.get("id") || "").trim();
-  if (!id) return NextResponse.json({ name: null });
+  const token = (new URL(req.url).searchParams.get("token") || "").trim();
+  if (!token) return NextResponse.json({ name: null });
+  const claims = verifySponsorGiveToken(token);
+  if (!claims) return NextResponse.json({ error: "invalid_link" }, { status: 400 });
 
   const { data } = await supabaseAdmin
     .from("businesses")
     .select("name_display")
-    .eq("id", id)
+    .eq("id", claims.businessId)
     .maybeSingle();
   return NextResponse.json({ name: data?.name_display || null });
 }

@@ -109,9 +109,12 @@ function Dashboard({ session, onLogout }) {
   }, [session, onLogout]);
 
   useEffect(() => {
-    load();
+    const initial = window.setTimeout(load, 0);
     const t = setInterval(load, 60_000);
-    return () => clearInterval(t);
+    return () => {
+      window.clearTimeout(initial);
+      clearInterval(t);
+    };
   }, [load]);
 
   if (error) return <p className="tracker-error">{error}</p>;
@@ -185,7 +188,7 @@ function Dashboard({ session, onLogout }) {
       {data.dedup.length > 0 && (
         <section className="dashboard-alerts">
           <h3>⚠ Duplicate prospect alerts</h3>
-          <p>Multiple students are pitching the same business. Coordinate before someone gets pitched twice. (Likely siblings if names match — that's expected.)</p>
+          <p>Multiple students are pitching the same business. Coordinate before someone gets pitched twice. (Likely siblings if names match. That&apos;s expected.)</p>
           <ul>
             {data.dedup.map((d) => (
               <li key={d.business_id}>
@@ -301,7 +304,8 @@ function GiftsPanel({ session }) {
   }, [session]);
 
   useEffect(() => {
-    load();
+    const timer = window.setTimeout(load, 0);
+    return () => window.clearTimeout(timer);
   }, [load]);
 
   async function confirmGift(g) {
@@ -337,6 +341,22 @@ function GiftsPanel({ session }) {
     }
   }
 
+  async function publishGift(g) {
+    if (!confirm(`Publish ${g.business_name} on the public sponsor page? Confirm the payment identity first.`)) return;
+    setBusy(g.id);
+    try {
+      const res = await fetch(`/api/sponsors/gifts/${g.id}`, {
+        method: "PATCH",
+        headers: authHeaders(session),
+        body: JSON.stringify({ action: "list" })
+      });
+      if (res.ok) await load();
+      else alert("Could not publish sponsor.");
+    } finally {
+      setBusy("");
+    }
+  }
+
   if (!data) return null;
   const gifts = data.gifts || [];
   if (!gifts.length) return null;
@@ -348,8 +368,8 @@ function GiftsPanel({ session }) {
     <section className="dashboard-alerts" style={{ background: "#fbf7ee", borderColor: "#ecd9ad" }}>
       <h3>💛 Sponsor gifts</h3>
       <p>
-        {fmt(data.confirmedCents)} confirmed · {pending.length} pending. Confirming a gift sends the tax receipt,
-        lists the sponsor publicly, and emails their badge (receipt/badge stay held until the templates are turned on).
+        {fmt(data.confirmedCents)} confirmed · {pending.length} pending. Check gifts are published when staff confirms
+        receipt. Online gifts remain private until staff verifies and publishes the sponsor name.
       </p>
       {pending.length ? (
         <table className="tracker-table" style={{ marginTop: 8 }}>
@@ -377,9 +397,19 @@ function GiftsPanel({ session }) {
         </table>
       ) : null}
       {confirmed.length ? (
-        <p className="tracker-sub" style={{ marginTop: 8 }}>
-          Confirmed: {confirmed.map((g) => `${g.business_name} (${fmt(g.amount_cents)})`).join(", ")}
-        </p>
+        <div className="tracker-sub" style={{ marginTop: 8 }}>
+          <strong>Confirmed:</strong>{" "}
+          {confirmed.map((g, index) => (
+            <span key={g.id}>
+              {index ? ", " : ""}{g.business_name} ({fmt(g.amount_cents)})
+              {g.listed_on_site ? " · published" : (
+                <button type="button" className="tracker-link" disabled={busy === g.id} onClick={() => publishGift(g)}>
+                  {" · publish"}
+                </button>
+              )}
+            </span>
+          ))}
+        </div>
       ) : null}
     </section>
   );
@@ -390,8 +420,11 @@ export default function DashboardPage() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setSession(readSession());
-    setMounted(true);
+    const timer = window.setTimeout(() => {
+      setSession(readSession());
+      setMounted(true);
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   if (!mounted) return null;
@@ -402,7 +435,7 @@ export default function DashboardPage() {
         <p className="eyebrow">Staff only</p>
         <h1>Sponsorship Dashboard</h1>
         <p className="sponsors-lede">
-          Roll-up view of every family's prospect pipeline. Duplicate-prospect alerts flag when
+          Roll-up view of every family&apos;s prospect pipeline. Duplicate-prospect alerts flag when
           two families are pitching the same business.
         </p>
         <p className="sponsors-lede">

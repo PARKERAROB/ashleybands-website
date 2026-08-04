@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { sponsorThankYouLine } from "@/lib/sponsorGiftPolicy.mjs";
 
 let paypalSdkPromise = null;
 function loadPaypalSdk(clientId) {
@@ -24,8 +25,8 @@ function loadPaypalSdk(clientId) {
 
 export default function GiveClient() {
   const params = useSearchParams();
-  const businessId = params.get("b") || "";
-  const prospectId = params.get("p") || "";
+  const attributionToken = params.get("a") || "";
+  const checkRequestKey = useRef("");
 
   const [open, setOpen] = useState("loading"); // loading | open | closed
   const [businessName, setBusinessName] = useState("");
@@ -40,8 +41,8 @@ export default function GiveClient() {
 
   useEffect(() => {
     let cancelled = false;
-    const url = businessId
-      ? `/api/sponsors/business-public?id=${encodeURIComponent(businessId)}`
+    const url = attributionToken
+      ? `/api/sponsors/business-public?token=${encodeURIComponent(attributionToken)}`
       : `/api/sponsors/business-public`;
     fetch(url)
       .then((res) => (res.ok ? res.json().then((j) => ({ ok: true, j })) : { ok: false }))
@@ -58,7 +59,7 @@ export default function GiveClient() {
     return () => {
       cancelled = true;
     };
-  }, [businessId]);
+  }, [attributionToken]);
 
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
   const amountCents = Math.round(Number(amount) * 100);
@@ -70,12 +71,13 @@ export default function GiveClient() {
     if (!amountValid) return setError("Enter a gift amount of at least $5.");
     setSavingCheck(true);
     try {
+      if (!checkRequestKey.current) checkRequestKey.current = window.crypto.randomUUID();
       const res = await fetch("/api/sponsors/give/check", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          business_id: businessId || undefined,
-          prospect_id: prospectId || undefined,
+          request_key: checkRequestKey.current,
+          attribution_token: attributionToken || undefined,
           business_name: businessName,
           amount_cents: amountCents,
           payer_name: payerName,
@@ -118,10 +120,10 @@ export default function GiveClient() {
       <div className="give-card">
         <p className="give-eyebrow">AHS Band Boosters · 501(c)(3)</p>
         <h1>Sponsor the Bands of Ashley</h1>
-        {businessName ? <p className="give-lede">Thank you for supporting <strong>{businessName}</strong>&apos;s community band.</p> : null}
+        {businessName ? <p className="give-lede">{sponsorThankYouLine(businessName)}</p> : null}
 
         {checkResult ? (
-          <div className="give-result">
+          <div className="give-result" role="status" aria-live="polite">
             <h2>Almost there — mail your check</h2>
             <ul>
               <li>Make payable to: <strong>{checkResult.payable_to}</strong></li>
@@ -132,42 +134,71 @@ export default function GiveClient() {
             <p className="give-muted">We&apos;ll send your tax receipt as soon as it arrives. Thank you.</p>
           </div>
         ) : onlineResult ? (
-          <div className="give-result">
+          <div className="give-result" role="status" aria-live="polite">
             <h2>Thank you, {onlineResult.business}!</h2>
-            <p>Your {onlineResult.amount} sponsorship of the Bands of Ashley is confirmed.</p>
-            <p className="give-muted">A receipt {onlineResult.receiptNumber ? `(${onlineResult.receiptNumber})` : ""} is on its way to your email.</p>
+            <p>
+              {onlineResult.pending
+                ? `PayPal received your ${onlineResult.amount} sponsorship. Ashley Bands is reconciling the receipt now.`
+                : `Your ${onlineResult.amount} sponsorship of the Bands of Ashley is confirmed.`}
+            </p>
+            <p className="give-muted">
+              {onlineResult.recognition === "sent"
+                ? `A receipt ${onlineResult.receiptNumber ? `(${onlineResult.receiptNumber})` : ""} was sent to the email on the PayPal account.`
+                : "Your payment is recorded. Ashley Bands will follow up if a receipt could not be delivered."}
+            </p>
           </div>
         ) : (
           <>
             <label className="give-label">
               Business name
-              <input value={businessName} onChange={(e) => setBusinessName(e.target.value)} placeholder="Your business" />
+              <input
+                value={businessName}
+                onChange={(e) => setBusinessName(e.target.value)}
+                placeholder="Your business"
+                readOnly={Boolean(attributionToken)}
+              />
             </label>
             <div className="give-grid">
               <label className="give-label">
                 Gift amount (USD)
                 <input type="number" min="5" step="1" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="500" />
               </label>
-              <label className="give-label">
-                Your name
-                <input value={payerName} onChange={(e) => setPayerName(e.target.value)} placeholder="Contact name" />
-              </label>
+              {method === "check" ? (
+                <label className="give-label">
+                  Your name
+                  <input value={payerName} onChange={(e) => setPayerName(e.target.value)} placeholder="Contact name" />
+                </label>
+              ) : null}
             </div>
-            <label className="give-label">
-              Email (for your receipt)
-              <input type="email" value={payerEmail} onChange={(e) => setPayerEmail(e.target.value)} placeholder="you@business.com" />
-            </label>
+            {method === "check" ? (
+              <label className="give-label">
+                Email (for your receipt)
+                <input type="email" value={payerEmail} onChange={(e) => setPayerEmail(e.target.value)} placeholder="you@business.com" />
+              </label>
+            ) : (
+              <p className="give-muted">Your online receipt goes to the verified email on the PayPal account.</p>
+            )}
 
             <div className="give-methods">
-              <button type="button" className={`give-tab ${method === "online" ? "on" : ""}`} onClick={() => setMethod("online")}>
+              <button
+                type="button"
+                className={`give-tab ${method === "online" ? "on" : ""}`}
+                aria-pressed={method === "online"}
+                onClick={() => setMethod("online")}
+              >
                 Give online
               </button>
-              <button type="button" className={`give-tab ${method === "check" ? "on" : ""}`} onClick={() => setMethod("check")}>
+              <button
+                type="button"
+                className={`give-tab ${method === "check" ? "on" : ""}`}
+                aria-pressed={method === "check"}
+                onClick={() => setMethod("check")}
+              >
                 Pay by check
               </button>
             </div>
 
-            {error ? <p className="give-error">{error}</p> : null}
+            {error ? <p className="give-error" role="alert">{error}</p> : null}
 
             {method === "check" ? (
               <button type="button" className="give-btn give-btn-primary" disabled={savingCheck} onClick={submitCheck}>
@@ -176,8 +207,7 @@ export default function GiveClient() {
             ) : clientId && amountValid && businessName.trim() ? (
               <PayPalGive
                 clientId={clientId}
-                businessId={businessId}
-                prospectId={prospectId}
+                attributionToken={attributionToken}
                 businessName={businessName}
                 amountCents={amountCents}
                 payerName={payerName}
@@ -196,12 +226,13 @@ export default function GiveClient() {
   );
 }
 
-function PayPalGive({ clientId, businessId, prospectId, businessName, amountCents, payerName, payerEmail, onError, onDone }) {
+function PayPalGive({ clientId, attributionToken, businessName, amountCents, payerName, payerEmail, onError, onDone }) {
   const ref = useRef(null);
-  const dataRef = useRef({ businessId, prospectId, businessName, amountCents, payerName, payerEmail });
+  const requestKey = useRef("");
+  const dataRef = useRef({ attributionToken, businessName, amountCents, payerName, payerEmail });
   useEffect(() => {
-    dataRef.current = { businessId, prospectId, businessName, amountCents, payerName, payerEmail };
-  }, [businessId, prospectId, businessName, amountCents, payerName, payerEmail]);
+    dataRef.current = { attributionToken, businessName, amountCents, payerName, payerEmail };
+  }, [attributionToken, businessName, amountCents, payerName, payerEmail]);
 
   useEffect(() => {
     let cancelled = false;
@@ -213,12 +244,13 @@ function PayPalGive({ clientId, businessId, prospectId, businessName, amountCent
           createOrder: async () => {
             onError("");
             const d = dataRef.current;
+            if (!requestKey.current) requestKey.current = window.crypto.randomUUID();
             const res = await fetch("/api/sponsors/give/create-order", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                business_id: d.businessId || undefined,
-                prospect_id: d.prospectId || undefined,
+                request_key: requestKey.current,
+                attribution_token: d.attributionToken || undefined,
                 business_name: d.businessName,
                 amount_cents: d.amountCents,
                 payer_name: d.payerName,
@@ -296,6 +328,7 @@ function Styles() {
       }
       .give-label input {
         width: 100%;
+        min-height: 44px;
         box-sizing: border-box;
         margin-top: 5px;
         padding: 10px 12px;
@@ -320,6 +353,7 @@ function Styles() {
       }
       .give-tab {
         flex: 1;
+        min-height: 44px;
         border: 1px solid #c9bba6;
         background: #fff;
         border-radius: 8px;

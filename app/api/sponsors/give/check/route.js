@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { sponsorFunnelLive } from "@/lib/sponsorFamily";
 import { parseGiftAmountCents, createPendingGift } from "@/lib/sponsorGifts";
 import { SPONSOR_CONTACT } from "@/lib/sponsorshipContent";
+import { normalizePublicGiftInput } from "@/lib/sponsorGiftPolicy.mjs";
+import { checkRateLimit, clientIp } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
 
@@ -17,17 +19,33 @@ export async function POST(req) {
   const amount = parseGiftAmountCents(body);
   if (amount.error) return NextResponse.json({ error: amount.error }, { status: 400 });
 
+  let input;
+  try {
+    input = normalizePublicGiftInput(body);
+  } catch (error) {
+    return NextResponse.json({ error: String(error?.message || error) }, { status: 400 });
+  }
+  const rate = await checkRateLimit({
+    key: `sponsor-check:${clientIp(req)}`,
+    limit: 5,
+    windowMs: 60 * 60 * 1000,
+    failOpen: false
+  });
+  if (!rate.allowed) {
+    return NextResponse.json({ error: "Too many check requests. Please try again later." }, { status: 429 });
+  }
+
   const result = await createPendingGift({
     amountCents: amount.cents,
     method: "check",
-    businessId: String(body.business_id || "").trim() || null,
-    prospectId: String(body.prospect_id || "").trim() || null,
-    businessName: body.business_name,
-    payerName: body.payer_name,
-    payerEmail: body.payer_email,
+    requestKey: input.requestKey,
+    attributionToken: String(body.attribution_token || "").trim() || null,
+    businessName: input.businessName,
+    payerName: input.payerName,
+    payerEmail: input.payerEmail,
     recordedBy: "business_check_pledge"
   });
-  if (result.error) return NextResponse.json({ error: result.error }, { status: 400 });
+  if (result.error) return NextResponse.json({ error: result.error }, { status: result.status || 400 });
 
   return NextResponse.json({
     ok: true,
