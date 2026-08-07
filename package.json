@@ -15,6 +15,7 @@
     "portal:sync": "node scripts/sync-portal-csv.mjs",
     "lint:provenance": "node scripts/provenance-lint.mjs",
     "test:attendance": "node --test scripts/attendance-events.test.mjs",
+    "test:uniform-sizing": "node --test scripts/uniform-sizing.test.mjs",
     "test:sponsorship": "node --test scripts/sponsorship-security.test.mjs",
     "integration:doctor": "node scripts/integration.mjs doctor",
     "integration:doctor:online": "node scripts/integration.mjs doctor --online",

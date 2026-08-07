@@ -10,6 +10,10 @@ function text(v) {
   return String(v || "").trim();
 }
 
+function minimumSizeFor(student) {
+  return student.display_name === "Hyeyul Um" ? "XS" : "S";
+}
+
 // Build the row the table renders: the recommendation is computed on read from the
 // measurements (never stored -- the measurements own that fact), then Rob's override is
 // layered on top. If he overrode and the math has MOVED since (a re-measure), the row
@@ -17,9 +21,10 @@ function text(v) {
 function buildRow(student, measurement) {
   const computed = computeSize(measurement, {
     mbRole: student.mb_role_2026,
-    instrument: null
+    instrument: null,
+    minimumSize: minimumSizeFor(student)
   });
-  const override = measurement?.size_override || null;
+  const override = computed.sizes.includes(measurement?.size_override) ? measurement.size_override : null;
   const computedAtOverride = measurement?.size_computed_at_override || null;
   const drifted = Boolean(override && computedAtOverride && computed.size && computedAtOverride !== computed.size);
 
@@ -116,7 +121,7 @@ export async function PUT(req) {
 
   const { data: student, error: sErr } = await supabaseAdmin
     .from("portal_students")
-    .select("id, mb_role_2026")
+    .select("id, display_name, mb_role_2026")
     .eq("id", studentId)
     .maybeSingle();
   if (sErr) return NextResponse.json({ error: sErr.message }, { status: 500 });
@@ -133,7 +138,9 @@ export async function PUT(req) {
   // Only a size that actually exists on that student's chart -- a free-text size would
   // reach Synced Up as an unfillable order line.
   const chart = chartForRole(student.mb_role_2026, null);
-  const valid = chart.sizes.map((s) => s.size);
+  const minimumSize = minimumSizeFor(student);
+  const minimumIndex = chart.sizes.findIndex((s) => s.size === minimumSize);
+  const valid = chart.sizes.slice(Math.max(0, minimumIndex)).map((s) => s.size);
   if (size && !valid.includes(size)) {
     return NextResponse.json(
       { error: `"${size}" is not a ${chart.label} size. Valid: ${valid.join(", ")}` },
@@ -141,7 +148,11 @@ export async function PUT(req) {
     );
   }
 
-  const computed = computeSize(measurement, { mbRole: student.mb_role_2026, instrument: null });
+  const computed = computeSize(measurement, {
+    mbRole: student.mb_role_2026,
+    instrument: null,
+    minimumSize
+  });
   const now = new Date().toISOString();
   const payload = size
     ? {

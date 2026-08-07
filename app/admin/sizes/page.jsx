@@ -69,8 +69,9 @@ function SizesTable({ session }) {
         </span>
       </div>
       <p style={{ color: "#6f675a", fontSize: 13.5, margin: "6px 0 0" }}>
-        Sizes are calculated from chest, waist and hip using the Synced Up chart for each student&apos;s lane, then
-        averaged. Neck, arm and inseam are hemming numbers, not size inputs. Change any size and it stays changed.
+        Final size uses the largest result from chest, waist or hip. Small is the minimum except for Hyeyul Um at XS.
+        Classic Tops are Regular unless height is over 6&apos;1&quot;, which is Tall. Neck, arm and inseam are hemming numbers.
+        A manual change stays in place until it is reset.
       </p>
 
       <div style={{ display: "flex", gap: 8, margin: "14px 0", flexWrap: "wrap" }}>
@@ -111,7 +112,7 @@ function SizesTable({ session }) {
                 <th style={th}>Lane</th>
                 <th style={th}>Chest / Waist / Hip</th>
                 <th style={th}>Each says</th>
-                <th style={th}>Calculated</th>
+                <th style={th}>Rule result</th>
                 <th style={th}>Final size</th>
                 <th style={th}>Flags</th>
               </tr>
@@ -168,7 +169,7 @@ function SizesTable({ session }) {
                         {r.overrideAt ? ` on ${new Date(r.overrideAt).toLocaleDateString()}` : ""}
                         <br />
                         <button onClick={() => setSize(r, "")} style={{ ...link, fontSize: 11 }}>
-                          reset to calculated
+                          reset to rule result
                         </button>
                       </div>
                     )}
@@ -185,7 +186,7 @@ function SizesTable({ session }) {
                     {r.unparsedHeight && <div style={{ ...chip, ...chipInfo }}>height unreadable</div>}
                     {r.drifted && (
                       <div style={{ ...chip, ...chipWarn }}>
-                        re-measured — now calculates {r.computedSize}
+                        re-measured. Rule result is now {r.computedSize}
                       </div>
                     )}
                   </td>
