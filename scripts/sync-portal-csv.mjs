@@ -45,8 +45,20 @@ if (REPORT && !CHECK && !APPLY) {
   if (!APPLY) process.exit(0);
 }
 
-const students = readCsv("students.csv");
-const parents = readCsv("parents.csv");
+const PORTAL_EXCLUDED_STUDENT_ID_HASHES = new Set([
+  "00b69731bad62dd8d04b78d533d618c324d7a24d22e3f2a6a985fb441e16aba9",
+  "4b3096082f2876f555c097e11bad45ac58170a98360ea3df8afb15df28f6aca1",
+  "eaa49a3a071ddebfe2257e26ebb0b5eb5f72a99611265b9e2025da3eea611428"
+]);
+const portalStudentIsIncluded = (sourceStudentId) =>
+  !PORTAL_EXCLUDED_STUDENT_ID_HASHES.has(
+    createHash("sha256").update(sourceStudentId).digest("hex")
+  );
+
+const students = readCsv("students.csv")
+  .filter((row) => portalStudentIsIncluded(row.id));
+const parents = readCsv("parents.csv")
+  .filter((row) => portalStudentIsIncluded(row.student_id));
 const studentBySourceId = new Map(students.map((row) => [row.id, row]));
 const guardianPeople = new Map();
 const studentPeople = new Map();
