@@ -198,6 +198,15 @@
   "location": "AHS"
  },
  {
+  "id": "evt-0110",
+  "title": "Senior Banner Photos",
+  "start": "2026-08-13T13:00",
+  "end": null,
+  "all_day": false,
+  "category": "MB",
+  "location": "Ashley High School"
+ },
+ {
   "id": "evt-0008",
   "title": "Band Camp (week 2)",
   "start": "2026-08-14T07:00",
