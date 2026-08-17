@@ -15,6 +15,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { createClient } from "@supabase/supabase-js";
+import WebSocket from "ws";
 import { bandsofAHSDataDir, loadBandWebsiteEnv } from "./lib/workspace-paths.mjs";
 
 const BAND_DATA_DIR = bandsofAHSDataDir;
@@ -35,7 +36,8 @@ if ((APPLY || REPORT || CHECK) && (!supabaseUrl || !supabaseSecret)) {
 
 const supabase = supabaseUrl && supabaseSecret
   ? createClient(supabaseUrl, supabaseSecret, {
-      auth: { persistSession: false, autoRefreshToken: false }
+      auth: { persistSession: false, autoRefreshToken: false },
+      realtime: { transport: WebSocket }
     })
   : null;
 

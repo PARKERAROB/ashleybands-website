@@ -33,7 +33,8 @@
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
     "resend": "^6.12.3",
-    "vexflow": "^5.0.0"
+    "vexflow": "^5.0.0",
+    "ws": "^8.21.3"
   },
   "devDependencies": {
     "eslint": "9.26.0",
