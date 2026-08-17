@@ -8,9 +8,11 @@ Everything Needed for Band
 
 The band calendar at ashleybands.com/calendar is the source of truth for all band events. Always assume the band calendar is correct if there is a date conflict. Subscribe once and dates update automatically.
 
-### My Music Office
+### Family Portal
 
-Every student and at least one parent must have an active account in My Music Office (MMO). MMO is used to manage student information, communication, instrument and music databases, payments, and booster records for the Ashley High School Bands.
+Every student should be connected to at least one parent or guardian in the Ashley Bands Family Portal. Use it to keep family contacts and student details current and to complete Ashley Bands requests and forms without repeatedly entering information we already have.
+
+Open the portal at https://ashleybands.com/portal.
 
 ### Google Chat
 

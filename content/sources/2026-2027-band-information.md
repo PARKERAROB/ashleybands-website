@@ -52,11 +52,11 @@ Subscribe to the calendar instead of downloading a one-time copy. Subscribing al
 Open and subscribe at:  
 https://ashleybands.com/calendar
 
-### My Music Office
+### Family Portal
 
-Every student and at least one parent should have an active My Music Office account.
+Every student should be connected to at least one parent or guardian in the Ashley Bands Family Portal.
 
-My Music Office is used for:
+The Family Portal is used for:
 
 - student information
 - parent contact information
@@ -64,9 +64,9 @@ My Music Office is used for:
 - instrument / music / equipment records
 - band communication
 
-Website: https://www.mymusicoffice.com/
+Open the portal at https://ashleybands.com/portal
 
-If you have trouble logging in, email Mr. Parker.
+If your email is new or does not connect to your student, request access from the portal. If you still need help, email Mr. Parker.
 
 ### Google Chat
 

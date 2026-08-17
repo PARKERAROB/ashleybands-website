@@ -164,13 +164,13 @@ export default function HomePage() {
           <a className="text-link" href="/calendar">Open the band calendar</a>
         </div>
         <div>
-          <p className="eyebrow">Payments and Records</p>
-          <h2>My Music Office</h2>
+          <p className="eyebrow">Family Records and Forms</p>
+          <h2>Family Portal</h2>
           <p>
-            MMO is used for student information, parent contact information, financial accounts,
-            equipment records, band communication, and calendar access.
+            Review family contacts and student details, complete requests and forms, and keep your
+            Ashley Bands information current.
           </p>
-          <a className="text-link" href={data.quickLinks[1].href}>Open My Music Office</a>
+          <a className="text-link" href={data.quickLinks[1].href}>Open the Family Portal</a>
         </div>
         <div>
           <p className="eyebrow">Spirit Wear</p>

@@ -123,7 +123,7 @@ const pages = [
   {
     slug: "the-band-folder",
     title: "The Band Folder",
-    summary: "Everything needed for band: calendar, MMO, student supplies, apps, clothing, and methods.",
+    summary: "Everything needed for band: calendar, Family Portal, student supplies, clothing, and methods.",
     audience: "Students and families",
     source: sources.bandFolder,
     category: "Everyday resources",
@@ -181,8 +181,8 @@ const siteDataBody = {
       href: "https://ashleybands.com/calendar"
     },
     {
-      label: "My Music Office",
-      href: "https://www.mymusicoffice.com/"
+      label: "Family Portal",
+      href: "https://ashleybands.com/portal"
     },
     {
       label: "InstaRaise campaign",

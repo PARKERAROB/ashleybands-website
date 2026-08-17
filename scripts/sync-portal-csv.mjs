@@ -47,8 +47,7 @@ if (REPORT && !CHECK && !APPLY) {
 
 const PORTAL_EXCLUDED_STUDENT_ID_HASHES = new Set([
   "00b69731bad62dd8d04b78d533d618c324d7a24d22e3f2a6a985fb441e16aba9",
-  "4b3096082f2876f555c097e11bad45ac58170a98360ea3df8afb15df28f6aca1",
-  "eaa49a3a071ddebfe2257e26ebb0b5eb5f72a99611265b9e2025da3eea611428"
+  "4b3096082f2876f555c097e11bad45ac58170a98360ea3df8afb15df28f6aca1"
 ]);
 const portalStudentIsIncluded = (sourceStudentId) =>
   !PORTAL_EXCLUDED_STUDENT_ID_HASHES.has(

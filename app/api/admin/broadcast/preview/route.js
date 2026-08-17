@@ -16,7 +16,7 @@ export async function POST(req) {
     ? body.recipientAxis
     : "guardians";
 
-  const { recipients, count, studentCount } = await resolveAudience(
+  const { recipients, count, studentCount, coveredStudentCount } = await resolveAudience(
     audienceFilter,
     recipientAxis
   );
@@ -24,6 +24,7 @@ export async function POST(req) {
   return NextResponse.json({
     count,
     studentCount,
+    coveredStudentCount,
     sample: recipients.slice(0, 10).map((r) => r.email)
   });
 }

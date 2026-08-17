@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import InstrumentRequestSection from "./InstrumentRequestSection";
 
 const SAVED_NOTE = "Saved. Your family record is updated.";
 
@@ -144,6 +145,7 @@ export default function PortalReviewClient() {
               />
               <div className="portal-workspace-main">
                 <ParticipationSection student={selectedStudent} />
+                <InstrumentRequestSection student={selectedStudent} />
                 <UniformSection student={selectedStudent} />
                 <BillingSection studentId={selectedStudent.id} studentName={selectedStudent.displayName} />
                 <FamilyResources />
@@ -166,6 +168,7 @@ function FamilyResources() {
   return (
     <nav className="portal-family-resources" aria-label="Family resources">
       <strong>Family resources</strong>
+      <Link href="/portal/clothing">Open House clothing order</Link>
       <Link href="/portal/sponsorship">Business sponsorship</Link>
       <Link href="/info/marching-band-2026">Marching Band information</Link>
       <Link href="/calendar">Band calendar</Link>

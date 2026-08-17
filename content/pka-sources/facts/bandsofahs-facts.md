@@ -139,18 +139,12 @@ Subscribe at: `https://ashleybands.com/calendar`
 - **Android/Google Calendar:** open the download link in Google Calendar.
 - Always subscribe (don't download a one-time copy) for automatic real-time updates.
 
-### My Music Office (MMO)
-Every student AND at least one parent must have an active account at https://www.mymusicoffice.com/
+### Ashley Bands Family Portal
+Every student should be connected to at least one parent or guardian at https://ashleybands.com/portal.
 
-Used for: student info, communications, instrument/music databases, payments, booster records.
+Use the portal to review family contacts and student details and complete Ashley Bands requests and forms. Known families sign in with a six-digit email code. New or unmatched emails can request access and verify their address.
 
-Login: Username provided by Mr. Parker. First login prompts password reset.
-Forgot password: Click "Forgot Your Login Information" on MMO login page.
-Still having trouble: Email Mr. Parker at robert.parker@nhcs.net
-
-In MMO: update contact info · view/pay financial account · print statements · view locker assignments · check instrument/uniform/equipment assignments · access band calendar · message Mr. Parker directly.
-
-Multiple students: Link Family Access Accounts via Control Panel → "Link Family Access Accounts" (same email must be on all accounts).
+Still having trouble: Email Mr. Parker at robert.parker@nhcs.net.
 
 ### Gmail — Staff Listserv
 Ashley-wide teacher/staff communications sent via Gmail staff listserv. Used when Rob needs to reach all 2nd period (or all) teachers — e.g., guest visitor notices.

@@ -1,0 +1,22 @@
+.page { min-height: 100vh; background: #f5f1e8; color: #18241d; padding: 0 1rem 4rem; }
+.hero { max-width: 760px; margin: 0 auto; padding: 4rem 0 2rem; }
+.eyebrow { color: #9d1f2d; font-size: .78rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.hero h1 { font-size: clamp(3rem, 11vw, 6rem); line-height: .9; margin: .7rem 0 1.2rem; letter-spacing: -.06em; }
+.hero > p:not(.eyebrow) { max-width: 620px; font-size: 1.12rem; line-height: 1.6; }
+.progress { margin-top: 2rem; display: grid; grid-template-columns: 1fr auto; gap: .8rem; align-items: center; }
+.progressTrack { height: 12px; border-radius: 999px; background: #dcd6c8; overflow: hidden; }
+.progressTrack span { display: block; height: 100%; border-radius: inherit; background: #9d1f2d; transition: width .25s ease; }
+.steps { max-width: 760px; margin: 0 auto; display: grid; gap: 1rem; }
+.card { position: relative; display: grid; grid-template-columns: 48px 1fr; gap: 1rem; padding: 1.4rem; background: #fff; border: 2px solid transparent; border-radius: 18px; box-shadow: 0 8px 28px rgba(24,36,29,.07); }
+.done { border-color: #2e6f4d; background: #f6fff9; }
+.number { font-weight: 900; color: #9d1f2d; }
+.card h2 { margin: 0; font-size: 1.35rem; }
+.card p { line-height: 1.55; }
+.link { display: inline-block; color: #9d1f2d; font-weight: 800; margin: .15rem 0 1rem; }
+.check { display: flex; gap: .75rem; align-items: flex-start; font-weight: 750; cursor: pointer; }
+.check input { width: 22px; height: 22px; accent-color: #2e6f4d; flex: 0 0 auto; }
+.finish { max-width: 760px; margin: 1rem auto 0; padding: 2rem; text-align: center; border-radius: 18px; background: #18241d; color: #fff; }
+.finishReady { background: #9d1f2d; }
+.finish h2 { margin: .3rem 0; font-size: 2rem; }
+.badge { display: inline-block; margin-top: 1rem; padding: .7rem 1rem; border: 2px solid currentColor; border-radius: 999px; font-weight: 900; letter-spacing: .12em; }
+@media (max-width: 520px) { .hero { padding-top: 2.5rem; } .progress { grid-template-columns: 1fr; } .card { grid-template-columns: 34px 1fr; padding: 1.15rem; } }

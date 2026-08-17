@@ -28,6 +28,31 @@ const AXES = [
   { value: "both", label: "Both" }
 ];
 
+const OPEN_HOUSE_SUBJECT = "Welcome to Ashley Bands - Complete Your Band Ready Challenge";
+const OPEN_HOUSE_BODY = `Hello Ashley Bands families,
+
+Welcome to band! We are excited to begin the new school year with you.
+
+You can complete the band portion of Open House through our Band Ready Challenge:
+
+https://ashleybands.com/open-house
+
+The challenge will connect you to the Family Portal and walk you through the calendar, Day 1 necessities, county instrument agreement, clothing order, grading, attendance, and communication information. AshleyBands.com is our one-stop shop for band information and forms.
+
+Once you finish the six quick stops, show the completed screen to a student helper during Open House and choose a sticker. We may also have individually wrapped candy while supplies last.
+
+You are always welcome to stop by the band room, say hello, and tell me something you enjoyed this summer, what you liked about band camp, or what you are excited about in band this year. I want to be available for individual conversations even though I will not be able to meet with every family at length that evening.
+
+Our Band Boosters will also be in the band room to share ways families can volunteer and support the program. One of our long-term goals is to raise $150,000 over the next ten years so every Ashley band student can have access to a quality instrument.
+
+If you have a question, email me at robert.parker@nhcs.net. Email is the best way for families to reach me.
+
+Welcome to Ashley Bands,
+
+Robert A. Parker
+Director of Bands
+Ashley High School`;
+
 export default function BroadcastPage() {
   const [session, setSession] = useState(() => readSession());
   const [facets, setFacets] = useState([]);
@@ -192,6 +217,20 @@ export default function BroadcastPage() {
 
       <section style={card}>
         <h2 style={h2}>Message</h2>
+        <button
+          type="button"
+          style={{ ...chip, marginBottom: 10 }}
+          onClick={() => {
+            setSubject(OPEN_HOUSE_SUBJECT);
+            setBody(OPEN_HOUSE_BODY);
+            setAxis("guardians");
+            setSelected({ open_house_roster: new Set(["2026-08-17_current_classes"]) });
+            setPreview(null);
+            setMsg("Open House welcome staged for the confirmed August 17 roster. Preview before sending.");
+          }}
+        >
+          Load Open House welcome
+        </button>
         <input
           style={input}
           placeholder="Subject"
@@ -280,7 +319,9 @@ export default function BroadcastPage() {
           <div style={{ marginTop: 12 }}>
             <p style={{ fontSize: 15, fontWeight: 600 }}>
               {preview.count} recipient{preview.count === 1 ? "" : "s"}{" "}
-              <span style={muted}>({preview.studentCount} students)</span>
+              <span style={muted}>
+                ({preview.coveredStudentCount} of {preview.studentCount} students reached)
+              </span>
             </p>
             {preview.sample?.length > 0 && (
               <p style={{ ...muted, wordBreak: "break-all" }}>

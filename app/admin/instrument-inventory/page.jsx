@@ -47,13 +47,14 @@ function StaffLogin({ onAuthed }) {
 export default function AdminInventoryPage() {
   const [session, setSession] = useState(() => readSession());
   const [items, setItems] = useState([]);
+  const [eligibleStudents, setEligibleStudents] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!session) return;
     fetch("/api/instrument-inventory/admin", { headers: authHeaders(session) })
       .then((r) => r.json())
-      .then((d) => { setItems(d.items || []); setLoading(false); })
+      .then((d) => { setItems(d.items || []); setEligibleStudents(d.eligibleStudents || []); setLoading(false); })
       .catch(() => setLoading(false));
   }, [session]);
 
@@ -66,6 +67,23 @@ export default function AdminInventoryPage() {
     if (res.ok) setItems((prev) => prev.filter((i) => i.id !== id));
   };
 
+  const assign = async (event, id) => {
+    event.preventDefault();
+    const values = Object.fromEntries(new FormData(event.currentTarget));
+    const res = await fetch("/api/instrument-inventory/admin", {
+      method: "PATCH",
+      headers: authHeaders(session),
+      body: JSON.stringify({ id, action: "assign", ...values })
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      window.alert(body.error || "Could not assign the instrument.");
+      return;
+    }
+    setEligibleStudents((previous) => previous.filter((item) => item.id !== values.requestId));
+    setItems((previous) => previous.map((item) => item.id === id ? { ...item, instrument_request_id: values.requestId } : item));
+  };
+
   if (!session) return <StaffLogin onAuthed={(s) => { setSession(s); setLoading(true); }} />;
 
   if (loading) return <div style={pageStyle}><p>Loading...</p></div>;
@@ -76,6 +94,9 @@ export default function AdminInventoryPage() {
     <div style={pageStyle}>
       <h2>🎺 Instrument Inventory — Review</h2>
       <p style={{ color: "#555", fontSize: 14 }}>{pending.length} pending · {items.length - pending.length} reviewed</p>
+      <p style={{ color: "#555", fontSize: 14 }}>
+        {eligibleStudents.length} student{eligibleStudents.length === 1 ? " has" : "s have"} a signed county instrument agreement and await assignment.
+      </p>
 
       {pending.length === 0 && <p style={{ color: "#999", marginTop: 20 }}>All caught up.</p>}
 
@@ -110,6 +131,37 @@ export default function AdminInventoryPage() {
               <summary>Raw transcript</summary>
               <p style={{ margin: "4px 0 0", fontStyle: "italic" }}>{item.raw_transcript}</p>
             </details>
+          )}
+          {!item.instrument_request_id ? (
+            <form onSubmit={(event) => assign(event, item.id)} style={{ marginTop: 14, paddingTop: 12, borderTop: "1px solid #eee" }}>
+              <label style={{ display: "block", fontSize: 13, fontWeight: 600 }}>
+                Assign to student with signed form
+                <select name="requestId" required defaultValue="" style={{ ...inputStyle, marginTop: 5 }}>
+                  <option value="" disabled>Select student…</option>
+                  {eligibleStudents.map((agreement) => (
+                    <option key={agreement.id} value={agreement.id}>
+                      {agreement.portal_students?.display_name || "Student"} · grade {agreement.portal_students?.grade_fall26 || "—"}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label style={{ display: "block", fontSize: 13, fontWeight: 600, marginTop: 8 }}>
+                Condition when issued
+                <select name="issuedCondition" required defaultValue="good" style={{ ...inputStyle, marginTop: 5 }}>
+                  <option value="new">New</option><option value="excellent">Excellent</option>
+                  <option value="good">Good</option><option value="fair">Fair</option>
+                </select>
+              </label>
+              <label style={{ display: "block", fontSize: 13, fontWeight: 600, marginTop: 8 }}>
+                Assignment notes
+                <textarea name="assignmentNotes" rows={2} style={{ ...inputStyle, marginTop: 5 }} />
+              </label>
+              <button disabled={!eligibleStudents.length} style={{ ...btnStyle, background: "#7b1829", marginTop: 10 }}>
+                Assign this instrument
+              </button>
+            </form>
+          ) : (
+            <p style={{ fontSize: 13, fontWeight: 600, color: "#2c7a4b", marginTop: 12 }}>Assigned to signed student</p>
           )}
           <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
             <button onClick={() => mark(item.id, "verified")} style={{ ...btnStyle, background: "#2ecc71" }}>✅ Verified</button>

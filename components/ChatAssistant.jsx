@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 const welcome = {
   role: "assistant",
   content:
-    "Ask a question about Ashley Bands. I can help with calendar links, required items, concert attire, MMO, trips, marching band, fundraising, and general program information."
+    "Ask a question about Ashley Bands. I can help with calendar links, the Family Portal, required items, concert attire, trips, marching band, fundraising, and general program information."
 };
 
 function parseAssistantContent(data) {
@@ -143,7 +143,7 @@ Rules:
         <input
           value={question}
           onChange={(event) => setQuestion(event.target.value)}
-          placeholder="Ask about dates, attire, MMO, trips, marching band..."
+          placeholder="Ask about dates, attire, the portal, trips, marching band..."
           aria-label="Question"
         />
         <button type="submit" disabled={isLoading || !question.trim()}>
