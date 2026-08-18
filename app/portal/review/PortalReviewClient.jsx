@@ -93,7 +93,6 @@ export default function PortalReviewClient() {
     };
   }, []);
 
-  const ownPhone = profile?.contacts?.phones?.[0]?.value || "";
   const students = profile?.students || [];
   const selectedStudent = students.find((student) => student.id === selectedStudentId) || students[0] || null;
 
@@ -140,8 +139,6 @@ export default function PortalReviewClient() {
               <StudentRail
                 key={selectedStudent.id}
                 student={selectedStudent}
-                profile={profile}
-                ownPhone={ownPhone}
                 onChanged={loadProfile}
               />
               <div className="portal-workspace-main">
@@ -799,8 +796,8 @@ function MeasurementsPanel({ studentId }) {
   );
 }
 
-function StudentRail({ student, profile, ownPhone, onChanged }) {
-  const guardians = student.guardians || [];
+function StudentRail({ student, onChanged }) {
+  const guardians = [...(student.guardians || [])].sort((a, b) => Number(b.primary) - Number(a.primary));
   const guardianCount = guardians.length;
 
   return (
@@ -823,32 +820,25 @@ function StudentRail({ student, profile, ownPhone, onChanged }) {
           note="What they go by"
           featured
         />
-        <ReadOnlyField label="Grade" value={student.grade || "Not listed"} />
-        <ReadOnlyField label="Student status" value={statusValue(student.status)} />
-      </section>
-
-      <section className="portal-rail-group" aria-labelledby="portal-personal-heading">
-        <h3 id="portal-personal-heading">Personal information</h3>
+        <EditableField
+          key={`email-${student.id}`}
+          field="student_school_email"
+          studentId={student.id}
+          label="Student email"
+          value={student.schoolEmail || ""}
+          placeholder="Add the student's email"
+          inputType="email"
+        />
         <EditableField
           key={`phone-${student.id}`}
           field="student_cell_phone"
           studentId={student.id}
-          label="Student cell phone"
+          label="Student phone"
           value={student.cellPhone || ""}
-          placeholder="Add a cell number"
+          placeholder="Add the student's phone"
         />
-        <EditableField
-          field="person_display_name"
-          label="Your name"
-          value={profile.person?.display_name || ""}
-        />
-        <EditableField
-          field="person_phone"
-          label="Your phone"
-          value={ownPhone}
-          placeholder="Add a phone number"
-        />
-        <ReadOnlyField label="Your email" value={profile.email} note="Used to sign in. Contact Mr. Parker to change it." />
+        <ReadOnlyField label="Grade" value={student.grade || "Not listed"} />
+        <ReadOnlyField label="Student status" value={statusValue(student.status)} />
       </section>
 
       <section className="portal-rail-group" aria-labelledby="portal-notes-heading">
@@ -883,9 +873,7 @@ function StudentRail({ student, profile, ownPhone, onChanged }) {
                 {g.emails?.map((e) => (
                   <p key={e}>{e}</p>
                 ))}
-                {!g.isSelf ? (
-                  <GuardianEdit guardian={g} studentId={student.id} studentName={student.displayName} onSaved={onChanged} />
-                ) : null}
+                <GuardianEdit guardian={g} studentId={student.id} studentName={student.displayName} onSaved={onChanged} />
               </article>
             ))}
           </div>
@@ -972,7 +960,7 @@ function UniformSection({ student }) {
   );
 }
 
-function EditableField({ field, studentId, label, value, placeholder, note, featured = false, multiline = false, allowEmpty = false }) {
+function EditableField({ field, studentId, label, value, placeholder, note, featured = false, multiline = false, allowEmpty = false, inputType = "text" }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value);
   const [current, setCurrent] = useState(value);
@@ -1007,7 +995,7 @@ function EditableField({ field, studentId, label, value, placeholder, note, feat
           {multiline ? (
             <textarea rows="5" value={draft} placeholder={placeholder} onChange={(e) => setDraft(e.target.value)} />
           ) : (
-            <input value={draft} placeholder={placeholder} onChange={(e) => setDraft(e.target.value)} />
+            <input type={inputType} value={draft} placeholder={placeholder} onChange={(e) => setDraft(e.target.value)} />
           )}
           <button type="button" onClick={save} disabled={status === "saving" || (!allowEmpty && !draft.trim())}>
             {status === "saving" ? "Saving..." : "Save"}

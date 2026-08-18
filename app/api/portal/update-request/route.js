@@ -31,6 +31,11 @@ const ALLOWED_FIELDS = {
     targetTable: "portal_students",
     sensitivity: "contact"
   },
+  student_school_email: {
+    label: "Student email",
+    targetTable: "portal_students",
+    sensitivity: "contact"
+  },
   student_notes: {
     label: "Student notes",
     targetTable: "portal_students",
@@ -56,6 +61,9 @@ export async function POST(request) {
   }
   if (!newValue && !config.allowEmpty) {
     return NextResponse.json({ error: "Enter the updated information before submitting." }, { status: 400 });
+  }
+  if (field === "student_school_email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newValue)) {
+    return NextResponse.json({ error: "Enter a valid student email address." }, { status: 400 });
   }
 
   if (field.startsWith("student_")) {
@@ -206,6 +214,15 @@ async function applyMirrorWrite({ field, session, studentId, targetId, newValue 
     return;
   }
 
+  if (field === "student_school_email") {
+    const { error } = await supabaseAdmin
+      .from("portal_students")
+      .update({ school_email: newValue.toLowerCase(), updated_at: now })
+      .eq("id", studentId);
+    if (error) throw new Error(error.message);
+    return;
+  }
+
   if (field === "student_notes") {
     const { error } = await supabaseAdmin
       .from("portal_students")
@@ -286,6 +303,14 @@ async function resolveOldValue({ field, targetId, session, studentId }) {
       .eq("id", studentId)
       .maybeSingle();
     return data?.cell_phone || "";
+  }
+  if (field === "student_school_email") {
+    const { data } = await supabaseAdmin
+      .from("portal_students")
+      .select("school_email")
+      .eq("id", studentId)
+      .maybeSingle();
+    return data?.school_email || "";
   }
   if (field === "student_notes") {
     const { data } = await supabaseAdmin

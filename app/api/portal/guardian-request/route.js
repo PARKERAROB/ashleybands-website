@@ -233,10 +233,6 @@ export async function PATCH(request) {
   if (!studentId || !guardianId) return NextResponse.json({ error: "Guardian record not found." }, { status: 400 });
   if (!name) return NextResponse.json({ error: "Enter the guardian's name." }, { status: 400 });
   if (!phone && !email) return NextResponse.json({ error: "Enter a phone or email for the guardian." }, { status: 400 });
-  if (guardianId === session.personId) {
-    return NextResponse.json({ error: "Use Your name and Your phone above to update your own information." }, { status: 400 });
-  }
-
   const access = await trustedStudentAccess(session.personId, studentId);
   if (!access) return NextResponse.json({ error: "Student access not found." }, { status: 403 });
 

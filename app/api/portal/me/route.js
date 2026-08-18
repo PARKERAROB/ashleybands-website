@@ -35,7 +35,7 @@ export async function GET(request) {
       supabaseAdmin
         .from("portal_student_people")
         .select(
-          "student_id, relationship_status, role, primary_contact, portal_students(id, display_name, preferred_first, grade_fall26, status, cell_phone, notes, band_class_2026, ensemble_2026, instrument_2026, marching_2026, mb_role_2026)"
+          "student_id, relationship_status, role, primary_contact, portal_students(id, display_name, preferred_first, grade_fall26, status, school_email, cell_phone, notes, band_class_2026, ensemble_2026, instrument_2026, marching_2026, mb_role_2026)"
         )
         .eq("person_id", session.personId)
         .eq("relationship_status", "trusted")
@@ -52,6 +52,7 @@ export async function GET(request) {
       preferredFirst: link.portal_students?.preferred_first,
       grade: link.portal_students?.grade_fall26,
       status: link.portal_students?.status,
+      schoolEmail: link.portal_students?.school_email,
       cellPhone: link.portal_students?.cell_phone,
       note: link.portal_students?.notes || "",
       bandClass2026: link.portal_students?.band_class_2026 || "",
