@@ -74,7 +74,7 @@ export default function ClothingOrderClient() {
   if (!profile || !catalog) return <main className="portal-shell"><section className="portal-panel"><h1>Open House Clothing</h1><p>{message || "Loading…"}</p></section></main>;
   return (
     <main className="portal-shell"><section className="portal-panel portal-panel-wide">
-      <Link className="portal-footnote" href={`/portal/band-ready/clothing?studentId=${encodeURIComponent(studentId)}`}>← Back to Band Ready</Link>
+      <Link className="portal-footnote" href={`/portal/band-ready/clothing?studentId=${encodeURIComponent(studentId)}&refresh=1`}>← Back to Band Ready</Link>
       <p className="eyebrow">Family Portal</p><h1>Open House Clothing Order</h1>
       <p className="portal-copy">Order by Friday, August 28. Prices include no individual shipping; items will be distributed through the band.</p>
       <label>Student<select value={studentId} onChange={(e) => setStudentId(e.target.value)}>{profile.students.map((s) => <option key={s.id} value={s.id}>{s.displayName}</option>)}</select></label>
@@ -92,7 +92,7 @@ export default function ClothingOrderClient() {
       <div ref={paypalRef} />
       {message ? <p className="portal-message">{message}</p> : null}
       <p className="portal-footnote">If required clothing creates a financial hardship, contact Mr. Parker. No student will be excluded.</p>
-      <p className="portal-footnote"><Link href={`/portal/band-ready/clothing?studentId=${encodeURIComponent(studentId)}`}>Return to Band Ready</Link></p>
+      <p className="portal-footnote"><Link href={`/portal/band-ready/clothing?studentId=${encodeURIComponent(studentId)}&refresh=1`}>Return to Band Ready</Link></p>
     </section></main>
   );
 }

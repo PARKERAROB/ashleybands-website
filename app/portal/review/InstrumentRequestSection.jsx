@@ -109,7 +109,7 @@ export default function InstrumentRequestSection({ student }) {
       ) : null}
       {message ? <p className="portal-muted-status">{message}</p> : null}
       <p className="portal-footnote">
-        <Link href={`/portal/band-ready/forms?studentId=${encodeURIComponent(student.id)}`}>Return to Band Ready forms</Link>
+        <Link href={`/portal/band-ready/forms?studentId=${encodeURIComponent(student.id)}&refresh=1`}>Return to Band Ready forms</Link>
       </p>
     </section>
   );

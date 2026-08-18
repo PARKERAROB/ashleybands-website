@@ -22,6 +22,13 @@ const nextStep = {
   clothing: "review"
 };
 
+const bandReadyCache = new Map();
+
+function rememberBandReady(body) {
+  if (body?.student?.id) bandReadyCache.set(body.student.id, body);
+  return body;
+}
+
 function queryHref(path, studentId) {
   return `${path}?studentId=${encodeURIComponent(studentId)}`;
 }
@@ -64,7 +71,7 @@ async function fetchBandReady(studentId = "") {
     error.status = response.status;
     throw error;
   }
-  return body;
+  return rememberBandReady(body);
 }
 
 export default function BandReadyPortalClient({ step }) {
@@ -77,18 +84,23 @@ export default function BandReadyPortalClient({ step }) {
 
   useEffect(() => {
     let cancelled = false;
-    const requestedStudentId = new URLSearchParams(window.location.search).get("studentId") || "";
+    const params = new URLSearchParams(window.location.search);
+    const requestedStudentId = params.get("studentId") || "";
+    const cached = params.get("refresh") === "1" ? null : bandReadyCache.get(requestedStudentId);
+    const show = (body) => {
+      if (cancelled) return;
+      setProfile({ students: body.students || [] });
+      setStudentId(body.student?.id || "");
+      setData(body);
+      setStatus("ready");
+      setMessage("");
+    };
+    if (cached) Promise.resolve().then(() => show(cached));
     fetchBandReady(requestedStudentId)
-      .then((body) => {
-        if (cancelled) return;
-        setProfile({ students: body.students || [] });
-        setStudentId(body.student?.id || "");
-        setData(body);
-        setStatus("ready");
-        setMessage("");
-      })
+      .then(show)
       .catch((error) => {
         if (!cancelled) {
+          if (cached) return;
           setMessage(error.message);
           setStatus(error.status === 401 ? "signed-out" : error.status === 404 ? "empty" : "error");
         }
@@ -110,6 +122,8 @@ export default function BandReadyPortalClient({ step }) {
       });
       const body = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(body.error || "This step could not be saved.");
+      const updated = rememberBandReady({ ...data, progress: body.progress, readiness: body.readiness, completion: null });
+      setData(updated);
       router.push(href(`/portal/band-ready/${destination}`));
     } catch (error) {
       setMessage(error.message);
@@ -117,24 +131,18 @@ export default function BandReadyPortalClient({ step }) {
     }
   }
 
-  async function switchStudent(event) {
+  function switchStudent(event) {
     const nextId = event.target.value;
     setStudentId(nextId);
-    setData(null);
-    setStatus("loading");
+    const cached = bandReadyCache.get(nextId) || null;
+    setData(cached);
+    setStatus(cached ? "ready" : "loading");
     const currentPath = step === "home" ? "/portal/band-ready" : `/portal/band-ready/${step}`;
     router.replace(queryHref(currentPath, nextId));
-    try {
-      const body = await fetchBandReady(nextId);
-      setProfile({ students: body.students || [] });
-      setStudentId(body.student?.id || "");
-      setData(body);
-      setStatus("ready");
-      setMessage("");
-    } catch (error) {
-      setMessage(error.message);
-      setStatus("error");
-    }
+  }
+
+  function updateData(updater) {
+    setData((current) => rememberBandReady(typeof updater === "function" ? updater(current) : updater));
   }
 
   if (status === "signed-out") {
@@ -209,7 +217,7 @@ export default function BandReadyPortalClient({ step }) {
       {step === "forms" ? <FormsStep data={data} href={href} /> : null}
       {step === "how-band-works" ? <HowBandWorksStep data={data} save={save} busy={status === "saving"} href={href} /> : null}
       {step === "clothing" ? <ClothingStep key={`${studentId}-${data.completion?.updatedAt || "new"}`} data={data} save={save} busy={status === "saving"} href={href} studentId={studentId} /> : null}
-      {step === "review" ? <ReviewStep data={data} setData={setData} studentId={studentId} href={href} /> : null}
+      {step === "review" ? <ReviewStep data={data} setData={updateData} studentId={studentId} href={href} /> : null}
     </main>
   );
 }
