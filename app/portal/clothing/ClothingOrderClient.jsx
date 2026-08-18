@@ -67,7 +67,10 @@ export default function ClothingOrderClient() {
     setAnnouncement(`${selected.quantity} ${product.name}, ${selected.color}, size ${selected.size}, added to your order.`);
   }
   function update(key, field, value) { setLines((current) => current.map((line) => line.key === key ? { ...line, [field]: field === "quantity" ? Number(value) : value } : line)); }
-  function remove(key) { setLines((current) => current.filter((line) => line.key !== key)); }
+  function remove(key) {
+    setLines((current) => current.filter((line) => line.key !== key));
+    setLastAddedProduct("");
+  }
   const subtotal = useMemo(() => lines.reduce((sum, line) => sum + line.priceCents * line.quantity, 0), [lines]);
   const tax = Math.round(subtotal * (catalog?.taxRate || 0));
   const total = subtotal + tax;
