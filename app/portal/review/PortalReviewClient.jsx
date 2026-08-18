@@ -81,6 +81,8 @@ export default function PortalReviewClient() {
       return;
     }
     setProfile(data);
+    const requestedStudentId = new URLSearchParams(window.location.search).get("studentId") || "";
+    setSelectedStudentId((current) => current || ((data.students || []).some((student) => student.id === requestedStudentId) ? requestedStudentId : ""));
     setState({ status: "ready", message: "" });
   }
 
@@ -151,11 +153,12 @@ export default function PortalReviewClient() {
                 onChanged={loadProfile}
               />
               <div className="portal-workspace-main">
+                <BandReadySection student={selectedStudent} />
                 <ParticipationSection student={selectedStudent} onChanged={loadProfile} />
                 <InstrumentRequestSection student={selectedStudent} />
                 <UniformSection student={selectedStudent} />
                 <BillingSection studentId={selectedStudent.id} studentName={selectedStudent.displayName} />
-                <FamilyResources />
+                <FamilyResources studentId={selectedStudent.id} />
               </div>
             </div>
           </>
@@ -171,11 +174,25 @@ export default function PortalReviewClient() {
   );
 }
 
-function FamilyResources() {
+function BandReadySection({ student }) {
+  return (
+    <section className="portal-workspace-section portal-band-ready-callout" aria-labelledby="portal-band-ready-heading">
+      <div>
+        <p className="eyebrow">Open House</p>
+        <h2 id="portal-band-ready-heading">Get {student.displayName} Band Ready</h2>
+        <p>Complete the student&apos;s calendar, Day One supplies, forms, band expectations, and clothing checklist in one saved path.</p>
+      </div>
+      <Link className="portal-action-link" href={`/portal/band-ready?studentId=${encodeURIComponent(student.id)}`}>Open Band Ready</Link>
+    </section>
+  );
+}
+
+function FamilyResources({ studentId }) {
   return (
     <nav className="portal-family-resources" aria-label="Family resources">
       <strong>Family resources</strong>
-      <Link href="/portal/clothing">Open House clothing order</Link>
+      <Link href={`/portal/band-ready?studentId=${encodeURIComponent(studentId)}`}>Band Ready checklist</Link>
+      <Link href={`/portal/clothing?studentId=${encodeURIComponent(studentId)}`}>Open House clothing order</Link>
       <Link href="/portal/sponsorship">Business sponsorship</Link>
       <Link href="/info/marching-band-2026">Marching Band information</Link>
       <Link href="/calendar">Band calendar</Link>

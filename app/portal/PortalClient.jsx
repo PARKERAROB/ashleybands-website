@@ -4,6 +4,12 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+function requestedDestination() {
+  if (typeof window === "undefined") return "/portal/review";
+  const requested = new URLSearchParams(window.location.search).get("next") || "";
+  return requested.startsWith("/portal/") && !requested.startsWith("//") ? requested : "/portal/review";
+}
+
 export default function PortalClient() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -11,14 +17,19 @@ export default function PortalClient() {
   const [step, setStep] = useState("email"); // "email" | "code"
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
+  const [nextPath, setNextPath] = useState("/portal/review");
 
   // Already signed in? Skip the login screen and go to the profile.
   useEffect(() => {
     let cancelled = false;
+    const destination = requestedDestination();
+    // Keep the post-sign-in target stable without making server rendering read the browser URL.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setNextPath(destination);
     fetch("/api/portal/session")
       .then((res) => (res.ok ? res.json() : { signedIn: false }))
       .then((data) => {
-        if (!cancelled && data?.signedIn) router.replace("/portal/review");
+        if (!cancelled && data?.signedIn) router.replace(destination);
       })
       .catch(() => {});
     return () => {
@@ -67,7 +78,7 @@ export default function PortalClient() {
         setMessage(data.error || "That code did not work. Try again or request a new one.");
         return;
       }
-      router.replace("/portal/review");
+      router.replace(requestedDestination());
     } catch {
       setStatus("error");
       setMessage("We could not reach the portal. Check your connection and try again.");
@@ -147,7 +158,7 @@ export default function PortalClient() {
 
         {message ? <p className={`portal-message ${status === "error" ? "error" : ""}`} aria-live="polite">{message}</p> : null}
         <p className="portal-footnote">
-          New email or another student to connect? <Link href="/portal/request">Request profile access</Link>. A verified email with a roster match connects immediately. If no roster match is found, Mr. Parker will follow up.
+          New email or another student to connect? <Link href={`/portal/request?next=${encodeURIComponent(nextPath)}`}>Request profile access</Link>. A verified email with a roster match connects immediately. If no roster match is found, Mr. Parker will follow up.
         </p>
       </section>
     </main>

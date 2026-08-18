@@ -1,4 +1,14 @@
 .page { min-height: 100vh; background: #f5f1e8; color: #18241d; padding: 0 1rem 4rem; }
+.welcome { min-height: 100vh; max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; padding: 3rem 0; }
+.welcome h1 { margin: .5rem 0 1rem; font-size: clamp(3rem, 11vw, 6rem); line-height: .9; letter-spacing: -.06em; }
+.welcome > p:not(.eyebrow):not(.prizeLine) { max-width: 690px; font-size: 1.1rem; line-height: 1.65; }
+.welcomeActions { display: flex; flex-wrap: wrap; gap: .8rem; margin: 1.4rem 0; }
+.primaryLink, .secondaryLink { min-height: 50px; display: inline-flex; align-items: center; justify-content: center; border-radius: 9px; padding: .75rem 1rem; font-weight: 850; text-decoration: none; }
+.primaryLink { background: #9d1f2d; color: #fff; }
+.secondaryLink { border: 1px solid #9ea89f; background: #fff; color: #18241d; }
+.welcomeNote { max-width: 690px; display: grid; gap: .25rem; padding: 1rem 1.15rem; border-left: 4px solid #2e6f4d; background: rgba(255,255,255,.65); }
+.welcomeNote span { color: #556258; line-height: 1.5; }
+.prizeLine { margin-top: 1.4rem; color: #9d1f2d; font-weight: 850; }
 .hero { max-width: 760px; margin: 0 auto; padding: 4rem 0 2rem; }
 .eyebrow { color: #9d1f2d; font-size: .78rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
 .hero h1 { font-size: clamp(3rem, 11vw, 6rem); line-height: .9; margin: .7rem 0 1.2rem; letter-spacing: -.06em; }

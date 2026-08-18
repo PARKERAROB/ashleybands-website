@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+function requestedDestination() {
+  if (typeof window === "undefined") return "/portal/review";
+  const requested = new URLSearchParams(window.location.search).get("next") || "";
+  return requested.startsWith("/portal/") && !requested.startsWith("//") ? requested : "/portal/review";
+}
 
 export default function PortalRequestClient() {
   const [form, setForm] = useState({
@@ -17,8 +23,14 @@ export default function PortalRequestClient() {
   const [code, setCode] = useState("");
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
+  const [nextPath, setNextPath] = useState("/portal/review");
 
   const guardianEmail = form.guardianEmail.trim().toLowerCase();
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setNextPath(requestedDestination());
+  }, []);
 
   async function submit(event) {
     event.preventDefault();
@@ -174,7 +186,7 @@ export default function PortalRequestClient() {
 
         {step === "done" ? (
           <p className="portal-footnote">
-            <Link href="/portal">Return to the family profile page</Link>
+            <Link href={`/portal?next=${encodeURIComponent(nextPath)}`}>{nextPath === "/portal/band-ready" ? "Sign in and continue Band Ready" : "Return to the family profile page"}</Link>
           </p>
         ) : null}
 

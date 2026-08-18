@@ -1,0 +1,398 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import styles from "./band-ready.module.css";
+
+const steps = [
+  { id: "portal", number: "01", title: "Connect your family", body: "Your family is signed in and connected to this student." },
+  { id: "calendar", number: "02", title: "Subscribe to the calendar", body: "Keep Ashley Bands dates and updates on your family calendar." },
+  { id: "day-one", number: "03", title: "Be ready for Day One", body: "Check the instrument, black one-inch binder, and dedicated band pencil." },
+  { id: "forms", number: "04", title: "Complete applicable forms", body: "If a county instrument is needed, submit the responsibility agreement." },
+  { id: "how-band-works", number: "05", title: "Know how band works", body: "Review assessments, practice, performances, absences, and communication." },
+  { id: "clothing", number: "06", title: "Review clothing", body: "Order, decide not to order, or make a plan to return before the deadline." }
+];
+
+const nextStep = {
+  calendar: "day-one",
+  "day-one": "forms",
+  forms: "how-band-works",
+  "how-band-works": "clothing",
+  clothing: "review"
+};
+
+function queryHref(path, studentId) {
+  return `${path}?studentId=${encodeURIComponent(studentId)}`;
+}
+
+function formatDate(value) {
+  if (!value) return "";
+  return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(new Date(value));
+}
+
+function instrumentLabel(value) {
+  if (value === "personal") return "Personal instrument";
+  if (value === "county") return "County instrument";
+  if (value === "help") return "I need help choosing the instrument path";
+  return "Not answered";
+}
+
+function stillNeededItems(data) {
+  const dayOne = data?.progress?.["day-one"] || {};
+  return [
+    dayOne.binderStatus === "need" ? "Get a black one-inch band binder." : null,
+    dayOne.pencilStatus === "need" ? "Get a dedicated band pencil and give it a name." : null,
+    dayOne.instrumentStatus === "county" && !data?.external?.instrumentRequest ? "Submit the county instrument responsibility agreement." : null,
+    dayOne.instrumentStatus === "help" ? "Talk with Mr. Parker about the student’s instrument." : null,
+    data?.progress?.clothing?.status === "return_later" ? "Return to the clothing collection by Friday, August 28." : null
+  ].filter(Boolean);
+}
+
+export default function BandReadyPortalClient({ step }) {
+  const router = useRouter();
+  const [profile, setProfile] = useState(null);
+  const [studentId, setStudentId] = useState("");
+  const [data, setData] = useState(null);
+  const [status, setStatus] = useState("loading");
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    const requestedStudentId = new URLSearchParams(window.location.search).get("studentId") || "";
+    fetch("/api/portal/me")
+      .then(async (response) => {
+        const body = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(body.error || "Please sign in to continue Band Ready.");
+        if (cancelled) return;
+        const available = body.students || [];
+        const selected = available.some((student) => student.id === requestedStudentId) ? requestedStudentId : available[0]?.id || "";
+        setProfile(body);
+        setStudentId(selected);
+        if (!selected) setStatus("empty");
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          setMessage(error.message);
+          setStatus("signed-out");
+        }
+      });
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    if (!studentId) return;
+    let cancelled = false;
+    fetch(`/api/portal/band-ready?studentId=${encodeURIComponent(studentId)}`)
+      .then(async (response) => {
+        const body = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(body.error || "Band Ready could not be loaded.");
+        if (!cancelled) {
+          setData(body);
+          setStatus("ready");
+          setMessage("");
+        }
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          setMessage(error.message);
+          setStatus("error");
+        }
+      });
+    return () => { cancelled = true; };
+  }, [studentId]);
+
+  const selectedStudent = profile?.students?.find((student) => student.id === studentId) || null;
+  const href = (destination) => queryHref(destination, studentId);
+
+  async function save(stepId, stepData, destination = nextStep[stepId] || "review") {
+    setStatus("saving");
+    setMessage("");
+    try {
+      const response = await fetch("/api/portal/band-ready", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ studentId, step: stepId, data: stepData })
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.error || "This step could not be saved.");
+      router.push(href(`/portal/band-ready/${destination}`));
+    } catch (error) {
+      setMessage(error.message);
+      setStatus("ready");
+    }
+  }
+
+  function switchStudent(event) {
+    const nextId = event.target.value;
+    setStudentId(nextId);
+    setData(null);
+    const currentPath = step === "home" ? "/portal/band-ready" : `/portal/band-ready/${step}`;
+    router.replace(queryHref(currentPath, nextId));
+  }
+
+  if (status === "signed-out") {
+    return (
+      <main className={styles.page}>
+        <section className={styles.notice}>
+          <p className={styles.eyebrow}>Ashley Bands Open House</p>
+          <h1>Connect your family first.</h1>
+          <p>{message}</p>
+          <Link className={styles.primaryButton} href="/portal?next=/portal/band-ready">Sign in to the Family Portal</Link>
+          <Link className={styles.textLink} href="/portal/request?next=/portal/band-ready">New email? Request access</Link>
+        </section>
+      </main>
+    );
+  }
+
+  if (status === "empty") {
+    return (
+      <main className={styles.page}>
+        <section className={styles.notice}>
+          <p className={styles.eyebrow}>Ashley Bands Open House</p>
+          <h1>Connect a student.</h1>
+          <p>Your portal sign-in works, but no student is connected to this family profile yet.</p>
+          <Link className={styles.primaryButton} href="/portal/request?next=/portal/band-ready">Request student access</Link>
+        </section>
+      </main>
+    );
+  }
+
+  if (!profile || !data || !selectedStudent) {
+    return <main className={styles.page}><section className={styles.notice}><p>Opening Band Ready…</p></section></main>;
+  }
+
+  return (
+    <main className={styles.page}>
+      <header className={styles.topbar}>
+        <div>
+          <Link className={styles.brand} href={href("/portal/band-ready")}>Ashley Bands · Band Ready</Link>
+          <p>Open House checklist</p>
+        </div>
+        <nav aria-label="Portal navigation">
+          <Link href={href("/portal/band-ready")}>Band Ready home</Link>
+          <Link href={`/portal/review?studentId=${encodeURIComponent(studentId)}`}>Family Portal</Link>
+        </nav>
+      </header>
+
+      <section className={styles.studentBar}>
+        <div><span>Completing for</span><strong>{selectedStudent.displayName}</strong></div>
+        {profile.students.length > 1 ? (
+          <label>Student<select value={studentId} onChange={switchStudent}>{profile.students.map((student) => <option key={student.id} value={student.id}>{student.displayName}</option>)}</select></label>
+        ) : null}
+      </section>
+
+      {message ? <p className={styles.error} role="alert">{message}</p> : null}
+
+      {step === "home" ? <Dashboard data={data} href={href} /> : null}
+      {step === "calendar" ? <CalendarStep data={data} save={save} busy={status === "saving"} href={href} /> : null}
+      {step === "day-one" ? <DayOneStep key={`${studentId}-${data.completion?.updatedAt || "new"}`} data={data} save={save} busy={status === "saving"} href={href} /> : null}
+      {step === "forms" ? <FormsStep data={data} href={href} /> : null}
+      {step === "how-band-works" ? <HowBandWorksStep data={data} save={save} busy={status === "saving"} href={href} /> : null}
+      {step === "clothing" ? <ClothingStep key={`${studentId}-${data.completion?.updatedAt || "new"}`} data={data} save={save} busy={status === "saving"} href={href} studentId={studentId} /> : null}
+      {step === "review" ? <ReviewStep data={data} setData={setData} studentId={studentId} href={href} /> : null}
+    </main>
+  );
+}
+
+function Dashboard({ data, href }) {
+  const { count, complete } = data.readiness;
+  return (
+    <>
+      <section className={styles.hero}>
+        <p className={styles.eyebrow}>Get Band Ready</p>
+        <h1>One clear path to the first day.</h1>
+        <p>Complete one small task at a time. Your answers are saved to this student&apos;s Family Portal.</p>
+        <div className={styles.progress} aria-label={`${count} of 6 steps complete`}><span style={{ width: `${(count / 6) * 100}%` }} /></div>
+        <strong>{count} of 6 complete</strong>
+      </section>
+      <section className={styles.stepGrid} aria-label="Band Ready steps">
+        {steps.map((item) => {
+          const done = Boolean(complete[item.id]);
+          const destination = item.id === "portal" ? "/portal/review" : `/portal/band-ready/${item.id}`;
+          return (
+            <Link className={`${styles.stepCard} ${done ? styles.done : ""}`} href={href(destination)} key={item.id}>
+              <span className={styles.stepNumber}>{done ? "✓" : item.number}</span>
+              <div><p>{done ? "Complete" : `Step ${item.number}`}</p><h2>{item.title}</h2><span>{item.body}</span></div>
+              <b aria-hidden="true">→</b>
+            </Link>
+          );
+        })}
+      </section>
+      <div className={styles.reviewCallout}>
+        <div><strong>{data.readiness.finished ? "All six stops are ready." : "Your progress is saved."}</strong><p>Review the family checklist and send the personalized summary when every stop is complete.</p></div>
+        <Link className={styles.primaryButton} href={href("/portal/band-ready/review")}>Review Band Ready</Link>
+      </div>
+    </>
+  );
+}
+
+function StepShell({ eyebrow, title, intro, children, backHref }) {
+  return (
+    <section className={styles.stepPage}>
+      <Link className={styles.backLink} href={backHref}>← Back to Band Ready</Link>
+      <p className={styles.eyebrow}>{eyebrow}</p>
+      <h1>{title}</h1>
+      <p className={styles.intro}>{intro}</p>
+      {children}
+    </section>
+  );
+}
+
+function CalendarStep({ data, save, busy, href }) {
+  const confirmed = data.progress?.calendar?.confirmed;
+  return (
+    <StepShell eyebrow="Step 02" title="Put the band calendar where your family will see it." intro="The Ashley Bands calendar is the official place for dates and times. A subscription updates when the band calendar changes." backHref={href("/portal/band-ready")}>
+      <div className={styles.actionPanel}>
+        <h2>Choose the option that works for you</h2>
+        <div className={styles.actionLinks}>
+          <a className={styles.primaryButton} href="webcal://ashleybands.com/calendar.ics">Subscribe to the band calendar</a>
+          <a className={styles.secondaryButton} href="/calendar.ics">Download calendar file</a>
+          <Link className={styles.secondaryButton} href="/calendar" target="_blank">View the full calendar</Link>
+        </div>
+        <p>You can return here after the calendar opens. We only ask you to confirm that you reviewed or subscribed.</p>
+      </div>
+      <button className={styles.primaryButton} type="button" disabled={busy} onClick={() => save("calendar", { confirmed: true })}>{busy ? "Saving…" : confirmed ? "Confirmed · Continue" : "I reviewed or subscribed · Continue"}</button>
+    </StepShell>
+  );
+}
+
+function DayOneStep({ data, save, busy, href }) {
+  const existing = data.progress?.["day-one"] || {};
+  const [form, setForm] = useState({ instrumentStatus: existing.instrumentStatus || "", binderStatus: existing.binderStatus || "", pencilStatus: existing.pencilStatus || "", pencilName: existing.pencilName || "" });
+  const valid = form.instrumentStatus && form.binderStatus && form.pencilStatus && (form.pencilStatus !== "have" || form.pencilName.trim());
+  const update = (field, value) => setForm((current) => ({ ...current, [field]: value }));
+  return (
+    <StepShell eyebrow="Step 03" title="Be ready for Day One." intro="Band starts smoothly when each student has these three things ready and knows exactly where they belong." backHref={href("/portal/band-ready")}>
+      <form className={styles.form} onSubmit={(event) => { event.preventDefault(); save("day-one", form); }}>
+        <fieldset><legend>1. Instrument</legend><p>Will the student bring a personal instrument, or do they need a county instrument?</p>
+          <Choice name="instrument" checked={form.instrumentStatus === "personal"} onChange={() => update("instrumentStatus", "personal")} title="Personal instrument" detail="The student will bring their own instrument." />
+          <Choice name="instrument" checked={form.instrumentStatus === "county"} onChange={() => update("instrumentStatus", "county")} title="County instrument" detail="The family will complete the county responsibility agreement in the next step." />
+          <Choice name="instrument" checked={form.instrumentStatus === "help"} onChange={() => update("instrumentStatus", "help")} title="We need help" detail="Mr. Parker should follow up about the best instrument path." />
+        </fieldset>
+        <fieldset><legend>2. Black one-inch band binder</legend><p>This binder holds the student&apos;s music and band handouts.</p>
+          <Choice name="binder" checked={form.binderStatus === "have"} onChange={() => update("binderStatus", "have")} title="We have it" />
+          <Choice name="binder" checked={form.binderStatus === "need"} onChange={() => update("binderStatus", "need")} title="We still need it" />
+        </fieldset>
+        <fieldset><legend>3. Dedicated band pencil</legend><p>This pencil lives in the band binder. It is not the student&apos;s math or science pencil. Students name it so the whole class knows it belongs to band.</p>
+          <Choice name="pencil" checked={form.pencilStatus === "have"} onChange={() => update("pencilStatus", "have")} title="We have a band pencil" detail="Give it a name below." />
+          <Choice name="pencil" checked={form.pencilStatus === "need"} onChange={() => update("pencilStatus", "need")} title="We still need a band pencil" />
+          {form.pencilStatus === "have" ? <label className={styles.textField}><span>What is the pencil&apos;s name?</span><input value={form.pencilName} onChange={(event) => update("pencilName", event.target.value)} maxLength={80} placeholder="Bob" required /></label> : null}
+        </fieldset>
+        <button className={styles.primaryButton} type="submit" disabled={busy || !valid}>{busy ? "Saving…" : "Save and continue"}</button>
+      </form>
+    </StepShell>
+  );
+}
+
+function Choice({ name, checked, onChange, title, detail }) {
+  return <label className={`${styles.choice} ${checked ? styles.choiceSelected : ""}`}><input type="radio" name={name} checked={checked} onChange={onChange} /><span><strong>{title}</strong>{detail ? <small>{detail}</small> : null}</span></label>;
+}
+
+function FormsStep({ data, href }) {
+  const dayOne = data.progress?.["day-one"] || {};
+  const request = data.external?.instrumentRequest;
+  const county = dayOne.instrumentStatus === "county";
+  const answered = Boolean(dayOne.instrumentStatus);
+  return (
+    <StepShell eyebrow="Step 04" title="Complete the forms that apply to this student." intro="The portal already knows the student and family, so it only asks for information that is new." backHref={href("/portal/band-ready")}>
+      <div className={`${styles.statusPanel} ${data.readiness.complete.forms ? styles.statusGood : styles.statusNeeds}`}>
+        <span>{data.readiness.complete.forms ? "✓" : "!"}</span>
+        <div>
+          <h2>{data.readiness.complete.forms ? "This step is covered." : "One form is still needed."}</h2>
+          <p>Day One instrument choice: <strong>{instrumentLabel(dayOne.instrumentStatus)}</strong></p>
+          {!answered ? <p>Return to the Day One step and choose the student&apos;s instrument path first.</p> : null}
+          {county && request ? <p>The county instrument responsibility agreement was submitted{request.submitted_at ? ` on ${formatDate(request.submitted_at)}` : ""}. Mr. Parker will add the assigned instrument information after processing it.</p> : null}
+          {county && !request ? <p>Complete the county instrument responsibility agreement. It will go into the band instrument system for Mr. Parker to process.</p> : null}
+          {dayOne.instrumentStatus === "personal" ? <p>No county instrument agreement is needed.</p> : null}
+          {dayOne.instrumentStatus === "help" ? <p>No form is required right now. Your final summary will remind the family to follow up with Mr. Parker.</p> : null}
+        </div>
+      </div>
+      <div className={styles.actionLinks}>
+        {!answered ? <Link className={styles.primaryButton} href={href("/portal/band-ready/day-one")}>Return to Day One</Link> : null}
+        {county && !request ? <Link className={styles.primaryButton} href={`/portal/review?studentId=${encodeURIComponent(data.student.id)}#instrument-request-heading`}>Complete instrument agreement</Link> : null}
+        {answered && data.readiness.complete.forms ? <Link className={styles.primaryButton} href={href("/portal/band-ready/how-band-works")}>Continue to how band works</Link> : null}
+      </div>
+    </StepShell>
+  );
+}
+
+function HowBandWorksStep({ data, save, busy, href }) {
+  const [acknowledged, setAcknowledged] = useState(Boolean(data.progress?.["how-band-works"]?.acknowledged));
+  return (
+    <StepShell eyebrow="Step 05" title="Know how band works." intro="Students who stay engaged, work on the music presented in class, and prepare for individual and ensemble goals should have no problem earning an A in band." backHref={href("/portal/band-ready")}>
+      <div className={styles.infoGrid}>
+        <article><span>60 / 40</span><h2>Assessment balance</h2><p>County grading is based on a 60% performance and 40% practice split.</p></article>
+        <article><span>Weekly</span><h2>Consistent assessment</h2><p>Mr. Parker&apos;s goal is to assess the ensemble at least once each week in an integrated way. That may be an in-class performance, individual performance, written test, or another assessment connected to the music.</p></article>
+        <article><span>Regularly</span><h2>Practice and preparation</h2><p>Students should practice consistently, prepare for assessments, and contribute to the ensemble&apos;s larger performance goals, including concerts.</p></article>
+        <article><span>As soon as known</span><h2>Absences and conflicts</h2><p>Communicate an absence or conflict as soon as it is understood, whether that is months ahead or the morning of an illness. Communication is especially important for performances because every student affects the ensemble.</p></article>
+      </div>
+      <div className={styles.detailPanel}>
+        <h2>If a performance is missed</h2>
+        <p>An illness or unavoidable circumstance that is communicated does not usually require a major performance make-up. An avoidable conflict may require an individual project, written reflection, concert-program project, or performance of key music. Mr. Parker will choose what fits the situation.</p>
+        <h2>How to reach Mr. Parker</h2>
+        <p>Families should email Mr. Parker. Students currently use Google Chat. If the transition to Microsoft changes the student communication method, families and students will be told.</p>
+        <a className={styles.textLink} href="mailto:robert.parker@nhcs.net?subject=Ashley%20Bands%20Question">Email Mr. Parker</a>
+      </div>
+      <label className={`${styles.confirmBox} ${acknowledged ? styles.choiceSelected : ""}`}><input type="checkbox" checked={acknowledged} onChange={(event) => setAcknowledged(event.target.checked)} /><span><strong>We reviewed how band works.</strong><small>We understand the assessment balance, regular preparation, performance expectations, and the importance of early communication.</small></span></label>
+      <button className={styles.primaryButton} type="button" disabled={busy || !acknowledged} onClick={() => save("how-band-works", { acknowledged: true })}>{busy ? "Saving…" : "Save and continue"}</button>
+    </StepShell>
+  );
+}
+
+function ClothingStep({ data, save, busy, href, studentId }) {
+  const paid = data.external?.clothingOrder?.payment_status === "paid";
+  const [status, setStatus] = useState(paid ? "ordered" : data.progress?.clothing?.status || "");
+  return (
+    <StepShell eyebrow="Step 06" title="Review the Open House clothing collection." intro="This bulk order is separate from the Ashley Band Shirts store. Prices use the store price plus tax, with no individual shipping charge." backHref={href("/portal/band-ready")}>
+      <div className={styles.deadline}><span>Order deadline</span><strong>Friday, August 28</strong><p>Payment is completed in the Family Portal.</p></div>
+      {paid ? <div className={`${styles.statusPanel} ${styles.statusGood}`}><span>✓</span><div><h2>Paid and ordered</h2><p>The order is already connected to this student. Items will be distributed through the band after the bulk order arrives.</p></div></div> : (
+        <>
+          <div className={styles.actionLinks}><Link className={styles.primaryButton} href={`/portal/clothing?studentId=${encodeURIComponent(studentId)}`}>Open the clothing order</Link></div>
+          <div className={styles.form}>
+            <Choice name="clothing" checked={status === "ordered"} onChange={() => setStatus("ordered")} title="We placed our order" detail="The order and payment are complete." />
+            <Choice name="clothing" checked={status === "not_ordering"} onChange={() => setStatus("not_ordering")} title="We are not ordering" detail="Nothing else is needed for this collection." />
+            <Choice name="clothing" checked={status === "return_later"} onChange={() => setStatus("return_later")} title="We will return later" detail="Add the deadline to our final reminder." />
+          </div>
+        </>
+      )}
+      <button className={styles.primaryButton} type="button" disabled={busy || (!paid && !status)} onClick={() => save("clothing", { status: paid ? "ordered" : status })}>{busy ? "Saving…" : "Save and review Band Ready"}</button>
+    </StepShell>
+  );
+}
+
+function ReviewStep({ data, setData, studentId, href }) {
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState("");
+  const needed = useMemo(() => stillNeededItems(data), [data]);
+  const alreadySent = Boolean(data.completion?.emailSentAt);
+
+  async function finish() {
+    setBusy(true); setError("");
+    try {
+      const response = await fetch("/api/portal/band-ready", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ studentId }) });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.error || "Band Ready could not be finished.");
+      setResult(body);
+      setData((current) => ({ ...current, completion: { completedAt: body.completedAt || current.completion?.completedAt, emailSentAt: body.emailSent ? new Date().toISOString() : current.completion?.emailSentAt, emailRecipients: body.recipients || current.completion?.emailRecipients, emailError: body.emailError || null } }));
+    } catch (requestError) { setError(requestError.message); }
+    finally { setBusy(false); }
+  }
+
+  const completionShown = alreadySent || result?.emailSent || result?.alreadySent;
+  return (
+    <StepShell eyebrow="Band Ready review" title={`${data.student.display_name}’s family checklist`} intro="This is the complete Open House picture for this student. Finish when all six stops are complete, and the band will email this summary to the connected student and family addresses." backHref={href("/portal/band-ready")}>
+      <ol className={styles.reviewList}>{steps.map((item) => <li key={item.id} className={data.readiness.complete[item.id] ? styles.reviewDone : styles.reviewOpen}><span>{data.readiness.complete[item.id] ? "✓" : "•"}</span><div><strong>{item.title}</strong><small>{data.readiness.complete[item.id] ? "Complete" : "Still needs attention"}</small></div>{!data.readiness.complete[item.id] && item.id !== "portal" ? <Link href={href(`/portal/band-ready/${item.id}`)}>Open</Link> : null}</li>)}</ol>
+      <div className={styles.summaryGrid}>
+        <article><h2>Day One</h2><p><strong>Instrument:</strong> {instrumentLabel(data.progress?.["day-one"]?.instrumentStatus)}</p><p><strong>Binder:</strong> {data.progress?.["day-one"]?.binderStatus === "have" ? "Ready" : "Still needed"}</p><p><strong>Band pencil:</strong> {data.progress?.["day-one"]?.pencilStatus === "have" ? `Ready${data.progress?.["day-one"]?.pencilName ? ` · ${data.progress["day-one"].pencilName}` : ""}` : "Still needed"}</p></article>
+        <article><h2>Still needed</h2>{needed.length ? <ul>{needed.map((item) => <li key={item}>{item}</li>)}</ul> : <p>Nothing. This student reported having the Day One supplies they need.</p>}</article>
+      </div>
+      {completionShown ? <div className={styles.prize}><p className={styles.eyebrow}>Challenge complete</p><h2>{data.student.display_name} is Band Ready!</h2><p>The personalized summary was sent to {result?.recipients?.length || data.completion?.emailRecipients?.length || "the connected"} student and family email address{(result?.recipients?.length || data.completion?.emailRecipients?.length) === 1 ? "" : "es"}.</p><strong>Show this screen to a student helper for a sticker or candy prize.</strong></div> : (
+        <div className={styles.finishPanel}><div><h2>{data.readiness.finished ? "Everything is ready to finish." : `${data.readiness.count} of 6 stops are complete.`}</h2><p>{data.readiness.finished ? "Finishing sends the personalized checklist email and unlocks the prize screen." : "Open each unfinished stop above. Your work is already saved."}</p></div><button className={styles.primaryButton} type="button" disabled={busy || !data.readiness.finished} onClick={finish}>{busy ? "Sending summary…" : "Finish Band Ready and email summary"}</button></div>
+      )}
+      {result?.emailError || data.completion?.emailError ? <p className={styles.error}>The checklist is saved, but the email could not be sent. Try finishing again.</p> : null}
+      {error ? <p className={styles.error}>{error}</p> : null}
+    </StepShell>
+  );
+}
