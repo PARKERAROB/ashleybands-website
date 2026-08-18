@@ -9,6 +9,11 @@ function requestedDestination() {
   return requested.startsWith("/portal/") && !requested.startsWith("//") ? requested : "/portal/review";
 }
 
+function requestedEmail() {
+  if (typeof window === "undefined") return "";
+  return new URLSearchParams(window.location.search).get("email")?.trim().toLowerCase() || "";
+}
+
 export default function PortalRequestClient() {
   const [form, setForm] = useState({
     guardianName: "",
@@ -30,6 +35,10 @@ export default function PortalRequestClient() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setNextPath(requestedDestination());
+    const email = requestedEmail();
+    if (email) {
+      setForm((current) => ({ ...current, guardianEmail: email }));
+    }
   }, []);
 
   async function submit(event) {

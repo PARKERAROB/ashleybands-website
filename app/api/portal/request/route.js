@@ -76,7 +76,16 @@ export async function POST(request) {
     return NextResponse.json({ error: "Could not create confirmation code." }, { status: 500 });
   }
 
-  await sendPortalCodeEmail({ to: guardianEmail, code, expiresMinutes: CONFIRM_CODE_MINUTES });
+  try {
+    await sendPortalCodeEmail({ to: guardianEmail, code, expiresMinutes: CONFIRM_CODE_MINUTES });
+  } catch (sendError) {
+    await supabaseAdmin
+      .from("portal_magic_links")
+      .update({ consumed_at: new Date().toISOString() })
+      .eq("token_hash", hashCode(guardianEmail, code));
+    console.error("Portal access-request code email failed to send.", sendError);
+    return NextResponse.json({ error: "We could not send the verification code. Check the email address and try again." }, { status: 503 });
+  }
 
   return NextResponse.json({ ok: true });
 }

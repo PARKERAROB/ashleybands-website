@@ -55,7 +55,7 @@ export default function PortalClient() {
       }
       setStep("code");
       setStatus("idle");
-      setMessage("If that email is in the Ashley Bands profile system, a 6-digit code is on the way. Enter it below.");
+      setMessage("If that email is already connected, a 6-digit code is on the way. Check junk or spam if it does not arrive within a minute. If it still is not there, request profile access below using the same email.");
     } catch {
       setStatus("error");
       setMessage("We could not reach the portal. Check your connection and try again.");
@@ -152,6 +152,11 @@ export default function PortalClient() {
               >
                 Use a different email or send again
               </button>
+              {" "}or{" "}
+              <Link href={`/portal/request?next=${encodeURIComponent(nextPath)}&email=${encodeURIComponent(email.trim().toLowerCase())}`}>
+                request profile access
+              </Link>
+              .
             </p>
           </>
         )}

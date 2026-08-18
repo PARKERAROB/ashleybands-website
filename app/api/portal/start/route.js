@@ -15,9 +15,11 @@ export async function POST(request) {
     return NextResponse.json({ error: "Enter a valid email address." }, { status: 400 });
   }
 
-  // Throttle code spam: 6 / 15 min per email, 20 / 15 min per IP.
+  // Throttle code spam per address. The IP ceiling is intentionally high enough
+  // for Open House, where many families can share the school's public address.
+  // The per-email cap remains the primary protection against targeted spam.
   const emailLimit = await checkRateLimit({ key: `portal-start:${email}`, limit: 6, windowMs: 15 * 60 * 1000 });
-  const ipLimit = await checkRateLimit({ key: `portal-start-ip:${clientIp(request)}`, limit: 20, windowMs: 15 * 60 * 1000 });
+  const ipLimit = await checkRateLimit({ key: `portal-start-ip:${clientIp(request)}`, limit: 120, windowMs: 15 * 60 * 1000 });
   if (!emailLimit.allowed || !ipLimit.allowed) {
     // Mirror the existing privacy-preserving response shape.
     return NextResponse.json({ ok: true, status: "sent_if_known" });
@@ -68,7 +70,17 @@ export async function POST(request) {
     return NextResponse.json({ error: "Could not create sign-in code." }, { status: 500 });
   }
 
-  await sendPortalCodeEmail({ to: email, code, expiresMinutes: CODE_MINUTES });
+  try {
+    await sendPortalCodeEmail({ to: email, code, expiresMinutes: CODE_MINUTES });
+  } catch (sendError) {
+    // Do not leave an undelivered code active. Keep the public response
+    // indistinguishable from an unknown email to avoid exposing the roster.
+    await supabaseAdmin
+      .from("portal_magic_links")
+      .update({ consumed_at: new Date().toISOString() })
+      .eq("token_hash", hashCode(email, code));
+    console.error("Portal sign-in code email failed to send.", sendError);
+  }
 
   return NextResponse.json({ ok: true, status: "sent_if_known" });
 }
