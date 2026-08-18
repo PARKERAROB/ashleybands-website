@@ -41,10 +41,16 @@ function instrumentLabel(value) {
 function stillNeededItems(data) {
   const dayOne = data?.progress?.["day-one"] || {};
   return [
+    !data?.readiness?.complete?.calendar ? "Review or subscribe to the Ashley Bands calendar." : null,
+    !dayOne.instrumentStatus ? "Choose the student’s instrument path." : null,
+    !dayOne.binderStatus ? "Confirm whether the black one-inch band binder is ready." : null,
     dayOne.binderStatus === "need" ? "Get a black one-inch band binder." : null,
+    !dayOne.pencilStatus ? "Confirm whether the dedicated band pencil is ready." : null,
     dayOne.pencilStatus === "need" ? "Get a dedicated band pencil and give it a name." : null,
     dayOne.instrumentStatus === "county" && !data?.external?.instrumentRequest ? "Submit the county instrument responsibility agreement." : null,
     dayOne.instrumentStatus === "help" ? "Talk with Mr. Parker about the student’s instrument." : null,
+    !data?.readiness?.complete?.["how-band-works"] ? "Review how band works and confirm the family understands." : null,
+    !data?.readiness?.complete?.clothing ? "Review the Open House clothing collection." : null,
     data?.progress?.clothing?.status === "return_later" ? "Return to the clothing collection by Friday, August 28." : null
   ].filter(Boolean);
 }
@@ -367,6 +373,7 @@ function ReviewStep({ data, setData, studentId, href }) {
   const [error, setError] = useState("");
   const needed = useMemo(() => stillNeededItems(data), [data]);
   const alreadySent = Boolean(data.completion?.emailSentAt);
+  const progressHeading = data.readiness.count === 1 ? "1 of 6 stops is complete." : `${data.readiness.count} of 6 stops are complete.`;
 
   async function finish() {
     setBusy(true); setError("");
@@ -389,7 +396,7 @@ function ReviewStep({ data, setData, studentId, href }) {
         <article><h2>Still needed</h2>{needed.length ? <ul>{needed.map((item) => <li key={item}>{item}</li>)}</ul> : <p>Nothing. This student reported having the Day One supplies they need.</p>}</article>
       </div>
       {completionShown ? <div className={styles.prize}><p className={styles.eyebrow}>Challenge complete</p><h2>{data.student.display_name} is Band Ready!</h2><p>The personalized summary was sent to {result?.recipients?.length || data.completion?.emailRecipients?.length || "the connected"} student and family email address{(result?.recipients?.length || data.completion?.emailRecipients?.length) === 1 ? "" : "es"}.</p><strong>Show this screen to a student helper for a sticker or candy prize.</strong></div> : (
-        <div className={styles.finishPanel}><div><h2>{data.readiness.finished ? "Everything is ready to finish." : `${data.readiness.count} of 6 stops are complete.`}</h2><p>{data.readiness.finished ? "Finishing sends the personalized checklist email and unlocks the prize screen." : "Open each unfinished stop above. Your work is already saved."}</p></div><button className={styles.primaryButton} type="button" disabled={busy || !data.readiness.finished} onClick={finish}>{busy ? "Sending summary…" : "Finish Band Ready and email summary"}</button></div>
+        <div className={styles.finishPanel}><div><h2>{data.readiness.finished ? "Everything is ready to finish." : progressHeading}</h2><p>{data.readiness.finished ? "Finishing sends the personalized checklist email and unlocks the prize screen." : "Open each unfinished stop above. Your work is already saved."}</p></div><button className={styles.primaryButton} type="button" disabled={busy || !data.readiness.finished} onClick={finish}>{busy ? "Sending summary…" : "Finish Band Ready and email summary"}</button></div>
       )}
       {result?.emailError || data.completion?.emailError ? <p className={styles.error}>The checklist is saved, but the email could not be sent. Try finishing again.</p> : null}
       {error ? <p className={styles.error}>{error}</p> : null}
