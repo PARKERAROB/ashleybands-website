@@ -817,8 +817,6 @@ function StudentRail({ student, onChanged }) {
           label="Preferred name"
           value={student.preferredFirst || ""}
           placeholder="Add preferred name"
-          note="What they go by"
-          featured
         />
         <EditableField
           key={`email-${student.id}`}
