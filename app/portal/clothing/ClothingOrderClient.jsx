@@ -115,7 +115,15 @@ export default function ClothingOrderClient() {
           <div className={styles.deadline}><span>Order by</span><strong>Friday, August 28</strong><small>No individual shipping charge</small></div>
         </header>
 
-        <label className={styles.studentPicker}>Ordering for<select value={studentId} onChange={(event) => setStudentId(event.target.value)}>{catalog.students.map((student) => <option key={student.id} value={student.id}>{student.displayName}</option>)}</select></label>
+        <div className={styles.studentConnection}>
+          <label className={styles.studentPicker}>Order connected to<select value={studentId} onChange={(event) => setStudentId(event.target.value)}>{catalog.students.map((student) => <option key={student.id} value={student.id}>{student.displayName}</option>)}</select></label>
+          <p>This student will receive the order through the band. The clothing can be for the student, a parent, or anyone else in the family.</p>
+        </div>
+
+        <section className={styles.requiredNotice} aria-labelledby="required-shirt-heading">
+          <span>Required band item</span>
+          <div><h2 id="required-shirt-heading">Every band student needs the official red band shirt.</h2><p>It is worn for pep rallies, community performances, parades, and informal band events. Order it first below, then add any optional clothing you would like.</p></div>
+        </section>
 
         <div className={styles.layout}>
           <section aria-labelledby="clothing-choices-heading">
@@ -124,8 +132,10 @@ export default function ClothingOrderClient() {
               {catalog.products.map((product) => {
                 const selected = selectedFor(product);
                 return (
-                  <article className={styles.productCard} key={product.id}>
+                  <article className={`${styles.productCard} ${product.required ? styles.requiredProduct : ""}`} key={product.id}>
+                    {product.required ? <p className={styles.requiredBadge}>Required for every band student</p> : null}
                     <div className={styles.productHeading}><h3>{product.name}</h3><strong>{money(product.priceCents)}</strong></div>
+                    {product.description ? <p className={styles.productDescription}>{product.description}</p> : null}
                     <p className={styles.taxNote}>Price before {Math.round(catalog.taxRate * 100)}% tax</p>
                     <div className={styles.productFields}>
                       <label><span>Color</span><select value={selected.color} onChange={(event) => choose(product, "color", event.target.value)}>{product.colors.map((color) => <option key={color}>{color}</option>)}</select></label>

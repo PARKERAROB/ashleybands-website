@@ -10,7 +10,7 @@ const steps = [
   { id: "day-one", number: "03", title: "Be ready for Day One", body: "Check the instrument, black one-inch binder, and dedicated band pencil." },
   { id: "forms", number: "04", title: "Complete applicable forms", body: "If a county instrument is needed, submit the responsibility agreement." },
   { id: "how-band-works", number: "05", title: "Know how band works", body: "Review assessments, practice, performances, absences, and communication." },
-  { id: "clothing", number: "06", title: "Review clothing", body: "Order, decide not to order, or make a plan to return before the deadline." }
+  { id: "clothing", number: "06", title: "Confirm the red band shirt", body: "Every band student needs the official red shirt. Review it first, then any optional clothing." }
 ];
 
 const nextStep = {
@@ -425,14 +425,15 @@ function ClothingStep({ data, save, busy, href, navigate, studentId }) {
   const paid = data.external?.clothingOrder?.payment_status === "paid";
   const [status, setStatus] = useState(paid ? "ordered" : data.progress?.clothing?.status || "");
   return (
-    <StepShell eyebrow="Step 06" title="Review the Open House clothing collection." intro="This bulk order is separate from the Ashley Band Shirts store. Prices use the store price plus tax, with no individual shipping charge." backHref={href("/portal/band-ready")} navigate={navigate}>
+    <StepShell eyebrow="Step 06" title="Confirm the required red band shirt." intro="Every band student needs the official red band shirt. Start there, then review any optional clothing your student or family would like." backHref={href("/portal/band-ready")} navigate={navigate}>
+      <div className={`${styles.statusPanel} ${styles.statusNeeds}`}><span>!</span><div><h2>Required for every band student</h2><p>The official red band shirt is worn for pep rallies, community performances, parades, and informal band events.</p></div></div>
       <div className={styles.deadline}><span>Order deadline</span><strong>Friday, August 28</strong><p>Payment is completed in the Family Portal.</p></div>
       {paid ? <div className={`${styles.statusPanel} ${styles.statusGood}`}><span>✓</span><div><h2>Paid and ordered</h2><p>The order is already connected to this student. Items will be distributed through the band after the bulk order arrives.</p></div></div> : (
         <>
           <div className={styles.actionLinks}><Link className={styles.primaryButton} href={`/portal/clothing?studentId=${encodeURIComponent(studentId)}`}>Open the clothing order</Link></div>
           <div className={styles.form}>
             <Choice name="clothing" checked={status === "ordered"} onChange={() => setStatus("ordered")} title="We placed our order" detail="The order and payment are complete." />
-            <Choice name="clothing" checked={status === "not_ordering"} onChange={() => setStatus("not_ordering")} title="We are not ordering" detail="Nothing else is needed for this collection." />
+            <Choice name="clothing" checked={status === "not_ordering"} onChange={() => setStatus("not_ordering")} title="We are not ordering" detail="The student already has the required shirt, or the family does not need any optional items." />
             <Choice name="clothing" checked={status === "return_later"} onChange={() => setStatus("return_later")} title="We will return later" detail="Add the deadline to our final reminder." />
           </div>
         </>
