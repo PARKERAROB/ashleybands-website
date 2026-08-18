@@ -30,6 +30,12 @@ const ALLOWED_FIELDS = {
     label: "Student cell phone",
     targetTable: "portal_students",
     sensitivity: "contact"
+  },
+  student_notes: {
+    label: "Student notes",
+    targetTable: "portal_students",
+    sensitivity: "medical",
+    allowEmpty: true
   }
 };
 
@@ -48,7 +54,7 @@ export async function POST(request) {
   if (!config) {
     return NextResponse.json({ error: "That field cannot be updated here." }, { status: 400 });
   }
-  if (!newValue) {
+  if (!newValue && !config.allowEmpty) {
     return NextResponse.json({ error: "Enter the updated information before submitting." }, { status: 400 });
   }
 
@@ -96,7 +102,11 @@ export async function POST(request) {
   const { data: reviewItem, error: reviewError } = await supabaseAdmin
     .from("portal_review_queue")
     .insert({
-      item_type: config.sensitivity === "contact" ? "contact_change" : "profile_conflict",
+      item_type: config.sensitivity === "contact"
+        ? "contact_change"
+        : config.sensitivity === "medical"
+          ? "sensitive_submission"
+          : "profile_conflict",
       status: "approved",
       student_id: studentId,
       person_id: session.personId,
@@ -193,6 +203,15 @@ async function applyMirrorWrite({ field, session, studentId, targetId, newValue 
       .update({ cell_phone: newValue, updated_at: now })
       .eq("id", studentId);
     if (error) throw new Error(error.message);
+    return;
+  }
+
+  if (field === "student_notes") {
+    const { error } = await supabaseAdmin
+      .from("portal_students")
+      .update({ notes: newValue || null, updated_at: now })
+      .eq("id", studentId);
+    if (error) throw new Error(error.message);
   }
 }
 
@@ -267,6 +286,14 @@ async function resolveOldValue({ field, targetId, session, studentId }) {
       .eq("id", studentId)
       .maybeSingle();
     return data?.cell_phone || "";
+  }
+  if (field === "student_notes") {
+    const { data } = await supabaseAdmin
+      .from("portal_students")
+      .select("notes")
+      .eq("id", studentId)
+      .maybeSingle();
+    return data?.notes || "";
   }
   return "";
 }

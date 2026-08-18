@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import PortalSectionIcon from "./PortalSectionIcon";
 
 export default function InstrumentRequestSection({ student }) {
   const [record, setRecord] = useState(null);
@@ -53,7 +54,8 @@ export default function InstrumentRequestSection({ student }) {
   return (
     <section className="portal-workspace-section" aria-labelledby="instrument-request-heading">
       <div className="portal-section-heading">
-        <div>
+        <PortalSectionIcon type="instrument" />
+        <div className="portal-section-heading-copy">
           <h2 id="instrument-request-heading">County instrument</h2>
           <p>Complete this only if {student.displayName} needs to borrow a school-owned instrument.</p>
         </div>

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import InstrumentRequestSection from "./InstrumentRequestSection";
+import PortalSectionIcon from "./PortalSectionIcon";
 
 const SAVED_NOTE = "Saved. Your family record is updated.";
 
@@ -224,7 +225,8 @@ function BillingSection({ studentId, studentName }) {
   return (
     <section className="portal-workspace-section" aria-labelledby="portal-funding-heading">
       <div className="portal-section-heading">
-        <div>
+        <PortalSectionIcon type="funding" />
+        <div className="portal-section-heading-copy">
           <h2 id="portal-funding-heading">Funding and payments</h2>
           <p>Fees, fundraising credit, and payment history for {studentName}.</p>
         </div>
@@ -318,14 +320,14 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
 
       {hasGoal ? (
         <div className="portal-field">
-          <span className="portal-field-label">Season funding</span>
+          <span className="portal-field-label">Marching Band season funding</span>
           <span className="portal-field-value">
             Goal {formatUsd(goal.charged)} · Raised {formatUsd(goal.paid)} · Remaining{" "}
             {formatUsd(goal.remaining)}
             {goal.sponsorship > 0 ? ` (includes ${formatUsd(goal.sponsorship)} from sponsorships)` : ""}
           </span>
           <span className="portal-field-note">
-            This is our shared season goal, not a bill. Sponsorships and fundraising count toward it.
+            This is the 2026 Marching Band goal, not a bill. Sponsorships and fundraising count toward it.
           </span>
         </div>
       ) : null}
@@ -810,14 +812,16 @@ function StudentRail({ student, profile, ownPhone, onChanged }) {
       </div>
 
       <section className="portal-rail-group" aria-labelledby="portal-demographics-heading">
-        <h3 id="portal-demographics-heading">Demographics</h3>
+        <h3 id="portal-demographics-heading" className="portal-rail-heading"><PortalSectionIcon type="person" />Demographics</h3>
         <EditableField
           key={`preferred-${student.id}`}
           field="student_preferred_first"
           studentId={student.id}
           label="Preferred name"
           value={student.preferredFirst || ""}
-          placeholder="What they go by"
+          placeholder="Add preferred name"
+          note="What they go by"
+          featured
         />
         <ReadOnlyField label="Grade" value={student.grade || "Not listed"} />
         <ReadOnlyField label="Student status" value={statusValue(student.status)} />
@@ -847,13 +851,19 @@ function StudentRail({ student, profile, ownPhone, onChanged }) {
         <ReadOnlyField label="Your email" value={profile.email} note="Used to sign in. Contact Mr. Parker to change it." />
       </section>
 
-      {student.note ? (
-        <section className="portal-rail-group" aria-labelledby="portal-notes-heading">
-          <h3 id="portal-notes-heading">Notes on file</h3>
-          <p className="portal-rail-note">{student.note}</p>
-          <p className="portal-field-note">To change this, contact Mr. Parker.</p>
-        </section>
-      ) : null}
+      <section className="portal-rail-group" aria-labelledby="portal-notes-heading">
+        <h3 id="portal-notes-heading">Notes on file</h3>
+        <EditableField
+          key={`notes-${student.id}`}
+          field="student_notes"
+          studentId={student.id}
+          label="Family notes"
+          value={student.note || ""}
+          placeholder="Add information Mr. Parker should know"
+          multiline
+          allowEmpty
+        />
+      </section>
 
       <section className="portal-rail-group portal-guardians" aria-labelledby="portal-family-heading">
         <h3 id="portal-family-heading">Family contacts</h3>
@@ -873,6 +883,9 @@ function StudentRail({ student, profile, ownPhone, onChanged }) {
                 {g.emails?.map((e) => (
                   <p key={e}>{e}</p>
                 ))}
+                {!g.isSelf ? (
+                  <GuardianEdit guardian={g} studentId={student.id} studentName={student.displayName} onSaved={onChanged} />
+                ) : null}
               </article>
             ))}
           </div>
@@ -938,7 +951,8 @@ function UniformSection({ student }) {
   return (
     <section className="portal-workspace-section" aria-labelledby="portal-uniform-heading">
       <div className="portal-section-heading">
-        <div>
+        <PortalSectionIcon type="shirt" />
+        <div className="portal-section-heading-copy">
           <h2 id="portal-uniform-heading">Uniform readiness</h2>
           <p>Review or enter the measurements used for uniform fitting.</p>
         </div>
@@ -958,7 +972,7 @@ function UniformSection({ student }) {
   );
 }
 
-function EditableField({ field, studentId, label, value, placeholder }) {
+function EditableField({ field, studentId, label, value, placeholder, note, featured = false, multiline = false, allowEmpty = false }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value);
   const [current, setCurrent] = useState(value);
@@ -985,12 +999,17 @@ function EditableField({ field, studentId, label, value, placeholder }) {
   }
 
   return (
-    <div className="portal-field">
+    <div className={`portal-field ${featured ? "portal-field-featured" : ""}`}>
       <span className="portal-field-label">{label}</span>
+      {note ? <span className="portal-field-note">{note}</span> : null}
       {editing ? (
         <div className="portal-field-edit">
-          <input value={draft} placeholder={placeholder} onChange={(e) => setDraft(e.target.value)} />
-          <button type="button" onClick={save} disabled={status === "saving"}>
+          {multiline ? (
+            <textarea rows="5" value={draft} placeholder={placeholder} onChange={(e) => setDraft(e.target.value)} />
+          ) : (
+            <input value={draft} placeholder={placeholder} onChange={(e) => setDraft(e.target.value)} />
+          )}
+          <button type="button" onClick={save} disabled={status === "saving" || (!allowEmpty && !draft.trim())}>
             {status === "saving" ? "Saving..." : "Save"}
           </button>
           <button
@@ -1016,6 +1035,58 @@ function EditableField({ field, studentId, label, value, placeholder }) {
       {status === "saved" ? <span className="portal-field-pending">{SAVED_NOTE}</span> : null}
       {error ? <span className="portal-field-error">{error}</span> : null}
     </div>
+  );
+}
+
+function GuardianEdit({ guardian, studentId, studentName, onSaved }) {
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({
+    name: guardian.name || "",
+    relationship: guardian.role || "",
+    phone: guardian.phones?.[0] || "",
+    email: guardian.emails?.[0] || ""
+  });
+  const [status, setStatus] = useState("idle");
+  const [message, setMessage] = useState("");
+
+  async function submit(event) {
+    event.preventDefault();
+    setStatus("saving");
+    setMessage("");
+    const res = await fetch("/api/portal/guardian-request", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentId, guardianId: guardian.id, ...form })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setStatus("idle");
+      setMessage(data.error || "Could not update this guardian.");
+      return;
+    }
+    setStatus("saved");
+    setMessage("Family contact updated.");
+    setOpen(false);
+    if (onSaved) await onSaved();
+  }
+
+  if (!open) {
+    return <button type="button" className="portal-link-btn portal-guardian-edit" onClick={() => setOpen(true)}>Edit contact</button>;
+  }
+
+  return (
+    <form className="portal-guardian-form" onSubmit={submit}>
+      <p className="portal-field-label">Edit {guardian.name} for {studentName}</p>
+      <input aria-label="Guardian name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+      <input aria-label="Relationship" placeholder="Relationship" value={form.relationship} onChange={(e) => setForm({ ...form, relationship: e.target.value })} />
+      <input aria-label="Guardian phone" placeholder="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+      <input aria-label="Guardian email" placeholder="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+      <div className="portal-field-edit">
+        <button type="submit" disabled={status === "saving" || !form.name.trim() || (!form.phone.trim() && !form.email.trim())}>{status === "saving" ? "Saving..." : "Save contact"}</button>
+        <button type="button" className="portal-link-btn" onClick={() => { setOpen(false); setMessage(""); }}>Cancel</button>
+      </div>
+      {message ? <span className={status === "saved" ? "portal-field-pending" : "portal-field-error"}>{message}</span> : null}
+    </form>
   );
 }
 

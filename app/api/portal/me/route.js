@@ -81,8 +81,9 @@ export async function GET(request) {
     if (guardianIds.length) {
       const { data: guardianContacts } = await supabaseAdmin
         .from("portal_contact_methods")
-        .select("person_id, contact_type, value_display")
-        .in("person_id", guardianIds);
+        .select("person_id, contact_type, value_display, verification_status")
+        .in("person_id", guardianIds)
+        .not("verification_status", "in", "(superseded,replaced,hard_bounce)");
       contactsByPerson = (guardianContacts || []).reduce((acc, row) => {
         (acc[row.person_id] = acc[row.person_id] || []).push(row);
         return acc;
