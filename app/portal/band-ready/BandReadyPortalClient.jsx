@@ -55,6 +55,18 @@ function stillNeededItems(data) {
   ].filter(Boolean);
 }
 
+async function fetchBandReady(studentId = "") {
+  const query = studentId ? `?studentId=${encodeURIComponent(studentId)}` : "";
+  const response = await fetch(`/api/portal/band-ready${query}`);
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = new Error(body.error || "Band Ready could not be loaded.");
+    error.status = response.status;
+    throw error;
+  }
+  return body;
+}
+
 export default function BandReadyPortalClient({ step }) {
   const router = useRouter();
   const [profile, setProfile] = useState(null);
@@ -66,47 +78,23 @@ export default function BandReadyPortalClient({ step }) {
   useEffect(() => {
     let cancelled = false;
     const requestedStudentId = new URLSearchParams(window.location.search).get("studentId") || "";
-    fetch("/api/portal/me")
-      .then(async (response) => {
-        const body = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(body.error || "Please sign in to continue Band Ready.");
+    fetchBandReady(requestedStudentId)
+      .then((body) => {
         if (cancelled) return;
-        const available = body.students || [];
-        const selected = available.some((student) => student.id === requestedStudentId) ? requestedStudentId : available[0]?.id || "";
-        setProfile(body);
-        setStudentId(selected);
-        if (!selected) setStatus("empty");
+        setProfile({ students: body.students || [] });
+        setStudentId(body.student?.id || "");
+        setData(body);
+        setStatus("ready");
+        setMessage("");
       })
       .catch((error) => {
         if (!cancelled) {
           setMessage(error.message);
-          setStatus("signed-out");
+          setStatus(error.status === 401 ? "signed-out" : error.status === 404 ? "empty" : "error");
         }
       });
     return () => { cancelled = true; };
   }, []);
-
-  useEffect(() => {
-    if (!studentId) return;
-    let cancelled = false;
-    fetch(`/api/portal/band-ready?studentId=${encodeURIComponent(studentId)}`)
-      .then(async (response) => {
-        const body = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(body.error || "Band Ready could not be loaded.");
-        if (!cancelled) {
-          setData(body);
-          setStatus("ready");
-          setMessage("");
-        }
-      })
-      .catch((error) => {
-        if (!cancelled) {
-          setMessage(error.message);
-          setStatus("error");
-        }
-      });
-    return () => { cancelled = true; };
-  }, [studentId]);
 
   const selectedStudent = profile?.students?.find((student) => student.id === studentId) || null;
   const href = (destination) => queryHref(destination, studentId);
@@ -129,12 +117,24 @@ export default function BandReadyPortalClient({ step }) {
     }
   }
 
-  function switchStudent(event) {
+  async function switchStudent(event) {
     const nextId = event.target.value;
     setStudentId(nextId);
     setData(null);
+    setStatus("loading");
     const currentPath = step === "home" ? "/portal/band-ready" : `/portal/band-ready/${step}`;
     router.replace(queryHref(currentPath, nextId));
+    try {
+      const body = await fetchBandReady(nextId);
+      setProfile({ students: body.students || [] });
+      setStudentId(body.student?.id || "");
+      setData(body);
+      setStatus("ready");
+      setMessage("");
+    } catch (error) {
+      setMessage(error.message);
+      setStatus("error");
+    }
   }
 
   if (status === "signed-out") {
@@ -159,6 +159,19 @@ export default function BandReadyPortalClient({ step }) {
           <h1>Connect a student.</h1>
           <p>Your portal sign-in works, but no student is connected to this family profile yet.</p>
           <Link className={styles.primaryButton} href="/portal/request?next=/portal/band-ready">Request student access</Link>
+        </section>
+      </main>
+    );
+  }
+
+  if (status === "error") {
+    return (
+      <main className={styles.page}>
+        <section className={styles.notice}>
+          <p className={styles.eyebrow}>Ashley Bands Open House</p>
+          <h1>Band Ready did not load.</h1>
+          <p>{message}</p>
+          <button className={styles.primaryButton} type="button" onClick={() => window.location.reload()}>Try again</button>
         </section>
       </main>
     );

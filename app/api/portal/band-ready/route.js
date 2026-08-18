@@ -14,15 +14,13 @@ const VALID = {
 
 const PORTAL_URL = "https://ashleybands.com/portal/band-ready";
 
-async function trustedStudent(personId, studentId) {
-  const { data } = await supabaseAdmin
-    .from("portal_student_people")
-    .select("student_id, portal_students(id, display_name, school_email)")
-    .eq("person_id", personId)
-    .eq("student_id", studentId)
-    .eq("relationship_status", "trusted")
-    .maybeSingle();
-  return data?.portal_students || null;
+function oneRelation(value) {
+  return Array.isArray(value) ? value[0] || null : value || null;
+}
+
+function manyRelation(value) {
+  if (Array.isArray(value)) return value;
+  return value ? [value] : [];
 }
 
 function normalizeStep(step, data) {
@@ -47,14 +45,6 @@ function normalizeStep(step, data) {
   throw new Error("Unknown Band Ready step.");
 }
 
-async function externalStatuses(studentId) {
-  const [{ data: instrument }, { data: clothing }] = await Promise.all([
-    supabaseAdmin.from("portal_instrument_requests").select("id, status, submitted_at").eq("student_id", studentId).eq("school_year", "2026-2027").maybeSingle(),
-    supabaseAdmin.from("portal_clothing_orders").select("id, payment_status, submitted_at").eq("student_id", studentId).order("submitted_at", { ascending: false }).limit(1).maybeSingle()
-  ]);
-  return { instrumentRequest: instrument || null, clothingOrder: clothing || null };
-}
-
 function readiness(progress, external) {
   const dayOne = progress?.["day-one"] || {};
   const complete = {
@@ -69,26 +59,61 @@ function readiness(progress, external) {
 }
 
 async function loadState(personId, studentId) {
-  const student = await trustedStudent(personId, studentId);
-  if (!student) return null;
-  const [{ data: row }, external] = await Promise.all([
-    supabaseAdmin.from("portal_band_ready_progress").select("id, progress, completed_at, summary_email_sent_at, summary_email_recipients, summary_email_error, updated_at").eq("student_id", studentId).maybeSingle(),
-    externalStatuses(studentId)
-  ]);
-  const progress = row?.progress || {};
+  const { data: links, error } = await supabaseAdmin
+    .from("portal_student_people")
+    .select(`
+      student_id,
+      portal_students(
+        id,
+        display_name,
+        school_email,
+        portal_band_ready_progress(
+          id,
+          progress,
+          completed_at,
+          summary_email_sent_at,
+          summary_email_recipients,
+          summary_email_error,
+          updated_at
+        ),
+        portal_instrument_requests(id, status, submitted_at, school_year),
+        portal_clothing_orders(id, payment_status, submitted_at)
+      )
+    `)
+    .eq("person_id", personId)
+    .eq("relationship_status", "trusted");
+  if (error) throw error;
+
+  const linkedStudents = (links || []).map((link) => oneRelation(link.portal_students)).filter(Boolean);
+  const students = linkedStudents.map((student) => ({ id: student.id, displayName: student.display_name }));
+  const selected = linkedStudents.find((student) => student.id === studentId) || linkedStudents[0] || null;
+  if (!selected) return { students, student: null };
+
+  const row = oneRelation(selected.portal_band_ready_progress);
+  const instrumentRequest = manyRelation(selected.portal_instrument_requests)
+    .filter((item) => item.school_year === "2026-2027")
+    .sort((left, right) => String(right.submitted_at || "").localeCompare(String(left.submitted_at || "")))[0] || null;
+  const clothingOrder = manyRelation(selected.portal_clothing_orders)
+    .sort((left, right) => String(right.submitted_at || "").localeCompare(String(left.submitted_at || "")))[0] || null;
+  const external = { instrumentRequest, clothingOrder };
+  const progress = { ...(row?.progress || {}) };
   if (external.clothingOrder?.payment_status === "paid" && progress?.clothing?.status !== "ordered") {
     progress.clothing = { status: "ordered", confirmedAt: external.clothingOrder.submitted_at };
   }
-  return { student, row: row || null, progress, external, readiness: readiness(progress, external) };
+  const student = { id: selected.id, display_name: selected.display_name, school_email: selected.school_email };
+  return { students, student, row: row || null, progress, external, readiness: readiness(progress, external) };
 }
 
 export async function GET(request) {
   const session = readPortalSession(request);
   if (!session?.personId) return NextResponse.json({ error: "Not signed in." }, { status: 401 });
   const studentId = new URL(request.url).searchParams.get("studentId") || "";
-  const state = await loadState(session.personId, studentId);
-  if (!state) return NextResponse.json({ error: "Student access not found." }, { status: 403 });
+  let state;
+  try { state = await loadState(session.personId, studentId); }
+  catch { return NextResponse.json({ error: "Band Ready could not be loaded." }, { status: 500 }); }
+  if (!state.student) return NextResponse.json({ error: "No student is connected to this family profile." }, { status: 404 });
   return NextResponse.json({
+    students: state.students,
     student: state.student,
     progress: state.progress,
     external: state.external,
@@ -109,8 +134,10 @@ export async function PATCH(request) {
   const body = await request.json().catch(() => ({}));
   const studentId = String(body.studentId || "");
   const step = String(body.step || "");
-  const state = await loadState(session.personId, studentId);
-  if (!state) return NextResponse.json({ error: "Student access not found." }, { status: 403 });
+  let state;
+  try { state = await loadState(session.personId, studentId); }
+  catch { return NextResponse.json({ error: "Band Ready could not be loaded." }, { status: 500 }); }
+  if (!state.student || state.student.id !== studentId) return NextResponse.json({ error: "Student access not found." }, { status: 403 });
   let value;
   try { value = normalizeStep(step, body.data || {}); }
   catch (error) { return NextResponse.json({ error: error.message }, { status: 400 }); }
@@ -126,9 +153,8 @@ export async function PATCH(request) {
     updated_at: new Date().toISOString()
   }, { onConflict: "student_id" });
   if (error) return NextResponse.json({ error: "Could not save Band Ready progress." }, { status: 500 });
-  const external = await externalStatuses(studentId);
   await logAudit({ actor: { type: "parent", id: session.personId, name: session.email }, action: "update", table: "portal_band_ready_progress", recordId: studentId, route: "/api/portal/band-ready", changes: { step, value } });
-  return NextResponse.json({ ok: true, progress, readiness: readiness(progress, external) });
+  return NextResponse.json({ ok: true, progress, readiness: readiness(progress, state.external) });
 }
 
 function summaryItems(state) {
@@ -178,8 +204,10 @@ export async function POST(request) {
   if (!session?.personId) return NextResponse.json({ error: "Not signed in." }, { status: 401 });
   const body = await request.json().catch(() => ({}));
   const studentId = String(body.studentId || "");
-  const state = await loadState(session.personId, studentId);
-  if (!state) return NextResponse.json({ error: "Student access not found." }, { status: 403 });
+  let state;
+  try { state = await loadState(session.personId, studentId); }
+  catch { return NextResponse.json({ error: "Band Ready could not be loaded." }, { status: 500 }); }
+  if (!state.student || state.student.id !== studentId) return NextResponse.json({ error: "Student access not found." }, { status: 403 });
   if (!state.readiness.finished) return NextResponse.json({ error: "Complete each Band Ready step before finishing." }, { status: 409 });
   if (state.row?.summary_email_sent_at) return NextResponse.json({ ok: true, alreadySent: true, recipients: state.row.summary_email_recipients || [] });
   const recipients = await recipientsFor(state, session.email);
