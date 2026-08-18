@@ -24,12 +24,14 @@ const ALLOWED_FIELDS = {
   student_preferred_first: {
     label: "Student preferred name",
     targetTable: "portal_students",
-    sensitivity: "normal"
+    sensitivity: "normal",
+    allowEmpty: true
   },
   student_cell_phone: {
     label: "Student cell phone",
     targetTable: "portal_students",
-    sensitivity: "contact"
+    sensitivity: "contact",
+    allowEmpty: true
   },
   student_school_email: {
     label: "Student email",
@@ -208,7 +210,7 @@ async function applyMirrorWrite({ field, session, studentId, targetId, newValue 
   if (field === "student_cell_phone") {
     const { error } = await supabaseAdmin
       .from("portal_students")
-      .update({ cell_phone: newValue, updated_at: now })
+      .update({ cell_phone: newValue || null, updated_at: now })
       .eq("id", studentId);
     if (error) throw new Error(error.message);
     return;

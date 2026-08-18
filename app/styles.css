@@ -3521,6 +3521,22 @@ h2 {
 .portal-profile-rail .portal-guardian-edit {
   margin-top: var(--portal-space-1);
 }
+.portal-profile-rail .portal-demographics-summary .portal-guardian {
+  padding-top: 0;
+}
+.portal-profile-rail .portal-demographics-summary .portal-guardian-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--portal-space-1);
+}
+.portal-profile-rail .portal-demographics-summary .portal-tag {
+  margin-left: 0;
+}
+.portal-profile-rail .portal-demographics-form label {
+  display: grid;
+  gap: var(--portal-space-1);
+}
 .portal-privacy-note {
   margin: var(--portal-space-6) 0 0;
   padding-top: var(--portal-space-4);

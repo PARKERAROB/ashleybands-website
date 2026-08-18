@@ -810,33 +810,11 @@ function StudentRail({ student, onChanged }) {
 
       <section className="portal-rail-group" aria-labelledby="portal-demographics-heading">
         <h3 id="portal-demographics-heading" className="portal-rail-heading"><PortalSectionIcon type="person" />Demographics</h3>
-        <EditableField
-          key={`preferred-${student.id}`}
-          field="student_preferred_first"
-          studentId={student.id}
-          label="Preferred name"
-          value={student.preferredFirst || ""}
-          placeholder="Add preferred name"
+        <StudentDemographics
+          key={`${student.id}-${student.preferredFirst}-${student.schoolEmail}-${student.cellPhone}`}
+          student={student}
+          onSaved={onChanged}
         />
-        <EditableField
-          key={`email-${student.id}`}
-          field="student_school_email"
-          studentId={student.id}
-          label="Student email"
-          value={student.schoolEmail || ""}
-          placeholder="Add the student's email"
-          inputType="email"
-        />
-        <EditableField
-          key={`phone-${student.id}`}
-          field="student_cell_phone"
-          studentId={student.id}
-          label="Student phone"
-          value={student.cellPhone || ""}
-          placeholder="Add the student's phone"
-        />
-        <ReadOnlyField label="Grade" value={student.grade || "Not listed"} />
-        <ReadOnlyField label="Student status" value={statusValue(student.status)} />
       </section>
 
       <section className="portal-rail-group" aria-labelledby="portal-notes-heading">
@@ -895,16 +873,6 @@ function StudentRail({ student, onChanged }) {
   );
 }
 
-function ReadOnlyField({ label, value, note }) {
-  return (
-    <div className="portal-field">
-      <span className="portal-field-label">{label}</span>
-      <span className="portal-field-value">{value}</span>
-      {note ? <span className="portal-field-note">{note}</span> : null}
-    </div>
-  );
-}
-
 function ParticipationSection({ student }) {
   return (
     <section className="portal-workspace-section" aria-labelledby="portal-participation-heading">
@@ -955,6 +923,86 @@ function UniformSection({ student }) {
         <p className="portal-muted-status">The full measurement form stays closed until you need it.</p>
       )}
     </section>
+  );
+}
+
+function StudentDemographics({ student, onSaved }) {
+  const original = {
+    student_preferred_first: student.preferredFirst || "",
+    student_school_email: student.schoolEmail || "",
+    student_cell_phone: student.cellPhone || ""
+  };
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState(original);
+  const [status, setStatus] = useState("idle");
+  const [message, setMessage] = useState("");
+
+  async function submit(event) {
+    event.preventDefault();
+    setStatus("saving");
+    setMessage("");
+    const changed = Object.entries(form).filter(([field, value]) => value.trim() !== original[field]);
+    if (!changed.length) {
+      setOpen(false);
+      setStatus("idle");
+      return;
+    }
+    const responses = await Promise.all(changed.map(([field, value]) => fetch("/api/portal/update-request", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ field, studentId: student.id, value })
+    })));
+    const failed = responses.find((response) => !response.ok);
+    if (failed) {
+      const data = await failed.json().catch(() => ({}));
+      setStatus("idle");
+      setMessage(data.error || "Could not save all student details.");
+      if (onSaved) await onSaved();
+      return;
+    }
+    setStatus("saved");
+    setOpen(false);
+    if (onSaved) await onSaved();
+  }
+
+  if (open) {
+    return (
+      <form className="portal-guardian-form portal-demographics-form" onSubmit={submit}>
+        <label>
+          <span className="portal-field-label">Preferred name</span>
+          <input value={form.student_preferred_first} placeholder="Preferred name, if any" onChange={(event) => setForm({ ...form, student_preferred_first: event.target.value })} />
+        </label>
+        <label>
+          <span className="portal-field-label">Student email</span>
+          <input type="email" value={form.student_school_email} onChange={(event) => setForm({ ...form, student_school_email: event.target.value })} required />
+        </label>
+        <label>
+          <span className="portal-field-label">Student phone</span>
+          <input type="tel" value={form.student_cell_phone} placeholder="Phone, if available" onChange={(event) => setForm({ ...form, student_cell_phone: event.target.value })} />
+        </label>
+        <div className="portal-field-edit">
+          <button type="submit" disabled={status === "saving"}>{status === "saving" ? "Saving..." : "Save student details"}</button>
+          <button type="button" className="portal-link-btn" onClick={() => { setForm(original); setOpen(false); setMessage(""); }}>Cancel</button>
+        </div>
+        {message ? <span className="portal-field-error">{message}</span> : null}
+      </form>
+    );
+  }
+
+  return (
+    <div className="portal-guardian-list portal-demographics-summary">
+      <article className="portal-guardian">
+        <p className="portal-guardian-name">
+          {student.preferredFirst || <em>No preferred name listed</em>}
+          <span className="portal-tag">{student.grade || "Grade not listed"}</span>
+          <span className="portal-tag">{statusValue(student.status)}</span>
+        </p>
+        <p>{student.schoolEmail || <em>No student email listed</em>}</p>
+        <p>{student.cellPhone || <em>No student phone listed</em>}</p>
+        <button type="button" className="portal-link-btn portal-guardian-edit" onClick={() => setOpen(true)}>Edit student details</button>
+        {status === "saved" ? <span className="portal-field-pending">{SAVED_NOTE}</span> : null}
+      </article>
+    </div>
   );
 }
 
