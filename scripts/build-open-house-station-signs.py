@@ -152,10 +152,13 @@ def fit_font(text, font_name, maximum, minimum, max_width):
     return size
 
 
-def draw_checkbox(c, x, y, size=8):
+def draw_checkbox(c, x, text_baseline, size=8):
+    # Align the box's visual center with the lowercase text beside it.
+    # ReportLab positions text from its baseline, not its bounding-box center.
+    bottom = text_baseline - (size * 0.20)
     c.setLineWidth(0.8)
     c.setStrokeColor(black)
-    c.rect(x, y - size + 1, size, size, fill=0, stroke=1)
+    c.rect(x, bottom, size, size, fill=0, stroke=1)
 
 
 def draw_qr(c, size, x, y):
@@ -250,7 +253,7 @@ def draw_field(c, label, x, y, width):
 def draw_inline_options(c, x, y, options, font_size=7.6, gap=10):
     cursor = x
     for option in options:
-        draw_checkbox(c, cursor, y + 1, 7)
+        draw_checkbox(c, cursor, y, 7)
         cursor += 11
         c.setFont("Helvetica", font_size)
         c.drawString(cursor, y, option)
@@ -278,7 +281,7 @@ def draw_panel(c, x, top, width, height, number, title, rows, note=None):
             draw_inline_options(c, x + 0.10 * inch + label_width, y, options, 7.4, 7)
             y -= 0.22 * inch
         elif row[0] == "check":
-            draw_checkbox(c, x + 0.10 * inch, y + 1, 7)
+            draw_checkbox(c, x + 0.10 * inch, y, 7)
             y = draw_wrapped(c, row[1], x + 0.25 * inch, y, width - 0.36 * inch, "Helvetica", 7.8, 9.4, black, 2) - 2
         elif row[0] == "line":
             c.setFont("Helvetica-Bold", 7.8)
@@ -376,7 +379,7 @@ def build_paper_checklist():
     footer_y = 0.66 * inch
     c.setFont("Helvetica-Bold", 8)
     c.drawString(0.48 * inch, footer_y + 0.25 * inch, "STAFF FOLLOW-UP:")
-    draw_inline_options(c, 1.48 * inch, footer_y + 0.25 * inch, ["portal", "instrument", "clothing", "Level 2", "other"], 7.4, 8)
+    draw_inline_options(c, 1.62 * inch, footer_y + 0.25 * inch, ["portal", "instrument", "clothing", "Level 2", "other"], 7.4, 8)
     draw_field(c, "Received by:", 0.48 * inch, footer_y, 4.35 * inch)
     draw_field(c, "Date:", 4.62 * inch, footer_y, 3.30 * inch)
     c.setFont("Helvetica-Bold", 7.2)
