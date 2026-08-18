@@ -142,9 +142,9 @@ const portalStudents = students.map((row) => {
     instrument_2026: row.instrument || null,
     marching_2026: row.marching_2026 || null,
     mb_role_2026: row.mb_role_2026 || null,
-    // COMPLIANCE GUARD (2026-07-10): contact values are family-owned, never mirrored from the
-    // IC-derived CSV. Kept null here so a re-sync can't repopulate what Phase 1.1 deleted.
-    school_email: null,
+    // Rob 2026-08-18: the canonical @student.nhcs.net address is the narrow
+    // contact-value exception so every student can request a portal code.
+    school_email: row.school_email || null,
     cell_phone: null,
     status: row.status || null,
     notes: row.notes || null,
@@ -348,11 +348,9 @@ async function applySync() {
         continue;
       }
 
-      // Omit both contact columns for existing rows. `null` would erase a phone
-      // number the family entered in the portal, which is exactly what the
-      // 2026-07-10 contact-value guard is meant to prevent.
+      // School email is roster-owned and now mirrors to the portal. Continue to
+      // omit cell_phone so a sync cannot erase a family-entered phone number.
       const safeRow = { ...row };
-      delete safeRow.school_email;
       delete safeRow.cell_phone;
       if (protectedStudentIds.has(existing.id)) {
         safeRow.preferred_first = existing.preferred_first;
@@ -427,17 +425,38 @@ async function applySync() {
         last_seen_sync_id: syncId
       }))
       .filter((row) => row.person_id && row.value_normalized);
-    // COMPLIANCE GUARD (2026-07-10): contact methods (emails/phones) are now FAMILY-OWNED —
-    // provided by families through the portal with consent, never pushed from the IC-derived CSV.
-    // The IC-sourced contact rows were deleted from prod on 2026-07-10 (Phase 1.1, delete-and-
-    // re-enter). Do NOT re-mirror contact methods here. Person/student/relationship structure still
-    // syncs from the roster; contact VALUES do not. See BandsofAHS/projects/placement-authority-2026-27.
-    const SYNC_CONTACT_METHODS = false;
-    if (SYNC_CONTACT_METHODS) {
-      await upsert("portal_contact_methods", contactRows, "person_id,contact_type,value_normalized");
-    } else {
-      console.log(`contact_methods: SKIPPED ${contactRows.length} rows (family-owned since 2026-07-10; see compliance guard)`);
+    // Rob 2026-08-18: seed only canonical student school-email addresses. They
+    // begin unverified and become verified only after a successful email-code
+    // login. Guardian emails, personal student emails, and every phone number
+    // remain family-owned and are never mirrored by this sync.
+    const studentSchoolEmailRows = contactRows.filter((row) =>
+      row.contact_type === "email" &&
+      row.source === "bdos_students_csv" &&
+      row.value_normalized.endsWith("@student.nhcs.net")
+    );
+    const { data: existingSchoolEmails, error: existingSchoolEmailError } = await supabase
+      .from("portal_contact_methods")
+      .select("person_id,contact_type,value_normalized")
+      .eq("contact_type", "email")
+      .like("value_normalized", "%@student.nhcs.net");
+    if (existingSchoolEmailError) throw existingSchoolEmailError;
+    const existingSchoolEmailKeys = new Set((existingSchoolEmails || []).map((row) =>
+      `${row.person_id}|${row.contact_type}|${row.value_normalized}`
+    ));
+    const missingStudentSchoolEmails = studentSchoolEmailRows.filter((row) =>
+      !existingSchoolEmailKeys.has(`${row.person_id}|${row.contact_type}|${row.value_normalized}`)
+    );
+    if (missingStudentSchoolEmails.length) {
+      const { error: schoolEmailInsertError } = await supabase
+        .from("portal_contact_methods")
+        .insert(missingStudentSchoolEmails);
+      if (schoolEmailInsertError) throw schoolEmailInsertError;
     }
+    console.log(
+      `student school emails: ${missingStudentSchoolEmails.length} added, ` +
+      `${studentSchoolEmailRows.length - missingStudentSchoolEmails.length} already present; ` +
+      `${contactRows.length - studentSchoolEmailRows.length} family-owned contact row(s) skipped`
+    );
     console.log(
       `family overlay: preserved contact columns on ${existingStudentRows.length} existing students; ` +
       `${protectedStudentIds.size} open preferred-name edit(s); ${protectedPersonIds.size} open person-name edit(s)`

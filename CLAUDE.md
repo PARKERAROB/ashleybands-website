@@ -54,9 +54,12 @@ sanitized public projections, website-owned content, and application code.
 ## Data rules (compliant plan, 2026-07-10)
 - **No grades, ever.** No coursework, GPA, or required-for-class features, full stop. Verified
   clean in the schema as of 2026-07-10; keep it that way.
-- **Contact values are family-owned, not CSV-mirrored.** `sync-portal-csv.mjs` is guarded to never
-  push parent/student email or phone from the BandsofAHS CSVs into the hosted DB — those values come only
-  from the family via portal request/confirmation. Don't remove that guard.
+- **Guardian contacts and phone numbers are family-owned. Student school email is the narrow exception.**
+  `sync-portal-csv.mjs` may mirror each student's canonical `@student.nhcs.net` address from
+  BandsofAHS `students.csv` so every student can request a portal code. It must enter as `unverified`;
+  the first successful code changes it to `verified_email_code`. Guardian emails, personal student
+  emails, and all phone numbers still come only from the family via portal request/confirmation.
+  — Rob, 2026-08-18
 - **Every new person-data column/table carries a source/provenance tag.** A `source` (or
   `source_*`) column on the table, or an explicit `-- provenance: ...` comment in the same
   migration file. Enforced by `npm run lint:provenance` (`scripts/provenance-lint.mjs`) for
