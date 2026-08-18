@@ -18,7 +18,8 @@ sanitized public projections, website-owned content, and application code.
 ## Deploy
 - `/deploy-website` only. Never deploy spring-concert-2026.vercel.app.
 - The checked production command is `npm run deploy:checked`; it refreshes safe local projections,
-  runs the integration/privacy checks, lints, builds, and invokes Vercel production.
+  runs the production identity/service preflight, integration/privacy checks, lints, builds, and
+  invokes the pinned Vercel production CLI. Do not bypass `npm run deploy:preflight`.
 - Production requires a Rob-authored HEAD commit (`parkerarob` / `robert.parker@nhcs.net`). An
   Atlas-authored HEAD is rejected by Vercel as an `UNKNOWN` deployment with a zero-millisecond build.
   The identity rail applies to GitHub issues and comments, not commit authorship in this repository.
@@ -33,6 +34,10 @@ sanitized public projections, website-owned content, and application code.
 - `vercel --prod --yes` builds with Production env + aliases ashleybands.com. **Preview deploys
   (`vercel`) fail** here — env vars are scoped to Production only, so a preview `next build` exits 1
   even when the local build passes. Use prod, or fix preview-scoped env, don't chase the code.
+- Run production Supabase CLI operations through `npm run supabase:production -- <command>`. The
+  wrapper verifies project `edcmfzxqtdbgygeimedo` and removes any stale `SUPABASE_ACCESS_TOKEN`
+  override before invoking the linked CLI. Incident detail and recovery steps:
+  `docs/incidents/2026-08-17-open-house-deployment.md`.
 
 ## Family portal
 - **NO portal approval gates, period (Rob 2026-06-23, re-ordered 2026-07-05 after a 3rd recurrence).**

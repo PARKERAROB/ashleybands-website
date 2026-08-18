@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "lint:integration": "eslint scripts/integration.mjs scripts/lib/workspace-paths.mjs scripts/build-public-content.mjs scripts/build-instruments-public.mjs scripts/sync-portal-csv.mjs scripts/apply-business-enrichment.mjs scripts/apply-contact-enrichment.mjs scripts/backfill-geo.mjs scripts/discover-places.mjs scripts/enrich-contacts-firecrawl.mjs scripts/export-sponsorship-status.mjs scripts/gen_qr.mjs scripts/generate-prospect-view.mjs scripts/mark-chains-skip.mjs",
+    "lint:integration": "eslint scripts/integration.mjs scripts/deploy-preflight.mjs scripts/supabase-production.mjs scripts/lib/workspace-paths.mjs scripts/build-public-content.mjs scripts/build-instruments-public.mjs scripts/sync-portal-csv.mjs scripts/apply-business-enrichment.mjs scripts/apply-contact-enrichment.mjs scripts/backfill-geo.mjs scripts/discover-places.mjs scripts/enrich-contacts-firecrawl.mjs scripts/export-sponsorship-status.mjs scripts/gen_qr.mjs scripts/generate-prospect-view.mjs scripts/mark-chains-skip.mjs",
     "lint:sponsorship": "eslint lib/sponsorGiftPolicy.mjs lib/sponsorGiveToken.mjs lib/sponsorFamily.js lib/sponsorGifts.js lib/sponsorRecognition.js lib/paypal.js lib/rateLimit.js app/api/sponsors app/api/billing/webhook/route.js app/sponsors/give/GiveClient.jsx app/portal/sponsorship/SponsorshipClient.jsx app/sponsors/tracker/page.jsx app/sponsors/dashboard/page.jsx",
     "instruments:build": "node scripts/build-instruments-public.mjs",
     "content:build": "node scripts/build-public-content.mjs",
@@ -20,7 +20,9 @@
     "integration:doctor": "node scripts/integration.mjs doctor",
     "integration:doctor:online": "node scripts/integration.mjs doctor --online",
     "integration:sync": "node scripts/integration.mjs sync",
-    "deploy:checked": "node scripts/integration.mjs sync --deploy && npm run lint:integration && npm run test:sponsorship && npm run lint:sponsorship && npm run build && vercel --prod --yes"
+    "deploy:preflight": "node scripts/deploy-preflight.mjs",
+    "deploy:checked": "npm run deploy:preflight && node scripts/integration.mjs sync --deploy && npm run lint:integration && npm run test:sponsorship && npm run lint:sponsorship && npm run build && npx --yes vercel@59.1.4 --prod --yes --scope robs-projects-9eb69de7",
+    "supabase:production": "node scripts/supabase-production.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.105.4",
