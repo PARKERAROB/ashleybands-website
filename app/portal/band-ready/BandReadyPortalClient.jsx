@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import styles from "./band-ready.module.css";
 
 const steps = [
@@ -23,6 +22,7 @@ const nextStep = {
 };
 
 const bandReadyCache = new Map();
+const allowedStepIds = new Set(["calendar", "day-one", "forms", "how-band-works", "clothing", "review"]);
 
 function rememberBandReady(body) {
   if (body?.student?.id) bandReadyCache.set(body.student.id, body);
@@ -31,6 +31,29 @@ function rememberBandReady(body) {
 
 function queryHref(path, studentId) {
   return `${path}?studentId=${encodeURIComponent(studentId)}`;
+}
+
+function stepPath(stepId) {
+  return stepId === "home" ? "/portal/band-ready" : `/portal/band-ready/${stepId}`;
+}
+
+function stepFromPathname(pathname) {
+  const requested = pathname.match(/^\/portal\/band-ready\/([^/]+)/)?.[1] || "home";
+  return allowedStepIds.has(requested) ? requested : "home";
+}
+
+function BandReadyLink({ destination, navigate, onClick, ...props }) {
+  return (
+    <Link
+      {...props}
+      onClick={(event) => {
+        onClick?.(event);
+        if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        event.preventDefault();
+        navigate(destination);
+      }}
+    />
+  );
 }
 
 function formatDate(value) {
@@ -75,7 +98,7 @@ async function fetchBandReady(studentId = "") {
 }
 
 export default function BandReadyPortalClient({ step }) {
-  const router = useRouter();
+  const [activeStep, setActiveStep] = useState(step);
   const [profile, setProfile] = useState(null);
   const [studentId, setStudentId] = useState("");
   const [data, setData] = useState(null);
@@ -108,8 +131,21 @@ export default function BandReadyPortalClient({ step }) {
     return () => { cancelled = true; };
   }, []);
 
+  useEffect(() => {
+    const handleBackOrForward = () => setActiveStep(stepFromPathname(window.location.pathname));
+    window.addEventListener("popstate", handleBackOrForward);
+    return () => window.removeEventListener("popstate", handleBackOrForward);
+  }, []);
+
   const selectedStudent = profile?.students?.find((student) => student.id === studentId) || null;
   const href = (destination) => queryHref(destination, studentId);
+
+  function navigate(destination, { replace = false } = {}) {
+    const nextHref = queryHref(stepPath(destination), studentId);
+    window.history[replace ? "replaceState" : "pushState"]({ bandReadyStep: destination }, "", nextHref);
+    setActiveStep(destination);
+    window.scrollTo(0, 0);
+  }
 
   async function save(stepId, stepData, destination = nextStep[stepId] || "review") {
     setStatus("saving");
@@ -124,21 +160,34 @@ export default function BandReadyPortalClient({ step }) {
       if (!response.ok) throw new Error(body.error || "This step could not be saved.");
       const updated = rememberBandReady({ ...data, progress: body.progress, readiness: body.readiness, completion: null });
       setData(updated);
-      router.push(href(`/portal/band-ready/${destination}`));
+      setStatus("ready");
+      navigate(destination);
     } catch (error) {
       setMessage(error.message);
       setStatus("ready");
     }
   }
 
-  function switchStudent(event) {
+  async function switchStudent(event) {
     const nextId = event.target.value;
     setStudentId(nextId);
     const cached = bandReadyCache.get(nextId) || null;
     setData(cached);
     setStatus(cached ? "ready" : "loading");
-    const currentPath = step === "home" ? "/portal/band-ready" : `/portal/band-ready/${step}`;
-    router.replace(queryHref(currentPath, nextId));
+    window.history.replaceState({ bandReadyStep: activeStep }, "", queryHref(stepPath(activeStep), nextId));
+    try {
+      const body = await fetchBandReady(nextId);
+      setProfile({ students: body.students || [] });
+      setStudentId(body.student?.id || nextId);
+      setData(body);
+      setStatus("ready");
+      setMessage("");
+    } catch (error) {
+      if (!cached) {
+        setMessage(error.message);
+        setStatus("error");
+      }
+    }
   }
 
   function updateData(updater) {
@@ -193,11 +242,11 @@ export default function BandReadyPortalClient({ step }) {
     <main className={styles.page}>
       <header className={styles.topbar}>
         <div>
-          <Link className={styles.brand} href={href("/portal/band-ready")}>Ashley Bands · Band Ready</Link>
+          <BandReadyLink className={styles.brand} href={href("/portal/band-ready")} destination="home" navigate={navigate}>Ashley Bands · Band Ready</BandReadyLink>
           <p>Open House checklist</p>
         </div>
         <nav aria-label="Portal navigation">
-          <Link href={href("/portal/band-ready")}>Band Ready home</Link>
+          <BandReadyLink href={href("/portal/band-ready")} destination="home" navigate={navigate}>Band Ready home</BandReadyLink>
           <Link href={`/portal/review?studentId=${encodeURIComponent(studentId)}`}>Family Portal</Link>
         </nav>
       </header>
@@ -211,18 +260,18 @@ export default function BandReadyPortalClient({ step }) {
 
       {message ? <p className={styles.error} role="alert">{message}</p> : null}
 
-      {step === "home" ? <Dashboard data={data} href={href} /> : null}
-      {step === "calendar" ? <CalendarStep data={data} save={save} busy={status === "saving"} href={href} /> : null}
-      {step === "day-one" ? <DayOneStep key={`${studentId}-${data.completion?.updatedAt || "new"}`} data={data} save={save} busy={status === "saving"} href={href} /> : null}
-      {step === "forms" ? <FormsStep data={data} href={href} /> : null}
-      {step === "how-band-works" ? <HowBandWorksStep data={data} save={save} busy={status === "saving"} href={href} /> : null}
-      {step === "clothing" ? <ClothingStep key={`${studentId}-${data.completion?.updatedAt || "new"}`} data={data} save={save} busy={status === "saving"} href={href} studentId={studentId} /> : null}
-      {step === "review" ? <ReviewStep data={data} setData={updateData} studentId={studentId} href={href} /> : null}
+      {activeStep === "home" ? <Dashboard data={data} href={href} navigate={navigate} /> : null}
+      {activeStep === "calendar" ? <CalendarStep data={data} save={save} busy={status === "saving"} href={href} navigate={navigate} /> : null}
+      {activeStep === "day-one" ? <DayOneStep key={`${studentId}-${data.completion?.updatedAt || "new"}`} data={data} save={save} busy={status === "saving"} href={href} navigate={navigate} /> : null}
+      {activeStep === "forms" ? <FormsStep data={data} href={href} navigate={navigate} /> : null}
+      {activeStep === "how-band-works" ? <HowBandWorksStep data={data} save={save} busy={status === "saving"} href={href} navigate={navigate} /> : null}
+      {activeStep === "clothing" ? <ClothingStep key={`${studentId}-${data.completion?.updatedAt || "new"}`} data={data} save={save} busy={status === "saving"} href={href} navigate={navigate} studentId={studentId} /> : null}
+      {activeStep === "review" ? <ReviewStep data={data} setData={updateData} studentId={studentId} href={href} navigate={navigate} /> : null}
     </main>
   );
 }
 
-function Dashboard({ data, href }) {
+function Dashboard({ data, href, navigate }) {
   const { count, complete } = data.readiness;
   return (
     <>
@@ -237,27 +286,32 @@ function Dashboard({ data, href }) {
         {steps.map((item) => {
           const done = Boolean(complete[item.id]);
           const destination = item.id === "portal" ? "/portal/review" : `/portal/band-ready/${item.id}`;
-          return (
-            <Link className={`${styles.stepCard} ${done ? styles.done : ""}`} href={href(destination)} key={item.id}>
+          const card = (
+            <>
               <span className={styles.stepNumber}>{done ? "✓" : item.number}</span>
               <div><p>{done ? "Complete" : `Step ${item.number}`}</p><h2>{item.title}</h2><span>{item.body}</span></div>
               <b aria-hidden="true">→</b>
-            </Link>
+            </>
+          );
+          return item.id === "portal" ? (
+            <Link className={`${styles.stepCard} ${done ? styles.done : ""}`} href={href(destination)} key={item.id}>{card}</Link>
+          ) : (
+            <BandReadyLink className={`${styles.stepCard} ${done ? styles.done : ""}`} href={href(destination)} destination={item.id} navigate={navigate} key={item.id}>{card}</BandReadyLink>
           );
         })}
       </section>
       <div className={styles.reviewCallout}>
         <div><strong>{data.readiness.finished ? "All six stops are ready." : "Your progress is saved."}</strong><p>Review the family checklist and send the personalized summary when every stop is complete.</p></div>
-        <Link className={styles.primaryButton} href={href("/portal/band-ready/review")}>Review Band Ready</Link>
+        <BandReadyLink className={styles.primaryButton} href={href("/portal/band-ready/review")} destination="review" navigate={navigate}>Review Band Ready</BandReadyLink>
       </div>
     </>
   );
 }
 
-function StepShell({ eyebrow, title, intro, children, backHref }) {
+function StepShell({ eyebrow, title, intro, children, backHref, navigate }) {
   return (
     <section className={styles.stepPage}>
-      <Link className={styles.backLink} href={backHref}>← Back to Band Ready</Link>
+      <BandReadyLink className={styles.backLink} href={backHref} destination="home" navigate={navigate}>← Back to Band Ready</BandReadyLink>
       <p className={styles.eyebrow}>{eyebrow}</p>
       <h1>{title}</h1>
       <p className={styles.intro}>{intro}</p>
@@ -266,10 +320,10 @@ function StepShell({ eyebrow, title, intro, children, backHref }) {
   );
 }
 
-function CalendarStep({ data, save, busy, href }) {
+function CalendarStep({ data, save, busy, href, navigate }) {
   const confirmed = data.progress?.calendar?.confirmed;
   return (
-    <StepShell eyebrow="Step 02" title="Put the band calendar where your family will see it." intro="The Ashley Bands calendar is the official place for dates and times. A subscription updates when the band calendar changes." backHref={href("/portal/band-ready")}>
+    <StepShell eyebrow="Step 02" title="Put the band calendar where your family will see it." intro="The Ashley Bands calendar is the official place for dates and times. A subscription updates when the band calendar changes." backHref={href("/portal/band-ready")} navigate={navigate}>
       <div className={styles.actionPanel}>
         <h2>Choose the option that works for you</h2>
         <div className={styles.actionLinks}>
@@ -284,13 +338,13 @@ function CalendarStep({ data, save, busy, href }) {
   );
 }
 
-function DayOneStep({ data, save, busy, href }) {
+function DayOneStep({ data, save, busy, href, navigate }) {
   const existing = data.progress?.["day-one"] || {};
   const [form, setForm] = useState({ instrumentStatus: existing.instrumentStatus || "", binderStatus: existing.binderStatus || "", pencilStatus: existing.pencilStatus || "", pencilName: existing.pencilName || "" });
   const valid = form.instrumentStatus && form.binderStatus && form.pencilStatus && (form.pencilStatus !== "have" || form.pencilName.trim());
   const update = (field, value) => setForm((current) => ({ ...current, [field]: value }));
   return (
-    <StepShell eyebrow="Step 03" title="Be ready for Day One." intro="Band starts smoothly when each student has these three things ready and knows exactly where they belong." backHref={href("/portal/band-ready")}>
+    <StepShell eyebrow="Step 03" title="Be ready for Day One." intro="Band starts smoothly when each student has these three things ready and knows exactly where they belong." backHref={href("/portal/band-ready")} navigate={navigate}>
       <form className={styles.form} onSubmit={(event) => { event.preventDefault(); save("day-one", form); }}>
         <fieldset><legend>1. Instrument</legend><p>Will the student bring a personal instrument, or do they need a county instrument?</p>
           <Choice name="instrument" checked={form.instrumentStatus === "personal"} onChange={() => update("instrumentStatus", "personal")} title="Personal instrument" detail="The student will bring their own instrument." />
@@ -316,13 +370,13 @@ function Choice({ name, checked, onChange, title, detail }) {
   return <label className={`${styles.choice} ${checked ? styles.choiceSelected : ""}`}><input type="radio" name={name} checked={checked} onChange={onChange} /><span><strong>{title}</strong>{detail ? <small>{detail}</small> : null}</span></label>;
 }
 
-function FormsStep({ data, href }) {
+function FormsStep({ data, href, navigate }) {
   const dayOne = data.progress?.["day-one"] || {};
   const request = data.external?.instrumentRequest;
   const county = dayOne.instrumentStatus === "county";
   const answered = Boolean(dayOne.instrumentStatus);
   return (
-    <StepShell eyebrow="Step 04" title="Complete the forms that apply to this student." intro="The portal already knows the student and family, so it only asks for information that is new." backHref={href("/portal/band-ready")}>
+    <StepShell eyebrow="Step 04" title="Complete the forms that apply to this student." intro="The portal already knows the student and family, so it only asks for information that is new." backHref={href("/portal/band-ready")} navigate={navigate}>
       <div className={`${styles.statusPanel} ${data.readiness.complete.forms ? styles.statusGood : styles.statusNeeds}`}>
         <span>{data.readiness.complete.forms ? "✓" : "!"}</span>
         <div>
@@ -336,18 +390,18 @@ function FormsStep({ data, href }) {
         </div>
       </div>
       <div className={styles.actionLinks}>
-        {!answered ? <Link className={styles.primaryButton} href={href("/portal/band-ready/day-one")}>Return to Day One</Link> : null}
+        {!answered ? <BandReadyLink className={styles.primaryButton} href={href("/portal/band-ready/day-one")} destination="day-one" navigate={navigate}>Return to Day One</BandReadyLink> : null}
         {county && !request ? <Link className={styles.primaryButton} href={`/portal/review?studentId=${encodeURIComponent(data.student.id)}#instrument-request-heading`}>Complete instrument agreement</Link> : null}
-        {answered && data.readiness.complete.forms ? <Link className={styles.primaryButton} href={href("/portal/band-ready/how-band-works")}>Continue to how band works</Link> : null}
+        {answered && data.readiness.complete.forms ? <BandReadyLink className={styles.primaryButton} href={href("/portal/band-ready/how-band-works")} destination="how-band-works" navigate={navigate}>Continue to how band works</BandReadyLink> : null}
       </div>
     </StepShell>
   );
 }
 
-function HowBandWorksStep({ data, save, busy, href }) {
+function HowBandWorksStep({ data, save, busy, href, navigate }) {
   const [acknowledged, setAcknowledged] = useState(Boolean(data.progress?.["how-band-works"]?.acknowledged));
   return (
-    <StepShell eyebrow="Step 05" title="Know how band works." intro="Students who stay engaged, work on the music presented in class, and prepare for individual and ensemble goals should have no problem earning an A in band." backHref={href("/portal/band-ready")}>
+    <StepShell eyebrow="Step 05" title="Know how band works." intro="Students who stay engaged, work on the music presented in class, and prepare for individual and ensemble goals should have no problem earning an A in band." backHref={href("/portal/band-ready")} navigate={navigate}>
       <div className={styles.infoGrid}>
         <article><span>60 / 40</span><h2>Assessment balance</h2><p>County grading is based on a 60% performance and 40% practice split.</p></article>
         <article><span>Weekly</span><h2>Consistent assessment</h2><p>Mr. Parker&apos;s goal is to assess the ensemble at least once each week in an integrated way. That may be an in-class performance, individual performance, written test, or another assessment connected to the music.</p></article>
@@ -367,11 +421,11 @@ function HowBandWorksStep({ data, save, busy, href }) {
   );
 }
 
-function ClothingStep({ data, save, busy, href, studentId }) {
+function ClothingStep({ data, save, busy, href, navigate, studentId }) {
   const paid = data.external?.clothingOrder?.payment_status === "paid";
   const [status, setStatus] = useState(paid ? "ordered" : data.progress?.clothing?.status || "");
   return (
-    <StepShell eyebrow="Step 06" title="Review the Open House clothing collection." intro="This bulk order is separate from the Ashley Band Shirts store. Prices use the store price plus tax, with no individual shipping charge." backHref={href("/portal/band-ready")}>
+    <StepShell eyebrow="Step 06" title="Review the Open House clothing collection." intro="This bulk order is separate from the Ashley Band Shirts store. Prices use the store price plus tax, with no individual shipping charge." backHref={href("/portal/band-ready")} navigate={navigate}>
       <div className={styles.deadline}><span>Order deadline</span><strong>Friday, August 28</strong><p>Payment is completed in the Family Portal.</p></div>
       {paid ? <div className={`${styles.statusPanel} ${styles.statusGood}`}><span>✓</span><div><h2>Paid and ordered</h2><p>The order is already connected to this student. Items will be distributed through the band after the bulk order arrives.</p></div></div> : (
         <>
@@ -388,7 +442,7 @@ function ClothingStep({ data, save, busy, href, studentId }) {
   );
 }
 
-function ReviewStep({ data, setData, studentId, href }) {
+function ReviewStep({ data, setData, studentId, href, navigate }) {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
@@ -410,8 +464,8 @@ function ReviewStep({ data, setData, studentId, href }) {
 
   const completionShown = alreadySent || result?.emailSent || result?.alreadySent;
   return (
-    <StepShell eyebrow="Band Ready review" title={`${data.student.display_name}’s family checklist`} intro="This is the complete Open House picture for this student. Finish when all six stops are complete, and the band will email this summary to the connected student and family addresses." backHref={href("/portal/band-ready")}>
-      <ol className={styles.reviewList}>{steps.map((item) => <li key={item.id} className={data.readiness.complete[item.id] ? styles.reviewDone : styles.reviewOpen}><span>{data.readiness.complete[item.id] ? "✓" : "•"}</span><div><strong>{item.title}</strong><small>{data.readiness.complete[item.id] ? "Complete" : "Still needs attention"}</small></div>{!data.readiness.complete[item.id] && item.id !== "portal" ? <Link href={href(`/portal/band-ready/${item.id}`)}>Open</Link> : null}</li>)}</ol>
+    <StepShell eyebrow="Band Ready review" title={`${data.student.display_name}’s family checklist`} intro="This is the complete Open House picture for this student. Finish when all six stops are complete, and the band will email this summary to the connected student and family addresses." backHref={href("/portal/band-ready")} navigate={navigate}>
+      <ol className={styles.reviewList}>{steps.map((item) => <li key={item.id} className={data.readiness.complete[item.id] ? styles.reviewDone : styles.reviewOpen}><span>{data.readiness.complete[item.id] ? "✓" : "•"}</span><div><strong>{item.title}</strong><small>{data.readiness.complete[item.id] ? "Complete" : "Still needs attention"}</small></div>{!data.readiness.complete[item.id] && item.id !== "portal" ? <BandReadyLink href={href(`/portal/band-ready/${item.id}`)} destination={item.id} navigate={navigate}>Open</BandReadyLink> : null}</li>)}</ol>
       <div className={styles.summaryGrid}>
         <article><h2>Day One</h2><p><strong>Instrument:</strong> {instrumentLabel(data.progress?.["day-one"]?.instrumentStatus)}</p><p><strong>Binder:</strong> {data.progress?.["day-one"]?.binderStatus === "have" ? "Ready" : "Still needed"}</p><p><strong>Band pencil:</strong> {data.progress?.["day-one"]?.pencilStatus === "have" ? `Ready${data.progress?.["day-one"]?.pencilName ? ` · ${data.progress["day-one"].pencilName}` : ""}` : "Still needed"}</p></article>
         <article><h2>Still needed</h2>{needed.length ? <ul>{needed.map((item) => <li key={item}>{item}</li>)}</ul> : <p>Nothing. This student reported having the Day One supplies they need.</p>}</article>
