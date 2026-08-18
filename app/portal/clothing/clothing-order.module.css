@@ -1,0 +1,470 @@
+.panel {
+  max-width: 1180px;
+  padding: clamp(22px, 4vw, 42px);
+}
+
+.backLink,
+.returnLink a {
+  color: #405047;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.backLink:hover,
+.returnLink a:hover {
+  text-decoration: underline;
+}
+
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px;
+  margin-top: 28px;
+}
+
+.header > div:first-child {
+  max-width: 720px;
+}
+
+.header h1 {
+  font-size: clamp(2rem, 4.2vw, 3.5rem);
+}
+
+.deadline {
+  display: grid;
+  flex: 0 0 auto;
+  gap: 3px;
+  min-width: 230px;
+  padding: 16px 18px;
+  border: 1px solid #d7dfd5;
+  border-radius: 10px;
+  background: #f1f6ee;
+}
+
+.deadline span,
+.deadline small,
+.stepLabel,
+.productFields span,
+.orderLineFields span {
+  color: #627065;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.deadline strong {
+  color: #172018;
+  font-size: 1.08rem;
+}
+
+.deadline small {
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.studentPicker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 28px 0 24px;
+  color: #536057;
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.studentPicker select,
+.productFields select,
+.orderLineFields select {
+  min-height: 44px;
+  border: 1px solid #aebbad;
+  border-radius: 7px;
+  background: #fff;
+  color: #172018;
+  font: inherit;
+}
+
+.studentPicker select {
+  min-width: 240px;
+  padding: 9px 38px 9px 12px;
+  font-size: 1rem;
+  font-weight: 650;
+  text-transform: none;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(320px, 0.8fr);
+  gap: clamp(22px, 3vw, 36px);
+  align-items: start;
+}
+
+.sectionHeading,
+.orderHeading,
+.orderLineHeading,
+.productHeading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.sectionHeading,
+.orderHeading {
+  align-items: flex-end;
+  margin-bottom: 14px;
+}
+
+.sectionHeading h2,
+.orderHeading h2 {
+  margin: 2px 0 0;
+  font-size: 1.6rem;
+}
+
+.sectionHeading > span,
+.orderHeading > span {
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: #edf2ea;
+  color: #405047;
+  font-size: 0.78rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.stepLabel {
+  margin: 0;
+}
+
+.catalogGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.productCard {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid #d6dfd3;
+  border-radius: 10px;
+  background: #fbfcfa;
+}
+
+.productHeading h3 {
+  margin: 0;
+  color: #172018;
+  font-size: 1.08rem;
+  line-height: 1.25;
+}
+
+.productHeading > strong {
+  color: #245c3b;
+  font-size: 1.05rem;
+  white-space: nowrap;
+}
+
+.taxNote {
+  margin: 5px 0 15px;
+  color: #6a766c;
+  font-size: 0.8rem;
+}
+
+.productFields {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(96px, 1fr) 76px;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.productFields label,
+.orderLineFields label {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.productFields select,
+.orderLineFields select {
+  width: 100%;
+  min-width: 0;
+  padding: 9px 30px 9px 9px;
+}
+
+.addButton,
+.paymentButton {
+  width: 100%;
+  min-height: 46px;
+  border: 0;
+  border-radius: 7px;
+  background: #245c3b;
+  color: #fff;
+  font-size: 0.92rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.addButton {
+  margin-top: 12px;
+}
+
+.addButton:hover,
+.paymentButton:hover {
+  background: #17442a;
+}
+
+.addButton:disabled {
+  background: #9ba79d;
+  cursor: not-allowed;
+}
+
+.addedButton {
+  background: #426d4e;
+}
+
+.orderPanel {
+  position: sticky;
+  top: 92px;
+  padding: 20px;
+  border: 1px solid #ccd7c9;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 12px 34px rgba(27, 48, 31, 0.1);
+  scroll-margin-top: 90px;
+}
+
+.emptyOrder {
+  padding: 22px;
+  border: 1px dashed #bdc9ba;
+  border-radius: 9px;
+  background: #f7f9f5;
+  text-align: center;
+}
+
+.emptyOrder p {
+  margin: 7px 0 0;
+  color: #667268;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.orderLines {
+  display: grid;
+  gap: 12px;
+}
+
+.orderLine {
+  padding-bottom: 13px;
+  border-bottom: 1px solid #e0e6de;
+}
+
+.orderLineHeading strong {
+  font-size: 0.92rem;
+  line-height: 1.3;
+}
+
+.orderLineHeading button {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: #8a3030;
+  font-size: 0.78rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.orderLineFields {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(78px, 0.8fr) 64px;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.orderLine p {
+  display: flex;
+  justify-content: space-between;
+  margin: 9px 0 0;
+  color: #69746b;
+  font-size: 0.82rem;
+}
+
+.orderLine p strong {
+  color: #172018;
+}
+
+.totals {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+}
+
+.totals div {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.totals dt,
+.totals dd {
+  margin: 0;
+}
+
+.total {
+  margin-top: 3px;
+  padding-top: 9px;
+  border-top: 1px solid #ccd7c9;
+  font-size: 1.12rem;
+  font-weight: 850;
+}
+
+.paymentButton:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.paypal {
+  margin-top: 12px;
+}
+
+.assistance {
+  margin: 30px 0 0;
+  padding-top: 22px;
+  border-top: 1px solid #d8dfd2;
+  color: #59665c;
+  font-size: 0.9rem;
+}
+
+.returnLink {
+  margin: 12px 0 0;
+}
+
+.mobileOrderBar {
+  display: none;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (max-width: 960px) {
+  .shellWithMobileBar {
+    padding-bottom: 104px;
+  }
+
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .orderPanel {
+    position: static;
+  }
+
+  .mobileOrderBar {
+    position: fixed;
+    z-index: 30;
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 64px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    padding: 10px 16px;
+    background: #173f28;
+    box-shadow: 0 10px 30px rgba(13, 32, 20, 0.3);
+    color: #fff;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .mobileOrderBar span {
+    display: grid;
+    gap: 1px;
+  }
+
+  .mobileOrderBar small {
+    color: #dce9df;
+  }
+
+  .mobileOrderBar b {
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 700px) {
+  .panel {
+    padding: 20px 16px 28px;
+  }
+
+  .header {
+    display: grid;
+    gap: 14px;
+    margin-top: 22px;
+  }
+
+  .deadline {
+    min-width: 0;
+  }
+
+  .studentPicker {
+    display: grid;
+    gap: 7px;
+    margin: 22px 0;
+  }
+
+  .studentPicker select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .catalogGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .productCard {
+    padding: 16px;
+  }
+
+  .productFields {
+    grid-template-columns: minmax(0, 1.25fr) minmax(100px, 0.85fr) 70px;
+  }
+
+  .orderPanel {
+    padding: 17px;
+  }
+
+}
+
+@media (max-width: 430px) {
+  .productFields {
+    grid-template-columns: minmax(0, 1fr) minmax(90px, 0.85fr);
+  }
+
+  .productFields label:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .productFields label:last-child select {
+    width: 100%;
+  }
+
+  .orderLineFields {
+    grid-template-columns: minmax(0, 1fr) minmax(82px, 0.75fr);
+  }
+
+  .orderLineFields label:last-child {
+    grid-column: 1 / -1;
+  }
+}

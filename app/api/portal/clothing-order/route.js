@@ -10,12 +10,24 @@ export const runtime = "nodejs";
 export async function GET(request) {
   const session = readPortalSession(request);
   if (!session?.personId) return NextResponse.json({ error: "Not signed in." }, { status: 401 });
-  const { data } = await supabaseAdmin
-    .from("portal_clothing_orders")
-    .select("id, student_id, subtotal_cents, tax_cents, total_cents, payment_status, submitted_at, portal_clothing_order_items(product_name,color,size,quantity,unit_price_cents)")
-    .eq("submitted_by_person_id", session.personId)
-    .order("submitted_at", { ascending: false });
-  return NextResponse.json({ products: OPEN_HOUSE_CLOTHING, deadline: CLOTHING_DEADLINE, taxRate: CLOTHING_TAX_RATE, paymentsEnabled: isPaypalConfigured(), orders: data || [] });
+  const [{ data: links, error: linkError }, { data: orders, error: orderError }] = await Promise.all([
+    supabaseAdmin
+      .from("portal_student_people")
+      .select("student_id, portal_students(id, display_name)")
+      .eq("person_id", session.personId)
+      .eq("relationship_status", "trusted"),
+    supabaseAdmin
+      .from("portal_clothing_orders")
+      .select("id, student_id, subtotal_cents, tax_cents, total_cents, payment_status, submitted_at, portal_clothing_order_items(product_name,color,size,quantity,unit_price_cents)")
+      .eq("submitted_by_person_id", session.personId)
+      .order("submitted_at", { ascending: false })
+  ]);
+  if (linkError || orderError) return NextResponse.json({ error: "Could not load the clothing order." }, { status: 500 });
+  const students = (links || []).map((link) => {
+    const student = Array.isArray(link.portal_students) ? link.portal_students[0] : link.portal_students;
+    return student ? { id: student.id, displayName: student.display_name } : null;
+  }).filter(Boolean);
+  return NextResponse.json({ students, products: OPEN_HOUSE_CLOTHING, deadline: CLOTHING_DEADLINE, taxRate: CLOTHING_TAX_RATE, paymentsEnabled: isPaypalConfigured(), orders: orders || [] });
 }
 
 export async function POST(request) {
@@ -58,4 +70,3 @@ export async function POST(request) {
     return NextResponse.json({ error: "Could not start portal payment." }, { status: 502 });
   }
 }
-
