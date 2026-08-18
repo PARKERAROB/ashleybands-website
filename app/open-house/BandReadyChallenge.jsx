@@ -28,7 +28,7 @@ export default function BandReadyChallenge() {
     <section className={styles.welcome}>
       <p className={styles.eyebrow}>Ashley Bands Open House</p>
       <h1>Get Band Ready.</h1>
-      <p>Start by connecting to the Family Portal. Then complete seven small stops for your student, including the Band Booster and Level 2 volunteer check-in. Your progress will be saved, and you&apos;ll receive a personalized first-day checklist when you finish.</p>
+      <p>Start by connecting to the Family Portal. Then complete eight small stops for your student, including the Band Booster and Level 2 volunteer check-in and a quick hello with Mr. Parker. Your progress will be saved, and you&apos;ll receive a personalized first-day checklist when you finish.</p>
       <div className={styles.welcomeActions}>
         <Link className={styles.primaryLink} href="/portal?next=/portal/band-ready">Sign in and start Band Ready</Link>
         <Link className={styles.secondaryLink} href="/portal/request?next=/portal/band-ready">New family email? Request access</Link>

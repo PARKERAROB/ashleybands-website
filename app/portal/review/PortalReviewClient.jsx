@@ -180,7 +180,7 @@ function BandReadySection({ student }) {
       <div>
         <p className="eyebrow">Open House</p>
         <h2 id="portal-band-ready-heading">Get {student.displayName} Band Ready</h2>
-        <p>Complete the student&apos;s calendar, Day One supplies, forms, band expectations, clothing, and Band Booster volunteer check-in in one saved path.</p>
+        <p>Complete the student&apos;s calendar, Day One supplies, forms, band expectations, clothing, Booster volunteer check-in, and Mr. Parker greeting in one saved path.</p>
       </div>
       <Link className="portal-action-link" href={`/portal/band-ready?studentId=${encodeURIComponent(student.id)}`}>Open Band Ready</Link>
     </section>

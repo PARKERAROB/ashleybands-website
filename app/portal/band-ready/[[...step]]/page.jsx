@@ -1,6 +1,6 @@
 import BandReadyPortalClient from "../BandReadyPortalClient";
 
-const allowedSteps = new Set(["calendar", "day-one", "forms", "how-band-works", "clothing", "boosters", "review"]);
+const allowedSteps = new Set(["calendar", "day-one", "forms", "how-band-works", "clothing", "boosters", "say-hey", "review"]);
 
 export const metadata = {
   title: "Band Ready | Ashley Bands",

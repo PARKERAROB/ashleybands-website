@@ -10,7 +10,8 @@ const VALID = {
   instrumentStatus: new Set(["personal", "county", "help"]),
   supplyStatus: new Set(["have", "need"]),
   clothingStatus: new Set(["ordered", "not_ordering", "return_later"]),
-  boosterStatus: new Set(["approved", "started", "plan_later", "need_help"])
+  boosterStatus: new Set(["approved", "started", "plan_later", "need_help"]),
+  greetingStatus: new Set(["in_person", "waved", "online"])
 };
 
 const PORTAL_URL = "https://ashleybands.com/portal/band-ready";
@@ -48,6 +49,11 @@ function normalizeStep(step, data) {
     if (!VALID.boosterStatus.has(status)) throw new Error("Choose where you are in the Level 2 volunteer process.");
     return { status, confirmedAt: new Date().toISOString() };
   }
+  if (step === "say-hey") {
+    const status = String(data?.status || "");
+    if (!VALID.greetingStatus.has(status)) throw new Error("Choose how your family completed the Mr. Parker check-in.");
+    return { status, confirmedAt: new Date().toISOString() };
+  }
   throw new Error("Unknown Band Ready step.");
 }
 
@@ -60,7 +66,8 @@ function readiness(progress, external) {
     forms: dayOne.instrumentStatus === "personal" || dayOne.instrumentStatus === "help" || (dayOne.instrumentStatus === "county" && Boolean(external.instrumentRequest)),
     "how-band-works": progress?.["how-band-works"]?.acknowledged === true,
     clothing: progress?.clothing?.status === "ordered" || progress?.clothing?.status === "not_ordering" || progress?.clothing?.status === "return_later" || external.clothingOrder?.payment_status === "paid",
-    boosters: VALID.boosterStatus.has(progress?.boosters?.status)
+    boosters: VALID.boosterStatus.has(progress?.boosters?.status),
+    "say-hey": VALID.greetingStatus.has(progress?.["say-hey"]?.status)
   };
   return { complete, count: Object.values(complete).filter(Boolean).length, finished: Object.values(complete).every(Boolean) };
 }
@@ -177,7 +184,10 @@ function summaryItems(state) {
     state.external.clothingOrder?.payment_status === "paid" ? "Open House clothing order was paid" : null,
     state.progress?.boosters?.status === "approved" ? "Family reported a current Level 2 volunteer approval" : null,
     state.progress?.boosters?.status === "started" ? "Level 2 volunteer process was started or completed" : null,
-    ["plan_later", "need_help"].includes(state.progress?.boosters?.status) ? "Band Booster and Level 2 volunteer information was reviewed" : null
+    ["plan_later", "need_help"].includes(state.progress?.boosters?.status) ? "Band Booster and Level 2 volunteer information was reviewed" : null,
+    state.progress?.["say-hey"]?.status === "in_person" ? "Family said hello to Mr. Parker at Open House" : null,
+    state.progress?.["say-hey"]?.status === "waved" ? "Family checked in while Mr. Parker was helping another family" : null,
+    state.progress?.["say-hey"]?.status === "online" ? "Family completed Band Ready away from Open House" : null
   ].filter(Boolean);
   const stillNeeded = [
     dayOne.binderStatus === "need" ? "Get a black one-inch binder" : null,

@@ -11,7 +11,8 @@ const steps = [
   { id: "forms", number: "04", title: "Complete applicable forms", body: "If a county instrument is needed, submit the responsibility agreement." },
   { id: "how-band-works", number: "05", title: "Know how band works", body: "Review assessments, practice, performances, absences, and communication." },
   { id: "clothing", number: "06", title: "Confirm the red band shirt", body: "Every band student needs the official red shirt. Review it first, then any optional clothing." },
-  { id: "boosters", number: "07", title: "Check in with the Band Boosters", body: "Review Level 2 volunteering and tell us where you are in the process." }
+  { id: "boosters", number: "07", title: "Check in with the Band Boosters", body: "Review Level 2 volunteering and tell us where you are in the process." },
+  { id: "say-hey", number: "08", title: "Say hey to Mr. Parker", body: "Stop by for a quick hello, give a wave, or let us know you completed Band Ready online." }
 ];
 
 const stepTotal = steps.length;
@@ -22,11 +23,12 @@ const nextStep = {
   forms: "how-band-works",
   "how-band-works": "clothing",
   clothing: "boosters",
-  boosters: "review"
+  boosters: "say-hey",
+  "say-hey": "review"
 };
 
 const bandReadyCache = new Map();
-const allowedStepIds = new Set(["calendar", "day-one", "forms", "how-band-works", "clothing", "boosters", "review"]);
+const allowedStepIds = new Set(["calendar", "day-one", "forms", "how-band-works", "clothing", "boosters", "say-hey", "review"]);
 
 function rememberBandReady(body) {
   if (body?.student?.id) bandReadyCache.set(body.student.id, body);
@@ -88,7 +90,8 @@ function stillNeededItems(data) {
     data?.progress?.clothing?.status === "return_later" ? "Return to the clothing collection by Friday, August 28." : null,
     !data?.readiness?.complete?.boosters ? "Review the Band Booster and Level 2 volunteer information." : null,
     data?.progress?.boosters?.status === "plan_later" ? "Complete the annual NHCS volunteer training and Level 2 background check." : null,
-    data?.progress?.boosters?.status === "need_help" ? "Check in with the Band Boosters for help with Level 2 volunteering." : null
+    data?.progress?.boosters?.status === "need_help" ? "Check in with the Band Boosters for help with Level 2 volunteering." : null,
+    !data?.readiness?.complete?.["say-hey"] ? "Say hey to Mr. Parker or mark that you completed Band Ready online." : null
   ].filter(Boolean);
 }
 
@@ -274,6 +277,7 @@ export default function BandReadyPortalClient({ step }) {
       {activeStep === "how-band-works" ? <HowBandWorksStep data={data} save={save} busy={status === "saving"} href={href} navigate={navigate} /> : null}
       {activeStep === "clothing" ? <ClothingStep key={`${studentId}-${data.completion?.updatedAt || "new"}`} data={data} save={save} busy={status === "saving"} href={href} navigate={navigate} studentId={studentId} /> : null}
       {activeStep === "boosters" ? <BoostersStep key={`${studentId}-${data.completion?.updatedAt || "new"}`} data={data} save={save} busy={status === "saving"} href={href} navigate={navigate} /> : null}
+      {activeStep === "say-hey" ? <SayHeyStep key={`${studentId}-${data.completion?.updatedAt || "new"}`} data={data} save={save} busy={status === "saving"} href={href} navigate={navigate} /> : null}
       {activeStep === "review" ? <ReviewStep data={data} setData={updateData} studentId={studentId} href={href} navigate={navigate} /> : null}
     </main>
   );
@@ -481,7 +485,25 @@ function BoostersStep({ data, save, busy, href, navigate }) {
         <Choice name="boosters" checked={status === "plan_later"} onChange={() => setStatus("plan_later")} title="I plan to complete Level 2" detail="Add it to our Band Ready follow-up list." />
         <Choice name="boosters" checked={status === "need_help"} onChange={() => setStatus("need_help")} title="I need help or have a question" detail="I will check in with the Boosters before I leave or follow up afterward." />
       </div>
-      <button className={styles.primaryButton} type="button" disabled={busy || !status} onClick={() => save("boosters", { status })}>{busy ? "Saving…" : "Save and review Band Ready"}</button>
+      <button className={styles.primaryButton} type="button" disabled={busy || !status} onClick={() => save("boosters", { status })}>{busy ? "Saving…" : "Save and continue to Mr. Parker"}</button>
+    </StepShell>
+  );
+}
+
+function SayHeyStep({ data, save, busy, href, navigate }) {
+  const [status, setStatus] = useState(data.progress?.["say-hey"]?.status || "");
+  return (
+    <StepShell eyebrow="Step 08" title="Say hey to Mr. Parker." intro="Mr. Parker wants to greet every band family, even though Open House does not leave enough time for a long conversation with everyone. A quick hello or wave is perfect." backHref={href("/portal/band-ready")} navigate={navigate}>
+      <div className={styles.detailPanel}>
+        <h2>A quick connection is all this stop needs</h2>
+        <p>If you have a moment, tell Mr. Parker something you enjoyed this summer, something you liked about band camp, or something you are excited about in band this year. If he is helping another family, a wave absolutely counts.</p>
+      </div>
+      <div className={styles.form}>
+        <Choice name="say-hey" checked={status === "in_person"} onChange={() => setStatus("in_person")} title="We said hey to Mr. Parker" detail="We stopped by for a quick greeting." />
+        <Choice name="say-hey" checked={status === "waved"} onChange={() => setStatus("waved")} title="We waved while Mr. Parker was helping someone" detail="We made the connection without waiting for a longer conversation." />
+        <Choice name="say-hey" checked={status === "online"} onChange={() => setStatus("online")} title="We completed Band Ready away from Open House" detail="We could not say hello in person, but we completed the family checklist." />
+      </div>
+      <button className={styles.primaryButton} type="button" disabled={busy || !status} onClick={() => save("say-hey", { status })}>{busy ? "Saving…" : "Save and review Band Ready"}</button>
     </StepShell>
   );
 }
