@@ -6,7 +6,7 @@ from reportlab.graphics.shapes import Drawing
 from reportlab.lib.colors import black, white
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
-from reportlab.pdfbase.pdfmetrics import stringWidth
+from reportlab.pdfbase.pdfmetrics import getAscent, getDescent, stringWidth
 from reportlab.pdfgen import canvas
 
 
@@ -145,6 +145,26 @@ def draw_wrapped(c, text, x, y, max_width, font_name="Helvetica", font_size=12, 
     return y
 
 
+def draw_wrapped_centered(c, text, x, center_y, max_width, font_name="Helvetica", font_size=12, leading=None, color=black, max_lines=None):
+    leading = leading or font_size * 1.25
+    lines = wrap_lines(text, font_name, font_size, max_width)
+    if max_lines is not None:
+        lines = lines[:max_lines]
+    if not lines:
+        return
+
+    ascent = getAscent(font_name, font_size)
+    descent = getDescent(font_name, font_size)
+    block_height = ascent - descent + (len(lines) - 1) * leading
+    baseline = center_y + (block_height / 2) - ascent
+
+    c.setFillColor(color)
+    c.setFont(font_name, font_size)
+    for line in lines:
+        c.drawString(x, baseline, line)
+        baseline -= leading
+
+
 def fit_font(text, font_name, maximum, minimum, max_width):
     size = maximum
     while size > minimum and stringWidth(text, font_name, size) > max_width:
@@ -216,7 +236,18 @@ def build_station_signs():
             c.setFillColor(white)
             c.setFont("Helvetica-Bold", 15)
             c.drawCentredString(1.05 * inch, box_y + 0.31 * inch, str(index))
-            draw_wrapped(c, action, 1.43 * inch, box_y + 0.54 * inch, width - 2.40 * inch, "Helvetica-Bold", 15.3, 19, black, 3)
+            draw_wrapped_centered(
+                c,
+                action,
+                1.43 * inch,
+                box_y + 0.40 * inch,
+                width - 2.40 * inch,
+                "Helvetica-Bold",
+                15.3,
+                19,
+                black,
+                3,
+            )
             action_y -= 0.96 * inch
 
         c.setFillColor(black)
