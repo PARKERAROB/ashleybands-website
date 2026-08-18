@@ -903,7 +903,7 @@ function StudentRail({ student, profile, ownPhone, onChanged }) {
       </section>
 
       <p className="portal-privacy-note">
-        Changes take effect immediately. To remove information, contact Mr. Parker. <Link href="/privacy">Privacy Notice</Link>
+        Changes take effect immediately. To remove a person from the family record entirely, contact Mr. Parker. <Link href="/privacy">Privacy Notice</Link>
       </p>
     </aside>
   );
