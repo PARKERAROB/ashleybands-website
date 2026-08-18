@@ -67,6 +67,17 @@ const relationships = [];
 const contactMethods = [];
 const conflicts = [];
 
+function currentSchoolYearGrade(value) {
+  const text = String(value || "").trim();
+  const match = text.match(/^(?:Rising|Incoming)\s+(\d+)(?:st|nd|rd|th)(?:\s+\(current\s+\d+(?:st|nd|rd|th)\))?$/i);
+  if (!match) return text || null;
+  const grade = Number(match[1]);
+  const suffix = grade % 10 === 1 && grade % 100 !== 11 ? "st"
+    : grade % 10 === 2 && grade % 100 !== 12 ? "nd"
+      : grade % 10 === 3 && grade % 100 !== 13 ? "rd" : "th";
+  return `${grade}${suffix} Grade`;
+}
+
 const portalStudents = students.map((row) => {
   const displayName = [row.preferred_first || row.legal_first, row.legal_last].filter(Boolean).join(" ").trim();
   const sourceRowHash = hashJson(row);
@@ -122,7 +133,7 @@ const portalStudents = students.map((row) => {
     legal_last: row.legal_last || null,
     preferred_first: row.preferred_first || null,
     display_name: displayName || row.id,
-    grade_fall26: row.grade_fall26 || null,
+    grade_fall26: currentSchoolYearGrade(row.grade_fall26),
     // Program participation, mirrored like grade_fall26 (NOT contact values, so the
     // guard below does not apply). The family portal uses these fields to show the
     // current roster record without families having to ask staff for confirmation.
@@ -296,7 +307,7 @@ async function applySync() {
     const [{ data: existingStudents, error: existingStudentError }, { data: existingPeople, error: existingPeopleError }, { data: openFamilyUpdates, error: familyUpdateError }] = await Promise.all([
       supabase
         .from("portal_students")
-        .select("id, source_student_id, preferred_first, display_name, school_email, cell_phone"),
+        .select("id, source_student_id, preferred_first, display_name, school_email, cell_phone, band_period_2026, ensemble_2026, instrument_2026, marching_2026, marching_role_category_2026, marching_assignment_2026"),
       supabase
         .from("portal_people")
         .select("id, source_person_key, display_name, first_name, last_name"),
@@ -304,7 +315,7 @@ async function applySync() {
         .from("portal_update_requests")
         .select("student_id, target_id, field_name")
         .eq("status", "approved")
-        .in("field_name", ["student_preferred_first", "person_display_name"])
+        .in("field_name", ["student_preferred_first", "person_display_name", "participation_bundle"])
     ]);
     if (existingStudentError) throw existingStudentError;
     if (existingPeopleError) throw existingPeopleError;
@@ -321,6 +332,11 @@ async function applySync() {
       (openFamilyUpdates || [])
         .filter((row) => row.field_name === "person_display_name" && row.target_id)
         .map((row) => row.target_id)
+    );
+    const protectedParticipationIds = new Set(
+      (openFamilyUpdates || [])
+        .filter((row) => row.field_name === "participation_bundle" && row.student_id)
+        .map((row) => row.student_id)
     );
 
     const existingStudentRows = [];
@@ -344,6 +360,14 @@ async function applySync() {
           .filter(Boolean)
           .join(" ")
           .trim() || existing.display_name;
+      }
+      if (protectedParticipationIds.has(existing.id)) {
+        safeRow.band_period_2026 = existing.band_period_2026;
+        safeRow.ensemble_2026 = existing.ensemble_2026;
+        safeRow.instrument_2026 = existing.instrument_2026;
+        safeRow.marching_2026 = existing.marching_2026;
+        safeRow.marching_role_category_2026 = existing.marching_role_category_2026;
+        safeRow.marching_assignment_2026 = existing.marching_assignment_2026;
       }
       existingStudentRows.push({ ...safeRow, last_seen_sync_id: syncId });
     }

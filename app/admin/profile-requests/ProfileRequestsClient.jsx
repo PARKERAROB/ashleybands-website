@@ -72,6 +72,7 @@ export default function ProfileRequestsClient() {
   const [session, setSession] = useState(null);
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
+  const [busyId, setBusyId] = useState("");
 
   useEffect(() => {
     const timer = window.setTimeout(() => setSession(readSession()), 0);
@@ -99,6 +100,23 @@ export default function ProfileRequestsClient() {
     return () => window.clearTimeout(timer);
   }, [load]);
 
+  async function review(item, status) {
+    setBusyId(item.id);
+    setError("");
+    const res = await fetch("/api/admin/profile-requests", {
+      method: "PATCH",
+      headers: authHeaders(session),
+      body: JSON.stringify({ id: item.id, status, details: item.details })
+    });
+    const body = await res.json().catch(() => ({}));
+    setBusyId("");
+    if (!res.ok) {
+      setError(body.error || "Could not review this request.");
+      return;
+    }
+    await load();
+  }
+
   if (!session) {
     return (
       <main className="portal-shell">
@@ -118,7 +136,7 @@ export default function ProfileRequestsClient() {
           <div>
             <p className="eyebrow">Staff only</p>
             <h1>Profile Requests</h1>
-            <p className="portal-copy">Audit log of parent portal changes. These auto-approve on submit (families control them via login) - this is the record, not an approval gate.</p>
+            <p className="portal-copy">Family profile details apply immediately. Program participation changes remain pending here until staff approves or declines them.</p>
             <p className="portal-copy">Signed in as {session.display_name}</p>
           </div>
           <button
@@ -147,14 +165,26 @@ export default function ProfileRequestsClient() {
                     Status: {item.status} · Email alert: {item.email_alert_status}
                   </p>
                 </div>
-                <dl className="portal-detail-grid">
-                  <div><dt>Guardian</dt><dd>{item.details?.guardian_name || item.portal_people?.display_name || "Not listed"}</dd></div>
-                  <div><dt>Email</dt><dd>{item.details?.guardian_email || "Not listed"}</dd></div>
-                  <div><dt>Phone</dt><dd>{item.details?.guardian_phone || "Not listed"}</dd></div>
-                  <div><dt>Claimed student</dt><dd>{item.details?.claimed_student || item.portal_students?.display_name || "Not listed"}</dd></div>
-                  <div><dt>Grade</dt><dd>{item.details?.student_grade || item.portal_students?.grade_fall26 || "Not listed"}</dd></div>
-                  <div><dt>Match</dt><dd>{item.details?.match_confidence || "none"}</dd></div>
-                </dl>
+                {item.item_type === "participation_change" ? (
+                  <>
+                    <ParticipationComparison details={item.details} />
+                    {item.status === "needs_review" ? (
+                      <div className="portal-field-edit">
+                        <button type="button" disabled={busyId === item.id} onClick={() => review(item, "approved")}>Approve and update record</button>
+                        <button type="button" className="portal-link-btn" disabled={busyId === item.id} onClick={() => review(item, "rejected")}>Decline</button>
+                      </div>
+                    ) : null}
+                  </>
+                ) : (
+                  <dl className="portal-detail-grid">
+                    <div><dt>Guardian</dt><dd>{item.details?.guardian_name || item.portal_people?.display_name || "Not listed"}</dd></div>
+                    <div><dt>Email</dt><dd>{item.details?.guardian_email || "Not listed"}</dd></div>
+                    <div><dt>Phone</dt><dd>{item.details?.guardian_phone || "Not listed"}</dd></div>
+                    <div><dt>Claimed student</dt><dd>{item.details?.claimed_student || item.portal_students?.display_name || "Not listed"}</dd></div>
+                    <div><dt>Grade</dt><dd>{item.details?.student_grade || item.portal_students?.grade_fall26 || "Not listed"}</dd></div>
+                    <div><dt>Match</dt><dd>{item.details?.match_confidence || "none"}</dd></div>
+                  </dl>
+                )}
               </article>
             ))}
           </div>
@@ -162,5 +192,32 @@ export default function ProfileRequestsClient() {
         <p className="portal-footnote"><Link href="/sponsors/dashboard">Sponsorship dashboard</Link></p>
       </section>
     </main>
+  );
+}
+
+const PARTICIPATION_LABELS = {
+  bandPeriod: "Band period",
+  ensemble: "Concert ensemble",
+  concertInstrument: "Concert band instrument",
+  marchingEnrollment: "Marching Band",
+  marchingRole: "Marching role",
+  marchingAssignment: "Marching assignment"
+};
+
+function ParticipationComparison({ details }) {
+  const oldValue = details?.old_value || {};
+  const requested = details?.requested_value || {};
+  return (
+    <>
+      <dl className="portal-detail-grid">
+        {Object.entries(PARTICIPATION_LABELS).map(([key, label]) => (
+          <div key={key}>
+            <dt>{label}</dt>
+            <dd>{oldValue[key] || "Not listed"} → <strong>{requested[key] || "Not applicable"}</strong></dd>
+          </div>
+        ))}
+      </dl>
+      {details?.family_note ? <p className="portal-copy"><strong>Family note:</strong> {details.family_note}</p> : null}
+    </>
   );
 }

@@ -35,7 +35,7 @@ export async function GET(request) {
       supabaseAdmin
         .from("portal_student_people")
         .select(
-          "student_id, relationship_status, role, primary_contact, portal_students(id, display_name, preferred_first, grade_fall26, status, school_email, cell_phone, notes, band_class_2026, ensemble_2026, instrument_2026, marching_2026, mb_role_2026)"
+          "student_id, relationship_status, role, primary_contact, portal_students(id, display_name, preferred_first, grade_fall26, status, school_email, cell_phone, notes, band_class_2026, band_period_2026, ensemble_2026, instrument_2026, marching_2026, mb_role_2026, marching_role_category_2026, marching_assignment_2026)"
         )
         .eq("person_id", session.personId)
         .eq("relationship_status", "trusted")
@@ -56,10 +56,14 @@ export async function GET(request) {
       cellPhone: link.portal_students?.cell_phone,
       note: link.portal_students?.notes || "",
       bandClass2026: link.portal_students?.band_class_2026 || "",
+      bandPeriod2026: link.portal_students?.band_period_2026 || "",
       ensemble2026: link.portal_students?.ensemble_2026 || "",
       instrument2026: link.portal_students?.instrument_2026 || "",
       marching2026: link.portal_students?.marching_2026 || "",
       marchingRole2026: link.portal_students?.mb_role_2026 || "",
+      marchingRoleCategory2026: link.portal_students?.marching_role_category_2026 || "",
+      marchingAssignment2026: link.portal_students?.marching_assignment_2026 || "",
+      participationRequest: null,
       guardians: []
     }))
     .filter((student) => student.id);
@@ -67,6 +71,29 @@ export async function GET(request) {
   // Attach the other adult guardians linked to each student.
   const studentIds = students.map((s) => s.id);
   if (studentIds.length) {
+    const { data: pendingParticipation } = await supabaseAdmin
+      .from("portal_update_requests")
+      .select("id, student_id, new_value, submitted_at")
+      .in("student_id", studentIds)
+      .eq("submitted_by_person_id", session.personId)
+      .eq("field_name", "participation_bundle")
+      .eq("status", "needs_review")
+      .order("submitted_at", { ascending: false });
+
+    for (const requestRow of pendingParticipation || []) {
+      const student = students.find((item) => item.id === requestRow.student_id);
+      if (!student || student.participationRequest) continue;
+      try {
+        student.participationRequest = {
+          id: requestRow.id,
+          requested: JSON.parse(requestRow.new_value || "{}"),
+          submittedAt: requestRow.submitted_at
+        };
+      } catch {
+        student.participationRequest = { id: requestRow.id, requested: {}, submittedAt: requestRow.submitted_at };
+      }
+    }
+
     const { data: guardianLinks } = await supabaseAdmin
       .from("portal_student_people")
       .select("student_id, role, primary_contact, portal_people(id, display_name, person_type)")

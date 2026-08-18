@@ -4,6 +4,15 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import InstrumentRequestSection from "./InstrumentRequestSection";
 import PortalSectionIcon from "./PortalSectionIcon";
+import {
+  BAND_PERIOD_OPTIONS,
+  ENSEMBLE_OPTIONS,
+  CONCERT_INSTRUMENT_OPTIONS,
+  MARCHING_ENROLLMENT_OPTIONS,
+  MARCHING_ROLE_OPTIONS,
+  MARCHING_ASSIGNMENTS,
+  optionsWithCurrent
+} from "@/lib/participationOptions";
 
 const SAVED_NOTE = "Saved. Your family record is updated.";
 
@@ -142,7 +151,7 @@ export default function PortalReviewClient() {
                 onChanged={loadProfile}
               />
               <div className="portal-workspace-main">
-                <ParticipationSection student={selectedStudent} />
+                <ParticipationSection student={selectedStudent} onChanged={loadProfile} />
                 <InstrumentRequestSection student={selectedStudent} />
                 <UniformSection student={selectedStudent} />
                 <BillingSection studentId={selectedStudent.id} studentName={selectedStudent.displayName} />
@@ -873,7 +882,45 @@ function StudentRail({ student, onChanged }) {
   );
 }
 
-function ParticipationSection({ student }) {
+function inferredBandPeriod(student) {
+  if (student.bandPeriod2026) return student.bandPeriod2026;
+  if (student.ensemble2026 === "Concert Band") return "1st Period";
+  if (student.ensemble2026 === "Percussion Ensemble") return "2nd Period";
+  if (student.ensemble2026 === "Wind Ensemble") return "4th Period";
+  return "Not enrolled in an AHS band period";
+}
+
+function inferredMarchingRole(student) {
+  if (student.marchingRoleCategory2026) return student.marchingRoleCategory2026;
+  const legacy = String(student.marchingRole2026 || "").toLowerCase();
+  if (legacy.includes("drum major")) return "Drum Major";
+  if (legacy.includes("guard")) return "Color Guard Member";
+  if (legacy.includes("percussion")) {
+    const assignment = String(student.instrument2026 || "").toLowerCase();
+    return /(snare|quad|tenor|bass drum|cymbal)/.test(assignment) ? "Drumline Member" : "Front Ensemble Member";
+  }
+  if (legacy) return "Wind Player";
+  return "";
+}
+
+function inferredMarchingAssignment(student) {
+  if (student.marchingAssignment2026) return student.marchingAssignment2026;
+  const role = inferredMarchingRole(student);
+  if (role === "Drum Major") return "Drum Major / Conductor";
+  if (["Wind Player", "Drumline Member", "Front Ensemble Member"].includes(role)) return student.instrument2026 || student.marchingRole2026 || "";
+  return "";
+}
+
+function ParticipationSection({ student, onChanged }) {
+  const [editing, setEditing] = useState(false);
+  const current = {
+    bandPeriod: inferredBandPeriod(student),
+    ensemble: student.ensemble2026 || "Not currently assigned",
+    concertInstrument: student.instrument2026 || "",
+    marchingEnrollment: String(student.marching2026 || "").toLowerCase() === "yes" ? "Yes" : "No",
+    marchingRole: inferredMarchingRole(student),
+    marchingAssignment: inferredMarchingAssignment(student)
+  };
   return (
     <section className="portal-workspace-section" aria-labelledby="portal-participation-heading">
       <div className="portal-section-heading">
@@ -881,21 +928,138 @@ function ParticipationSection({ student }) {
           <h2 id="portal-participation-heading">Band participation</h2>
           <p>{student.displayName}&apos;s current 2026–27 program record.</p>
         </div>
-        <a
-          className="portal-text-action"
-          href={`mailto:robert.parker@nhcs.net?subject=${encodeURIComponent(`Family portal update for ${student.displayName}`)}`}
-        >
-          Report a change
-        </a>
+        {!student.participationRequest ? (
+          <button type="button" className="portal-text-action" onClick={() => setEditing((value) => !value)}>
+            {editing ? "Cancel" : "Request a change"}
+          </button>
+        ) : null}
       </div>
       <dl className="portal-program-grid">
-        <div><dt>Band class</dt><dd>{enrollmentValue(student.bandClass2026)}</dd></div>
-        <div><dt>Ensemble</dt><dd>{programValue(student.ensemble2026)}</dd></div>
-        <div><dt>Instrument</dt><dd>{programValue(student.instrument2026)}</dd></div>
-        <div><dt>Marching Band</dt><dd>{enrollmentValue(student.marching2026)}</dd></div>
-        <div><dt>Marching role</dt><dd>{programValue(student.marchingRole2026)}</dd></div>
+        <div><dt>Band period</dt><dd>{programValue(current.bandPeriod)}</dd></div>
+        <div><dt>Concert ensemble</dt><dd>{programValue(current.ensemble)}</dd></div>
+        <div><dt>Concert band instrument</dt><dd>{programValue(current.concertInstrument)}</dd></div>
+        <div><dt>Enrolled in Marching Band</dt><dd>{current.marchingEnrollment}</dd></div>
+        {current.marchingEnrollment === "Yes" ? <div><dt>Marching role</dt><dd>{programValue(current.marchingRole)}</dd></div> : null}
+        {current.marchingEnrollment === "Yes" ? <div><dt>Marching assignment</dt><dd>{programValue(current.marchingAssignment)}</dd></div> : null}
       </dl>
+      {student.participationRequest ? (
+        <PendingParticipationRequest request={student.participationRequest} student={student} onChanged={onChanged} />
+      ) : null}
+      {editing ? (
+        <ParticipationRequestForm student={student} initial={current} onCancel={() => setEditing(false)} onSubmitted={async () => { setEditing(false); if (onChanged) await onChanged(); }} />
+      ) : null}
     </section>
+  );
+}
+
+function SelectField({ label, value, options, onChange, required = true }) {
+  return (
+    <label className="portal-field">
+      <span className="portal-field-label">{label}</span>
+      <select value={value} onChange={(event) => onChange(event.target.value)} required={required}>
+        {!value ? <option value="">Choose one</option> : null}
+        {optionsWithCurrent(options, value).map((option) => <option value={option} key={option}>{option}</option>)}
+      </select>
+    </label>
+  );
+}
+
+function ParticipationRequestForm({ student, initial, onCancel, onSubmitted }) {
+  const [form, setForm] = useState(initial);
+  const [note, setNote] = useState("");
+  const [status, setStatus] = useState("idle");
+  const [error, setError] = useState("");
+  const assignmentOptions = MARCHING_ASSIGNMENTS[form.marchingRole] || [];
+
+  function setField(field, value) {
+    setForm((current) => {
+      const next = { ...current, [field]: value };
+      if (field === "marchingEnrollment" && value === "No") {
+        next.marchingRole = "";
+        next.marchingAssignment = "";
+      }
+      if (field === "marchingRole") next.marchingAssignment = "";
+      return next;
+    });
+  }
+
+  async function submit(event) {
+    event.preventDefault();
+    setStatus("saving");
+    setError("");
+    const response = await fetch("/api/portal/participation-request", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentId: student.id, ...form, note })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      setStatus("idle");
+      setError(data.error || "Could not submit the request.");
+      return;
+    }
+    setStatus("saved");
+    await onSubmitted();
+  }
+
+  return (
+    <form className="portal-participation-form" onSubmit={submit}>
+      <p className="portal-muted-status">Choose the record you believe is correct. Nothing changes until Mr. Parker reviews it.</p>
+      <div className="portal-participation-fields">
+        <SelectField label="Band period" value={form.bandPeriod} options={BAND_PERIOD_OPTIONS} onChange={(value) => setField("bandPeriod", value)} />
+        <SelectField label="Concert ensemble" value={form.ensemble} options={ENSEMBLE_OPTIONS} onChange={(value) => setField("ensemble", value)} />
+        <SelectField label="Concert band instrument" value={form.concertInstrument} options={CONCERT_INSTRUMENT_OPTIONS} onChange={(value) => setField("concertInstrument", value)} />
+        <SelectField label="Enrolled in Marching Band" value={form.marchingEnrollment} options={MARCHING_ENROLLMENT_OPTIONS} onChange={(value) => setField("marchingEnrollment", value)} />
+        {form.marchingEnrollment === "Yes" ? <SelectField label="Marching role" value={form.marchingRole} options={MARCHING_ROLE_OPTIONS} onChange={(value) => setField("marchingRole", value)} /> : null}
+        {form.marchingEnrollment === "Yes" ? <SelectField label="Marching assignment" value={form.marchingAssignment} options={assignmentOptions} onChange={(value) => setField("marchingAssignment", value)} /> : null}
+      </div>
+      <label className="portal-field">
+        <span className="portal-field-label">Anything Mr. Parker should know? (optional)</span>
+        <textarea rows="3" value={note} onChange={(event) => setNote(event.target.value)} />
+      </label>
+      <div className="portal-field-edit">
+        <button type="submit" disabled={status === "saving"}>{status === "saving" ? "Submitting..." : "Send for approval"}</button>
+        <button type="button" className="portal-link-btn" onClick={onCancel}>Cancel</button>
+      </div>
+      {error ? <span className="portal-field-error">{error}</span> : null}
+    </form>
+  );
+}
+
+function PendingParticipationRequest({ request, student, onChanged }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  async function withdraw() {
+    setBusy(true);
+    setError("");
+    const response = await fetch("/api/portal/participation-request", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ requestId: request.id })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      setBusy(false);
+      setError(data.error || "Could not withdraw the request.");
+      return;
+    }
+    if (onChanged) await onChanged();
+  }
+  return (
+    <div className="portal-pending-request">
+      <strong>Participation change awaiting Mr. Parker&apos;s approval</strong>
+      <p>The official record above has not changed.</p>
+      <dl className="portal-pending-values">
+        <div><dt>Band period</dt><dd>{request.requested?.bandPeriod || "Not listed"}</dd></div>
+        <div><dt>Concert ensemble</dt><dd>{request.requested?.ensemble || "Not listed"}</dd></div>
+        <div><dt>Concert instrument</dt><dd>{request.requested?.concertInstrument || "Not listed"}</dd></div>
+        <div><dt>Marching Band</dt><dd>{request.requested?.marchingEnrollment || "Not listed"}</dd></div>
+        {request.requested?.marchingEnrollment === "Yes" ? <div><dt>Marching role</dt><dd>{request.requested?.marchingRole || "Not listed"}</dd></div> : null}
+        {request.requested?.marchingEnrollment === "Yes" ? <div><dt>Marching assignment</dt><dd>{request.requested?.marchingAssignment || "Not listed"}</dd></div> : null}
+      </dl>
+      <button type="button" className="portal-link-btn" disabled={busy} onClick={withdraw}>{busy ? "Withdrawing..." : `Withdraw ${student.displayName}'s request`}</button>
+      {error ? <span className="portal-field-error">{error}</span> : null}
+    </div>
   );
 }
 
