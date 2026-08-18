@@ -6,3 +6,4 @@ node_modules
 google-site-audit.json
 .DS_Store
 supabase/.temp
+.env*
