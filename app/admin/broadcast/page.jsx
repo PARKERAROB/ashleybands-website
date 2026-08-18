@@ -37,9 +37,9 @@ You can complete the band portion of Open House through our Band Ready Challenge
 
 https://ashleybands.com/open-house
 
-The challenge will connect you to the Family Portal and walk you through the calendar, Day 1 necessities, county instrument agreement, clothing order, grading, attendance, and communication information. AshleyBands.com is our one-stop shop for band information and forms.
+The challenge will connect you to the Family Portal and walk you through the calendar, Day 1 necessities, county instrument agreement, clothing order, grading, attendance, communication, and the Band Booster Level 2 volunteer check-in. AshleyBands.com is our one-stop shop for band information and forms.
 
-Once you finish the six quick stops, show the completed screen to a student helper during Open House and choose a sticker. We may also have individually wrapped candy while supplies last.
+Once you finish the seven quick stops, show the completed screen to a student helper during Open House and choose a sticker. We may also have individually wrapped candy while supplies last.
 
 You are always welcome to stop by the band room, say hello, and tell me something you enjoyed this summer, what you liked about band camp, or what you are excited about in band this year. I want to be available for individual conversations even though I will not be able to meet with every family at length that evening.
 

@@ -9,7 +9,8 @@ export const runtime = "nodejs";
 const VALID = {
   instrumentStatus: new Set(["personal", "county", "help"]),
   supplyStatus: new Set(["have", "need"]),
-  clothingStatus: new Set(["ordered", "not_ordering", "return_later"])
+  clothingStatus: new Set(["ordered", "not_ordering", "return_later"]),
+  boosterStatus: new Set(["approved", "started", "plan_later", "need_help"])
 };
 
 const PORTAL_URL = "https://ashleybands.com/portal/band-ready";
@@ -42,6 +43,11 @@ function normalizeStep(step, data) {
     if (!VALID.clothingStatus.has(status)) throw new Error("Choose what you plan to do about the clothing collection.");
     return { status, confirmedAt: new Date().toISOString() };
   }
+  if (step === "boosters") {
+    const status = String(data?.status || "");
+    if (!VALID.boosterStatus.has(status)) throw new Error("Choose where you are in the Level 2 volunteer process.");
+    return { status, confirmedAt: new Date().toISOString() };
+  }
   throw new Error("Unknown Band Ready step.");
 }
 
@@ -53,7 +59,8 @@ function readiness(progress, external) {
     "day-one": VALID.instrumentStatus.has(dayOne.instrumentStatus) && VALID.supplyStatus.has(dayOne.binderStatus) && VALID.supplyStatus.has(dayOne.pencilStatus) && (dayOne.pencilStatus !== "have" || Boolean(dayOne.pencilName)),
     forms: dayOne.instrumentStatus === "personal" || dayOne.instrumentStatus === "help" || (dayOne.instrumentStatus === "county" && Boolean(external.instrumentRequest)),
     "how-band-works": progress?.["how-band-works"]?.acknowledged === true,
-    clothing: progress?.clothing?.status === "ordered" || progress?.clothing?.status === "not_ordering" || progress?.clothing?.status === "return_later" || external.clothingOrder?.payment_status === "paid"
+    clothing: progress?.clothing?.status === "ordered" || progress?.clothing?.status === "not_ordering" || progress?.clothing?.status === "return_later" || external.clothingOrder?.payment_status === "paid",
+    boosters: VALID.boosterStatus.has(progress?.boosters?.status)
   };
   return { complete, count: Object.values(complete).filter(Boolean).length, finished: Object.values(complete).every(Boolean) };
 }
@@ -167,18 +174,24 @@ function summaryItems(state) {
     dayOne.binderStatus === "have" ? "Black one-inch band binder is ready" : null,
     dayOne.pencilStatus === "have" ? `Dedicated band pencil is ready${dayOne.pencilName ? `. Its name is ${dayOne.pencilName}` : ""}` : null,
     state.external.instrumentRequest ? "County instrument responsibility agreement was submitted" : null,
-    state.external.clothingOrder?.payment_status === "paid" ? "Open House clothing order was paid" : null
+    state.external.clothingOrder?.payment_status === "paid" ? "Open House clothing order was paid" : null,
+    state.progress?.boosters?.status === "approved" ? "Family reported a current Level 2 volunteer approval" : null,
+    state.progress?.boosters?.status === "started" ? "Level 2 volunteer process was started or completed" : null,
+    ["plan_later", "need_help"].includes(state.progress?.boosters?.status) ? "Band Booster and Level 2 volunteer information was reviewed" : null
   ].filter(Boolean);
   const stillNeeded = [
     dayOne.binderStatus === "need" ? "Get a black one-inch binder" : null,
     dayOne.pencilStatus === "need" ? "Get and name a dedicated band pencil" : null,
     dayOne.instrumentStatus === "county" && !state.external.instrumentRequest ? "Complete the county instrument responsibility agreement" : null,
     dayOne.instrumentStatus === "help" ? "Follow up with Mr. Parker about the student’s instrument" : null,
-    state.progress?.clothing?.status === "return_later" ? "Return to the clothing collection by the order deadline" : null
+    state.progress?.clothing?.status === "return_later" ? "Return to the clothing collection by the order deadline" : null,
+    state.progress?.boosters?.status === "plan_later" ? "Complete the annual NHCS volunteer training and Level 2 background check" : null,
+    state.progress?.boosters?.status === "need_help" ? "Check in with the Band Boosters for help with Level 2 volunteering" : null
   ].filter(Boolean);
   const followUp = [
     state.progress?.clothing?.status === "not_ordering" ? "No Open House clothing order planned" : null,
-    state.progress?.clothing?.status === "ordered" || state.external.clothingOrder?.payment_status === "paid" ? "Clothing collection reviewed" : null
+    state.progress?.clothing?.status === "ordered" || state.external.clothingOrder?.payment_status === "paid" ? "Clothing collection reviewed" : null,
+    state.progress?.boosters?.status === "approved" ? "Remember to complete this school year’s NHCS volunteer training" : null
   ].filter(Boolean);
   return { completed, stillNeeded, followUp };
 }

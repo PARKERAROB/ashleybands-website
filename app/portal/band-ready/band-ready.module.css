@@ -47,6 +47,11 @@
 .actionPanel h2, .detailPanel h2, .statusPanel h2, .summaryGrid h2 { margin: 0 0 .6rem; }
 .actionPanel p, .detailPanel p, .statusPanel p { color: var(--muted); line-height: 1.55; }
 .actionLinks { display: flex; flex-wrap: wrap; gap: .75rem; margin: 1rem 0; }
+.processList { display: grid; gap: .75rem; margin: 1rem 0; padding: 0; list-style: none; counter-reset: volunteer-step; }
+.processList li { counter-increment: volunteer-step; display: grid; grid-template-columns: 42px minmax(0,1fr) auto; gap: .85rem; align-items: center; padding: .9rem; border: 1px solid #ded8cc; border-radius: 10px; background: #faf8f3; }
+.processList li::before { content: counter(volunteer-step); display: grid; width: 38px; height: 38px; place-items: center; border-radius: 50%; background: #f4e7e9; color: var(--red); font-weight: 900; }
+.processList li > div { display: grid; gap: .2rem; }
+.processList li span { color: var(--muted); font-size: .9rem; line-height: 1.4; }
 .form { display: grid; gap: 1.25rem; margin-top: 2rem; }
 .form fieldset { display: grid; gap: .7rem; margin: 0; padding: 1.4rem; border: 1px solid #d8d1c3; border-radius: 14px; background: #fff; }
 .form legend { padding: 0 .45rem; font-size: 1.2rem; font-weight: 900; }
@@ -105,4 +110,6 @@
   .stepCard { grid-template-columns: 42px minmax(0,1fr); }
   .stepCard > b { display: none; }
   .reviewCallout .primaryButton, .finishPanel .primaryButton { width: 100%; }
+  .processList li { grid-template-columns: 38px minmax(0,1fr); align-items: start; }
+  .processList li > a { grid-column: 1 / -1; width: 100%; }
 }

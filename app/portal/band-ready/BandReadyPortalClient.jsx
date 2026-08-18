@@ -10,19 +10,23 @@ const steps = [
   { id: "day-one", number: "03", title: "Be ready for Day One", body: "Check the instrument, black one-inch binder, and dedicated band pencil." },
   { id: "forms", number: "04", title: "Complete applicable forms", body: "If a county instrument is needed, submit the responsibility agreement." },
   { id: "how-band-works", number: "05", title: "Know how band works", body: "Review assessments, practice, performances, absences, and communication." },
-  { id: "clothing", number: "06", title: "Confirm the red band shirt", body: "Every band student needs the official red shirt. Review it first, then any optional clothing." }
+  { id: "clothing", number: "06", title: "Confirm the red band shirt", body: "Every band student needs the official red shirt. Review it first, then any optional clothing." },
+  { id: "boosters", number: "07", title: "Check in with the Band Boosters", body: "Review Level 2 volunteering and tell us where you are in the process." }
 ];
+
+const stepTotal = steps.length;
 
 const nextStep = {
   calendar: "day-one",
   "day-one": "forms",
   forms: "how-band-works",
   "how-band-works": "clothing",
-  clothing: "review"
+  clothing: "boosters",
+  boosters: "review"
 };
 
 const bandReadyCache = new Map();
-const allowedStepIds = new Set(["calendar", "day-one", "forms", "how-band-works", "clothing", "review"]);
+const allowedStepIds = new Set(["calendar", "day-one", "forms", "how-band-works", "clothing", "boosters", "review"]);
 
 function rememberBandReady(body) {
   if (body?.student?.id) bandReadyCache.set(body.student.id, body);
@@ -81,7 +85,10 @@ function stillNeededItems(data) {
     dayOne.instrumentStatus === "help" ? "Talk with Mr. Parker about the student’s instrument." : null,
     !data?.readiness?.complete?.["how-band-works"] ? "Review how band works and confirm the family understands." : null,
     !data?.readiness?.complete?.clothing ? "Review the Open House clothing collection." : null,
-    data?.progress?.clothing?.status === "return_later" ? "Return to the clothing collection by Friday, August 28." : null
+    data?.progress?.clothing?.status === "return_later" ? "Return to the clothing collection by Friday, August 28." : null,
+    !data?.readiness?.complete?.boosters ? "Review the Band Booster and Level 2 volunteer information." : null,
+    data?.progress?.boosters?.status === "plan_later" ? "Complete the annual NHCS volunteer training and Level 2 background check." : null,
+    data?.progress?.boosters?.status === "need_help" ? "Check in with the Band Boosters for help with Level 2 volunteering." : null
   ].filter(Boolean);
 }
 
@@ -266,6 +273,7 @@ export default function BandReadyPortalClient({ step }) {
       {activeStep === "forms" ? <FormsStep data={data} href={href} navigate={navigate} /> : null}
       {activeStep === "how-band-works" ? <HowBandWorksStep data={data} save={save} busy={status === "saving"} href={href} navigate={navigate} /> : null}
       {activeStep === "clothing" ? <ClothingStep key={`${studentId}-${data.completion?.updatedAt || "new"}`} data={data} save={save} busy={status === "saving"} href={href} navigate={navigate} studentId={studentId} /> : null}
+      {activeStep === "boosters" ? <BoostersStep key={`${studentId}-${data.completion?.updatedAt || "new"}`} data={data} save={save} busy={status === "saving"} href={href} navigate={navigate} /> : null}
       {activeStep === "review" ? <ReviewStep data={data} setData={updateData} studentId={studentId} href={href} navigate={navigate} /> : null}
     </main>
   );
@@ -279,8 +287,8 @@ function Dashboard({ data, href, navigate }) {
         <p className={styles.eyebrow}>Get Band Ready</p>
         <h1>One clear path to the first day.</h1>
         <p>Complete one small task at a time. Your answers are saved to this student&apos;s Family Portal.</p>
-        <div className={styles.progress} aria-label={`${count} of 6 steps complete`}><span style={{ width: `${(count / 6) * 100}%` }} /></div>
-        <strong>{count} of 6 complete</strong>
+        <div className={styles.progress} aria-label={`${count} of ${stepTotal} steps complete`}><span style={{ width: `${(count / stepTotal) * 100}%` }} /></div>
+        <strong>{count} of {stepTotal} complete</strong>
       </section>
       <section className={styles.stepGrid} aria-label="Band Ready steps">
         {steps.map((item) => {
@@ -301,7 +309,7 @@ function Dashboard({ data, href, navigate }) {
         })}
       </section>
       <div className={styles.reviewCallout}>
-        <div><strong>{data.readiness.finished ? "All six stops are ready." : "Your progress is saved."}</strong><p>Review the family checklist and send the personalized summary when every stop is complete.</p></div>
+        <div><strong>{data.readiness.finished ? `All ${stepTotal} stops are ready.` : "Your progress is saved."}</strong><p>Review the family checklist and send the personalized summary when every stop is complete.</p></div>
         <BandReadyLink className={styles.primaryButton} href={href("/portal/band-ready/review")} destination="review" navigate={navigate}>Review Band Ready</BandReadyLink>
       </div>
     </>
@@ -438,7 +446,42 @@ function ClothingStep({ data, save, busy, href, navigate, studentId }) {
           </div>
         </>
       )}
-      <button className={styles.primaryButton} type="button" disabled={busy || (!paid && !status)} onClick={() => save("clothing", { status: paid ? "ordered" : status })}>{busy ? "Saving…" : "Save and review Band Ready"}</button>
+      <button className={styles.primaryButton} type="button" disabled={busy || (!paid && !status)} onClick={() => save("clothing", { status: paid ? "ordered" : status })}>{busy ? "Saving…" : "Save and continue to the Boosters"}</button>
+    </StepShell>
+  );
+}
+
+function BoostersStep({ data, save, busy, href, navigate }) {
+  const [status, setStatus] = useState(data.progress?.boosters?.status || "");
+  return (
+    <StepShell eyebrow="Step 07" title="Check in with the Band Boosters." intro="Ashley Bands recommends that every band parent and guardian complete the NHCS Level 2 volunteer process. A large pool of approved adults gives the band the support it needs for travel, chaperoning, performances, and events." backHref={href("/portal/band-ready")} navigate={navigate}>
+      <div className={`${styles.statusPanel} ${styles.statusNeeds}`}>
+        <span>!</span>
+        <div>
+          <h2>Our recommendation: every parent completes Level 2</h2>
+          <p>NHCS specifically requires Level 2 clearance when a volunteer may work with students without continual staff supervision or serves on a field trip. The band recommends it for every parent so families are ready when opportunities arise.</p>
+        </div>
+      </div>
+      <div className={styles.actionPanel}>
+        <h2>Complete the NHCS process</h2>
+        <ol className={styles.processList}>
+          <li><div><strong>Review the NHCS volunteer orientation</strong><span>Every volunteer completes training each school year.</span></div><a className={styles.secondaryButton} href="https://new.express.adobe.com/webpage/CEj1D2XoaFiIZ" target="_blank" rel="noreferrer">Open orientation</a></li>
+          <li><div><strong>Complete the annual assessment</strong><span>NHCS requires a score of 80% or higher.</span></div><a className={styles.secondaryButton} href="https://docs.google.com/forms/d/e/1FAIpQLScVWKaIoXTNFKd1ofLKnSmK0P9Y73Xivcdb156cuEM0AGbnyg/viewform?usp=sf_link" target="_blank" rel="noreferrer">Open assessment</a></li>
+          <li><div><strong>Submit the Level 2 background check</strong><span>The $22.50 background check is valid for three years.</span></div><a className={styles.primaryButton} href="https://securevolunteer.com/NHC/home" target="_blank" rel="noreferrer">Start Level 2</a></li>
+        </ol>
+        <p>These NHCS pages open in a new tab so you can return here and save your progress.</p>
+      </div>
+      <div className={styles.detailPanel}>
+        <h2>Say hello to the Band Boosters</h2>
+        <p>If you are completing Band Ready at Open House, check in with the Boosters in the band room. They can help with the Level 2 process and share ways to support students throughout the year.</p>
+      </div>
+      <div className={styles.form}>
+        <Choice name="boosters" checked={status === "approved"} onChange={() => setStatus("approved")} title="My Level 2 approval is current" detail="I will also complete the NHCS volunteer training required this school year." />
+        <Choice name="boosters" checked={status === "started"} onChange={() => setStatus("started")} title="I started or completed the Level 2 process" detail="I reviewed the steps and submitted what I could today." />
+        <Choice name="boosters" checked={status === "plan_later"} onChange={() => setStatus("plan_later")} title="I plan to complete Level 2" detail="Add it to our Band Ready follow-up list." />
+        <Choice name="boosters" checked={status === "need_help"} onChange={() => setStatus("need_help")} title="I need help or have a question" detail="I will check in with the Boosters before I leave or follow up afterward." />
+      </div>
+      <button className={styles.primaryButton} type="button" disabled={busy || !status} onClick={() => save("boosters", { status })}>{busy ? "Saving…" : "Save and review Band Ready"}</button>
     </StepShell>
   );
 }
@@ -449,7 +492,7 @@ function ReviewStep({ data, setData, studentId, href, navigate }) {
   const [error, setError] = useState("");
   const needed = useMemo(() => stillNeededItems(data), [data]);
   const alreadySent = Boolean(data.completion?.emailSentAt);
-  const progressHeading = data.readiness.count === 1 ? "1 of 6 stops is complete." : `${data.readiness.count} of 6 stops are complete.`;
+  const progressHeading = data.readiness.count === 1 ? `1 of ${stepTotal} stops is complete.` : `${data.readiness.count} of ${stepTotal} stops are complete.`;
 
   async function finish() {
     setBusy(true); setError("");
@@ -463,9 +506,9 @@ function ReviewStep({ data, setData, studentId, href, navigate }) {
     finally { setBusy(false); }
   }
 
-  const completionShown = alreadySent || result?.emailSent || result?.alreadySent;
+  const completionShown = data.readiness.finished && (alreadySent || result?.emailSent || result?.alreadySent);
   return (
-    <StepShell eyebrow="Band Ready review" title={`${data.student.display_name}’s family checklist`} intro="This is the complete Open House picture for this student. Finish when all six stops are complete, and the band will email this summary to the connected student and family addresses." backHref={href("/portal/band-ready")} navigate={navigate}>
+    <StepShell eyebrow="Band Ready review" title={`${data.student.display_name}’s family checklist`} intro={`This is the complete Open House picture for this student. Finish when all ${stepTotal} stops are complete, and the band will email this summary to the connected student and family addresses.`} backHref={href("/portal/band-ready")} navigate={navigate}>
       <ol className={styles.reviewList}>{steps.map((item) => <li key={item.id} className={data.readiness.complete[item.id] ? styles.reviewDone : styles.reviewOpen}><span>{data.readiness.complete[item.id] ? "✓" : "•"}</span><div><strong>{item.title}</strong><small>{data.readiness.complete[item.id] ? "Complete" : "Still needs attention"}</small></div>{!data.readiness.complete[item.id] && item.id !== "portal" ? <BandReadyLink href={href(`/portal/band-ready/${item.id}`)} destination={item.id} navigate={navigate}>Open</BandReadyLink> : null}</li>)}</ol>
       <div className={styles.summaryGrid}>
         <article><h2>Day One</h2><p><strong>Instrument:</strong> {instrumentLabel(data.progress?.["day-one"]?.instrumentStatus)}</p><p><strong>Binder:</strong> {data.progress?.["day-one"]?.binderStatus === "have" ? "Ready" : "Still needed"}</p><p><strong>Band pencil:</strong> {data.progress?.["day-one"]?.pencilStatus === "have" ? `Ready${data.progress?.["day-one"]?.pencilName ? ` · ${data.progress["day-one"].pencilName}` : ""}` : "Still needed"}</p></article>
