@@ -14,6 +14,12 @@ export default function InstrumentRequestSection({ student }) {
     guardianSignature: "",
     responsibilityAccepted: false
   });
+  const [identification, setIdentification] = useState({
+    instrumentType: student.instrument2026 || "",
+    assetId: "",
+    serialNumber: "",
+    issuedCondition: "good"
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -52,6 +58,29 @@ export default function InstrumentRequestSection({ student }) {
     }
   }
 
+  async function identifyInstrument(event) {
+    event.preventDefault();
+    setBusy(true);
+    setMessage("");
+    try {
+      const res = await fetch("/api/portal/instrument-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ studentId: student.id, action: "identify", ...identification })
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) setMessage(body.error || "Could not save the instrument identification.");
+      else {
+        setRecord(body.request);
+        setMessage("Saved. The instrument is connected to this student and ready for Mr. Parker to verify.");
+      }
+    } catch {
+      setMessage("Could not save the instrument identification. Check your connection and try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <section className="portal-workspace-section" aria-labelledby="instrument-request-heading">
       <div className="portal-section-heading">
@@ -64,21 +93,54 @@ export default function InstrumentRequestSection({ student }) {
 
       {loading ? <p className="portal-muted-status">Checking agreement status…</p> : null}
       {record ? (
-        <div className="portal-field">
-          <span className="portal-field-label">Agreement received</span>
-          <span className="portal-field-value">
-            {record.status === "assigned" && record.assignment?.instrument_type
-              ? `${record.assignment.instrument_type}${record.assignment.brand ? ` — ${record.assignment.brand}` : ""}`
-              : "Submitted; instrument assignment pending"}
-          </span>
-          {record.assignment?.asset_id || record.assignment?.serial_number ? (
-            <span className="portal-field-note">
-              {record.assignment.asset_id ? `School asset ${record.assignment.asset_id}` : ""}
-              {record.assignment.asset_id && record.assignment.serial_number ? " · " : ""}
-              {record.assignment.serial_number ? `Serial ${record.assignment.serial_number}` : ""}
+        <>
+          <div className="portal-field">
+            <span className="portal-field-label">Agreement received</span>
+            <span className="portal-field-value">
+              {record.status === "assigned" && record.assignment?.instrument_type
+                ? `${record.assignment.instrument_type}${record.assignment.brand ? ` — ${record.assignment.brand}` : ""}`
+                : "Submitted; identify the instrument when it is issued"}
             </span>
+            {record.assignment?.asset_id || record.assignment?.serial_number ? (
+              <span className="portal-field-note">
+                {record.assignment.asset_id ? `School asset ${record.assignment.asset_id}` : ""}
+                {record.assignment.asset_id && record.assignment.serial_number ? " · " : ""}
+                {record.assignment.serial_number ? `Serial ${record.assignment.serial_number}` : ""}
+              </span>
+            ) : null}
+          </div>
+          {!record.assignment ? (
+            <form className="portal-form portal-instrument-identification" onSubmit={identifyInstrument}>
+              <h3>Identify the instrument you receive</h3>
+              <p className="portal-copy">Complete this with the instrument and case in front of you. Enter the school asset number and the manufacturer&apos;s serial number exactly as printed.</p>
+              <label>
+                Instrument type
+                <input required value={identification.instrumentType} onChange={(event) => setIdentification({ ...identification, instrumentType: event.target.value })} placeholder="Example: Trumpet" />
+              </label>
+              <label>
+                School asset number
+                <input required value={identification.assetId} onChange={(event) => setIdentification({ ...identification, assetId: event.target.value })} autoComplete="off" />
+              </label>
+              <label>
+                Serial number
+                <input required value={identification.serialNumber} onChange={(event) => setIdentification({ ...identification, serialNumber: event.target.value })} autoComplete="off" />
+              </label>
+              <label>
+                Current condition
+                <select required value={identification.issuedCondition} onChange={(event) => setIdentification({ ...identification, issuedCondition: event.target.value })}>
+                  <option value="new">New</option>
+                  <option value="excellent">Excellent</option>
+                  <option value="good">Good</option>
+                  <option value="fair">Fair or visibly worn</option>
+                  <option value="needs_attention">Needs Mr. Parker&apos;s attention</option>
+                </select>
+              </label>
+              <button type="submit" className="portal-action-link" disabled={busy}>
+                {busy ? "Saving…" : "Save issued instrument"}
+              </button>
+            </form>
           ) : null}
-        </div>
+        </>
       ) : !loading ? (
         <form className="portal-form" onSubmit={submit}>
           <p className="portal-copy">

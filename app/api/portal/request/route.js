@@ -9,28 +9,33 @@ const CONFIRM_CODE_MINUTES = 30;
 
 export async function POST(request) {
   const body = await request.json().catch(() => ({}));
-  const guardianName = clean(body.guardianName);
-  const guardianEmail = clean(body.guardianEmail).toLowerCase();
-  const guardianPhone = clean(body.guardianPhone);
+  const requesterType = body.requesterType === "student" ? "student" : "guardian";
+  const requesterName = clean(body.requesterName || body.guardianName);
+  const requesterEmail = clean(body.requesterEmail || body.guardianEmail).toLowerCase();
+  const requesterPhone = requesterType === "guardian" ? clean(body.requesterPhone || body.guardianPhone) : "";
   const studentFirst = clean(body.studentFirst);
   const studentLast = clean(body.studentLast);
   const studentGrade = clean(body.studentGrade);
   const instrumentOrNote = clean(body.instrumentOrNote);
 
-  if (!guardianName || !guardianEmail || !studentFirst || !studentLast) {
-    return NextResponse.json({ error: "Guardian name, guardian email, student first name, and student last name are required." }, { status: 400 });
+  if (!requesterName || !requesterEmail || !studentFirst || !studentLast) {
+    return NextResponse.json({ error: "Your name, email, student first name, and student last name are required." }, { status: 400 });
   }
-  if (!guardianEmail.includes("@")) {
-    return NextResponse.json({ error: "Enter a valid guardian email address." }, { status: 400 });
+  if (!requesterEmail.includes("@")) {
+    return NextResponse.json({ error: "Enter a valid email address." }, { status: 400 });
+  }
+  if (requesterType === "student" && !requesterEmail.endsWith("@student.nhcs.net")) {
+    return NextResponse.json({ error: "Students must use their NHCS school email ending in @student.nhcs.net." }, { status: 400 });
   }
 
   const match = await findStudentMatch({ studentFirst, studentLast, studentGrade });
   const { data: accessRequest, error: requestError } = await supabaseAdmin
     .from("portal_access_requests")
     .insert({
-      guardian_name: guardianName,
-      guardian_email: guardianEmail,
-      guardian_phone: guardianPhone || null,
+      requester_type: requesterType,
+      guardian_name: requesterName,
+      guardian_email: requesterEmail,
+      guardian_phone: requesterPhone || null,
       student_first: studentFirst,
       student_last: studentLast,
       student_grade: studentGrade || null,
@@ -56,7 +61,7 @@ export async function POST(request) {
   await supabaseAdmin
     .from("portal_magic_links")
     .update({ consumed_at: new Date().toISOString() })
-    .eq("email", guardianEmail)
+    .eq("email", requesterEmail)
     .eq("purpose", "unknown_email_confirm")
     .is("consumed_at", null);
 
@@ -64,9 +69,9 @@ export async function POST(request) {
     .from("portal_magic_links")
     .insert({
       access_request_id: accessRequest.id,
-      token_hash: hashCode(guardianEmail, code),
+      token_hash: hashCode(requesterEmail, code),
       purpose: "unknown_email_confirm",
-      email: guardianEmail,
+      email: requesterEmail,
       expires_at: expiresAt,
       ip_created: request.headers.get("x-forwarded-for") || null,
       user_agent_created: request.headers.get("user-agent") || null
@@ -77,12 +82,12 @@ export async function POST(request) {
   }
 
   try {
-    await sendPortalCodeEmail({ to: guardianEmail, code, expiresMinutes: CONFIRM_CODE_MINUTES });
+    await sendPortalCodeEmail({ to: requesterEmail, code, expiresMinutes: CONFIRM_CODE_MINUTES });
   } catch (sendError) {
     await supabaseAdmin
       .from("portal_magic_links")
       .update({ consumed_at: new Date().toISOString() })
-      .eq("token_hash", hashCode(guardianEmail, code));
+      .eq("token_hash", hashCode(requesterEmail, code));
     console.error("Portal access-request code email failed to send.", sendError);
     return NextResponse.json({ error: "We could not send the verification code. Check the email address and try again." }, { status: 503 });
   }

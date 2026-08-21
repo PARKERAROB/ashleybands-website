@@ -60,6 +60,9 @@ const students = readCsv("students.csv")
   .filter((row) => portalStudentIsIncluded(row.id));
 const parents = readCsv("parents.csv")
   .filter((row) => portalStudentIsIncluded(row.student_id));
+const lockers = readCsv("lockers.csv");
+const tuners = readCsv("tuners.csv");
+const masterLocks = readCsv("master-locks.csv");
 const studentBySourceId = new Map(students.map((row) => [row.id, row]));
 const guardianPeople = new Map();
 const studentPeople = new Map();
@@ -225,12 +228,14 @@ for (const row of parents) {
 const portalPeople = [...studentPeople.values(), ...guardianPeople.values()];
 const dedupedRelationships = dedupeRelationships(relationships);
 const dedupedContactMethods = dedupeContactMethods(contactMethods);
+const portalResources = buildPortalResources({ students, lockers, tuners, masterLocks, conflicts });
 
 console.log(`Family Portal CSV sync ${APPLY ? "APPLY" : "DRY RUN"}`);
 console.log(`students=${portalStudents.length}`);
 console.log(`people=${portalPeople.length} guardians=${guardianPeople.size} student_people=${studentPeople.size}`);
 console.log(`relationships=${dedupedRelationships.length}`);
 console.log(`contact_methods=${dedupedContactMethods.length}`);
+console.log(`student_resources=${portalResources.length}`);
 console.log(`conflicts=${conflicts.length}`);
 
 if (conflicts.length && !SUMMARY) {
@@ -250,13 +255,19 @@ if (!APPLY) {
 }
 
 async function checkMirror() {
-  const [{ data: dbStudents, error: studentError }, { data: dbPeople, error: peopleError }] =
+  const [
+    { data: dbStudents, error: studentError },
+    { data: dbPeople, error: peopleError },
+    { data: dbResources, error: resourceError }
+  ] =
     await Promise.all([
       supabase.from("portal_students").select("source_student_id,source_row_hash"),
-      supabase.from("portal_people").select("source_person_key,source_row_hash")
+      supabase.from("portal_people").select("source_person_key,source_row_hash"),
+      supabase.from("portal_student_resources").select("source_row_hash,portal_students(source_student_id)")
     ]);
   if (studentError) throw studentError;
   if (peopleError) throw peopleError;
+  if (resourceError) throw resourceError;
 
   const compare = (expectedRows, actualRows, key) => {
     const expected = new Map(expectedRows.map((row) => [row[key], row.source_row_hash]));
@@ -274,11 +285,22 @@ async function checkMirror() {
 
   const studentsResult = compare(portalStudents, dbStudents, "source_student_id");
   const peopleResult = compare(portalPeople, dbPeople, "source_person_key");
+  const resourcesResult = compare(
+    portalResources,
+    (dbResources || []).map((row) => ({
+      source_student_id: row.portal_students?.source_student_id,
+      source_row_hash: row.source_row_hash
+    })),
+    "source_student_id"
+  );
   const current =
     studentsResult.missing === 0 &&
     studentsResult.changed === 0 &&
     peopleResult.missing === 0 &&
     peopleResult.changed === 0 &&
+    resourcesResult.missing === 0 &&
+    resourcesResult.changed === 0 &&
+    resourcesResult.extra === 0 &&
     conflicts.length === 0;
 
   console.log("Portal mirror drift check (read-only):");
@@ -289,6 +311,10 @@ async function checkMirror() {
   console.log(
     `people expected=${peopleResult.expected} hosted=${peopleResult.actual} ` +
       `missing=${peopleResult.missing} changed=${peopleResult.changed} extra=${peopleResult.extra}`
+  );
+  console.log(
+    `student resources expected=${resourcesResult.expected} hosted=${resourcesResult.actual} ` +
+      `missing=${resourcesResult.missing} changed=${resourcesResult.changed} extra=${resourcesResult.extra}`
   );
   console.log(`local conflicts=${conflicts.length}`);
   console.log(current ? "Portal mirror OK" : "Portal mirror DRIFTED (no writes made)");
@@ -398,6 +424,40 @@ async function applySync() {
     const studentIds = new Map((dbStudents || []).map((row) => [row.source_student_id, row.id]));
     const personIds = new Map((dbPeople || []).map((row) => [row.source_person_key, row.id]));
 
+    const resourceRows = portalResources
+      .map((row) => ({
+        student_id: studentIds.get(row.source_student_id),
+        locker_number: row.locker_number,
+        lock_serial: row.lock_serial,
+        lock_combination: row.lock_combination,
+        tuner_number: row.tuner_number,
+        tuner_shared_with: row.tuner_shared_with,
+        assignment_status: row.assignment_status,
+        source: row.source,
+        source_row_hash: row.source_row_hash,
+        last_seen_sync_id: syncId
+      }))
+      .filter((row) => row.student_id);
+    const resourceStudentIds = new Set(resourceRows.map((row) => row.student_id));
+    const { data: hostedResources, error: hostedResourceError } = await supabase
+      .from("portal_student_resources")
+      .select("student_id")
+      .eq("source", "bandsofahs_resource_csv");
+    if (hostedResourceError) throw hostedResourceError;
+    const staleResourceIds = (hostedResources || [])
+      .map((row) => row.student_id)
+      .filter((studentId) => !resourceStudentIds.has(studentId));
+    if (staleResourceIds.length) {
+      const { error: staleResourceError } = await supabase
+        .from("portal_student_resources")
+        .delete()
+        .in("student_id", staleResourceIds)
+        .eq("source", "bandsofahs_resource_csv");
+      if (staleResourceError) throw staleResourceError;
+    }
+    await upsert("portal_student_resources", resourceRows, "student_id");
+    console.log(`student resources: ${resourceRows.length} current, ${staleResourceIds.length} stale removed`);
+
     const relationshipRows = dedupedRelationships
       .map((row) => ({
         student_id: studentIds.get(row.sourceStudentId),
@@ -468,7 +528,7 @@ async function applySync() {
       relationships_seen: relationshipRows.length,
       contact_methods_seen: contactRows.length,
       conflicts,
-      notes: "CSV mirror sync completed from BandsofAHS students.csv and parents.csv."
+      notes: `CSV mirror sync completed from BandsofAHS students, parents, lockers, locks, and tuners; ${resourceRows.length} student resources.`
     });
     console.log("\nSync applied.");
     await printReport();
@@ -628,4 +688,76 @@ function splitName(name) {
   const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
   if (parts.length <= 1) return { first: parts[0] || null, last: null };
   return { first: parts.slice(0, -1).join(" "), last: parts.at(-1) };
+}
+
+function buildPortalResources({ students, lockers, tuners, masterLocks, conflicts }) {
+  const studentByName = new Map();
+  for (const student of students) {
+    const firstNames = [student.legal_first, student.preferred_first].filter(Boolean);
+    for (const first of firstNames) {
+      studentByName.set(resourceNameKey(`${student.legal_last}, ${first}`), student);
+    }
+  }
+
+  const lockPairs = new Map(masterLocks.map((row) => [row.serial, row.combination]));
+  const resources = new Map();
+  const ensure = (studentName) => {
+    const student = studentByName.get(resourceNameKey(studentName));
+    if (!student) {
+      conflicts.push({ type: "resource_student_missing", student_name: studentName });
+      return null;
+    }
+    if (!resources.has(student.id)) {
+      resources.set(student.id, {
+        source_student_id: student.id,
+        locker_number: null,
+        lock_serial: null,
+        lock_combination: null,
+        tuner_number: null,
+        tuner_shared_with: null,
+        assignment_status: "provisional",
+        source: "bandsofahs_resource_csv"
+      });
+    }
+    return resources.get(student.id);
+  };
+
+  for (const locker of lockers) {
+    const studentName = locker["Student Assigned"];
+    if (!studentName) continue;
+    const resource = ensure(studentName);
+    if (!resource) continue;
+    const serial = locker["Lock Serial #"] || null;
+    const combination = locker.Combination || null;
+    if (!serial || !combination || lockPairs.get(serial) !== combination) {
+      conflicts.push({ type: "resource_lock_pair_invalid", student_name: studentName, serial });
+      continue;
+    }
+    resource.locker_number = locker["Locker #"] || null;
+    resource.lock_serial = serial;
+    resource.lock_combination = combination;
+  }
+
+  for (const tuner of tuners) {
+    if (tuner.assignment_status !== "assigned") continue;
+    const primaryName = tuner.student_assigned;
+    const secondaryName = tuner.student_assigned_2;
+    for (const [studentName, sharedWith] of [[primaryName, secondaryName], [secondaryName, primaryName]]) {
+      if (!studentName) continue;
+      const resource = ensure(studentName);
+      if (!resource) continue;
+      resource.tuner_number = tuner.tuner_number || null;
+      resource.tuner_shared_with = sharedWith || null;
+    }
+  }
+
+  return [...resources.values()].map((row) => ({ ...row, source_row_hash: hashJson(row) }));
+}
+
+function resourceNameKey(value) {
+  return String(value || "")
+    .normalize("NFKD")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "")
+    .trim();
 }

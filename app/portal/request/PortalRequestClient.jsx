@@ -16,9 +16,10 @@ function requestedEmail() {
 
 export default function PortalRequestClient() {
   const [form, setForm] = useState({
-    guardianName: "",
-    guardianEmail: "",
-    guardianPhone: "",
+    requesterType: "guardian",
+    requesterName: "",
+    requesterEmail: "",
+    requesterPhone: "",
     studentFirst: "",
     studentLast: "",
     studentGrade: "",
@@ -30,14 +31,14 @@ export default function PortalRequestClient() {
   const [message, setMessage] = useState("");
   const [nextPath, setNextPath] = useState("/portal/review");
 
-  const guardianEmail = form.guardianEmail.trim().toLowerCase();
+  const requesterEmail = form.requesterEmail.trim().toLowerCase();
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setNextPath(requestedDestination());
     const email = requestedEmail();
     if (email) {
-      setForm((current) => ({ ...current, guardianEmail: email }));
+      setForm((current) => ({ ...current, requesterEmail: email }));
     }
   }, []);
 
@@ -74,7 +75,7 @@ export default function PortalRequestClient() {
       const res = await fetch("/api/portal/request/confirm", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: guardianEmail, code })
+        body: JSON.stringify({ email: requesterEmail, code })
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -111,18 +112,31 @@ export default function PortalRequestClient() {
               Use this when your email is new or not connected to the right student yet. If the student matches the roster, you&apos;ll be connected as soon as your email is verified. If not, Mr. Parker will follow up.
             </p>
             <form className="portal-request-form" onSubmit={submit}>
+              <fieldset className="portal-requester-type portal-request-wide">
+                <legend>Who is requesting access?</legend>
+                <label>
+                  <input type="radio" name="requesterType" value="student" checked={form.requesterType === "student"} onChange={() => update("requesterType", "student")} />
+                  <span>I am the student</span>
+                </label>
+                <label>
+                  <input type="radio" name="requesterType" value="guardian" checked={form.requesterType === "guardian"} onChange={() => update("requesterType", "guardian")} />
+                  <span>I am a parent or guardian</span>
+                </label>
+              </fieldset>
               <label>
-                <span>Guardian name</span>
-                <input value={form.guardianName} onChange={(event) => update("guardianName", event.target.value)} required />
+                <span>{form.requesterType === "student" ? "Student name" : "Guardian name"}</span>
+                <input value={form.requesterName} onChange={(event) => update("requesterName", event.target.value)} required />
               </label>
               <label>
-                <span>Guardian email</span>
-                <input type="email" value={form.guardianEmail} onChange={(event) => update("guardianEmail", event.target.value)} required />
+                <span>{form.requesterType === "student" ? "NHCS student email" : "Guardian email"}</span>
+                <input type="email" value={form.requesterEmail} onChange={(event) => update("requesterEmail", event.target.value)} placeholder={form.requesterType === "student" ? "name@student.nhcs.net" : ""} required />
               </label>
-              <label>
-                <span>Guardian phone</span>
-                <input value={form.guardianPhone} onChange={(event) => update("guardianPhone", event.target.value)} />
-              </label>
+              {form.requesterType === "guardian" ? (
+                <label>
+                  <span>Guardian phone</span>
+                  <input value={form.requesterPhone} onChange={(event) => update("requesterPhone", event.target.value)} />
+                </label>
+              ) : null}
               <label>
                 <span>Student first name</span>
                 <input value={form.studentFirst} onChange={(event) => update("studentFirst", event.target.value)} required />
@@ -153,7 +167,7 @@ export default function PortalRequestClient() {
         {step === "code" ? (
           <>
             <p className="portal-copy">
-              Enter the 6-digit code we emailed to <strong>{guardianEmail}</strong>.
+              Enter the 6-digit code we emailed to <strong>{requesterEmail}</strong>.
             </p>
             <form className="portal-form" onSubmit={verify}>
               <label htmlFor="request-code">6-digit code</label>

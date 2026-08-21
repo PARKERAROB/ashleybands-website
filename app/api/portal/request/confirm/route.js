@@ -62,9 +62,10 @@ export async function POST(request) {
   const granted = Boolean(accessRequest.claimed_student_id);
   await upsertStudentRelationship(accessRequest, person.id, granted ? "trusted" : "claimed");
 
+  const requesterLabel = accessRequest.requester_type === "student" ? "Student" : "Guardian";
   const reviewSummary = granted
-    ? `${accessRequest.guardian_name} verified an email and was auto-connected to ${accessRequest.student_first} ${accessRequest.student_last}.`
-    : `${accessRequest.guardian_name} verified an email but no roster student matched ${accessRequest.student_first} ${accessRequest.student_last} - follow up with the family.`;
+    ? `${accessRequest.guardian_name} verified a ${accessRequest.requester_type === "student" ? "student" : "guardian"} email and was auto-connected to ${accessRequest.student_first} ${accessRequest.student_last}.`
+    : `${accessRequest.guardian_name} verified an email but no roster student matched ${accessRequest.student_first} ${accessRequest.student_last} - follow up.`;
   const { data: reviewItem, error: reviewError } = await supabaseAdmin
     .from("portal_review_queue")
     .insert({
@@ -75,6 +76,7 @@ export async function POST(request) {
       access_request_id: accessRequest.id,
       summary: reviewSummary,
       details: {
+        requester_type: accessRequest.requester_type || "guardian",
         guardian_name: accessRequest.guardian_name,
         guardian_email: accessRequest.guardian_email,
         guardian_phone: accessRequest.guardian_phone,
@@ -135,7 +137,7 @@ export async function POST(request) {
       summary: reviewSummary,
       reviewUrl,
       details: [
-        `Guardian: ${accessRequest.guardian_name}`,
+        `${requesterLabel}: ${accessRequest.guardian_name}`,
         `Email: ${accessRequest.guardian_email}`,
         `Phone: ${accessRequest.guardian_phone || "not provided"}`,
         `Claimed student: ${accessRequest.student_first} ${accessRequest.student_last}`,
@@ -158,12 +160,24 @@ export async function POST(request) {
 }
 
 async function upsertClaimedPerson(accessRequest) {
+  if (accessRequest.requester_type === "student" && accessRequest.claimed_student_id) {
+    const { data: studentLink, error: studentLinkError } = await supabaseAdmin
+      .from("portal_student_people")
+      .select("person_id")
+      .eq("student_id", accessRequest.claimed_student_id)
+      .eq("role", "student")
+      .eq("relationship_status", "trusted")
+      .limit(1)
+      .maybeSingle();
+    if (studentLinkError) throw studentLinkError;
+    if (studentLink?.person_id) return { id: studentLink.person_id };
+  }
   const sourcePersonKey = `access-request:${accessRequest.id}`;
   const { data, error } = await supabaseAdmin
     .from("portal_people")
     .upsert({
       source_person_key: sourcePersonKey,
-      person_type: "guardian",
+      person_type: accessRequest.requester_type === "student" ? "student" : "guardian",
       display_name: accessRequest.guardian_name,
       first_name: splitName(accessRequest.guardian_name).first,
       last_name: splitName(accessRequest.guardian_name).last,
@@ -184,8 +198,8 @@ async function upsertVerifiedEmail(personId, accessRequest, now) {
       contact_type: "email",
       value_display: accessRequest.guardian_email,
       value_normalized: accessRequest.guardian_email.toLowerCase(),
-      verification_status: "verified_magic_link",
-      verification_source: "portal_unknown_email_confirm",
+      verification_status: "verified_email_code",
+      verification_source: accessRequest.requester_type === "student" ? "portal_student_self_claim" : "portal_unknown_email_confirm",
       verified_at: now,
       evidence: {
         access_request_id: accessRequest.id,
@@ -207,7 +221,7 @@ async function upsertStudentRelationship(accessRequest, personId, relationshipSt
     .upsert({
       student_id: accessRequest.claimed_student_id,
       person_id: personId,
-      role: "guardian",
+      role: accessRequest.requester_type === "student" ? "student" : "guardian",
       relationship_status: relationshipStatus,
       primary_contact: false,
       source: "portal_access_request",

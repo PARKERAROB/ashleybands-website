@@ -15,6 +15,10 @@ function splitContacts(rows) {
   return { emails, phones };
 }
 
+function oneRelation(value) {
+  return Array.isArray(value) ? value[0] || null : value || null;
+}
+
 export async function GET(request) {
   const session = readPortalSession(request);
   if (!session?.personId) {
@@ -35,7 +39,7 @@ export async function GET(request) {
       supabaseAdmin
         .from("portal_student_people")
         .select(
-          "student_id, relationship_status, role, primary_contact, portal_students(id, display_name, preferred_first, grade_fall26, status, school_email, cell_phone, notes, band_class_2026, band_period_2026, ensemble_2026, instrument_2026, marching_2026, mb_role_2026, marching_role_category_2026, marching_assignment_2026)"
+          "student_id, relationship_status, role, primary_contact, portal_students(id, display_name, preferred_first, grade_fall26, status, school_email, cell_phone, notes, band_class_2026, band_period_2026, ensemble_2026, instrument_2026, marching_2026, mb_role_2026, marching_role_category_2026, marching_assignment_2026, portal_student_resources(locker_number, lock_serial, lock_combination, tuner_number, tuner_shared_with, assignment_status))"
         )
         .eq("person_id", session.personId)
         .eq("relationship_status", "trusted")
@@ -46,26 +50,38 @@ export async function GET(request) {
   }
 
   const students = (links || [])
-    .map((link) => ({
-      id: link.portal_students?.id,
-      displayName: link.portal_students?.display_name,
-      preferredFirst: link.portal_students?.preferred_first,
-      grade: link.portal_students?.grade_fall26,
-      status: link.portal_students?.status,
-      schoolEmail: link.portal_students?.school_email,
-      cellPhone: link.portal_students?.cell_phone,
-      note: link.portal_students?.notes || "",
-      bandClass2026: link.portal_students?.band_class_2026 || "",
-      bandPeriod2026: link.portal_students?.band_period_2026 || "",
-      ensemble2026: link.portal_students?.ensemble_2026 || "",
-      instrument2026: link.portal_students?.instrument_2026 || "",
-      marching2026: link.portal_students?.marching_2026 || "",
-      marchingRole2026: link.portal_students?.mb_role_2026 || "",
-      marchingRoleCategory2026: link.portal_students?.marching_role_category_2026 || "",
-      marchingAssignment2026: link.portal_students?.marching_assignment_2026 || "",
-      participationRequest: null,
-      guardians: []
-    }))
+    .map((link) => {
+      const resource = oneRelation(link.portal_students?.portal_student_resources);
+      const lockSerial = String(resource?.lock_serial || "");
+      return {
+        id: link.portal_students?.id,
+        displayName: link.portal_students?.display_name,
+        preferredFirst: link.portal_students?.preferred_first,
+        grade: link.portal_students?.grade_fall26,
+        status: link.portal_students?.status,
+        schoolEmail: link.portal_students?.school_email,
+        cellPhone: link.portal_students?.cell_phone,
+        note: link.portal_students?.notes || "",
+        bandClass2026: link.portal_students?.band_class_2026 || "",
+        bandPeriod2026: link.portal_students?.band_period_2026 || "",
+        ensemble2026: link.portal_students?.ensemble_2026 || "",
+        instrument2026: link.portal_students?.instrument_2026 || "",
+        marching2026: link.portal_students?.marching_2026 || "",
+        marchingRole2026: link.portal_students?.mb_role_2026 || "",
+        marchingRoleCategory2026: link.portal_students?.marching_role_category_2026 || "",
+        marchingAssignment2026: link.portal_students?.marching_assignment_2026 || "",
+        resources: resource ? {
+          lockerNumber: resource.locker_number || "",
+          lockId: lockSerial ? lockSerial.slice(-3) : "",
+          lockCombination: resource.lock_combination || "",
+          tunerNumber: resource.tuner_number || "",
+          tunerSharedWith: resource.tuner_shared_with || "",
+          assignmentStatus: resource.assignment_status || "provisional"
+        } : null,
+        participationRequest: null,
+        guardians: []
+      };
+    })
     .filter((student) => student.id);
 
   // Attach the other adult guardians linked to each student.

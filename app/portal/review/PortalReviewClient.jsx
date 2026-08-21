@@ -155,6 +155,7 @@ export default function PortalReviewClient() {
               <div className="portal-workspace-main">
                 <BandReadySection student={selectedStudent} />
                 <ParticipationSection student={selectedStudent} onChanged={loadProfile} />
+                <StudentResourcesSection student={selectedStudent} />
                 <InstrumentRequestSection student={selectedStudent} />
                 <UniformSection student={selectedStudent} />
                 <BillingSection studentId={selectedStudent.id} studentName={selectedStudent.displayName} />
@@ -199,6 +200,46 @@ function FamilyResources({ studentId }) {
       <Link href="/info/the-band-folder">The Band Folder</Link>
       <Link href="/assistant">Ask the Band Assistant</Link>
     </nav>
+  );
+}
+
+function StudentResourcesSection({ student }) {
+  const resources = student.resources;
+  const percussion = /percussion|front ensemble|drum/i.test(`${student.instrument2026} ${student.ensemble2026}`);
+
+  return (
+    <section className="portal-workspace-section" aria-labelledby="student-resources-heading">
+      <div className="portal-section-heading">
+        <PortalSectionIcon type="resources" />
+        <div className="portal-section-heading-copy">
+          <h2 id="student-resources-heading">Classroom assignments</h2>
+          <p>Use these provisional numbers when collecting equipment. Mr. Parker will confirm the physical items before they are issued.</p>
+        </div>
+      </div>
+      {resources ? (
+        <div className="portal-resource-grid">
+          <article>
+            <span>Instrument locker</span>
+            <strong>{resources.lockerNumber || "Pending"}</strong>
+            <small>{resources.lockerNumber ? "Physical locker location" : "Instrument must be confirmed first"}</small>
+          </article>
+          <article>
+            <span>Lock</span>
+            <strong>{resources.lockId ? `#${resources.lockId}` : "Pending"}</strong>
+            <small>{resources.lockCombination ? `Combination ${resources.lockCombination}` : "Matched lock not assigned yet"}</small>
+          </article>
+          <article>
+            <span>Tuner and clip</span>
+            <strong>{resources.tunerNumber ? `#${resources.tunerNumber}` : "Not assigned"}</strong>
+            <small>{resources.tunerSharedWith ? `Shared with ${resources.tunerSharedWith}` : resources.tunerNumber ? "Individual provisional assignment" : "No tuner assignment"}</small>
+          </article>
+        </div>
+      ) : (
+        <p className="portal-muted-status">
+          {percussion ? "Percussion students use percussion storage and do not receive a regular instrument locker or tuner." : "Classroom assignments are still pending."}
+        </p>
+      )}
+    </section>
   );
 }
 
