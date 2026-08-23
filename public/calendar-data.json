@@ -371,9 +371,9 @@
  {
   "id": "evt-0013",
   "title": "Mattress Fundraiser",
-  "start": "2026-09-26",
-  "end": null,
-  "all_day": true,
+  "start": "2026-09-26T08:00",
+  "end": "2026-09-26T17:00",
+  "all_day": false,
   "category": "MB-Fundraiser",
   "location": "AHS"
  },
@@ -398,9 +398,9 @@
  {
   "id": "evt-0014",
   "title": "Saturday Rehearsal (stadium)",
-  "start": "2026-10-03",
-  "end": null,
-  "all_day": true,
+  "start": "2026-10-03T08:00",
+  "end": "2026-10-03T20:00",
+  "all_day": false,
   "category": "MB-Rehearsal",
   "location": "AHS stadium"
  },
@@ -425,9 +425,9 @@
  {
   "id": "evt-0015",
   "title": "White Oak competition",
-  "start": "2026-10-10",
-  "end": null,
-  "all_day": true,
+  "start": "2026-10-10T08:00",
+  "end": "2026-10-11T00:00",
+  "all_day": false,
   "category": "MB-Competition",
   "location": "White Oak HS"
  },
@@ -468,15 +468,6 @@
   "location": "AHS"
  },
  {
-  "id": "evt-0017",
-  "title": "Pirate Classic (Topsail)",
-  "start": "2026-10-17",
-  "end": null,
-  "all_day": true,
-  "category": "MB-Competition",
-  "location": "Topsail HS"
- },
- {
   "id": "evt-0054",
   "title": "HOCO Dance",
   "start": "2026-10-17",
@@ -484,6 +475,15 @@
   "all_day": true,
   "category": "School",
   "location": ""
+ },
+ {
+  "id": "evt-0017",
+  "title": "Pirate Classic (Topsail)",
+  "start": "2026-10-17T08:00",
+  "end": "2026-10-18T00:00",
+  "all_day": false,
+  "category": "MB-Competition",
+  "location": "Topsail HS"
  },
  {
   "id": "evt-0018",
@@ -524,9 +524,9 @@
  {
   "id": "evt-0021",
   "title": "Pirate Nation Invitational (Corinth Holders)",
-  "start": "2026-10-24",
-  "end": null,
-  "all_day": true,
+  "start": "2026-10-24T08:00",
+  "end": "2026-10-25T00:00",
+  "all_day": false,
   "category": "MB-Competition",
   "location": "Corinth Holders HS"
  },
