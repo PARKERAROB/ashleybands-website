@@ -4,6 +4,9 @@ Public execution surface for the private AshleyBands Area at `~/Atlas/BandsofAHS
 Next.js + Vercel + Supabase. BandsofAHS owns private program facts; this repository contains only
 sanitized public projections, website-owned content, and application code.
 
+For recurring subject retrieval, start with `INDEX.md`; it separates website-owned sources,
+hosted-state contracts, and implementations without duplicating their facts.
+
 ## Before changing content or structure
 - Public info pages are GENERATED. Source markdown lives in `content/sources/`
   (e.g. `marching-band-2026.md`, `2026-2027-band-information.md`). Edit the SOURCE,
@@ -40,13 +43,19 @@ sanitized public projections, website-owned content, and application code.
   `docs/incidents/2026-08-17-open-house-deployment.md`.
 
 ## Family portal
-- **NO portal approval gates, period (Rob 2026-06-23, re-ordered 2026-07-05 after a 3rd recurrence).**
-  Rob approves NOTHING in the portal: signed-in parent changes AND outside-in access requests
-  (`/portal/request`) all auto-approve; a verified email with a roster match gets a `trusted` link
-  immediately. The `/admin/profile-requests` queue is an **audit log**, not an approval gate. The only
-  human case is a no-roster-match request = a family FOLLOW-UP, never an approval. Any new portal
-  feature that emails Rob an "approve" ask violates this decision. Full history + addendum:
+- **No general approval gate for family-owned profile/contact changes or roster-matched access**
+  (Rob 2026-06-23, re-ordered 2026-07-05 after a 3rd recurrence). Signed-in parent changes and
+  outside-in access requests (`/portal/request`) auto-apply; a verified email with a roster match gets
+  a `trusted` link immediately. The `/admin/profile-requests` queue is an **audit log**, not an
+  approval gate. A no-roster-match request is a family FOLLOW-UP, never an approval. Any new
+  family-owned profile/contact/access feature that emails Rob an "approve" ask violates this
+  decision. Full history + addendum:
   `docs/decisions/2026-06-23-portal-parent-changes-auto-approve.md`.
+- **Narrow exception: participation/placement corrections remain staff-reviewed.** Those requests
+  propose changes to roster-owned program facts, so they stay pending until staff disposition under
+  `supabase/migrations/0040_participation_change_requests.sql` and
+  `app/api/portal/participation-request/route.js`. This is not an access or family-contact gate and
+  does not alter the general auto-approval rule above.
 
 ## Comms
 - Resend broadcasts + send queue are L2: draft/stage only, Rob sends. Never send.
