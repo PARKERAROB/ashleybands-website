@@ -119,6 +119,7 @@ SUMMARY:Mattress Fundraiser
 DTSTART;TZID=America/New_York:20260926T080000
 DTEND;TZID=America/New_York:20260926T170000
 LOCATION:AHS
+DESCRIPTION:Times may change.
 END:VEVENT
 BEGIN:VEVENT
 UID:evt-0014-program@ashleybands.com
@@ -127,6 +128,7 @@ SUMMARY:Saturday Rehearsal (stadium)
 DTSTART;TZID=America/New_York:20261003T080000
 DTEND;TZID=America/New_York:20261003T200000
 LOCATION:AHS stadium
+DESCRIPTION:Times may change.
 END:VEVENT
 BEGIN:VEVENT
 UID:evt-0015-program@ashleybands.com
@@ -135,6 +137,8 @@ SUMMARY:White Oak competition
 DTSTART;TZID=America/New_York:20261010T080000
 DTEND;TZID=America/New_York:20261011T000000
 LOCATION:White Oak HS
+DESCRIPTION:Schedule will be released once it is communicated by the compe
+ tition host.
 END:VEVENT
 BEGIN:VEVENT
 UID:evt-0016-program@ashleybands.com
@@ -159,6 +163,8 @@ SUMMARY:Pirate Classic (Topsail)
 DTSTART;TZID=America/New_York:20261017T080000
 DTEND;TZID=America/New_York:20261018T000000
 LOCATION:Topsail HS
+DESCRIPTION:Schedule will be released once it is communicated by the compe
+ tition host.
 END:VEVENT
 BEGIN:VEVENT
 UID:evt-0018-program@ashleybands.com
@@ -199,6 +205,8 @@ SUMMARY:Pirate Nation Invitational (Corinth Holders)
 DTSTART;TZID=America/New_York:20261024T080000
 DTEND;TZID=America/New_York:20261025T000000
 LOCATION:Corinth Holders HS
+DESCRIPTION:Schedule will be released once it is communicated by the compe
+ tition host.
 END:VEVENT
 BEGIN:VEVENT
 UID:evt-0022-program@ashleybands.com

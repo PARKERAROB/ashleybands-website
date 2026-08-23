@@ -110,6 +110,7 @@ function gcalLink(ev) {
   const r = dateRange(ev);
   const p = new URLSearchParams({ action: "TEMPLATE", text: ev.title || "Band Event", dates: `${r.start}/${r.end}` });
   if (ev.location) p.set("location", ev.location);
+  if (ev.description) p.set("details", ev.description);
   return `https://calendar.google.com/calendar/render?${p.toString()}`;
 }
 function icsDataUri(ev) {
@@ -122,6 +123,7 @@ function icsDataUri(ev) {
     r.allDay ? `DTEND;VALUE=DATE:${r.end}` : `DTEND:${r.end}`
   ];
   if (ev.location) lines.push(`LOCATION:${ev.location}`);
+  if (ev.description) lines.push(`DESCRIPTION:${ev.description}`);
   lines.push("END:VEVENT", "END:VCALENDAR");
   return "data:text/calendar;charset=utf-8," + encodeURIComponent(lines.join("\r\n"));
 }
@@ -348,6 +350,7 @@ export default function CalendarView() {
             <h3 className="cal-modal-title">{openEvent.title}</h3>
             <p className="cal-modal-when">{whenLabel(openEvent)}</p>
             {openEvent.location && <p className="cal-modal-loc">{openEvent.location}</p>}
+            {openEvent.description && <p>{openEvent.description}</p>}
             <div className="cal-modal-actions">
               <a className="button primary" href={gcalLink(openEvent)} target="_blank" rel="noopener noreferrer">
                 Add to Google Calendar
