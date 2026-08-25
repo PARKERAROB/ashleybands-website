@@ -378,3 +378,118 @@ export async function PATCH(request) {
 
   return NextResponse.json({ ok: true, updated: true });
 }
+
+export async function DELETE(request) {
+  const session = readPortalSession(request);
+  if (!session?.personId) {
+    return NextResponse.json({ error: "Not signed in." }, { status: 401 });
+  }
+
+  const body = await request.json().catch(() => ({}));
+  const studentId = String(body.studentId || "").trim();
+  const guardianId = String(body.guardianId || "").trim();
+  if (!studentId || !guardianId) {
+    return NextResponse.json({ error: "Guardian record not found." }, { status: 400 });
+  }
+
+  const access = await trustedStudentAccess(session.personId, studentId);
+  if (!access) return NextResponse.json({ error: "Student access not found." }, { status: 403 });
+
+  const { data: guardianLink, error: guardianError } = await supabaseAdmin
+    .from("portal_student_people")
+    .select("id, role, primary_contact, portal_people(id, display_name, person_type)")
+    .eq("student_id", studentId)
+    .eq("person_id", guardianId)
+    .eq("relationship_status", "trusted")
+    .maybeSingle();
+
+  const guardian = Array.isArray(guardianLink?.portal_people)
+    ? guardianLink.portal_people[0]
+    : guardianLink?.portal_people;
+  if (guardianError || !guardianLink || guardian?.person_type === "student") {
+    return NextResponse.json({ error: "Guardian record not found." }, { status: 404 });
+  }
+
+  const now = new Date().toISOString();
+  const guardianName = guardian?.display_name || "Guardian";
+  const studentName = access.portal_students?.display_name || "this student";
+  const oldValue = {
+    guardianId,
+    name: guardianName,
+    relationship: guardianLink.role || "",
+    primary: Boolean(guardianLink.primary_contact),
+    relationshipStatus: "trusted"
+  };
+  const newValue = { relationshipStatus: "superseded" };
+
+  // Preserve the person and their links to any other students. Removing a
+  // guardian here revokes only this trusted student relationship and keeps the
+  // change reversible and auditable.
+  const { error: removeError } = await supabaseAdmin
+    .from("portal_student_people")
+    .update({ relationship_status: "superseded", primary_contact: false, updated_at: now })
+    .eq("id", guardianLink.id)
+    .eq("relationship_status", "trusted");
+  if (removeError) {
+    return NextResponse.json({ error: "Could not remove this guardian." }, { status: 500 });
+  }
+
+  const summary = `${session.email} removed ${guardianName} as a guardian for ${studentName}`;
+  const { data: updateRequest } = await supabaseAdmin
+    .from("portal_update_requests")
+    .insert({
+      submitted_by_person_id: session.personId,
+      student_id: studentId,
+      target_table: "portal_student_people",
+      target_id: guardianLink.id,
+      field_name: "remove_guardian",
+      old_value: JSON.stringify(oldValue),
+      new_value: JSON.stringify(newValue),
+      sensitivity: "relationship",
+      status: "approved",
+      reviewed_by: "auto-approve (login-authorized) 2026-06-23",
+      reviewed_at: now,
+      review_notes: "Auto-applied: a trusted family member removed a guardian relationship."
+    })
+    .select("id")
+    .single();
+
+  const { data: reviewItem } = await supabaseAdmin
+    .from("portal_review_queue")
+    .insert({
+      item_type: "contact_change",
+      status: "approved",
+      student_id: studentId,
+      person_id: session.personId,
+      update_request_id: updateRequest?.id || null,
+      summary,
+      details: {
+        field: "remove_guardian",
+        guardian_id: guardianId,
+        guardian_name: guardianName,
+        old_value: oldValue,
+        new_value: newValue,
+        auto_approved: true
+      }
+    })
+    .select("id")
+    .single();
+
+  if (updateRequest?.id && reviewItem?.id) {
+    await supabaseAdmin
+      .from("portal_update_requests")
+      .update({ review_item_id: reviewItem.id })
+      .eq("id", updateRequest.id);
+  }
+
+  await logAudit({
+    actor: { type: "parent", id: session.personId, name: session.email },
+    action: "update",
+    table: "portal_student_people",
+    recordId: guardianLink.id,
+    route: "/api/portal/guardian-request",
+    changes: { old: oldValue, new: newValue, studentId }
+  });
+
+  return NextResponse.json({ ok: true, removed: true });
+}

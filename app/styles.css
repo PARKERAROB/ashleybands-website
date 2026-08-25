@@ -3213,6 +3213,43 @@ h2 {
   border-radius: 8px;
   background: #fff;
 }
+.portal-guardian-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.portal-remove-link {
+  color: #a3242f;
+}
+.portal-guardian-remove-confirm {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid #d8a9ae;
+  border-radius: 8px;
+  background: #fff4f3;
+}
+.portal-guardian-remove-confirm p {
+  margin: 0;
+  color: #6f1e27;
+  line-height: 1.45;
+}
+.portal-danger-btn {
+  min-height: 44px;
+  border: 0;
+  border-radius: 6px;
+  padding: 9px 14px;
+  background: #a3242f;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+.portal-danger-btn:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
 .portal-measurements {
   margin-top: 16px;
   padding: 14px 16px;

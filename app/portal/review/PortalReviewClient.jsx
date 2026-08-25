@@ -934,7 +934,7 @@ function StudentRail({ student, onChanged }) {
       </section>
 
       <p className="portal-privacy-note">
-        Changes take effect immediately. To remove a person from the family record entirely, contact Mr. Parker. <Link href="/privacy">Privacy Notice</Link>
+        Changes take effect immediately. Removing a guardian here removes their access to this student only. <Link href="/privacy">Privacy Notice</Link>
       </p>
     </aside>
   );
@@ -1296,6 +1296,7 @@ function EditableField({ field, studentId, label, value, placeholder, note, feat
 
 function GuardianEdit({ guardian, studentId, studentName, onSaved }) {
   const [open, setOpen] = useState(false);
+  const [confirmingRemove, setConfirmingRemove] = useState(false);
   const [form, setForm] = useState({
     name: guardian.name || "",
     relationship: guardian.role || "",
@@ -1326,8 +1327,51 @@ function GuardianEdit({ guardian, studentId, studentName, onSaved }) {
     if (onSaved) await onSaved();
   }
 
+  async function removeGuardian() {
+    setStatus("removing");
+    setMessage("");
+    const res = await fetch("/api/portal/guardian-request", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentId, guardianId: guardian.id })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setStatus("idle");
+      setMessage(data.error || "Could not remove this guardian.");
+      return;
+    }
+    setStatus("removed");
+    setConfirmingRemove(false);
+    if (onSaved) await onSaved();
+  }
+
+  if (confirmingRemove) {
+    return (
+      <div className="portal-guardian-remove-confirm" role="group" aria-label={`Remove ${guardian.name} as a guardian`}>
+        <p>
+          Remove {guardian.name} from {studentName}? They will no longer have access to this student through this family record. Other students are not affected.
+        </p>
+        <div className="portal-guardian-actions">
+          <button type="button" className="portal-danger-btn" disabled={status === "removing"} onClick={removeGuardian}>
+            {status === "removing" ? "Removing..." : "Yes, remove guardian"}
+          </button>
+          <button type="button" className="portal-link-btn" disabled={status === "removing"} onClick={() => { setConfirmingRemove(false); setMessage(""); }}>
+            Keep guardian
+          </button>
+        </div>
+        {message ? <span className="portal-field-error">{message}</span> : null}
+      </div>
+    );
+  }
+
   if (!open) {
-    return <button type="button" className="portal-link-btn portal-guardian-edit" onClick={() => setOpen(true)}>Edit contact</button>;
+    return (
+      <div className="portal-guardian-actions">
+        <button type="button" className="portal-link-btn portal-guardian-edit" onClick={() => setOpen(true)}>Edit contact</button>
+        <button type="button" className="portal-link-btn portal-remove-link" onClick={() => setConfirmingRemove(true)}>Remove guardian</button>
+      </div>
+    );
   }
 
   return (
