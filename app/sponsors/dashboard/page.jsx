@@ -374,7 +374,7 @@ function GiftsPanel({ session }) {
       {pending.length ? (
         <table className="tracker-table" style={{ marginTop: 8 }}>
           <thead>
-            <tr><th>Business</th><th>Amount</th><th>Method</th><th>From</th><th></th></tr>
+            <tr><th>Donor</th><th>Amount</th><th>Method</th><th>From</th><th>Student</th><th></th></tr>
           </thead>
           <tbody>
             {pending.map((g) => (
@@ -383,6 +383,7 @@ function GiftsPanel({ session }) {
                 <td>{fmt(g.amount_cents)}{g.tier ? <div className="tracker-sub">{g.tier}</div> : null}</td>
                 <td>{g.method}</td>
                 <td>{g.payer_name || "—"}{g.payer_email ? <div className="tracker-sub">{g.payer_email}</div> : null}</td>
+                <td>{g.student?.display_name || "—"}</td>
                 <td>
                   <button type="button" className="tracker-link tracker-link-action" disabled={busy === g.id} onClick={() => confirmGift(g)}>
                     Confirm received
@@ -402,6 +403,7 @@ function GiftsPanel({ session }) {
           {confirmed.map((g, index) => (
             <span key={g.id}>
               {index ? ", " : ""}{g.business_name} ({fmt(g.amount_cents)})
+              {g.student?.display_name ? ` · credited to ${g.student.display_name}` : ""}
               {g.listed_on_site ? " · published" : (
                 <button type="button" className="tracker-link" disabled={busy === g.id} onClick={() => publishGift(g)}>
                   {" · publish"}

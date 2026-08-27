@@ -15,6 +15,7 @@ import {
 } from "../lib/sponsorGiftPolicy.mjs";
 import {
   signSponsorGiveToken,
+  signSponsorStudentGiveToken,
   verifySponsorGiveToken
 } from "../lib/sponsorGiveToken.mjs";
 
@@ -108,6 +109,20 @@ test("sponsor give attribution tokens are signed and expire", () => {
   assert.equal(verifySponsorGiveToken(token, { secret, nowMs: 7_000 }), null);
 });
 
+test("student share links use a distinct signed and expiring attribution token", () => {
+  const secret = "test-sponsorship-secret-with-enough-entropy";
+  const token = signSponsorStudentGiveToken(
+    { linkId: "link-1", studentId: "student-1" },
+    { secret, nowMs: 1_000, ttlMs: 5_000 }
+  );
+  assert.deepEqual(
+    verifySponsorGiveToken(token, { secret, nowMs: 2_000 }),
+    { linkId: "link-1", studentId: "student-1" }
+  );
+  assert.equal(verifySponsorGiveToken(`${token}x`, { secret, nowMs: 2_000 }), null);
+  assert.equal(verifySponsorGiveToken(token, { secret, nowMs: 7_000 }), null);
+});
+
 test("PayPal webhooks route sponsor invoices to the sponsor ledger", () => {
   assert.equal(isSponsorInvoiceId("AB-SP-123"), true);
   assert.deepEqual(
@@ -149,7 +164,31 @@ test("public gift writes use signed attribution, idempotency, and fail-closed ra
     assert.match(route, /attributionToken/);
     assert.match(route, /failOpen: false/);
     assert.doesNotMatch(route, /body\.business_id|body\.prospect_id/);
+    assert.doesNotMatch(route, /body\.portal_student_id|body\.student_id/);
   }
+});
+
+test("student support links are short, server-resolved, revocable, and walled", () => {
+  const shortRoute = source("app/support/[code]/page.jsx");
+  const resolver = source("lib/sponsorStudentLinks.js");
+  const migration = source("supabase/migrations/0043_student_sponsorship_links.sql");
+
+  assert.match(shortRoute, /resolveSponsorStudentCode/);
+  assert.match(shortRoute, /signSponsorStudentGiveToken/);
+  assert.match(resolver, /randomBytes\(9\)/);
+  assert.match(resolver, /\.eq\("active", true\)|!link\.active/);
+  assert.match(migration, /portal_student_id uuid not null/);
+  assert.match(migration, /security_invoker = true/);
+  assert.match(migration, /enable row level security/);
+});
+
+test("the donor page explains program support and student attribution without accepting a raw student id", () => {
+  const givePage = source("app/sponsors/give/GiveClient.jsx");
+  const gifts = source("lib/sponsorGifts.js");
+  assert.match(givePage, /supports the whole Bands of Ashley program/);
+  assert.match(givePage, /sponsorship total/);
+  assert.match(gifts, /resolveSponsorStudentTokenClaims/);
+  assert.doesNotMatch(givePage, /portal_student_id|student_id/);
 });
 
 test("online gifts stay private until staff review and badges require a listed gift", () => {

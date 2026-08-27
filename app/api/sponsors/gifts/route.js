@@ -25,7 +25,7 @@ export async function GET(req) {
   const { data, error } = await supabaseAdmin
     .from("sponsor_gifts")
     .select(
-      "id, business_name, amount_cents, method, status, tier, payer_name, payer_email, fmv_cents, deductible_cents, receipt_number, recognition_status, listed_on_site, recorded_by, confirmed_at, created_at"
+      "id, business_name, amount_cents, method, status, tier, payer_name, payer_email, fmv_cents, deductible_cents, receipt_number, recognition_status, listed_on_site, recorded_by, confirmed_at, created_at, student:portal_students(display_name, preferred_first, legal_first, legal_last)"
     )
     .order("created_at", { ascending: false })
     .limit(200);

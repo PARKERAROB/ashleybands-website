@@ -98,9 +98,11 @@ function Dashboard({ data, reload }) {
   return (
     <>
       <p className="sp-lede">
-        Help fund the band so families never have to. Add three to five businesses your family already knows and
-        loves. There is no obligation and no fee. We even break the ice for you.
+        Share one student link with family, friends, or businesses. They can support the band without signing in.
+        You can also add businesses your family already knows and loves below.
       </p>
+
+      {data.directGiveLinks?.length ? <DirectGiveLinks links={data.directGiveLinks} /> : null}
 
       <section className="sp-card sp-goal">
         <div className="sp-goal-head">
@@ -155,6 +157,62 @@ function Dashboard({ data, reload }) {
         <Link href="/portal/review">← Back to your profile</Link>
       </p>
     </>
+  );
+}
+
+function DirectGiveLinks({ links }) {
+  const [copiedId, setCopiedId] = useState("");
+
+  async function share(link) {
+    const url = `${window.location.origin}${link.give_path}`;
+    const firstName = link.student.first_name || "an Ashley Bands student";
+    const shareData = {
+      title: `Support ${firstName}'s Ashley Bands sponsorship effort`,
+      text: `Support the Bands of Ashley through ${firstName}'s sponsorship link.`,
+      url
+    };
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch (error) {
+        if (error?.name === "AbortError") return;
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedId(link.student.id);
+      window.setTimeout(() => setCopiedId(""), 2500);
+    } catch {
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+  }
+
+  return (
+    <section className="sp-card sp-share-card">
+      <h2>One link. Anyone can give.</h2>
+      <p>
+        Send this link to family, friends, or businesses. Their gift supports the whole band and is credited to the
+        student&apos;s sponsorship total.
+      </p>
+      <div className="sp-share-list">
+        {links.map((link) => (
+          <div className="sp-share-row" key={link.student.id}>
+            <div>
+              <strong>{link.student.display_name}</strong>
+              <span className="sp-muted">
+                {link.confirmedGifts
+                  ? `${usd(link.confirmedCents)} through ${link.confirmedGifts} confirmed gift${link.confirmedGifts === 1 ? "" : "s"}`
+                  : "Ready to share"}
+              </span>
+            </div>
+            <button type="button" className="sp-btn sp-btn-primary" onClick={() => share(link)}>
+              {copiedId === link.student.id ? "Link copied" : "Share link"}
+            </button>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -604,6 +662,35 @@ function Styles() {
         gap: 10px;
         flex-wrap: wrap;
       }
+      .sp-share-card {
+        border-color: #d8b46a;
+        background: linear-gradient(135deg, #fffdf8, #fbf3e3);
+      }
+      .sp-share-card h2 {
+        margin: 0 0 6px;
+      }
+      .sp-share-card > p {
+        margin: 0 0 14px;
+        line-height: 1.5;
+      }
+      .sp-share-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .sp-share-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding-top: 10px;
+        border-top: 1px solid #ead8b7;
+      }
+      .sp-share-row > div {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
       .sp-goal-head {
         display: flex;
         justify-content: space-between;
@@ -789,6 +876,10 @@ function Styles() {
       @media (max-width: 520px) {
         .sp-grid2 {
           grid-template-columns: 1fr;
+        }
+        .sp-share-row {
+          align-items: stretch;
+          flex-direction: column;
         }
       }
       .sp-suggest {

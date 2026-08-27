@@ -30,6 +30,7 @@ export default function GiveClient() {
 
   const [open, setOpen] = useState("loading"); // loading | open | closed
   const [businessName, setBusinessName] = useState("");
+  const [studentName, setStudentName] = useState("");
   const [amount, setAmount] = useState("");
   const [payerName, setPayerName] = useState("");
   const [payerEmail, setPayerEmail] = useState("");
@@ -54,6 +55,7 @@ export default function GiveClient() {
         }
         setOpen("open");
         if (out.j?.name) setBusinessName(out.j.name);
+        if (out.j?.student_name) setStudentName(out.j.student_name);
       })
       .catch(() => !cancelled && setOpen("closed"));
     return () => {
@@ -67,7 +69,7 @@ export default function GiveClient() {
 
   async function submitCheck() {
     setError("");
-    if (!businessName.trim()) return setError("Tell us your business name.");
+    if (!businessName.trim()) return setError("Tell us your name or business name.");
     if (!amountValid) return setError("Enter a gift amount of at least $5.");
     setSavingCheck(true);
     try {
@@ -119,8 +121,12 @@ export default function GiveClient() {
     <main className="give-shell">
       <div className="give-card">
         <p className="give-eyebrow">AHS Band Boosters · 501(c)(3)</p>
-        <h1>Sponsor the Bands of Ashley</h1>
-        {businessName ? <p className="give-lede">{sponsorThankYouLine(businessName)}</p> : null}
+        <h1>{studentName ? `Support ${studentName}'s Ashley Bands sponsorship effort` : "Sponsor the Bands of Ashley"}</h1>
+        {studentName ? (
+          <p className="give-lede">
+            Your gift supports the whole Bands of Ashley program and will be credited to {studentName}&apos;s sponsorship total.
+          </p>
+        ) : businessName ? <p className="give-lede">{sponsorThankYouLine(businessName)}</p> : null}
 
         {checkResult ? (
           <div className="give-result" role="status" aria-live="polite">
@@ -150,12 +156,12 @@ export default function GiveClient() {
         ) : (
           <>
             <label className="give-label">
-              Business name
+              {studentName ? "Your name or business name" : "Business name"}
               <input
                 value={businessName}
                 onChange={(e) => setBusinessName(e.target.value)}
-                placeholder="Your business"
-                readOnly={Boolean(attributionToken)}
+                placeholder={studentName ? "Donor or business" : "Your business"}
+                readOnly={Boolean(attributionToken) && !studentName}
               />
             </label>
             <div className="give-grid">
@@ -216,7 +222,7 @@ export default function GiveClient() {
                 onDone={setOnlineResult}
               />
             ) : (
-              <p className="give-muted">Enter your business name and an amount of at least $5 to give online — or choose Pay by check.</p>
+              <p className="give-muted">Enter your name and an amount of at least $5 to give online — or choose Pay by check.</p>
             )}
           </>
         )}

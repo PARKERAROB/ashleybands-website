@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveSponsorFamily, sponsorFunnelLive } from "@/lib/sponsorFamily";
 import { signSponsorGiveToken } from "@/lib/sponsorGiveToken.mjs";
+import {
+  ensureSponsorStudentLinks,
+  loadAuthorizedSponsorStudents
+} from "@/lib/sponsorStudentLinks";
 
 export const runtime = "nodejs";
 
@@ -21,8 +25,17 @@ export async function GET(req) {
     return NextResponse.json({ error: "Sign in to the Family Portal to open sponsorship." }, { status: 401 });
   }
   const fam = resolved.family;
+  let students;
+  let studentLinks;
+  try {
+    students = await loadAuthorizedSponsorStudents(fam);
+    studentLinks = await ensureSponsorStudentLinks(students);
+  } catch (error) {
+    return NextResponse.json({ error: String(error?.message || error) }, { status: 500 });
+  }
+  const studentIds = students.map((student) => student.id);
 
-  const [{ data: prospects, error: pErr }, { count: warmedCount }, { data: totals }] = await Promise.all([
+  const [{ data: prospects, error: pErr }, { count: warmedCount }, familyGiftResult, studentGiftResult] = await Promise.all([
     supabaseAdmin
       .from("prospects")
       .select(
@@ -37,13 +50,22 @@ export async function GET(req) {
       .eq("outreach_status", "willing")
       .is("claimed_by_family_id", null),
     supabaseAdmin
-      .from("sponsor_family_totals")
-      .select("confirmed_gifts, confirmed_cents")
+      .from("sponsor_gifts")
+      .select("id, portal_student_id, amount_cents")
       .eq("family_id", fam.id)
-      .maybeSingle()
+      .eq("status", "confirmed"),
+    studentIds.length
+      ? supabaseAdmin
+          .from("sponsor_gifts")
+          .select("id, portal_student_id, amount_cents")
+          .in("portal_student_id", studentIds)
+          .eq("status", "confirmed")
+      : Promise.resolve({ data: [], error: null })
   ]);
 
   if (pErr) return NextResponse.json({ error: pErr.message }, { status: 500 });
+  if (familyGiftResult.error) return NextResponse.json({ error: familyGiftResult.error.message }, { status: 500 });
+  if (studentGiftResult.error) return NextResponse.json({ error: studentGiftResult.error.message }, { status: 500 });
 
   const linkedProspects = (prospects || []).map((prospect) => {
     const businessId = prospect.business?.id;
@@ -52,12 +74,35 @@ export async function GET(req) {
     return { ...prospect, give_path: `/sponsors/give?a=${encodeURIComponent(token)}` };
   });
 
+  const allConfirmed = new Map();
+  for (const gift of [...(familyGiftResult.data || []), ...(studentGiftResult.data || [])]) {
+    allConfirmed.set(gift.id, gift);
+  }
+  const studentTotals = new Map(studentIds.map((id) => [id, { confirmedCents: 0, confirmedGifts: 0 }]));
+  for (const gift of studentGiftResult.data || []) {
+    const total = studentTotals.get(gift.portal_student_id);
+    if (!total) continue;
+    total.confirmedCents += Number(gift.amount_cents || 0);
+    total.confirmedGifts += 1;
+  }
+  const directLinks = studentLinks.map(({ student, link }) => ({
+    student: {
+      id: student.id,
+      display_name: student.portal_name,
+      first_name: student.public_name
+    },
+    give_path: `/support/${link.code}`,
+    confirmedCents: studentTotals.get(student.id)?.confirmedCents || 0,
+    confirmedGifts: studentTotals.get(student.id)?.confirmedGifts || 0
+  }));
+
   return NextResponse.json({
     family: { id: fam.id, display_name: fam.display_name, actor: resolved.actor },
+    directGiveLinks: directLinks,
     prospects: linkedProspects,
     warmedAvailable: warmedCount || 0,
-    confirmedCents: Number(totals?.confirmed_cents || 0),
-    confirmedGifts: Number(totals?.confirmed_gifts || 0),
+    confirmedCents: [...allConfirmed.values()].reduce((sum, gift) => sum + Number(gift.amount_cents || 0), 0),
+    confirmedGifts: allConfirmed.size,
     goalCents: FAMILY_GOAL_CENTS,
     targetBusinessCount: TARGET_BUSINESS_COUNT
   });
