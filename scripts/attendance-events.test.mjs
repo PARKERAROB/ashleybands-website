@@ -1,15 +1,23 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import {
   buildOccurrenceKey,
   buildAttendanceReport,
+  buildStaffAttendance,
   buildStudentAttendance,
   canManageAttendanceExceptions,
   configuredAttendanceOccurrences,
+  groupAttendanceOccurrencesByWeek,
   localEventTimeToIso,
   selectAttendanceOccurrence
 } from "../lib/attendanceEvents.mjs";
+
+const projectedCalendar = JSON.parse(readFileSync(
+  new URL("../public/calendar-data.json", import.meta.url),
+  "utf8"
+));
 
 const calendar = [
   { id: "evt-0007", title: "Band Camp (week 1)", start: "2026-08-03T07:00", end: "2026-08-03T15:00" },
@@ -35,6 +43,34 @@ test("only explicitly configured marching events become attendance occurrences",
 test("two configured events on one date remain distinct", () => {
   const occurrences = configuredAttendanceOccurrences(calendar);
   assert.notEqual(occurrences[1].occurrenceKey, occurrences[2].occurrenceKey);
+});
+
+test("the authoritative projection provides camp, rehearsal, and football sessions independently", () => {
+  const occurrences = configuredAttendanceOccurrences(projectedCalendar);
+  assert.equal(occurrences.length, 32);
+  assert.deepEqual(
+    occurrences
+      .filter((event) => ["2026-08-25", "2026-08-27", "2026-08-28"].includes(event.localDate))
+      .map((event) => event.occurrenceKey),
+    [
+      "evt-0108:2026-08-25",
+      "evt-0108:2026-08-27",
+      "evt-0009:2026-08-28"
+    ]
+  );
+  assert.equal(occurrences.filter((event) => event.calendarEventId === "evt-0108").length, 16);
+  assert.equal(occurrences.filter((event) => /^evt-00(09|10|12|16|20|22)$/.test(event.calendarEventId)).length, 6);
+});
+
+test("sessions are grouped into Monday-based weeks without losing date order", () => {
+  const occurrences = configuredAttendanceOccurrences(projectedCalendar);
+  const groups = groupAttendanceOccurrencesByWeek(occurrences);
+  const openingSeasonWeek = groups.find((group) => group.weekStart === "2026-08-24");
+  assert.deepEqual(openingSeasonWeek.occurrences.map((event) => event.localDate), [
+    "2026-08-25",
+    "2026-08-27",
+    "2026-08-28"
+  ]);
 });
 
 test("today defaults to the active or next configured occurrence when two share a date", () => {
@@ -85,6 +121,26 @@ test("a recorded local departure time is stored as the correct New York instant"
   );
 });
 
+test("staff attendance keeps the event-specific status, times, assignment, and notes", () => {
+  const staff = buildStaffAttendance(
+    { id: "staff-1", display_name: "Alex Director", role: "director" },
+    {
+      id: "record-1",
+      staff_id: "staff-1",
+      display_name: "Alex Director",
+      status: "left_early",
+      arrived_at: "2026-08-28T20:45:00.000Z",
+      departed_at: "2026-08-29T00:15:00.000Z",
+      role_assignment: "Front ensemble",
+      work_notes: "Loaded the synth and mixer."
+    }
+  );
+  assert.equal(staff.key, "staff:staff-1");
+  assert.equal(staff.status, "left_early");
+  assert.equal(staff.roleAssignment, "Front ensemble");
+  assert.equal(staff.workNotes, "Loaded the synth and mixer.");
+});
+
 test("the director report keeps plans and actual departures visibly separate", () => {
   const report = buildAttendanceReport({
     event: { title: "Band Camp (week 1)", localDate: "2026-08-04" },
@@ -101,10 +157,20 @@ test("the director report keeps plans and actual departures visibly separate", (
       kind: "early_departure",
       expected_at: "2026-08-04T17:00:00.000Z",
       note: "Appointment"
+    }],
+    staff: [{
+      name: "Alex Director",
+      status: "late",
+      arrivedAt: "2026-08-04T16:15:00.000Z",
+      departedAt: null,
+      roleAssignment: "Front ensemble",
+      workNotes: "Covered synth setup."
     }]
   });
   assert.equal(report.departedCount, 1);
   assert.equal(report.exceptionCount, 1);
+  assert.equal(report.staffCount, 1);
   assert.match(report.details.join("\n"), /ACTUAL DEPARTURE/);
   assert.match(report.details.join("\n"), /APPROVED EARLY DEPARTURE/);
+  assert.match(report.details.join("\n"), /STAFF LATE: Alex Director/);
 });

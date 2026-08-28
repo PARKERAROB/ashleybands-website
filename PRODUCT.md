@@ -23,6 +23,6 @@ The site is the public and operational web home for the Ashley High School band 
 
 Warm, credible, and school-specific: paper neutrals, Ashley garnet, restrained gold, strong typography, and clear operational contrast. Administrative tools may simplify the public-site styling but should still feel like part of the same product.
 
-## Day 1 attendance success
+## Marching attendance success
 
-For Band Camp Day 1 on August 3, 2026, staff and leadership can open a private link, enter the dedicated program PIN, see the 60 committed students plus three provisional/pending students in score order with battery and front ensemble separated, mark each student Present, Tardy, Absent, or back to Unmarked, save a staff note on any student, and deliberately email the director all marked absences and saved notes.
+Staff and leadership can open one private, phone-friendly attendance tool and move among Band Camp, regular rehearsals, and football games by week and date. Every session keeps its own student marks, notes, arrival/departure facts, approved plans, and staff attendance. Staff attendance includes present, absent, late, or left early status plus arrival/departure times, a role or assignment, and short work notes. The original August 3 Band Camp attendance remains part of the same history, and a deliberate report action sends only the selected session to the director.

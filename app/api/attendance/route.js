@@ -5,7 +5,8 @@ import {
   attendanceAuditTables,
   getAttendanceSheet,
   saveApprovedAttendanceException,
-  updateAttendanceObservation
+  updateAttendanceObservation,
+  updateStaffAttendance
 } from "@/lib/attendance";
 
 export const runtime = "nodejs";
@@ -35,6 +36,7 @@ export async function GET(request) {
       changes: {
         occurrence_key: sheet.event.occurrenceKey,
         row_count: sheet.students.length,
+        staff_row_count: sheet.staff.length,
         exception_count: sheet.exceptions.length
       },
       route: "/api/attendance"
@@ -50,12 +52,46 @@ export async function PATCH(request) {
   if (!session) return unauthorized();
   const body = await request.json().catch(() => ({}));
   const occurrenceKey = String(body.occurrenceKey || "").trim() || undefined;
-  const studentId = String(body.studentId || "").trim();
-  if (!studentId) {
-    return NextResponse.json({ error: "Choose a student." }, { status: 400 });
-  }
 
   try {
+    if (body.staffAttendance) {
+      const staffAttendance = body.staffAttendance || {};
+      const allowedKeys = ["status", "arrivedTime", "departedTime", "roleAssignment", "workNotes"];
+      const changes = Object.fromEntries(
+        allowedKeys
+          .filter((key) => Object.prototype.hasOwnProperty.call(staffAttendance, key))
+          .map((key) => [key, staffAttendance[key]])
+      );
+      const result = await updateStaffAttendance({
+        occurrenceKey,
+        recordId: String(staffAttendance.recordId || "").trim() || undefined,
+        staffId: String(staffAttendance.staffId || "").trim() || undefined,
+        displayName: staffAttendance.displayName,
+        changes
+      });
+      await logAudit({
+        actor: session.actor,
+        action: "attendance.staff.updated",
+        table: "attendance_staff_observations,staff,attendance_events",
+        recordId: result.staffAttendance.id || result.staffAttendance.staffId,
+        changes: {
+          occurrence_key: result.event.occurrenceKey,
+          staff_id: result.staffAttendance.staffId,
+          status: result.staffAttendance.status,
+          arrival_recorded: Boolean(result.staffAttendance.arrivedAt),
+          departure_recorded: Boolean(result.staffAttendance.departedAt),
+          role_assignment_present: Boolean(result.staffAttendance.roleAssignment),
+          work_notes_present: Boolean(result.staffAttendance.workNotes)
+        },
+        route: "/api/attendance"
+      });
+      return NextResponse.json(result.staffAttendance);
+    }
+
+    const studentId = String(body.studentId || "").trim();
+    if (!studentId) {
+      return NextResponse.json({ error: "Choose a student." }, { status: 400 });
+    }
     if (body.exception) {
       const result = await saveApprovedAttendanceException({
         occurrenceKey,

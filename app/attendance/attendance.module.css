@@ -69,6 +69,47 @@
   margin-top: 20px;
 }
 
+.sessionNavigator {
+  display: grid;
+  grid-template-columns: minmax(110px, auto) minmax(180px, 1fr) minmax(110px, auto);
+  align-items: stretch;
+  max-width: 760px;
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.sessionNavigator button {
+  min-height: 50px;
+  padding: 9px 14px;
+  border: 1px solid rgba(255, 250, 240, 0.38);
+  border-radius: 8px;
+  color: #fffaf0;
+  background: rgba(255, 250, 240, 0.08);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.sessionNavigator button:disabled {
+  color: rgba(255, 250, 240, 0.38);
+  cursor: not-allowed;
+}
+
+.sessionNavigator > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.15);
+  text-align: center;
+}
+
+.sessionNavigator strong { font-size: 0.88rem; }
+.sessionNavigator span { color: rgba(255, 250, 240, 0.7); font-size: 0.72rem; }
+
 .eventPicker span {
   color: rgba(255, 250, 240, 0.75);
   font-size: 0.74rem;
@@ -98,6 +139,152 @@
   font-weight: 700;
   cursor: pointer;
 }
+
+.staffSection {
+  max-width: 920px;
+  margin: 18px auto;
+  padding: 16px;
+  border: 1px solid #c9b777;
+  border-radius: 9px;
+  background: #fff9e6;
+}
+
+.staffSection .eyebrow { color: #7b1829; }
+
+.staffHeading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.staffHeading h2 { margin: 0; color: #4f101c; font-size: 1.3rem; }
+.staffHeading p:not(.eyebrow) { margin: 5px 0 0; color: #665f53; font-size: 0.85rem; }
+.staffHeading > strong { color: #4f101c; font-size: 1.45rem; white-space: nowrap; }
+
+.staffList {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.staffCard {
+  padding: 13px;
+  border: 1px solid #d8cda8;
+  border-radius: 8px;
+  background: #fffdf8;
+}
+
+.staffIdentity {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.staffIdentity h3 { margin: 0; font-size: 1rem; }
+.staffIdentity p { margin: 3px 0 0; color: #6f675a; font-size: 0.78rem; }
+.staffIdentity > span {
+  padding: 4px 7px;
+  border-radius: 999px;
+  color: #574f43;
+  background: #eee8dc;
+  font-size: 0.68rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.staffStatusGroup {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 11px;
+}
+
+.staffStatusButton {
+  min-height: 44px;
+  padding: 7px 8px;
+  border: 1px solid #c8bfae;
+  border-radius: 7px;
+  color: #575147;
+  background: #f3efe7;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.staffStatusButton:disabled { cursor: wait; opacity: 0.58; }
+.staffStatusButton.present.selected { color: #fff; border-color: #36543d; background: #446349; }
+.staffStatusButton.absent.selected { color: #fff; border-color: #7d1e2a; background: #a32436; }
+.staffStatusButton.late.selected { color: #251d05; border-color: #b68e16; background: #e2bd45; }
+.staffStatusButton.left_early.selected { color: #fff; border-color: #6b486f; background: #7c5681; }
+
+.staffDetails {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 11px;
+}
+
+.staffDetails label,
+.addStaff label {
+  display: grid;
+  gap: 5px;
+  color: #5e5548;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.staffDetails input,
+.staffDetails textarea,
+.addStaff input {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid #c8bda8;
+  border-radius: 7px;
+  color: #191716;
+  background: #fff;
+  font: inherit;
+  font-size: 16px;
+}
+
+.staffDetails textarea { min-height: 72px; resize: vertical; }
+.staffAssignment,
+.staffNotes { grid-column: 1 / -1; }
+
+.staffSave,
+.addStaff button {
+  min-height: 44px;
+  margin-top: 10px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 7px;
+  color: #fff;
+  background: #7b1829;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.staffSave:disabled,
+.addStaff button:disabled { color: #8b8375; background: #ddd6c9; cursor: wait; }
+
+.addStaff {
+  margin-top: 13px;
+  padding-top: 12px;
+  border-top: 1px solid #ded4c2;
+}
+
+.addStaff summary { color: #6b1725; font-weight: 800; cursor: pointer; }
+.addStaff form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+.addStaff button { align-self: end; margin: 0; }
 
 .toolbar {
   position: sticky;
@@ -239,6 +426,9 @@
 .search input:focus-visible,
 .gate input:focus-visible,
 .statusButton:focus-visible,
+.staffStatusButton:focus-visible,
+.staffSave:focus-visible,
+.sessionNavigator button:focus-visible,
 .reportBar button:focus-visible,
 .signOut:focus-visible {
   outline: 3px solid #c5a028;
@@ -647,6 +837,15 @@
   .reportBar span { display: none; }
   .reportBar button { max-width: 220px; padding-inline: 12px; font-size: 0.8rem; }
   .eventPicker { grid-template-columns: 1fr; }
+  .sessionNavigator { grid-template-columns: 1fr 1fr; }
+  .sessionNavigator > div { grid-column: 1 / -1; grid-row: 1; min-height: 50px; }
+  .sessionNavigator button { grid-row: 2; }
   .expected { margin: 12px 10px; }
+  .staffSection { margin: 12px 10px; }
+  .staffStatusGroup { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .staffDetails,
+  .addStaff form { grid-template-columns: 1fr; }
+  .staffAssignment,
+  .staffNotes { grid-column: auto; }
   .exceptionManager form { grid-template-columns: 1fr; }
 }

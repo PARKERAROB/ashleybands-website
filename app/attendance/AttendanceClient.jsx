@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { groupAttendanceOccurrencesByWeek } from "@/lib/attendanceEvents.mjs";
 import styles from "./attendance.module.css";
 
 const STATUS = {
@@ -13,6 +14,18 @@ const EXCEPTION_LABELS = {
   absent: "Absent",
   late_arrival: "Late arrival",
   early_departure: "Early departure"
+};
+
+const STAFF_STATUS = {
+  present: "Present",
+  absent: "Absent",
+  late: "Late",
+  left_early: "Left early"
+};
+
+const STAFF_ROLE_LABELS = {
+  director: "Director",
+  sponsor_lead: "Sponsor lead"
 };
 
 function eventDate(event) {
@@ -39,10 +52,21 @@ function eventTime(event) {
 function shortEventLabel(event) {
   const date = new Intl.DateTimeFormat("en-US", {
     timeZone: event.timeZone,
+    weekday: "short",
     month: "short",
     day: "numeric"
   }).format(new Date(event.startsAt));
-  return `${date}: ${event.title}`;
+  return `${date} · ${event.title}`;
+}
+
+function weekLabel(weekStart) {
+  if (!weekStart) return "";
+  return `Week of ${new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC"
+  }).format(new Date(`${weekStart}T12:00:00.000Z`))}`;
 }
 
 function timeLabel(iso, timeZone) {
@@ -54,9 +78,21 @@ function timeLabel(iso, timeZone) {
   }).format(new Date(iso));
 }
 
+function timeInputValue(iso, timeZone) {
+  if (!iso) return "";
+  const values = Object.fromEntries(new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23"
+  }).formatToParts(new Date(iso)).map((part) => [part.type, part.value]));
+  return `${values.hour}:${values.minute}`;
+}
+
 export default function AttendanceClient() {
   const [access, setAccess] = useState("checking");
   const [students, setStudents] = useState([]);
+  const [staff, setStaff] = useState([]);
   const [event, setEvent] = useState(null);
   const [occurrences, setOccurrences] = useState([]);
   const [exceptions, setExceptions] = useState([]);
@@ -66,6 +102,7 @@ export default function AttendanceClient() {
   const [notice, setNotice] = useState("");
   const [saving, setSaving] = useState(new Set());
   const [noteSaving, setNoteSaving] = useState(new Set());
+  const [staffSaving, setStaffSaving] = useState(new Set());
   const [openNotes, setOpenNotes] = useState(new Set());
   const [noteDrafts, setNoteDrafts] = useState({});
   const [openDepartures, setOpenDepartures] = useState(new Set());
@@ -93,6 +130,7 @@ export default function AttendanceClient() {
           ? localById.get(student.id) || student
           : student);
       });
+      setStaff(data.staff || []);
       loadedKey.current = data.event?.occurrenceKey || null;
       setEvent(data.event || null);
       setOccurrences(data.occurrences || []);
@@ -124,6 +162,12 @@ export default function AttendanceClient() {
     return total;
   }, { present: 0, tardy: 0, absent: 0, unmarked: 0, notes: 0, departed: 0 }), [students]);
 
+  const occurrenceGroups = useMemo(
+    () => groupAttendanceOccurrencesByWeek(occurrences),
+    [occurrences]
+  );
+  const occurrenceIndex = occurrences.findIndex((item) => item.occurrenceKey === event?.occurrenceKey);
+
   const visible = useMemo(() => {
     const needle = query.trim().toLowerCase();
     if (!needle) return students;
@@ -142,6 +186,54 @@ export default function AttendanceClient() {
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.error || "That attendance change did not save.");
     return data;
+  };
+
+  const selectOccurrence = (occurrenceKey) => {
+    setQuery("");
+    setOpenNotes(new Set());
+    setOpenDepartures(new Set());
+    loadRoster({ occurrenceKey });
+  };
+
+  const saveStaffAttendance = async (member, changes) => {
+    const savingKey = member?.key || `new:${changes.displayName || "staff"}`;
+    setStaffSaving((current) => new Set(current).add(savingKey));
+    setError("");
+    setNotice("");
+    try {
+      const response = await fetch("/api/attendance", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          occurrenceKey: event.occurrenceKey,
+          staffAttendance: {
+            recordId: member?.id,
+            staffId: member?.staffId,
+            displayName: member?.name || changes.displayName,
+            ...changes
+          }
+        })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "That staff attendance change did not save.");
+      setStaff((current) => {
+        const matchIndex = current.findIndex((item) => item.key === data.key);
+        if (matchIndex < 0) return [...current, data].sort((a, b) => a.name.localeCompare(b.name));
+        return current.map((item, index) => index === matchIndex ? data : item);
+      });
+      setLastSynced(new Date());
+      setNotice(member ? `${data.name}'s staff attendance saved.` : `${data.name} added to this session.`);
+      return data;
+    } catch (saveError) {
+      setError(saveError.message);
+      throw saveError;
+    } finally {
+      setStaffSaving((current) => {
+        const next = new Set(current);
+        next.delete(savingKey);
+        return next;
+      });
+    }
   };
 
   const mark = async (studentId, status) => {
@@ -286,7 +378,13 @@ export default function AttendanceClient() {
     return <AttendanceGate onOpen={() => { loadedKey.current = null; loadRoster(); }} />;
   }
 
-  const hasReportableDetails = counts.absent || counts.tardy || counts.notes || counts.departed || exceptions.length;
+  const staffReportableCount = staff.filter((member) => member.status
+    || member.arrivedAt
+    || member.departedAt
+    || member.roleAssignment
+    || member.workNotes).length;
+  const hasReportableDetails = counts.absent || counts.tardy || counts.notes || counts.departed
+    || exceptions.length || staffReportableCount;
 
   return (
     <main className={styles.shell}>
@@ -305,22 +403,39 @@ export default function AttendanceClient() {
             setAccess("locked");
           }}>Lock</button>
         </div>
+        <div className={styles.sessionNavigator} aria-label="Move among attendance sessions">
+          <button
+            type="button"
+            disabled={occurrenceIndex <= 0 || saving.size > 0 || noteSaving.size > 0 || staffSaving.size > 0}
+            onClick={() => selectOccurrence(occurrences[occurrenceIndex - 1].occurrenceKey)}
+          >← Previous</button>
+          <div>
+            <strong>{weekLabel(occurrenceGroups.find((group) =>
+              group.occurrences.some((item) => item.occurrenceKey === event?.occurrenceKey))?.weekStart)}</strong>
+            <span>{occurrenceIndex + 1} of {occurrences.length} sessions</span>
+          </div>
+          <button
+            type="button"
+            disabled={occurrenceIndex < 0 || occurrenceIndex >= occurrences.length - 1
+              || saving.size > 0 || noteSaving.size > 0 || staffSaving.size > 0}
+            onClick={() => selectOccurrence(occurrences[occurrenceIndex + 1].occurrenceKey)}
+          >Next →</button>
+        </div>
         <label className={styles.eventPicker}>
-          <span>Attendance event</span>
+          <span>Choose any date</span>
           <select
             value={event?.occurrenceKey || ""}
-            disabled={saving.size > 0 || noteSaving.size > 0}
-            onChange={(changeEvent) => {
-              setQuery("");
-              setOpenNotes(new Set());
-              setOpenDepartures(new Set());
-              loadRoster({ occurrenceKey: changeEvent.target.value });
-            }}
+            disabled={saving.size > 0 || noteSaving.size > 0 || staffSaving.size > 0}
+            onChange={(changeEvent) => selectOccurrence(changeEvent.target.value)}
           >
-            {occurrences.map((occurrence) => (
-              <option key={occurrence.occurrenceKey} value={occurrence.occurrenceKey}>
-                {shortEventLabel(occurrence)}
-              </option>
+            {occurrenceGroups.map((group) => (
+              <optgroup key={group.weekStart} label={weekLabel(group.weekStart)}>
+                {group.occurrences.map((occurrence) => (
+                  <option key={occurrence.occurrenceKey} value={occurrence.occurrenceKey}>
+                    {shortEventLabel(occurrence)}
+                  </option>
+                ))}
+              </optgroup>
             ))}
           </select>
         </label>
@@ -334,6 +449,15 @@ export default function AttendanceClient() {
         onSaved={() => loadRoster({ occurrenceKey: event.occurrenceKey })}
         onError={setError}
         onNotice={setNotice}
+      />
+
+      <StaffAttendance
+        key={event?.occurrenceKey}
+        event={event}
+        staff={staff}
+        saving={staffSaving}
+        onSave={saveStaffAttendance}
+        onError={setError}
       />
 
       <section className={styles.toolbar} aria-label="Attendance summary">
@@ -354,7 +478,9 @@ export default function AttendanceClient() {
           />
         </label>
         <div className={styles.syncLine} aria-live="polite">
-          {saving.size ? `Saving ${saving.size}…` : lastSynced ? "Shared list is up to date" : "Loading shared list…"}
+          {saving.size || staffSaving.size
+            ? `Saving ${saving.size + staffSaving.size}…`
+            : lastSynced ? "Shared list is up to date" : "Loading shared list…"}
         </div>
       </section>
 
@@ -480,16 +606,183 @@ export default function AttendanceClient() {
 
       <div className={styles.reportBar}>
         <div>
-          <strong>{counts.absent} absent · {counts.tardy} tardy · {counts.departed} departed</strong>
-          <span>The report includes saved notes, approved plans, and actual departures.</span>
+          <strong>{counts.absent} absent · {counts.tardy} tardy · {staffReportableCount} staff entries</strong>
+          <span>The report includes saved student and staff details for this session.</span>
         </div>
         <button
           type="button"
-          disabled={!hasReportableDetails || sending || saving.size > 0 || noteSaving.size > 0}
+          disabled={!hasReportableDetails || sending || saving.size > 0 || noteSaving.size > 0 || staffSaving.size > 0}
           onClick={sendReport}
         >{sending ? "Sending…" : "Send selected report"}</button>
       </div>
     </main>
+  );
+}
+
+function staffDraft(member, event) {
+  return {
+    arrivedTime: timeInputValue(member.arrivedAt, event.timeZone),
+    departedTime: timeInputValue(member.departedAt, event.timeZone),
+    roleAssignment: member.roleAssignment || "",
+    workNotes: member.workNotes || ""
+  };
+}
+
+function StaffAttendance({ event, staff, saving, onSave, onError }) {
+  const [drafts, setDrafts] = useState(() => Object.fromEntries(
+    staff.map((member) => [member.key, staffDraft(member, event)])));
+  const [newName, setNewName] = useState("");
+  const [newAssignment, setNewAssignment] = useState("");
+  const [adding, setAdding] = useState(false);
+
+  const updateDraft = (memberKey, changes) => {
+    setDrafts((current) => ({
+      ...current,
+      [memberKey]: { ...current[memberKey], ...changes }
+    }));
+  };
+
+  const saveDetails = async (member) => {
+    try {
+      const saved = await onSave(member, drafts[member.key] || staffDraft(member, event));
+      setDrafts((current) => ({ ...current, [saved.key]: staffDraft(saved, event) }));
+    } catch {
+      // The parent keeps the user-facing error in one consistent place.
+    }
+  };
+
+  const addStaff = async (submitEvent) => {
+    submitEvent.preventDefault();
+    setAdding(true);
+    onError("");
+    try {
+      const saved = await onSave(null, {
+        displayName: newName,
+        roleAssignment: newAssignment
+      });
+      setDrafts((current) => ({ ...current, [saved.key]: staffDraft(saved, event) }));
+      setNewName("");
+      setNewAssignment("");
+    } catch {
+      // The parent keeps the user-facing error in one consistent place.
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  const markedCount = staff.filter((member) => member.status).length;
+
+  return (
+    <section className={styles.staffSection} aria-labelledby="staff-attendance-heading">
+      <div className={styles.staffHeading}>
+        <div>
+          <p className={styles.eyebrow}>Same session · separate records</p>
+          <h2 id="staff-attendance-heading">Staff attendance</h2>
+          <p>Record each person’s status, times, assignment, and short work notes for this date.</p>
+        </div>
+        <strong>{markedCount}/{staff.length}</strong>
+      </div>
+
+      <div className={styles.staffList}>
+        {staff.map((member) => {
+          const draft = drafts[member.key] || staffDraft(member, event);
+          const busy = saving.has(member.key);
+          return (
+            <article className={styles.staffCard} key={member.key}>
+              <div className={styles.staffIdentity}>
+                <div>
+                  <h3>{member.name}</h3>
+                  <p>{member.roleAssignment
+                    || STAFF_ROLE_LABELS[member.directoryRole]
+                    || "Session staff"}</p>
+                </div>
+                <span>{member.status ? STAFF_STATUS[member.status] : "Unmarked"}</span>
+              </div>
+              <div className={styles.staffStatusGroup} aria-label={`Staff attendance for ${member.name}`}>
+                {Object.entries(STAFF_STATUS).map(([value, label]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className={`${styles.staffStatusButton} ${styles[value]} ${member.status === value ? styles.selected : ""}`}
+                    aria-pressed={member.status === value}
+                    disabled={busy}
+                    onClick={async () => {
+                      try {
+                        await onSave(member, { status: member.status === value ? "unmarked" : value });
+                      } catch {
+                        // The parent keeps the user-facing error in one consistent place.
+                      }
+                    }}
+                  >{label}</button>
+                ))}
+              </div>
+              <div className={styles.staffDetails}>
+                <label>Arrival time
+                  <input
+                    type="time"
+                    value={draft.arrivedTime}
+                    onChange={(changeEvent) => updateDraft(member.key, { arrivedTime: changeEvent.target.value })}
+                  />
+                </label>
+                <label>Departure time
+                  <input
+                    type="time"
+                    value={draft.departedTime}
+                    onChange={(changeEvent) => updateDraft(member.key, { departedTime: changeEvent.target.value })}
+                  />
+                </label>
+                <label className={styles.staffAssignment}>Role or assignment
+                  <input
+                    type="text"
+                    maxLength={160}
+                    placeholder="Director, props, front ensemble…"
+                    value={draft.roleAssignment}
+                    onChange={(changeEvent) => updateDraft(member.key, { roleAssignment: changeEvent.target.value })}
+                  />
+                </label>
+                <label className={styles.staffNotes}>Short work notes
+                  <textarea
+                    maxLength={500}
+                    placeholder="What did this person cover or complete?"
+                    value={draft.workNotes}
+                    onChange={(changeEvent) => updateDraft(member.key, { workNotes: changeEvent.target.value })}
+                  />
+                </label>
+              </div>
+              <button
+                className={styles.staffSave}
+                type="button"
+                disabled={busy}
+                onClick={() => saveDetails(member)}
+              >{busy ? "Saving…" : "Save staff details"}</button>
+            </article>
+          );
+        })}
+      </div>
+
+      <details className={styles.addStaff}>
+        <summary>Add staff for this session</summary>
+        <form onSubmit={addStaff}>
+          <label>Name
+            <input
+              required
+              maxLength={120}
+              value={newName}
+              onChange={(changeEvent) => setNewName(changeEvent.target.value)}
+            />
+          </label>
+          <label>Role or assignment
+            <input
+              maxLength={160}
+              placeholder="Optional"
+              value={newAssignment}
+              onChange={(changeEvent) => setNewAssignment(changeEvent.target.value)}
+            />
+          </label>
+          <button type="submit" disabled={adding}>{adding ? "Adding…" : "Add to this session"}</button>
+        </form>
+      </details>
+    </section>
   );
 }
 

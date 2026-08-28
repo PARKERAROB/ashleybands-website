@@ -43,7 +43,8 @@ export async function POST(request) {
       tardy_count: report.tardyCount,
       note_count: report.noteCount,
       departed_count: report.departedCount,
-      exception_count: report.exceptionCount
+      exception_count: report.exceptionCount,
+      staff_count: report.staffCount
     },
     route: "/api/attendance/report"
   });
@@ -58,8 +59,9 @@ export async function POST(request) {
       subject: `${sheet.event.title}, ${dateLabel}: attendance report`,
       summary: [
         `${sheet.event.title} on ${dateLabel}.`,
-        `${report.absentCount} absent, ${report.tardyCount} tardy, ${report.noteCount} staff notes,`,
-        `${report.departedCount} actual departures, and ${report.exceptionCount} approved exceptions.`
+        `${report.absentCount} absent, ${report.tardyCount} tardy, ${report.noteCount} student notes,`,
+        `${report.departedCount} actual student departures, ${report.exceptionCount} approved exceptions,`,
+        `and ${report.staffCount} staff attendance entries.`
       ].join(" "),
       details: report.details
     });
@@ -80,7 +82,8 @@ export async function POST(request) {
       tardy_count: report.tardyCount,
       note_count: report.noteCount,
       departed_count: report.departedCount,
-      exception_count: report.exceptionCount
+      exception_count: report.exceptionCount,
+      staff_count: report.staffCount
     },
     route: "/api/attendance/report"
   });
@@ -91,6 +94,7 @@ export async function POST(request) {
     noteCount: report.noteCount,
     departedCount: report.departedCount,
     exceptionCount: report.exceptionCount,
+    staffCount: report.staffCount,
     event: sheet.event
   });
 }
