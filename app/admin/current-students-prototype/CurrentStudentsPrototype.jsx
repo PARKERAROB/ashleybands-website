@@ -11,7 +11,7 @@ export const STUDENTS = [
     grade: "10", currentSchool: "Ashley High School", schoolEmail: "avery.north@student.example", personalEmail: "avery.north@example.com", mobile: "(910) 555-0101",
     guardian: { name: "Morgan North", relationship: "Parent", email: "morgan.north@example.com", phone: "(910) 555-0111" },
     ensembles: ["Wind Ensemble", "Marching Band"], programInstrument: "Trumpet", primaryInstrument: "Trumpet", otherInstruments: ["Piano"],
-    previousSchool: "Murray Middle", marchingRole: "Trumpet", needs: [], attendance: [12, 13], funding: [275, 500], assets: ["School trumpet", "Locker 114", "Tuner 33"], forms: [5, 5]
+    previousSchool: "Murray Middle", marchingRole: "Trumpet", needs: [], attendance: [12, 13], funding: [275, 500], assets: ["School trumpet", "Locker 114", "Master lock 114", "Tuner 33", "Marching jacket 42"], forms: [5, 5]
   },
   {
     id: "milo-harbor", status: "active", displayName: "Milo Harbor", legalName: "Miles Andrew Harbor", pronouns: "he/him",
@@ -25,7 +25,7 @@ export const STUDENTS = [
     grade: "9", currentSchool: "Ashley High School", schoolEmail: "sage.linden@student.example", personalEmail: "sage.linden@example.com", mobile: "",
     guardian: { name: "Taylor Linden", relationship: "Guardian", email: "taylor.linden@example.com", phone: "(910) 555-0113" },
     ensembles: ["Concert Band", "Color Guard"], programInstrument: "None", primaryInstrument: "None", otherInstruments: ["Piano"],
-    previousSchool: "Murray Middle", marchingRole: "Color Guard", needs: ["Transportation"], attendance: [11, 13], funding: [125, 500], assets: ["Guard locker 12"], forms: [5, 5]
+    previousSchool: "Murray Middle", marchingRole: "Color Guard", needs: ["Transportation"], attendance: [11, 13], funding: [125, 500], assets: ["Guard locker 12", "Guard top 14"], forms: [5, 5]
   },
   {
     id: "rowan-fields", status: "active", displayName: "Rowan Fields", legalName: "Rowan Lee Fields", pronouns: "",

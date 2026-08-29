@@ -39,3 +39,13 @@ test("student and command-center routes reach the full inventory workspace", () 
   assert.match(client, /Student context/);
   assert.match(client, /Open full student/);
 });
+
+test("every synthetic student asset has a matching inventory record", () => {
+  const studentAssets = [...students.matchAll(/assets:\s*(\[[^\]]*\])/g)]
+    .flatMap((match) => JSON.parse(match[1]));
+  const inventoryNames = [...client.matchAll(/\bname:\s*"([^"]+)"/g)]
+    .map((match) => match[1]);
+  for (const asset of studentAssets) {
+    assert.ok(inventoryNames.some((name) => name === asset || name.startsWith(asset + " ")), `Missing inventory record for ${asset}`);
+  }
+});

@@ -82,6 +82,20 @@ const ASSETS = [
     history: [["Aug 20, 2026", "Returned and checked in"], ["Aug 20, 2026", "Condition checked: Good"]]
   },
   {
+    id: "tuner-021", tag: "TN-021", name: "Tuner 21", category: "tuners", type: "Tuner",
+    status: "Checked out", state: "assigned", condition: "Good", location: "With student", studentId: "kai-mercer",
+    details: [["Brand", "Korg"], ["Model", "TM-60"], ["Clip", "Included"]],
+    assignment: { since: "Aug 5, 2026", agreement: "Not required", due: "End of marching season" },
+    history: [["Aug 5, 2026", "Assigned to Kai Mercer"], ["Aug 2, 2026", "Condition checked: Good"]]
+  },
+  {
+    id: "tuner-004", tag: "TN-004", name: "Tuner 04", category: "tuners", type: "Tuner",
+    status: "Checked out", state: "assigned", condition: "Good", location: "With student", studentId: "nia-grove",
+    details: [["Brand", "Korg"], ["Model", "TM-60"], ["Clip", "Included"]],
+    assignment: { since: "Aug 5, 2026", agreement: "Not required", due: "End of marching season" },
+    history: [["Aug 5, 2026", "Assigned to Nia Grove"], ["Aug 2, 2026", "Condition checked: Good"]]
+  },
+  {
     id: "locker-114", tag: "LK-114", name: "Locker 114", category: "lockers", type: "Locker",
     status: "In use", state: "assigned", condition: "Good", location: "Instrument storage · Row 1", studentId: "avery-north", relatedAssetId: "lock-114",
     details: [["Size", "Medium"], ["Lock", "Master lock 114"], ["Contents", "Trumpet case"]],
@@ -101,6 +115,55 @@ const ASSETS = [
     details: [["Size", "Large"], ["Lock", "Student-provided"], ["Contents", "Trombone case"]],
     assignment: { since: "Aug 5, 2026", agreement: "Not required", due: "End of school year" },
     history: [["Aug 5, 2026", "Assigned to Milo Harbor"], ["Aug 1, 2026", "Locker cleared and checked"]]
+  },
+  {
+    id: "locker-guard-012", tag: "GL-012", name: "Guard locker 12", category: "lockers", type: "Locker",
+    status: "In use", state: "assigned", condition: "Good", location: "Guard storage", studentId: "sage-linden",
+    details: [["Size", "Guard"], ["Lock", "Built in"], ["Contents", "Guard equipment"]],
+    assignment: { since: "Aug 5, 2026", agreement: "Not required", due: "End of marching season" },
+    history: [["Aug 5, 2026", "Assigned to Sage Linden"], ["Aug 1, 2026", "Locker cleared and checked"]]
+  },
+  {
+    id: "locker-132", tag: "LK-132", name: "Locker 132", category: "lockers", type: "Locker",
+    status: "In use", state: "assigned", condition: "Good", location: "Instrument storage · Row 2", studentId: "theo-marin",
+    details: [["Size", "Medium"], ["Lock", "Student-provided"], ["Contents", "Alto saxophone case"]],
+    assignment: { since: "Aug 5, 2026", agreement: "Not required", due: "End of school year" },
+    history: [["Aug 5, 2026", "Assigned to Theo Marin"], ["Aug 1, 2026", "Locker cleared and checked"]]
+  },
+  {
+    id: "locker-105", tag: "LK-105", name: "Locker 105", category: "lockers", type: "Locker",
+    status: "In use", state: "assigned", condition: "Good", location: "Instrument storage · Row 1", studentId: "imani-stone",
+    details: [["Size", "Medium"], ["Lock", "Student-provided"], ["Contents", "Horn case"]],
+    assignment: { since: "Aug 6, 2026", agreement: "Not required", due: "End of school year" },
+    history: [["Aug 6, 2026", "Assigned to Imani Stone"], ["Aug 1, 2026", "Locker cleared and checked"]]
+  },
+  {
+    id: "locker-141", tag: "LK-141", name: "Locker 141", category: "lockers", type: "Locker",
+    status: "In use", state: "assigned", condition: "Good", location: "Large instrument storage", studentId: "noah-quill",
+    details: [["Size", "Large"], ["Lock", "Student-provided"], ["Contents", "Tuba accessories"]],
+    assignment: { since: "Aug 7, 2026", agreement: "Not required", due: "End of school year" },
+    history: [["Aug 7, 2026", "Assigned to Noah Quill"], ["Aug 1, 2026", "Locker cleared and checked"]]
+  },
+  {
+    id: "locker-063", tag: "LK-063", name: "Locker 063", category: "lockers", type: "Locker",
+    status: "In use", state: "assigned", condition: "Good", location: "Instrument storage · Row 1", studentId: "kai-mercer",
+    details: [["Size", "Large"], ["Lock", "Student-provided"], ["Contents", "Bass clarinet case"]],
+    assignment: { since: "Aug 6, 2026", agreement: "Not required", due: "End of school year" },
+    history: [["Aug 6, 2026", "Assigned to Kai Mercer"], ["Aug 1, 2026", "Locker cleared and checked"]]
+  },
+  {
+    id: "locker-044", tag: "LK-044", name: "Locker 044", category: "lockers", type: "Locker",
+    status: "In use", state: "assigned", condition: "Good", location: "Instrument storage · Row 1", studentId: "lena-vale",
+    details: [["Size", "Small"], ["Lock", "Student-provided"], ["Contents", "Flute case"]],
+    assignment: { since: "Aug 5, 2026", agreement: "Not required", due: "End of school year" },
+    history: [["Aug 5, 2026", "Assigned to Lena Vale"], ["Aug 1, 2026", "Locker cleared and checked"]]
+  },
+  {
+    id: "locker-038", tag: "LK-038", name: "Locker 038", category: "lockers", type: "Locker",
+    status: "In use", state: "assigned", condition: "Good", location: "Instrument storage · Row 1", studentId: "nia-grove",
+    details: [["Size", "Small"], ["Lock", "Student-provided"], ["Contents", "Oboe case"]],
+    assignment: { since: "Aug 5, 2026", agreement: "Not required", due: "End of school year" },
+    history: [["Aug 5, 2026", "Assigned to Nia Grove"], ["Aug 1, 2026", "Locker cleared and checked"]]
   },
   {
     id: "lock-spare-017", tag: "ML-017", name: "Master lock 017", category: "lockers", type: "Lock",
