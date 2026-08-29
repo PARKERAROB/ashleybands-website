@@ -15,6 +15,7 @@
     "portal:sync": "node scripts/sync-portal-csv.mjs",
     "lint:provenance": "node scripts/provenance-lint.mjs",
     "test:attendance": "node --test scripts/attendance-events.test.mjs",
+    "test:assets-inventory-prototype": "node --test scripts/assets-inventory-prototype.test.mjs",
     "test:audience": "node --env-file=.env.local --test scripts/audience-active-status.test.mjs",
     "test:current-students-prototype": "node --test scripts/current-students-prototype.test.mjs",
     "test:operations-prototype": "node --test scripts/operations-prototype.test.mjs",

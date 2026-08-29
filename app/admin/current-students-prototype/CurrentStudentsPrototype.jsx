@@ -359,7 +359,7 @@ function StudentDetail({ student, onClose, onCopyContacts }) {
           <WorkCard label="Attendance" value={`${attended} of ${total}`} href={"/admin/operations-prototype?area=attendance&student=" + encodeURIComponent(student.id)} />
           <WorkCard label="Funding" value={goal ? `$${raised} of $${goal}` : "No goal"} href={"/admin/operations-prototype?area=funding&student=" + encodeURIComponent(student.id)} />
           <WorkCard label="Forms" value={`${formsComplete} of ${formsTotal}`} href={"/admin/operations-prototype?area=forms&student=" + encodeURIComponent(student.id)} />
-          <WorkCard label="Assets" value={student.assets.length ? `${student.assets.length} assigned` : "None"} href={"/admin/operations-prototype?area=inventory&student=" + encodeURIComponent(student.id)} />
+          <WorkCard label="Assets" value={student.assets.length ? `${student.assets.length} assigned` : "None"} href={"/admin/assets-inventory-prototype?student=" + encodeURIComponent(student.id)} />
         </div>
         {student.needs.length ? <div className={styles.openNeeds}><span>Open follow-up</span><ul>{student.needs.map((item) => <li key={item}><strong>{item}</strong><small>{needDescription(student, item)}</small></li>)}</ul></div> : <div className={styles.clearNeeds}>No open follow-up</div>}
       </DetailSection>
