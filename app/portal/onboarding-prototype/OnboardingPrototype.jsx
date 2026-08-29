@@ -17,13 +17,14 @@ const steps = [
 ];
 
 const initialForm = {
-  preferredFirst: "Jordan", pronunciation: "", pronouns: "", personalEmail: "", mobile: "",
-  preferredContact: "school_email", textOkay: false,
+  preferredFirst: "", pronunciation: "", pronouns: "", personalEmail: "", mobile: "",
   guardian1Name: "", guardian1Relationship: "Parent/guardian", guardian1Email: "", guardian1Phone: "",
   guardian2Name: "", guardian2Relationship: "", guardian2Email: "", guardian2Phone: "",
-  emergencySame: true, emergencyName: "", emergencyRelationship: "", emergencyPhone: "",
-  primaryInstrument: "", otherInstruments: "", yearsPlaying: "", priorProgram: "", privateTeacher: "", interests: [],
-  shirtSize: "", instrumentAccess: "not_sure", supportAreas: [], privateFollowup: "no", studentNote: "", accurate: false
+  guardian3Name: "", guardian3Relationship: "", guardian3Email: "", guardian3Phone: "",
+  guardian4Name: "", guardian4Relationship: "", guardian4Email: "", guardian4Phone: "", guardianCount: 2,
+  colorGuardOnly: false, primaryInstrument: "", otherInstruments: [], yearsPlaying: "", interests: [],
+  originSchool: "", priorSchoolName: "", priorSchoolCity: "", priorSchoolState: "",
+  shirtSize: "", instrumentAccess: "not_sure", supportAreas: [], studentNote: "", accurate: false
 };
 
 export default function OnboardingPrototype() {
@@ -38,14 +39,16 @@ export default function OnboardingPrototype() {
   }));
   const jumpTo = (index) => { setStepIndex(index); window.scrollTo({ top: 0, behavior: "smooth" }); };
 
-  const requiredRecordComplete = Boolean(
-    form.preferredFirst.trim() && form.guardian1Name.trim() && form.guardian1Email.trim() &&
-    form.guardian1Phone.trim() && form.primaryInstrument &&
-    (form.emergencySame || (form.emergencyName.trim() && form.emergencyRelationship.trim() && form.emergencyPhone.trim()))
+  const outsideCountyComplete = form.originSchool !== "outside_county" || Boolean(
+    form.priorSchoolName.trim() && form.priorSchoolCity.trim() && form.priorSchoolState
   );
-  const canContinue = stepIndex === 0 ? Boolean(form.preferredFirst.trim())
+  const musicComplete = Boolean((form.colorGuardOnly || form.primaryInstrument) && form.originSchool && outsideCountyComplete);
+  const requiredRecordComplete = Boolean(
+    form.guardian1Name.trim() && form.guardian1Email.trim() && form.guardian1Phone.trim() && musicComplete
+  );
+  const canContinue = stepIndex === 0 ? true
     : stepIndex === 2 ? Boolean(form.guardian1Name.trim() && form.guardian1Email.trim() && form.guardian1Phone.trim())
-      : stepIndex === 3 ? Boolean(form.primaryInstrument)
+      : stepIndex === 3 ? musicComplete
         : stepIndex === 5 ? form.accurate && requiredRecordComplete : true;
 
   function submitStep(event) {
@@ -63,7 +66,7 @@ export default function OnboardingPrototype() {
           <div className={styles.finishMark}>✓</div>
           <p className={styles.eyebrow}>Student onboarding</p>
           <h1>The student picture is ready.</h1>
-          <p>In the real system, Jordan’s current student record would now be updated, guardian verification would begin, and only the requested follow-ups would enter the staff work queue.</p>
+          <p>Nothing was saved. A live submission would update the current student record and create requested follow-ups.</p>
           <div className={styles.finishActions}>
             <button type="button" onClick={() => { setForm(initialForm); setStepIndex(0); setFinished(false); }}>Run the prototype again</button>
             <Link href="/portal">Return to the Family Portal</Link>
@@ -82,7 +85,7 @@ export default function OnboardingPrototype() {
       <section className={styles.hero}>
         <p className={styles.prototypeFlag}>Interactive prototype · Nothing is saved or sent</p>
         <div>
-          <div><p className={styles.eyebrow}>One student · One career record</p><h1>Welcome to Ashley Bands.</h1><p>This first-time onboarding connects the people and information that will support you throughout your time in the program.</p></div>
+          <div><p className={styles.eyebrow}>One student · One career record</p><h1>Welcome to Ashley Bands.</h1><p>One form for the information Ashley Bands needs throughout a student’s career.</p></div>
           <aside><span>Previewing as</span><strong>Jordan Ellis</strong><small>Synthetic student</small></aside>
         </div>
       </section>
@@ -96,7 +99,7 @@ export default function OnboardingPrototype() {
               <span>{index < stepIndex ? "✓" : number}</span><div><small>{short}</small><strong>{title}</strong></div>
             </button>
           ))}
-          <p><strong>Why one-time?</strong> Future forms should ask only for information that changed or belongs to a specific event.</p>
+          <p><strong>Why one-time?</strong> Future forms ask only what changed.</p>
         </nav>
         <form className={styles.formCard} onSubmit={submitStep}>
           {stepIndex === 0 ? <IdentityStep form={form} update={update} /> : null}
