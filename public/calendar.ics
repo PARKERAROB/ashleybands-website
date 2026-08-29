@@ -99,7 +99,7 @@ END:VEVENT
 BEGIN:VEVENT
 UID:evt-0012-program@ashleybands.com
 DTSTAMP:20260610T000000Z
-SUMMARY:Football Home vs Laney
+SUMMARY:Football Home vs Laney — 8th Grade Night
 DTSTART;TZID=America/New_York:20260925T190000
 DTEND;TZID=America/New_York:20260925T220000
 LOCATION:AHS

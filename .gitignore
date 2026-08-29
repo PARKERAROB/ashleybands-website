@@ -7,3 +7,5 @@ google-site-audit.json
 .DS_Store
 supabase/.temp
 .env*
+/tmp/
+**/__pycache__/

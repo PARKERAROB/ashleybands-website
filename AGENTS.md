@@ -1,10 +1,11 @@
-# Not the agent entry point
+# Ashley Bands website — Codex entry point
 
-The canonical entry point for Rob Parker's agent work is `/Users/parkerarob/workdesk`.
+The canonical thinking and coordination surface for Rob Parker's work is
+`/Users/parkerarob/workdesk`. Before acting, read its `AGENTS.md` and `CLAUDE.md`.
 
-If this session was opened directly in this repository, stop before doing work and restart at the
-workdesk. Do not reconstruct an operating layer from this repository, `~/Atlas/RobOS`,
-`~/Atlas-Codex`, or model memory.
+This repository is a legitimate Codex root for a bounded website build. If the request is still
+cross-Area thinking, assurance, or prioritization, use the workdesk task. Do not reconstruct an
+operating layer from historical assistant repositories or memory.
 
-When a workdesk session reaches this repository, its files and any repository-local `CLAUDE.md`
-provide subject matter and project mechanics only; the desk remains the operating context.
+Read `CLAUDE.md` for project mechanics, privacy boundaries, and verification commands; the desk
+remains the operating context.
