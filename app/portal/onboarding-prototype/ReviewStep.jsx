@@ -1,10 +1,10 @@
 import { CheckboxCard, ReviewGroup, ReviewLine, StepIntro } from "./OnboardingFields";
 import styles from "./onboarding.module.css";
 
-const accessLabels = { personal: "Has an instrument", school: "Needs a school instrument", percussion: "Percussionist", not_sure: "Not sure yet", color_guard: "Not applicable — Color Guard" };
+const accessLabels = { personal: "Has an instrument", school: "Needs a school instrument", percussion: "Percussionist", not_sure: "Not sure yet" };
 const schoolLabels = {
   murray: "Charles P. Murray Middle", myrtle_grove: "Myrtle Grove Middle", holly_shelter: "Holly Shelter Middle",
-  gregory: "International School at Gregory", noble: "MCS Noble Middle", roland_grise: "Roland-Grise Middle",
+  noble: "MCS Noble Middle", roland_grise: "Roland-Grise Middle",
   trask: "Emma B. Trask Middle", williston: "Williston Middle", no_previous: "No previous school music program"
 };
 
@@ -34,7 +34,7 @@ export default function ReviewStep({ form, update, jumpTo }) {
           })}
         </ReviewGroup>
         <ReviewGroup title="Music and participation" onEdit={() => jumpTo(3)}>
-          <ReviewLine label="Primary instrument" value={form.colorGuardOnly ? "Color Guard · no primary instrument" : form.primaryInstrument} />
+          <ReviewLine label="Primary instrument" value={form.primaryInstrument} />
           <ReviewLine label="Experience" value={form.yearsPlaying} />
           <ReviewLine label="Other instruments" value={form.otherInstruments.join(", ")} />
           <ReviewLine label="Previous school" value={form.originSchool === "outside_county" ? [form.priorSchoolName, form.priorSchoolCity, form.priorSchoolState].filter(Boolean).join(" · ") : schoolLabels[form.originSchool]} />

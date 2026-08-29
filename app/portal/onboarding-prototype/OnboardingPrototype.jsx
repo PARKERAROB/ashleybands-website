@@ -22,7 +22,7 @@ const initialForm = {
   guardian2Name: "", guardian2Relationship: "", guardian2Email: "", guardian2Phone: "",
   guardian3Name: "", guardian3Relationship: "", guardian3Email: "", guardian3Phone: "",
   guardian4Name: "", guardian4Relationship: "", guardian4Email: "", guardian4Phone: "", guardianCount: 2,
-  colorGuardOnly: false, primaryInstrument: "", otherInstruments: [], yearsPlaying: "", interests: [],
+  primaryInstrument: "", otherInstruments: [], yearsPlaying: "", interests: [],
   originSchool: "", priorSchoolName: "", priorSchoolCity: "", priorSchoolState: "",
   shirtSize: "", instrumentAccess: "not_sure", supportAreas: [], studentNote: "", accurate: false
 };
@@ -42,7 +42,7 @@ export default function OnboardingPrototype() {
   const outsideCountyComplete = form.originSchool !== "outside_county" || Boolean(
     form.priorSchoolName.trim() && form.priorSchoolCity.trim() && form.priorSchoolState
   );
-  const musicComplete = Boolean((form.colorGuardOnly || form.primaryInstrument) && form.originSchool && outsideCountyComplete);
+  const musicComplete = Boolean(form.primaryInstrument && form.originSchool && outsideCountyComplete);
   const requiredRecordComplete = Boolean(
     form.guardian1Name.trim() && form.guardian1Email.trim() && form.guardian1Phone.trim() && musicComplete
   );

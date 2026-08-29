@@ -2,14 +2,15 @@ import { CheckboxCard, Field, StepIntro } from "./OnboardingFields";
 import styles from "./onboarding.module.css";
 
 const instrumentOptions = [
-  "Flute", "Oboe", "Bassoon", "Clarinet", "Bass Clarinet",
+  "None", "Flute", "Oboe", "Bassoon", "Clarinet", "Bass Clarinet",
   "Alto Saxophone", "Tenor Saxophone", "Baritone Saxophone",
   "Trumpet", "French Horn", "Trombone", "Euphonium", "Tuba", "Percussion"
 ];
+const otherInstrumentOptions = [...instrumentOptions.filter((item) => item !== "None"), "Guitar", "Bass Guitar", "Piano"];
 const interestOptions = ["Concert Band", "Wind Ensemble", "Marching Band", "Color Guard", "Jazz", "Percussion", "Leadership", "Solo and Ensemble"];
 const schoolOptions = [
   ["murray", "Charles P. Murray Middle"], ["myrtle_grove", "Myrtle Grove Middle"],
-  ["holly_shelter", "Holly Shelter Middle"], ["gregory", "International School at Gregory"],
+  ["holly_shelter", "Holly Shelter Middle"],
   ["noble", "MCS Noble Middle"], ["roland_grise", "Roland-Grise Middle"],
   ["trask", "Emma B. Trask Middle"], ["williston", "Williston Middle"]
 ];
@@ -17,33 +18,24 @@ const schoolOptions = [
 function InstrumentSection({ form, update, toggleList }) {
   return (
     <>
-      <CheckboxCard checked={form.colorGuardOnly} onChange={(event) => {
-        update("colorGuardOnly", event.target.checked);
-        if (event.target.checked) { update("primaryInstrument", ""); update("instrumentAccess", "color_guard"); }
-        else if (form.instrumentAccess === "color_guard") update("instrumentAccess", "not_sure");
-      }} title="I am a Color Guard student and do not have a primary band instrument" />
-      {!form.colorGuardOnly ? (
-        <>
-          <div className={styles.formGrid}>
-            <Field id="primaryInstrument" label="Primary instrument" required>
-              <select id="primaryInstrument" value={form.primaryInstrument} onChange={(event) => update("primaryInstrument", event.target.value)}>
-                <option value="">Choose one</option>{instrumentOptions.map((item) => <option key={item}>{item}</option>)}
-              </select>
-            </Field>
-            <Field id="yearsPlaying" label="How long have you played?">
-              <select id="yearsPlaying" value={form.yearsPlaying} onChange={(event) => update("yearsPlaying", event.target.value)}>
-                <option value="">Choose one</option><option>Brand new</option><option>Less than 1 year</option><option>1–2 years</option><option>3–4 years</option><option>5+ years</option>
-              </select>
-            </Field>
-          </div>
-          <fieldset className={styles.choiceGroup}>
-            <legend>Other instruments</legend>
-            <div className={styles.choiceGrid}>
-              {instrumentOptions.filter((item) => item !== form.primaryInstrument).map((item) => <CheckboxCard key={item} checked={form.otherInstruments.includes(item)} onChange={() => toggleList("otherInstruments", item)} title={item} />)}
-            </div>
-          </fieldset>
-        </>
-      ) : null}
+      <div className={styles.formGrid}>
+        <Field id="primaryInstrument" label="Primary instrument" required>
+          <select id="primaryInstrument" value={form.primaryInstrument} onChange={(event) => update("primaryInstrument", event.target.value)}>
+            <option value="">Choose one</option>{instrumentOptions.map((item) => <option key={item}>{item}</option>)}
+          </select>
+        </Field>
+        <Field id="yearsPlaying" label="How long have you played?">
+          <select id="yearsPlaying" value={form.yearsPlaying} onChange={(event) => update("yearsPlaying", event.target.value)}>
+            <option value="">Choose one</option><option>Brand new</option><option>Less than 1 year</option><option>1–2 years</option><option>3–4 years</option><option>5+ years</option>
+          </select>
+        </Field>
+      </div>
+      <fieldset className={styles.choiceGroup}>
+        <legend>Other instruments</legend>
+        <div className={styles.choiceGrid}>
+          {otherInstrumentOptions.filter((item) => item !== form.primaryInstrument).map((item) => <CheckboxCard key={item} checked={form.otherInstruments.includes(item)} onChange={() => toggleList("otherInstruments", item)} title={item} />)}
+        </div>
+      </fieldset>
     </>
   );
 }

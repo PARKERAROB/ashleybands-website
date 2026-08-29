@@ -26,6 +26,10 @@ test("the prototype collects facts without inventing student communication permi
   assert.doesNotMatch(contact, /Best way to contact|may text|textOkay|preferredContact/);
   assert.match(family, /Primary \+ emergency/);
   assert.match(family, /form\.guardianCount < 4/);
+  assert.match(music, /"None"/);
+  assert.match(music, /"Guitar", "Bass Guitar", "Piano"/);
+  assert.doesNotMatch(music, /International School at Gregory/);
+  assert.doesNotMatch(prototypeBundle, /colorGuardOnly|color_guard/);
   assert.match(music, /otherInstruments\.includes/);
   assert.match(music, /Outside New Hanover County/);
   assert.match(support, /I am a percussionist/);

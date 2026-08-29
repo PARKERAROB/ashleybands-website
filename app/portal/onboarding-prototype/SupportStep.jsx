@@ -23,7 +23,6 @@ export default function SupportStep({ form, update, toggleList }) {
           <RadioCard name="instrumentAccess" value="school" checked={form.instrumentAccess === "school"} onChange={(event) => update("instrumentAccess", event.target.value)} title="I need a school instrument" />
           <RadioCard name="instrumentAccess" value="percussion" checked={form.instrumentAccess === "percussion"} onChange={(event) => update("instrumentAccess", event.target.value)} title="I am a percussionist" />
           <RadioCard name="instrumentAccess" value="not_sure" checked={form.instrumentAccess === "not_sure"} onChange={(event) => update("instrumentAccess", event.target.value)} title="I am not sure yet" />
-          {form.colorGuardOnly ? <RadioCard name="instrumentAccess" value="color_guard" checked={form.instrumentAccess === "color_guard"} onChange={(event) => update("instrumentAccess", event.target.value)} title="Not applicable — Color Guard" /> : null}
         </div>
       </fieldset>
       <fieldset className={styles.choiceGroup}>
