@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { compareStudents, emailValuesForStudents, needDescription } from "./current-students-prototype.logic.mjs";
 import styles from "./current-students-prototype.module.css";
 
 const STUDENTS = [
@@ -112,6 +113,17 @@ const STUDENTS = [
 ];
 
 const ALL = "All";
+const SORT_OPTIONS = [
+  ["last-asc", "Last name · A–Z"],
+  ["last-desc", "Last name · Z–A"],
+  ["first-asc", "First name · A–Z"],
+  ["first-desc", "First name · Z–A"],
+  ["grade-asc", "Grade · 9–12"],
+  ["grade-desc", "Grade · 12–9"],
+  ["ensemble-asc", "Ensemble · A–Z"],
+  ["instrument-asc", "Program instrument · A–Z"],
+  ["needs-desc", "Open needs first"]
+];
 
 function unique(values) {
   return [...new Set(values.filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b), undefined, { numeric: true }));
@@ -128,6 +140,7 @@ export default function CurrentStudentsPrototype() {
   const [ensemble, setEnsemble] = useState(ALL);
   const [instrument, setInstrument] = useState(ALL);
   const [need, setNeed] = useState(ALL);
+  const [sortBy, setSortBy] = useState("last-asc");
   const [selectedIds, setSelectedIds] = useState([]);
   const [focusedId, setFocusedId] = useState("avery-north");
   const [notice, setNotice] = useState("");
@@ -142,7 +155,7 @@ export default function CurrentStudentsPrototype() {
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
-    return pool.filter((student) => {
+    const matches = pool.filter((student) => {
       const haystack = [student.displayName, student.legalName, student.schoolEmail, student.guardian.name, student.programInstrument, ...student.ensembles].join(" ").toLowerCase();
       return (!term || haystack.includes(term)) &&
         (grade === ALL || student.grade === grade) &&
@@ -150,7 +163,8 @@ export default function CurrentStudentsPrototype() {
         (instrument === ALL || student.programInstrument === instrument) &&
         (need === ALL || student.needs.includes(need));
     });
-  }, [pool, search, grade, ensemble, instrument, need]);
+    return [...matches].sort((a, b) => compareStudents(a, b, sortBy));
+  }, [pool, search, grade, ensemble, instrument, need, sortBy]);
 
   const focusedStudent = focusedId
     ? STUDENTS.find((student) => student.id === focusedId && student.status === view) || null
@@ -186,20 +200,32 @@ export default function CurrentStudentsPrototype() {
 
   async function copyEmails(axis) {
     const chosen = STUDENTS.filter((student) => selectedIds.includes(student.id));
-    const values = chosen.map((student) => axis === "student" ? student.schoolEmail : student.guardian.email).filter(Boolean);
+    const values = emailValuesForStudents(chosen, axis);
     if (!values.length) { setNotice("No matching emails in the selected rows."); return; }
     await navigator.clipboard?.writeText(values.join(", "));
-    setNotice(`${values.length} synthetic ${axis === "student" ? "student" : "guardian"} emails copied.`);
+    const label = axis === "student" ? "student" : axis === "guardian" ? "guardian" : "student + guardian";
+    setNotice(`${values.length} synthetic ${label} emails copied.`);
+  }
+
+  async function copyStudentAndGuardian(student) {
+    const values = emailValuesForStudents([student], "both");
+    if (!values.length) { setNotice(`No student or guardian email is available for ${student.displayName}.`); return; }
+    await navigator.clipboard?.writeText(values.join(", "));
+    setNotice(`${values.length} synthetic student + guardian emails copied for ${student.displayName}.`);
   }
 
   function exportList() {
     const chosen = STUDENTS.filter((student) => selectedIds.includes(student.id));
     if (!chosen.length) { setNotice("Select at least one student first."); return; }
-    const lines = ["Student,Grade,Ensembles,Program instrument,Guardian"];
-    for (const student of chosen) lines.push([student.displayName, student.grade, student.ensembles.join(" + "), student.programInstrument, student.guardian.name].map((value) => `"${String(value).replaceAll('"', '""')}"`).join(","));
+    const lines = ["Student,Grade,Ensembles,Program instrument,School email,Personal email,Student mobile,Guardian,Guardian email,Guardian phone"];
+    for (const student of chosen) lines.push([
+      student.displayName, student.grade, student.ensembles.join(" + "), student.programInstrument,
+      student.schoolEmail, student.personalEmail, student.mobile, student.guardian.name,
+      student.guardian.email, student.guardian.phone
+    ].map((value) => `"${String(value).replaceAll('"', '""')}"`).join(","));
     const url = URL.createObjectURL(new Blob([lines.join("\n")], { type: "text/csv" }));
     const anchor = document.createElement("a"); anchor.href = url; anchor.download = "synthetic-current-students.csv"; anchor.click(); URL.revokeObjectURL(url);
-    setNotice(`${chosen.length} synthetic rows exported.`);
+    setNotice(`${chosen.length} synthetic contact rows exported.`);
   }
 
   return (
@@ -236,17 +262,21 @@ export default function CurrentStudentsPrototype() {
           <FilterSelect label="Ensemble" value={ensemble} onChange={setEnsemble} options={options.ensembles} />
           <FilterSelect label="Program instrument" value={instrument} onChange={setInstrument} options={options.instruments} />
           <FilterSelect label="Open need" value={need} onChange={setNeed} options={options.needs} />
-          <div className={styles.filterNote}><strong>Filters combine.</strong><span>Every choice narrows the same current roster.</span></div>
+          <div className={styles.filterNote}><strong>Filters combine.</strong><span>Every choice narrows the roster. Sort changes the order.</span></div>
         </aside>
 
         <section className={styles.rosterPanel} aria-label="Student roster">
           <div className={styles.rosterToolbar}>
             <div><strong>{filtered.length} students</strong><span>{selectedIds.length ? `${selectedIds.length} selected` : "Select rows to build a list"}</span></div>
-            {selectedIds.length ? <div className={styles.listActions}>
-              <button onClick={() => copyEmails("student")}>Student emails</button>
-              <button onClick={() => copyEmails("guardian")}>Guardian emails</button>
-              <button onClick={exportList}>Export</button>
-            </div> : null}
+            <div className={styles.rosterTools}>
+              <label className={styles.sortControl}><span>Sort by</span><select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>{SORT_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+              {selectedIds.length ? <div className={styles.listActions}>
+                <button onClick={() => copyEmails("student")}>Student emails</button>
+                <button onClick={() => copyEmails("guardian")}>Guardian emails</button>
+                <button onClick={() => copyEmails("both")}>Student + guardian</button>
+                <button onClick={exportList}>Export contacts</button>
+              </div> : null}
+            </div>
           </div>
           {notice ? <p className={styles.notice} aria-live="polite">{notice}</p> : null}
           <div className={styles.tableWrap}>
@@ -265,7 +295,7 @@ export default function CurrentStudentsPrototype() {
                     <td>{student.programInstrument}</td>
                     <td><div className={styles.signalStack}>
                       <span className={contactReady(student) ? styles.goodSignal : styles.gapSignal}>{contactReady(student) ? "Contact ready" : "Contact gap"}</span>
-                      {student.needs.length ? <span className={styles.needSignal}>{student.needs.length} open</span> : null}
+                      {student.needs.map((item) => <span key={item} className={styles.needSignal}>{item}</span>)}
                     </div></td>
                   </tr>
                 ))}
@@ -275,7 +305,7 @@ export default function CurrentStudentsPrototype() {
           </div>
         </section>
 
-        {focusedStudent ? <StudentDetail student={focusedStudent} onClose={() => setFocusedId("")} /> : null}
+        {focusedStudent ? <StudentDetail student={focusedStudent} onClose={() => setFocusedId("")} onCopyContacts={() => copyStudentAndGuardian(focusedStudent)} /> : null}
       </div>
     </main>
   );
@@ -285,7 +315,7 @@ function FilterSelect({ label, value, onChange, options }) {
   return <label><span>{label}</span><select value={value} onChange={(event) => onChange(event.target.value)}><option>{ALL}</option>{options.map((option) => <option key={option}>{option}</option>)}</select></label>;
 }
 
-function StudentDetail({ student, onClose }) {
+function StudentDetail({ student, onClose, onCopyContacts }) {
   const [attended, total] = student.attendance;
   const [raised, goal] = student.funding;
   const [formsComplete, formsTotal] = student.forms;
@@ -319,6 +349,7 @@ function StudentDetail({ student, onClose }) {
         <DetailLine label="Personal email" value={student.personalEmail || "Not provided"} />
         <DetailLine label="Student mobile" value={student.mobile || "Not provided"} />
         <div className={styles.guardianCard}><span>Primary + emergency</span><strong>{student.guardian.name}</strong><p>{student.guardian.relationship} · {student.guardian.email || "No email"} · {student.guardian.phone || "No phone"}</p></div>
+        <button className={styles.detailContactAction} onClick={onCopyContacts}>Copy student + guardian emails</button>
       </DetailSection>
 
       <DetailSection title="Connected work">
@@ -328,7 +359,7 @@ function StudentDetail({ student, onClose }) {
           <WorkCard label="Forms" value={`${formsComplete} of ${formsTotal}`} />
           <WorkCard label="Assets" value={student.assets.length ? `${student.assets.length} assigned` : "None"} />
         </div>
-        {student.needs.length ? <div className={styles.openNeeds}><span>Open follow-up</span><strong>{student.needs.join(" · ")}</strong></div> : <div className={styles.clearNeeds}>No open follow-up</div>}
+        {student.needs.length ? <div className={styles.openNeeds}><span>Open follow-up</span><ul>{student.needs.map((item) => <li key={item}><strong>{item}</strong><small>{needDescription(student, item)}</small></li>)}</ul></div> : <div className={styles.clearNeeds}>No open follow-up</div>}
       </DetailSection>
     </aside>
   );

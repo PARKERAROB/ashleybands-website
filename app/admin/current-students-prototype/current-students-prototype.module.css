@@ -54,6 +54,10 @@
 .rosterToolbar > div:first-child strong, .rosterToolbar > div:first-child span { display: block; }
 .rosterToolbar strong { font-size: .86rem; }
 .rosterToolbar span { margin-top: .16rem; color: var(--staff-muted); font-size: .69rem; }
+.rosterTools { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: .55rem; }
+.sortControl { display: flex; align-items: center; gap: .38rem; }
+.sortControl > span { margin: 0; color: var(--staff-muted); font-size: .63rem; font-weight: 850; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; }
+.sortControl select { min-height: 34px; border: 1px solid #b9b0a2; border-radius: 6px; padding: .35rem 1.8rem .35rem .5rem; background: #fff; color: var(--staff-ink); font: inherit; font-size: .68rem; font-weight: 750; }
 .listActions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .35rem; }
 .listActions button { min-height: 34px; border: 1px solid #b9b0a2; border-radius: 6px; padding: .38rem .55rem; background: #fff; color: var(--staff-red-dark); font: inherit; font-size: .68rem; font-weight: 850; cursor: pointer; }
 .notice { margin: 0; border-bottom: 1px solid #dfd8cc; padding: .5rem .9rem; background: #eef5f0; color: #31553e; font-size: .7rem; }
@@ -94,6 +98,7 @@
 .guardianCard span { color: var(--staff-muted); font-size: .58rem; font-weight: 850; letter-spacing: .06em; text-transform: uppercase; }
 .guardianCard strong { margin: .12rem 0; font-size: .75rem; }
 .guardianCard p { margin: 0; color: var(--staff-muted); font-size: .63rem; line-height: 1.45; overflow-wrap: anywhere; }
+.detailContactAction { width: 100%; min-height: 34px; margin-top: .65rem; border: 1px solid #b9b0a2; border-radius: 6px; padding: .4rem .55rem; background: #fff; color: var(--staff-red-dark); font: inherit; font-size: .66rem; font-weight: 850; cursor: pointer; }
 .workGrid { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; }
 .workGrid > div { border: 1px solid #ddd5ca; border-radius: 7px; padding: .55rem; background: #faf7f0; }
 .workGrid span, .workGrid strong { display: block; }
@@ -101,8 +106,13 @@
 .workGrid strong { margin-top: .1rem; font-size: .72rem; }
 .openNeeds, .clearNeeds { margin-top: .5rem; border-radius: 7px; padding: .6rem; font-size: .67rem; }
 .openNeeds { background: #f5e2d5; color: #783810; }
-.openNeeds span, .openNeeds strong { display: block; }
-.openNeeds span { margin-bottom: .12rem; font-size: .57rem; font-weight: 850; letter-spacing: .06em; text-transform: uppercase; }
+.openNeeds > span { display: block; margin-bottom: .28rem; font-size: .57rem; font-weight: 850; letter-spacing: .06em; text-transform: uppercase; }
+.openNeeds ul { display: grid; gap: .35rem; margin: 0; padding: 0; list-style: none; }
+.openNeeds li { display: grid; grid-template-columns: 82px minmax(0, 1fr); gap: .45rem; border-top: 1px solid rgba(120,56,16,.13); padding-top: .35rem; }
+.openNeeds li:first-child { border-top: 0; padding-top: 0; }
+.openNeeds li strong, .openNeeds li small { display: block; }
+.openNeeds li strong { font-size: .66rem; }
+.openNeeds li small { color: #925127; font-size: .62rem; }
 .clearNeeds { background: #e3f0e6; color: #31573e; font-weight: 800; }
 
 .page :is(button,input,select):focus-visible { outline: 3px solid rgba(139,29,44,.28); outline-offset: 2px; }
@@ -132,5 +142,5 @@
   .filters { grid-template-columns: 1fr; }
   .filterHeading, .filterNote { grid-column: auto; }
   .rosterToolbar { align-items: stretch; flex-direction: column; }
-  .listActions { justify-content: flex-start; }
+  .rosterTools, .listActions { justify-content: flex-start; }
 }
