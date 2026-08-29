@@ -18,6 +18,8 @@
 .appBar > div { display: flex; align-items: baseline; gap: .75rem; }
 .appBar strong { font-size: .96rem; font-weight: 900; }
 .appBar div span { color: var(--staff-muted); font-size: .78rem; }
+.appBar nav { display: flex; align-items: center; gap: .55rem; }
+.appBar nav > a { color: var(--staff-red-dark); font-size: .7rem; font-weight: 850; text-decoration: none; }
 .prototypeBadge { border-radius: 999px; padding: .4rem .62rem; background: #ecd9dc; color: #771827; font-size: .66rem; font-weight: 900; letter-spacing: .07em; text-transform: uppercase; }
 
 .heading { max-width: 1480px; margin: 0 auto; display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem; padding: 2.25rem 0 1.25rem; }
@@ -100,10 +102,12 @@
 .guardianCard p { margin: 0; color: var(--staff-muted); font-size: .63rem; line-height: 1.45; overflow-wrap: anywhere; }
 .detailContactAction { width: 100%; min-height: 34px; margin-top: .65rem; border: 1px solid #b9b0a2; border-radius: 6px; padding: .4rem .55rem; background: #fff; color: var(--staff-red-dark); font: inherit; font-size: .66rem; font-weight: 850; cursor: pointer; }
 .workGrid { display: grid; grid-template-columns: 1fr 1fr; gap: .4rem; }
-.workGrid > div { border: 1px solid #ddd5ca; border-radius: 7px; padding: .55rem; background: #faf7f0; }
-.workGrid span, .workGrid strong { display: block; }
+.workGrid > a { border: 1px solid #ddd5ca; border-radius: 7px; padding: .55rem; background: #faf7f0; color: inherit; text-decoration: none; }
+.workGrid > a:hover { border-color: #b7a990; background: #fffaf0; }
+.workGrid span, .workGrid strong, .workGrid small { display: block; }
 .workGrid span { color: var(--staff-muted); font-size: .59rem; }
 .workGrid strong { margin-top: .1rem; font-size: .72rem; }
+.workGrid small { margin-top: .35rem; color: var(--staff-red); font-size: .57rem; font-weight: 850; }
 .openNeeds, .clearNeeds { margin-top: .5rem; border-radius: 7px; padding: .6rem; font-size: .67rem; }
 .openNeeds { background: #f5e2d5; color: #783810; }
 .openNeeds > span { display: block; margin-bottom: .28rem; font-size: .57rem; font-weight: 850; letter-spacing: .06em; text-transform: uppercase; }

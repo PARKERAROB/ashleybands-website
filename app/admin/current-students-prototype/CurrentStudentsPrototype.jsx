@@ -1,10 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { compareStudents, emailValuesForStudents, needDescription } from "./current-students-prototype.logic.mjs";
 import styles from "./current-students-prototype.module.css";
 
-const STUDENTS = [
+export const STUDENTS = [
   {
     id: "avery-north", status: "active", displayName: "Avery North", legalName: "Avery Jordan North", pronouns: "they/them",
     grade: "10", currentSchool: "Ashley High School", schoolEmail: "avery.north@student.example", personalEmail: "avery.north@example.com", mobile: "(910) 555-0101",
@@ -133,8 +134,9 @@ function contactReady(student) {
   return Boolean(student.schoolEmail && student.guardian.email && student.guardian.phone);
 }
 
-export default function CurrentStudentsPrototype() {
-  const [view, setView] = useState("active");
+export default function CurrentStudentsPrototype({ initialStudentId = "" }) {
+  const initialStudent = STUDENTS.find((student) => student.id === initialStudentId);
+  const [view, setView] = useState(initialStudent?.status || "active");
   const [search, setSearch] = useState("");
   const [grade, setGrade] = useState(ALL);
   const [ensemble, setEnsemble] = useState(ALL);
@@ -142,7 +144,7 @@ export default function CurrentStudentsPrototype() {
   const [need, setNeed] = useState(ALL);
   const [sortBy, setSortBy] = useState("last-asc");
   const [selectedIds, setSelectedIds] = useState([]);
-  const [focusedId, setFocusedId] = useState("avery-north");
+  const [focusedId, setFocusedId] = useState(initialStudent?.id || "avery-north");
   const [notice, setNotice] = useState("");
 
   const pool = useMemo(() => STUDENTS.filter((student) => student.status === view), [view]);
@@ -232,7 +234,7 @@ export default function CurrentStudentsPrototype() {
     <main className={styles.page}>
       <header className={styles.appBar}>
         <div><strong>Ashley Bands</strong><span>Staff workspace</span></div>
-        <span className={styles.prototypeBadge}>Prototype · Synthetic data</span>
+        <nav><Link href="/admin/operations-prototype">Command center</Link><span className={styles.prototypeBadge}>Prototype · Synthetic data</span></nav>
       </header>
 
       <section className={styles.heading}>
@@ -354,10 +356,10 @@ function StudentDetail({ student, onClose, onCopyContacts }) {
 
       <DetailSection title="Connected work">
         <div className={styles.workGrid}>
-          <WorkCard label="Attendance" value={`${attended} of ${total}`} />
-          <WorkCard label="Funding" value={goal ? `$${raised} of $${goal}` : "No goal"} />
-          <WorkCard label="Forms" value={`${formsComplete} of ${formsTotal}`} />
-          <WorkCard label="Assets" value={student.assets.length ? `${student.assets.length} assigned` : "None"} />
+          <WorkCard label="Attendance" value={`${attended} of ${total}`} href={"/admin/operations-prototype?area=attendance&student=" + encodeURIComponent(student.id)} />
+          <WorkCard label="Funding" value={goal ? `$${raised} of $${goal}` : "No goal"} href={"/admin/operations-prototype?area=funding&student=" + encodeURIComponent(student.id)} />
+          <WorkCard label="Forms" value={`${formsComplete} of ${formsTotal}`} href={"/admin/operations-prototype?area=forms&student=" + encodeURIComponent(student.id)} />
+          <WorkCard label="Assets" value={student.assets.length ? `${student.assets.length} assigned` : "None"} href={"/admin/operations-prototype?area=inventory&student=" + encodeURIComponent(student.id)} />
         </div>
         {student.needs.length ? <div className={styles.openNeeds}><span>Open follow-up</span><ul>{student.needs.map((item) => <li key={item}><strong>{item}</strong><small>{needDescription(student, item)}</small></li>)}</ul></div> : <div className={styles.clearNeeds}>No open follow-up</div>}
       </DetailSection>
@@ -373,6 +375,6 @@ function DetailLine({ label, value }) {
   return <div className={styles.detailLine}><span>{label}</span><strong>{value}</strong></div>;
 }
 
-function WorkCard({ label, value }) {
-  return <div><span>{label}</span><strong>{value}</strong></div>;
+function WorkCard({ label, value, href }) {
+  return <Link href={href}><span>{label}</span><strong>{value}</strong><small>Open →</small></Link>;
 }

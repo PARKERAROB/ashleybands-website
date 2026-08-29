@@ -17,6 +17,7 @@
     "test:attendance": "node --test scripts/attendance-events.test.mjs",
     "test:audience": "node --env-file=.env.local --test scripts/audience-active-status.test.mjs",
     "test:current-students-prototype": "node --test scripts/current-students-prototype.test.mjs",
+    "test:operations-prototype": "node --test scripts/operations-prototype.test.mjs",
     "test:onboarding": "node --test scripts/onboarding-prototype.test.mjs",
     "test:uniform-sizing": "node --test scripts/uniform-sizing.test.mjs",
     "test:sponsorship": "node --test scripts/sponsorship-security.test.mjs",

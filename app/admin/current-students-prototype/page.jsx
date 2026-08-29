@@ -6,6 +6,7 @@ export const metadata = {
   robots: { index: false, follow: false }
 };
 
-export default function CurrentStudentsPrototypePage() {
-  return <CurrentStudentsPrototype />;
+export default async function CurrentStudentsPrototypePage({ searchParams }) {
+  const params = await searchParams;
+  return <CurrentStudentsPrototype initialStudentId={typeof params?.student === "string" ? params.student : ""} />;
 }

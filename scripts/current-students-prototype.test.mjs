@@ -17,7 +17,7 @@ test("the staff roster prototype is synthetic, read-only, and excluded from inde
 });
 
 test("current students are the default and inactive students require an intentional view", () => {
-  assert.match(client, /useState\("active"\)/);
+  assert.match(client, /useState\(initialStudent\?\.status \|\| "active"\)/);
   assert.match(client, /student\.status === view/);
   assert.match(client, /Inactive Students/);
   assert.match(client, /Current Students/);
