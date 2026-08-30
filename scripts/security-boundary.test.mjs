@@ -135,6 +135,8 @@ function runtimeSourceFilesUnder(directory) {
 }
 
 const SAFE_FILTER_COLUMN = {
+  student_guardians: "student_id",
+  project_thoughts: "project_id",
   portal_student_profiles: "student_id",
   portal_student_music_profiles: "student_id",
   portal_student_other_instruments: "student_id",
