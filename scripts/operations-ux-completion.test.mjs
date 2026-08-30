@@ -82,8 +82,10 @@ test("Guardian 1 relationship blocks onboarding save until it is present", () =>
 
 test("system oversight labels only fresh and tied evidence and grants named compatible scopes", () => {
   assert.match(systemPage, /Latest recovery check/);
-  assert.match(systemPage, /JSON integrity verified/);
-  assert.match(systemPage, /typed database restore is not yet proven/);
+  assert.match(systemPage, /verification\.target_label === "isolated_pglite_exact_migrations"/);
+  assert.match(systemPage, /Typed restore verified/);
+  assert.match(systemPage, /Exact migrations and typed records restored in an isolated database/);
+  assert.match(systemPage, /typed restore is not recorded/);
   assert.doesNotMatch(systemPage, /Latest isolated restore/);
   assert.match(systemPage, /verification\.backup_run_id === latestBackup\.id/);
   assert.match(systemRoute, /value:\s*event\.occurrence_key/);
