@@ -20,6 +20,7 @@
     "test:assets-inventory-prototype": "node --test scripts/assets-inventory-prototype.test.mjs",
     "test:audience": "node --env-file=.env.local --test scripts/audience-active-status.test.mjs",
     "test:current-students-prototype": "node --test scripts/current-students-prototype.test.mjs",
+    "test:current-students-live": "node --test scripts/current-students-live.test.mjs",
     "test:ensembles-memberships-prototype": "node --test scripts/ensembles-memberships-prototype.test.mjs",
     "test:operations-prototype": "node --test scripts/operations-prototype.test.mjs",
     "test:onboarding": "node --test scripts/onboarding-prototype.test.mjs",
