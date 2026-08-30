@@ -42,6 +42,13 @@ test("fees and sponsorship gifts remain separate connected records", () => {
   assert.match(workspace, /Money is kept in two records/);
 });
 
+test("student detail reads normalized current memberships", () => {
+  assert.match(dataLayer, /from\("program_memberships"\)/);
+  assert.match(dataLayer, /programMemberships/);
+  assert.match(workspace, /student\.programMemberships/);
+  assert.match(workspace, /\/admin\/ensembles\?view=students&student=/);
+});
+
 test("the accepted filtering, sorting, contact, and management paths remain available", () => {
   assert.match(workspace, /Filters combine/);
   assert.match(workspace, /Student \+ guardian/);

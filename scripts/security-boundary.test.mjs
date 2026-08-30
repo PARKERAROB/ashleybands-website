@@ -23,6 +23,12 @@ const PRIVATE_OPERATIONAL_TABLES = [
   "portal_onboarding_completions",
   "portal_onboarding_progress",
   "portal_onboarding_step_receipts",
+  "program_groups",
+  "program_memberships",
+  "program_membership_events",
+  "school_class_sections",
+  "student_class_enrollments",
+  "group_class_expectations",
 ];
 
 const migrationDir = path.resolve("supabase", "migrations");
@@ -88,16 +94,18 @@ test("production publishable key cannot write private operational rows", {
   assert.ok(url && key, "live boundary check requires the production publishable configuration");
 
   for (const table of PRIVATE_OPERATIONAL_TABLES) {
-    const response = await fetch(`${url}/rest/v1/${table}`, {
-      method: "POST",
-      headers: {
-        apikey: key,
-        Authorization: `Bearer ${key}`,
-        "Content-Type": "application/json",
-        Prefer: "return=minimal",
-      },
-      body: "{}",
-    });
-    assert.ok(!response.ok, `${table} accepted a production publishable-key insert`);
+    for (const [method, suffix] of [["POST", ""], ["PATCH", "?id=eq.00000000-0000-0000-0000-000000000000"], ["DELETE", "?id=eq.00000000-0000-0000-0000-000000000000"]]) {
+      const response = await fetch(`${url}/rest/v1/${table}${suffix}`, {
+        method,
+        headers: {
+          apikey: key,
+          Authorization: `Bearer ${key}`,
+          "Content-Type": "application/json",
+          Prefer: "return=minimal",
+        },
+        body: method === "DELETE" ? undefined : "{}",
+      });
+      assert.ok(!response.ok, `${table} accepted a production publishable-key ${method}`);
+    }
   }
 });

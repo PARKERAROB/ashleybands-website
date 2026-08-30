@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { validateStaffRequest } from "@/lib/staffAuth";
+import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
 import { logAudit, staffActor } from "@/lib/auditLog";
 
 export const runtime = "nodejs";
@@ -14,8 +14,9 @@ function buildDisplayName({ preferredFirst, legalFirst, legalLast }) {
 
 // GET ?q=  -> search students (with guardians). No q -> recent/first 50.
 export async function GET(req) {
-  const staff = await validateStaffRequest(req);
-  if (!staff) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.STUDENTS_READ);
+  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status });
+  const staff = authorization.staff;
 
   const q = text(new URL(req.url).searchParams.get("q")).toLowerCase();
 
@@ -107,8 +108,9 @@ export async function GET(req) {
 
 // POST -> create a student. body: legalFirst, legalLast, preferredFirst?, gradeFall26?, schoolEmail?, cellPhone?, status?
 export async function POST(req) {
-  const staff = await validateStaffRequest(req);
-  if (!staff) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.STUDENTS_WRITE);
+  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status });
+  const staff = authorization.staff;
 
   const body = await req.json().catch(() => ({}));
   const legalFirst = text(body.legalFirst);
@@ -167,8 +169,9 @@ export async function POST(req) {
 
 // PATCH -> update a student. body: id + any of the editable fields.
 export async function PATCH(req) {
-  const staff = await validateStaffRequest(req);
-  if (!staff) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.STUDENTS_WRITE);
+  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status });
+  const staff = authorization.staff;
 
   const body = await req.json().catch(() => ({}));
   const id = text(body.id);
@@ -197,8 +200,20 @@ export async function PATCH(req) {
     legalLast: update.legal_last !== undefined ? update.legal_last : current.legal_last
   });
 
-  const { error } = await supabaseAdmin.from("portal_students").update(update).eq("id", id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  const nextStatus = Object.hasOwn(update, "status") ? update.status : undefined;
+  if (nextStatus !== undefined) delete update.status;
+  if (Object.keys(update).length) {
+    const { error } = await supabaseAdmin.from("portal_students").update(update).eq("id", id);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+  if (nextStatus !== undefined) {
+    const { error: statusError } = await supabaseAdmin.rpc("portal_set_student_status_and_reconcile", {
+      p_student_id: id,
+      p_status: nextStatus,
+    });
+    if (statusError) return NextResponse.json({ error: statusError.message }, { status: 500 });
+    update.status = nextStatus;
+  }
 
   const changes = {};
   for (const field of Object.keys(update)) {

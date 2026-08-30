@@ -25,6 +25,7 @@
     "test:operations-prototype": "node --test scripts/operations-prototype.test.mjs",
     "test:onboarding": "node --test scripts/onboarding-prototype.test.mjs",
     "test:onboarding-live": "node --test scripts/onboarding-live.test.mjs",
+    "test:memberships-live": "node --test scripts/program-memberships-live.test.mjs",
     "test:uniform-sizing": "node --test scripts/uniform-sizing.test.mjs",
     "test:sponsorship": "node --test scripts/sponsorship-security.test.mjs",
     "test:newsletter": "node --test scripts/newsletter.test.mjs",
@@ -34,7 +35,7 @@
     "integration:doctor:online": "node scripts/integration.mjs doctor --online",
     "integration:sync": "node scripts/integration.mjs sync",
     "deploy:preflight": "node scripts/deploy-preflight.mjs",
-    "deploy:checked": "npm run deploy:preflight && node scripts/integration.mjs sync --deploy && npm run lint:integration && npm run lint:provenance && npm run test:audience && npm run test:sponsorship && npm run test:newsletter && npm run test:onboarding-live && npm run test:security:live && npm run lint:sponsorship && npm run lint:newsletter && npm run build && npx --yes vercel@59.1.4 --prod --yes --scope robs-projects-9eb69de7",
+    "deploy:checked": "npm run deploy:preflight && node scripts/integration.mjs sync --deploy && npm run lint:integration && npm run lint:provenance && npm run test:audience && npm run test:sponsorship && npm run test:newsletter && npm run test:onboarding-live && npm run test:memberships-live && npm run test:security:live && npm run lint:sponsorship && npm run lint:newsletter && npm run build && npx --yes vercel@59.1.4 --prod --yes --scope robs-projects-9eb69de7",
     "supabase:production": "node scripts/supabase-production.mjs"
   },
   "dependencies": {

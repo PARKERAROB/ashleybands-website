@@ -331,7 +331,7 @@ function StudentDetail({ student, onClose, onCopyContacts }) {
       </DetailSection>
 
       <DetailSection title="Current program">
-        <DetailLine label="Ensembles" value={student.ensembles.join(", ") || "Not listed"} />
+        <DetailLine label="Groups" value={student.programMemberships.map((membership) => membership.name).join(", ") || "Not listed"} />
         <DetailLine label="Band class" value={student.bandClass || "Not listed"} />
         <DetailLine label="Program instrument" value={student.programInstrument} />
         <DetailLine label="Marching role" value={student.marchingRole || "Not marching"} />
@@ -357,7 +357,7 @@ function StudentDetail({ student, onClose, onCopyContacts }) {
           <WorkCard label="Fees" value={money(student.finances.balanceCents) + " balance"} href={`/admin/billing?studentId=${encodeURIComponent(student.id)}`} />
           <WorkCard label="Sponsorship" value={`${money(student.finances.confirmedSponsorshipCents)} confirmed`} href={`/admin/marching-band/funding?studentId=${encodeURIComponent(student.id)}`} />
           <WorkCard label="Assets" value={`${student.instruments.length + (student.resources ? 1 : 0)} connected`} href={`/admin/instrument-inventory?studentId=${encodeURIComponent(student.id)}`} />
-          <WorkCard label="Memberships" value={`${student.ensembles.length} current`} href="/admin/ensembles-memberships-prototype?view=students" />
+          <WorkCard label="Memberships" value={`${student.programMemberships.length} current`} href={`/admin/ensembles?view=students&student=${encodeURIComponent(student.id)}`} />
           <WorkCard label="Forms" value="Catalog not connected" href="/admin/operations-prototype?area=forms&filter=incomplete" />
         </div>
         {student.needs.length ? <div className={styles.openNeeds}><span>Open follow-up</span><ul>{student.needs.map((item) => <li key={item}><strong>{item}</strong><small>{needDescription(item)}</small></li>)}</ul></div> : <div className={styles.clearNeeds}>No open follow-up in the connected records</div>}

@@ -101,8 +101,10 @@
 .studentSummary strong { margin-top: .15rem; font-size: .74rem; }
 .connectedLinks { display: flex; flex-wrap: wrap; gap: .35rem; border-top: 1px solid #e2dbd0; padding: .8rem .9rem; }
 .connectedLinks a { border: 1px solid #c9c0b4; border-radius: 6px; padding: .43rem .58rem; background: #fff; color: var(--red-dark); font-size: .65rem; font-weight: 850; text-decoration: none; }
+.connectedLinks > span { align-self: center; color: var(--muted); font-size: .61rem; }
 
 .detail { position: sticky; top: .75rem; max-height: calc(100vh - 1.5rem); overflow-y: auto; }
+.detail:focus { outline: 3px solid rgba(139,29,44,.2); outline-offset: 3px; }
 .detail > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; border-bottom: 1px solid #ddd5c9; padding: 1rem; background: var(--red-dark); color: #fffaf0; }
 .detail header span { color: #e0c56f; font-size: .58rem; font-weight: 900; letter-spacing: .07em; text-transform: uppercase; }
 .detail h2 { margin: .2rem 0 0; font-size: 1.4rem; line-height: 1.05; letter-spacing: -.03em; }
@@ -164,4 +166,12 @@
   .studentSummary > div { border-right: 0; border-bottom: 1px solid #ded6ca; }
   .studentSummary > div:last-child { border-bottom: 0; }
   .rosterActions { align-items: stretch; flex-direction: column; width: 100%; }
+  .tableWrap { overflow-x: visible; padding: .65rem; }
+  .tableWrap table { min-width: 0; }
+  .tableWrap thead { display: none; }
+  .tableWrap tbody { display: grid; gap: .65rem; }
+  .tableWrap tr { display: block; overflow: hidden; border: 1px solid #d9d1c5; border-radius: 9px; background: #fff; }
+  .tableWrap td { display: grid; grid-template-columns: minmax(92px, 36%) minmax(0, 1fr); gap: .55rem; border-bottom: 1px solid #ebe5db; padding: .58rem .65rem; }
+  .tableWrap td:last-child { border-bottom: 0; }
+  .tableWrap td::before { content: attr(data-label); color: var(--muted); font-size: .55rem; font-weight: 850; letter-spacing: .04em; text-transform: uppercase; }
 }
