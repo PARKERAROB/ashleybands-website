@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { validateStaffRequest } from "@/lib/staffAuth";
+import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
 import { createBroadcast, dispatchBroadcast } from "@/lib/broadcast";
 
 export const runtime = "nodejs";
@@ -11,8 +11,9 @@ export const maxDuration = 300;
 //   { broadcastId }                       -> resume dispatch of an existing broadcast
 //   { subject, body, audienceFilter, recipientAxis, confirm:true } -> create + send
 export async function POST(req) {
-  const staff = await validateStaffRequest(req);
-  if (!staff) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.COMMUNICATIONS_SEND);
+  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status });
+  const staff = authorization.staff;
 
   const body = await req.json().catch(() => ({}));
 

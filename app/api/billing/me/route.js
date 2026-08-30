@@ -28,7 +28,14 @@ export async function GET(request) {
     .select("id, display_name, preferred_first")
     .in("id", studentIds);
 
-  const { charges, payments, balances } = await loadStudentLedgers(studentIds);
+  const [{ charges, payments, balances }, { data: campaignRows, error: campaignError }] = await Promise.all([
+    loadStudentLedgers(studentIds),
+    supabaseAdmin.from("student_campaign_summary")
+      .select("student_id,goal_cents,family_contribution_cents,confirmed_gift_cents,legacy_sponsorship_credit_cents,raised_cents,remaining_cents")
+      .in("student_id", studentIds),
+  ]);
+  if (campaignError) return NextResponse.json({ error: "Could not load current campaign records." }, { status: 500, headers: { "Cache-Control": "private, no-store" } });
+  const campaignByStudent = new Map((campaignRows || []).map((row) => [row.student_id, row]));
 
   // Spring-Trip forgo offer — DARK by default. Only attach when the flag is live,
   // so families see nothing until go-live (the data never reaches the client otherwise).
@@ -37,6 +44,7 @@ export async function GET(request) {
   const students = (studentRows || []).map((s) => {
     const bal = balances[s.id] || { charged_cents: 0, paid_cents: 0, balance_cents: 0 };
     const credit = refundCredits[s.id];
+    const campaign = campaignByStudent.get(s.id) || {};
     return {
       id: s.id,
       name: s.display_name,
@@ -51,8 +59,17 @@ export async function GET(request) {
       chargedCents: Number(bal.charged_cents) || 0,
       paidCents: Number(bal.paid_cents) || 0,
       balanceCents: Number(bal.balance_cents) || 0,
+      campaign: {
+        goalCents: Number(campaign.goal_cents) || 0,
+        familyContributionCents: Number(campaign.family_contribution_cents) || 0,
+        confirmedGiftCents: Number(campaign.confirmed_gift_cents) || 0,
+        legacySponsorshipCreditCents: Number(campaign.legacy_sponsorship_credit_cents) || 0,
+        raisedCents: Number(campaign.raised_cents) || 0,
+        remainingCents: Number(campaign.remaining_cents) || 0,
+      },
       charges: (charges[s.id] || []).map((c) => ({
         id: c.id,
+        category: c.category,
         label: c.label || c.category,
         amountCents: c.amount_cents,
         status: c.status,
@@ -65,14 +82,15 @@ export async function GET(request) {
           id: p.id,
           amountCents: p.amount_cents,
           method: p.method,
-          kind: chargeKindForCategory(p.category),
+          kind: p.kind || chargeKindForCategory(p.category),
           isSponsorship: !!p.is_sponsorship,
-          payerName: p.payer_name || "",
-          receivedAt: p.received_at || p.created_at,
-          note: p.notes || ""
+          receivedAt: p.received_at || p.created_at
         }))
     };
   });
 
-  return NextResponse.json({ students, paymentsEnabled: isPaypalConfigured() });
+  return NextResponse.json(
+    { students, paymentsEnabled: isPaypalConfigured() },
+    { headers: { "Cache-Control": "private, no-store" } },
+  );
 }

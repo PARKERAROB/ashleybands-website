@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { validateStaffRequest } from "@/lib/staffAuth";
+import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
 import { resolveAudience } from "@/lib/audience";
 
 export const runtime = "nodejs";
@@ -7,8 +7,8 @@ export const runtime = "nodejs";
 // Resolve an audience WITHOUT creating or sending anything. Powers the live
 // recipient count + sample in the composer.
 export async function POST(req) {
-  const staff = await validateStaffRequest(req);
-  if (!staff) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.COMMUNICATIONS_READ);
+  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status });
 
   const body = await req.json().catch(() => ({}));
   const audienceFilter = body.audienceFilter || {};

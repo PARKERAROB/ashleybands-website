@@ -29,19 +29,20 @@ export async function POST(req) {
     return NextResponse.json({ error: "Email or PIN not recognized" }, { status: 401 });
   }
 
-  // Set an httpOnly session cookie. If that fails (e.g. secret unset), fall back
-  // to returning the token so there's always a working auth path (no lockout).
-  let cookieValue = null;
+  // A staff session must only leave this route in an httpOnly cookie. Never
+  // return the underlying database token to browser JavaScript.
+  let cookieValue;
   try {
     cookieValue = createStaffCookieValue({ id: data.id, token: data.session_token });
   } catch {
-    cookieValue = null;
+    return NextResponse.json(
+      { error: "Staff sign-in is temporarily unavailable." },
+      { status: 503, headers: { "Cache-Control": "private, no-store" } },
+    );
   }
 
   const payload = { id: data.id, role: data.role, display_name: data.display_name };
-  if (!cookieValue) payload.token = data.session_token;
-
-  const res = NextResponse.json(payload);
-  if (cookieValue) setStaffCookie(res, cookieValue);
+  const res = NextResponse.json(payload, { headers: { "Cache-Control": "private, no-store" } });
+  setStaffCookie(res, cookieValue);
   return res;
 }

@@ -11,10 +11,11 @@ const SCHOOL_YEAR = "2026-2027";
 async function trustedStudent(personId, studentId) {
   const { data } = await supabaseAdmin
     .from("portal_student_people")
-    .select("student_id, portal_students(display_name, instrument_2026)")
+    .select("student_id,assurance_level,role,portal_people!inner(person_type),portal_students(display_name,instrument_2026)")
     .eq("person_id", personId)
     .eq("student_id", studentId)
     .eq("relationship_status", "trusted")
+    .eq("portal_students.status", "active")
     .maybeSingle();
   return data || null;
 }
@@ -25,9 +26,10 @@ export async function GET(request) {
 
   const { data: trustedLinks, error: trustedError } = await supabaseAdmin
     .from("portal_student_people")
-    .select("student_id")
+    .select("student_id,portal_students!inner(status)")
     .eq("person_id", session.personId)
-    .eq("relationship_status", "trusted");
+    .eq("relationship_status", "trusted")
+    .eq("portal_students.status", "active");
   if (trustedError) return NextResponse.json({ error: "Could not load student access." }, { status: 500 });
   const studentIds = (trustedLinks || []).map((item) => item.student_id);
   if (!studentIds.length) return NextResponse.json({ requests: [], schoolYear: SCHOOL_YEAR });
@@ -43,16 +45,28 @@ export async function GET(request) {
   let assignments = [];
   if (requestIds.length) {
     const { data: assignedRows } = await supabaseAdmin
-      .from("instrument_inventory")
-      .select("instrument_request_id, instrument_type, brand, serial_number, asset_id, issued_condition")
-      .in("instrument_request_id", requestIds);
-    assignments = assignedRows || [];
+      .from("asset_assignments")
+      .select("id,source_ref,starts_at,assignment_status,assets(id,asset_tag,display_name,condition_summary,asset_instruments(instrument_type,brand,serial_number))")
+      .in("source_ref", requestIds.map(String))
+      .is("ends_at", null);
+    assignments = (assignedRows || []).map((assignment) => {
+      const asset = Array.isArray(assignment.assets) ? assignment.assets[0] : assignment.assets;
+      const instrument = Array.isArray(asset?.asset_instruments) ? asset.asset_instruments[0] : asset?.asset_instruments;
+      return {
+        instrument_request_id: assignment.source_ref,
+        instrument_type: instrument?.instrument_type || "",
+        brand: instrument?.brand || "",
+        serial_number: instrument?.serial_number || "",
+        asset_id: asset?.asset_tag || "",
+        issued_condition: asset?.condition_summary || "",
+      };
+    });
   }
   const byRequest = new Map(assignments.map((item) => [item.instrument_request_id, item]));
   return NextResponse.json({
     requests: (data || []).map((item) => ({ ...item, assignment: byRequest.get(item.id) || null })),
     schoolYear: SCHOOL_YEAR
-  });
+  }, { headers: { "Cache-Control": "private, no-store" } });
 }
 
 export async function POST(request) {
@@ -75,6 +89,10 @@ export async function POST(request) {
 
   const link = await trustedStudent(session.personId, studentId);
   if (!link) return NextResponse.json({ error: "Student access not found." }, { status: 403 });
+  const actorPerson = Array.isArray(link.portal_people) ? link.portal_people[0] : link.portal_people;
+  if (action === "agreement" && (actorPerson?.person_type !== "guardian" || !["medium", "high"].includes(link.assurance_level))) {
+    return NextResponse.json({ error: "A verified guardian must submit the responsibility agreement." }, { status: 403 });
+  }
   const studentName = link.portal_students?.display_name || "Student";
   const studentInstrument = link.portal_students?.instrument_2026 || "";
 
@@ -88,55 +106,55 @@ export async function POST(request) {
     if (!existing) {
       return NextResponse.json({ error: "Submit the county instrument agreement before identifying the instrument." }, { status: 409 });
     }
-    const assetId = String(body.assetId || "").trim().slice(0, 120);
+    const assetTag = String(body.assetId || "").trim().slice(0, 120);
     const serialNumber = String(body.serialNumber || "").trim().slice(0, 120);
     const instrumentType = String(body.instrumentType || studentInstrument || "").trim().slice(0, 120);
     const issuedCondition = String(body.issuedCondition || "").trim().slice(0, 80);
-    if (!assetId || !serialNumber || !instrumentType || !issuedCondition) {
+    if (!assetTag || !serialNumber || !instrumentType || !issuedCondition) {
       return NextResponse.json({ error: "Enter the instrument type, asset number, serial number, and current condition." }, { status: 400 });
     }
-    const now = new Date().toISOString();
-    const { data: inventory, error: inventoryError } = await supabaseAdmin
-      .from("instrument_inventory")
-      .insert({
-        asset_id: assetId,
-        serial_number: serialNumber,
-        instrument_type: instrumentType,
-        condition_notes: `Condition when identified: ${issuedCondition}`,
-        submitted_by: studentName,
-        submitted_by_person_id: session.personId,
-        assigned_student_id: studentId,
-        instrument_request_id: existing.id,
-        issued_at: now,
-        issued_by: session.email || "verified portal user",
-        issued_condition: issuedCondition,
-        assignment_notes: "Student-entered during the authenticated classroom issue workflow.",
-        source: "portal_student_issue",
-        review_status: "pending"
-      })
-      .select("id, instrument_type, brand, serial_number, asset_id, issued_condition")
-      .single();
-    if (inventoryError) {
-      if (inventoryError.code === "23505") return NextResponse.json({ error: "This request already has an identified instrument." }, { status: 409 });
-      return NextResponse.json({ error: "Could not save the instrument identification." }, { status: 500 });
+    const { data: asset } = await supabaseAdmin.from("assets")
+      .select("id,asset_tag,display_name,condition_summary,asset_instruments(instrument_type,brand,serial_number)")
+      .eq("asset_tag", assetTag)
+      .eq("asset_type", "instrument")
+      .eq("lifecycle_status", "active")
+      .maybeSingle();
+    if (!asset) return NextResponse.json({ error: "That asset number is not in the connected instrument inventory." }, { status: 404 });
+    const connectedInstrument = Array.isArray(asset.asset_instruments) ? asset.asset_instruments[0] : asset.asset_instruments;
+    if (connectedInstrument?.serial_number && connectedInstrument.serial_number.trim().toLowerCase() !== serialNumber.toLowerCase()) {
+      return NextResponse.json({ error: "The serial number does not match the connected instrument record." }, { status: 409 });
     }
-    const { error: statusError } = await supabaseAdmin
-      .from("portal_instrument_requests")
-      .update({ status: "assigned", updated_at: now })
-      .eq("id", existing.id);
-    if (statusError) return NextResponse.json({ error: "The instrument was saved, but its request status could not be updated." }, { status: 500 });
+    const { data: assignmentId, error: assignmentError } = await supabaseAdmin.rpc("assign_requested_instrument", {
+      p_asset_id: asset.id,
+      p_student_id: studentId,
+      p_request_id: existing.id,
+      p_actor_person_id: session.personId,
+      p_actor_staff_id: null,
+      p_source: "portal_student_issue",
+      p_condition: issuedCondition,
+      p_notes: "Identified during the authenticated classroom issue workflow.",
+    });
+    if (assignmentError) return NextResponse.json({ error: "Could not save the instrument assignment." }, { status: 409 });
+    const inventory = {
+      id: assignmentId,
+      instrument_type: connectedInstrument?.instrument_type || instrumentType,
+      brand: connectedInstrument?.brand || "",
+      serial_number: connectedInstrument?.serial_number || serialNumber,
+      asset_id: asset.asset_tag,
+      issued_condition: issuedCondition,
+    };
     await logAudit({
       actor: { type: "portal_user", id: session.personId, name: session.email },
       action: "identify_issued_instrument",
       table: "instrument_inventory",
-      recordId: inventory.id,
+      recordId: assignmentId,
       route: "/api/portal/instrument-request",
       changes: { student_id: studentId, instrument_request_id: existing.id, source: "portal_student_issue" }
     });
     return NextResponse.json({
       ok: true,
       request: { id: existing.id, student_id: studentId, status: "assigned", assignment: inventory }
-    });
+    }, { headers: { "Cache-Control": "private, no-store" } });
   }
   if (existing) {
     return NextResponse.json({ error: "An instrument agreement has already been submitted for this student." }, { status: 409 });
@@ -156,6 +174,15 @@ export async function POST(request) {
     .single();
   if (error) return NextResponse.json({ error: "Could not save the instrument agreement." }, { status: 500 });
 
+  await logAudit({
+    actor: { type: "portal_user", id: session.personId, name: session.email },
+    action: "submit_instrument_agreement",
+    table: "portal_instrument_requests",
+    recordId: submission.id,
+    route: "/api/portal/instrument-request",
+    changes: { student_id: studentId, school_year: SCHOOL_YEAR, guardian_verified: true },
+  });
+
   try {
     await sendPortalReviewAlert({
       subject: `Instrument agreement submitted — ${studentName}`,
@@ -173,5 +200,5 @@ export async function POST(request) {
     // The signed record is durable even if the notification provider is unavailable.
   }
 
-  return NextResponse.json({ ok: true, request: submission });
+  return NextResponse.json({ ok: true, request: submission }, { headers: { "Cache-Control": "private, no-store" } });
 }

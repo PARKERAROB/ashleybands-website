@@ -1,12 +1,10 @@
 import { getSupabaseEnv } from "@/lib/supabaseEnv";
 import { supabaseHeaders } from "@/lib/supabaseRest";
-import { validateStaffRequest } from "@/lib/staffAuth";
+import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
 
 export async function GET(request) {
-  const staff = await validateStaffRequest(request);
-  if (!staff) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const authorization = await authorizeStaffRequest(request, STAFF_CAPABILITIES.COMMUNICATIONS_READ);
+  if (!authorization.ok) return Response.json({ error: authorization.error }, { status: authorization.status });
 
   const { url: supabaseUrl, key: supabaseKey } = getSupabaseEnv();
 
@@ -24,10 +22,8 @@ export async function GET(request) {
 }
 
 export async function DELETE(request) {
-  const staff = await validateStaffRequest(request);
-  if (!staff) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const authorization = await authorizeStaffRequest(request, STAFF_CAPABILITIES.COMMUNICATIONS_WRITE);
+  if (!authorization.ok) return Response.json({ error: authorization.error }, { status: authorization.status });
 
   const { url: supabaseUrl, key: supabaseKey } = getSupabaseEnv();
 

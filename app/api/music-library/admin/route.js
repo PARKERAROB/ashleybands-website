@@ -1,32 +1,49 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { validateStaffRequest } from "@/lib/staffAuth";
+import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
+import { logAudit, staffActor } from "@/lib/auditLog";
+
+const PRIVATE_HEADERS = { "Cache-Control": "private, no-store" };
+
+function json(body, status = 200) {
+  return NextResponse.json(body, { status, headers: PRIVATE_HEADERS });
+}
 
 export async function GET(req) {
-  const staff = await validateStaffRequest(req);
-  if (!staff) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const access = await authorizeStaffRequest(req, STAFF_CAPABILITIES.ASSETS_READ);
+  if (!access.ok) return json({ error: access.error }, access.status);
+  const staff = access.staff;
 
   try {
     const { data, error } = await supabaseAdmin
       .from("music_library_inventory")
       .select("*")
       .order("submitted_at", { ascending: false });
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json({ items: data || [] });
-  } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) return json({ error: "Could not load the music library." }, 500);
+    await logAudit({
+      actor: staffActor(staff),
+      action: "music_library.viewed",
+      table: "music_library_inventory",
+      recordId: "all",
+      changes: { item_count: (data || []).length },
+      route: "/api/music-library/admin"
+    });
+    return json({ items: data || [] });
+  } catch {
+    return json({ error: "Could not load the music library." }, 500);
   }
 }
 
 export async function PATCH(req) {
-  const staff = await validateStaffRequest(req);
-  if (!staff) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const access = await authorizeStaffRequest(req, STAFF_CAPABILITIES.ASSETS_WRITE);
+  if (!access.ok) return json({ error: access.error }, access.status);
+  const staff = access.staff;
 
   try {
     const body = await req.json();
     const { id, review_status } = body;
     if (!id || !["reviewed", "verified", "rejected"].includes(review_status)) {
-      return NextResponse.json({ error: "Valid id and review_status required" }, { status: 400 });
+      return json({ error: "Valid id and review_status required" }, 400);
     }
     const { data, error } = await supabaseAdmin
       .from("music_library_inventory")
@@ -34,9 +51,17 @@ export async function PATCH(req) {
       .eq("id", id)
       .select("id")
       .single();
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json({ id: data.id, status: review_status });
-  } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) return json({ error: "Could not update the music library review." }, 500);
+    await logAudit({
+      actor: staffActor(staff),
+      action: "music_library.review_updated",
+      table: "music_library_inventory",
+      recordId: data.id,
+      changes: { review_status },
+      route: "/api/music-library/admin"
+    });
+    return json({ id: data.id, status: review_status });
+  } catch {
+    return json({ error: "Could not update the music library." }, 500);
   }
 }

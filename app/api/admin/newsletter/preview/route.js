@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
-import { validateStaffRequest } from "@/lib/staffAuth";
+import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
 import { previewNewsletterAudience } from "@/lib/newsletter";
 import { logAudit } from "@/lib/auditLog";
 
 export const runtime = "nodejs";
 
 export async function POST(request) {
-  const staff = await validateStaffRequest(request);
-  if (!staff) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const authorization = await authorizeStaffRequest(request, STAFF_CAPABILITIES.COMMUNICATIONS_READ);
+  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status });
+  const staff = authorization.staff;
   try {
     const counts = await previewNewsletterAudience();
     await logAudit({

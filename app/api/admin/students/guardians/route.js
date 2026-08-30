@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { validateStaffRequest } from "@/lib/staffAuth";
+import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
 import { logAudit, staffActor } from "@/lib/auditLog";
 
 export const runtime = "nodejs";
@@ -19,8 +19,9 @@ function normPhone(v) {
 // body: { studentId, name, email?, phone?, role?, primary? }
 // Reuses an existing person if the email already exists as a contact.
 export async function POST(req) {
-  const staff = await validateStaffRequest(req);
-  if (!staff) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.STUDENTS_WRITE);
+  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status });
+  const staff = authorization.staff;
 
   const body = await req.json().catch(() => ({}));
   const studentId = text(body.studentId);

@@ -2,6 +2,8 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { checkRateLimit, clientIp } from "@/lib/rateLimit";
+import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
+import { logAudit, staffActor } from "@/lib/auditLog";
 
 const PUBLIC_INSTRUMENTS_PATH = path.join(process.cwd(), "content", "instruments-public.json");
 
@@ -14,39 +16,61 @@ export async function GET() {
     const raw = await readFile(PUBLIC_INSTRUMENTS_PATH, "utf8");
     const snapshot = JSON.parse(raw);
     const instruments = Array.isArray(snapshot.instruments) ? snapshot.instruments : [];
+    const typeCounts = new Map();
+    for (const instrument of instruments) {
+      const type = text(instrument.instrument_type) || "unspecified";
+      typeCounts.set(type, (typeCounts.get(type) || 0) + 1);
+    }
     return Response.json({
-      instruments,
       generatedAt: snapshot.generatedAt || null,
       count: Number(snapshot.count ?? instruments.length),
+      types: [...typeCounts.entries()]
+        .map(([type, count]) => ({ type, count }))
+        .sort((a, b) => a.type.localeCompare(b.type)),
+    }, {
+      headers: { "Cache-Control": "public, max-age=300" }
     });
   } catch (error) {
     if (error.code === "ENOENT") {
       return Response.json({
-        instruments: [],
         generatedAt: null,
         count: 0,
+        types: [],
         warning: "Public instrument snapshot has not been generated yet.",
       });
     }
-    return Response.json({ error: error.message }, { status: 500 });
+    return Response.json({ error: "Instrument summary is unavailable." }, { status: 500 });
   }
 }
 
 export async function POST(request) {
+  const access = await authorizeStaffRequest(request, STAFF_CAPABILITIES.ASSETS_WRITE);
+  if (!access.ok) {
+    return Response.json({ error: access.error }, {
+      status: access.status,
+      headers: { "Cache-Control": "private, no-store" }
+    });
+  }
   const { allowed } = await checkRateLimit({
     key: `instrument-inventory:${clientIp(request)}`,
     limit: 10,
     windowMs: 10 * 60 * 1000
   });
   if (!allowed) {
-    return Response.json({ error: "Too many submissions. Please try again in a little while." }, { status: 429 });
+    return Response.json({ error: "Too many submissions. Please try again in a little while." }, {
+      status: 429,
+      headers: { "Cache-Control": "private, no-store" }
+    });
   }
   try {
     const payload = await request.json();
     const required = ["submitted_by", "instrument_type", "condition_notes"];
     const missing = required.filter((field) => !text(payload[field]));
     if (missing.length) {
-      return Response.json({ error: "missing required fields", missing }, { status: 400 });
+      return Response.json({ error: "missing required fields", missing }, {
+        status: 400,
+        headers: { "Cache-Control": "private, no-store" }
+      });
     }
 
     const { data, error } = await supabaseAdmin
@@ -77,9 +101,25 @@ export async function POST(request) {
       .select("id")
       .single();
 
-    if (error) return Response.json({ error: error.message }, { status: 500 });
-    return Response.json({ id: data.id });
-  } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    if (error) {
+      return Response.json({ error: "Could not save the instrument record." }, {
+        status: 500,
+        headers: { "Cache-Control": "private, no-store" }
+      });
+    }
+    await logAudit({
+      actor: staffActor(access.staff),
+      action: "instrument_inventory.created",
+      table: "instrument_inventory",
+      recordId: data.id,
+      changes: { instrument_type: text(payload.instrument_type) },
+      route: "/api/instrument-inventory"
+    });
+    return Response.json({ id: data.id }, { headers: { "Cache-Control": "private, no-store" } });
+  } catch {
+    return Response.json({ error: "Could not save the instrument record." }, {
+      status: 500,
+      headers: { "Cache-Control": "private, no-store" }
+    });
   }
 }

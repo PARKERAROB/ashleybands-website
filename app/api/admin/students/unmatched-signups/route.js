@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { validateStaffRequest } from "@/lib/staffAuth";
+import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
 import {
   loadUnmatchedSignups,
   MARCHING_BAND_2026_FEE_CENTS,
@@ -16,8 +16,8 @@ function text(v) {
 
 // GET -> MB signups with no matching student record.
 export async function GET(req) {
-  const staff = await validateStaffRequest(req);
-  if (!staff) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.STUDENTS_READ);
+  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status });
   try {
     const unmatched = await loadUnmatchedSignups();
     return NextResponse.json({ unmatched });
@@ -28,8 +28,12 @@ export async function GET(req) {
 
 // POST { signupId } -> create student (+ guardian + $500 MB charge) from a signup.
 export async function POST(req) {
-  const staff = await validateStaffRequest(req);
-  if (!staff) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const authorization = await authorizeStaffRequest(req, [
+    STAFF_CAPABILITIES.STUDENTS_WRITE,
+    STAFF_CAPABILITIES.BILLING_WRITE,
+  ]);
+  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status });
+  const staff = authorization.staff;
 
   const body = await req.json().catch(() => ({}));
   const signupId = text(body.signupId);

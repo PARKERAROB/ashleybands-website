@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { validateStaffRequest } from "@/lib/staffAuth";
-import { chargeKindForCategory } from "@/lib/billing";
-import { logAudit, staffActor } from "@/lib/auditLog";
+import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
 
 export const runtime = "nodejs";
 
@@ -11,8 +9,9 @@ const MAX_CHARGE_CENTS = 1_000_000;
 // POST: assign a charge to one or many students.
 // body: { studentIds: [...], category, label, amountCents, notes?, skipExistingCategory? }
 export async function POST(req) {
-  const staff = await validateStaffRequest(req);
-  if (!staff) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.BILLING_WRITE);
+  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status, headers: { "Cache-Control": "private, no-store" } });
+  const staff = authorization.staff;
 
   let body;
   try {
@@ -23,13 +22,16 @@ export async function POST(req) {
 
   const studentIds = [...new Set((body.studentIds || []).map((id) => String(id)).filter(Boolean))];
   const amountCents = Math.round(Number(body.amountCents) || 0);
-  const category = String(body.category || "marching_band_2026");
+  const category = String(body.category || "").trim();
+  const kind = body.kind === "funding_goal" ? "funding_goal" : body.kind === "fee" ? "fee" : "";
   const label = String(body.label || "").slice(0, 200);
   const notes = String(body.notes || "").slice(0, 500);
 
   if (!studentIds.length) {
     return NextResponse.json({ error: "Select at least one student" }, { status: 400 });
   }
+  if (!category) return NextResponse.json({ error: "Choose a fee or campaign category." }, { status: 400 });
+  if (!kind) return NextResponse.json({ error: "Choose whether this is a program fee or campaign goal." }, { status: 400 });
   if (!Number.isFinite(amountCents) || amountCents <= 0 || amountCents > MAX_CHARGE_CENTS) {
     return NextResponse.json({ error: "Enter a valid amount" }, { status: 400 });
   }
@@ -53,41 +55,27 @@ export async function POST(req) {
   }
 
   const source = targets.length > 1 ? "bulk" : "manual";
-  const kind = chargeKindForCategory(category);
-  const rows = targets.map((student_id) => ({
-    student_id,
-    category,
-    label,
-    amount_cents: amountCents,
-    source,
-    kind,
-    created_by: staff.display_name,
-    notes
-  }));
-
-  const { data, error } = await supabaseAdmin.from("fee_charges").insert(rows).select("id");
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-
-  await logAudit({
-    actor: staffActor(staff),
-    action: "insert",
-    table: "fee_charges",
-    recordId: targets.join(","),
-    route: "/api/admin/billing/charges",
-    changes: {
-      student_ids: { old: null, new: targets },
-      category: { old: null, new: category },
-      amount_cents: { old: null, new: amountCents }
-    }
+  const { data, error } = await supabaseAdmin.rpc("create_fee_charges_with_audit", {
+    p_student_ids: targets,
+    p_category: category,
+    p_label: label,
+    p_amount_cents: amountCents,
+    p_source: source,
+    p_kind: kind,
+    p_created_by: staff.display_name,
+    p_notes: notes,
+    p_actor_staff_id: staff.id,
+    p_route: "/api/admin/billing/charges",
   });
-
-  return NextResponse.json({ inserted: data?.length || 0, skipped: studentIds.length - targets.length });
+  if (error) return NextResponse.json({ error: "Could not create the charge." }, { status: 500 });
+  return NextResponse.json({ inserted: Number(data) || 0, skipped: studentIds.length - targets.length });
 }
 
 // PATCH: void a charge. body: { id }
 export async function PATCH(req) {
-  const staff = await validateStaffRequest(req);
-  if (!staff) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.BILLING_WRITE);
+  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status, headers: { "Cache-Control": "private, no-store" } });
+  const staff = authorization.staff;
 
   let body;
   try {
@@ -99,27 +87,15 @@ export async function PATCH(req) {
   const id = String(body.id || "");
   if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
-  const { data: current } = await supabaseAdmin
-    .from("fee_charges")
-    .select("status")
-    .eq("id", id)
-    .maybeSingle();
-
-  const { error } = await supabaseAdmin
-    .from("fee_charges")
-    .update({ status: "void", notes: String(body.notes || "").slice(0, 500) || undefined })
-    .eq("id", id);
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-
-  await logAudit({
-    actor: staffActor(staff),
-    action: "update",
-    table: "fee_charges",
-    recordId: id,
-    route: "/api/admin/billing/charges",
-    changes: { status: { old: current?.status ?? null, new: "void" } }
+  const { error } = await supabaseAdmin.rpc("update_fee_charge_with_audit", {
+    p_charge_id: id,
+    p_status: "void",
+    p_notes: body.notes == null ? null : String(body.notes).slice(0, 500),
+    p_actor_staff_id: staff.id,
+    p_route: "/api/admin/billing/charges",
   });
+
+  if (error) return NextResponse.json({ error: "Could not void the charge." }, { status: 500 });
 
   return NextResponse.json({ ok: true });
 }

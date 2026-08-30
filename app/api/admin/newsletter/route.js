@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { validateStaffRequest } from "@/lib/staffAuth";
+import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
 import { listNewsletterAdmin, saveNewsletterIssue } from "@/lib/newsletter";
 import { logAudit } from "@/lib/auditLog";
 
@@ -10,8 +10,9 @@ function actor(staff) {
 }
 
 export async function GET(request) {
-  const staff = await validateStaffRequest(request);
-  if (!staff) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const authorization = await authorizeStaffRequest(request, STAFF_CAPABILITIES.COMMUNICATIONS_READ);
+  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status });
+  const staff = authorization.staff;
   try {
     const data = await listNewsletterAdmin();
     await logAudit({
@@ -27,8 +28,9 @@ export async function GET(request) {
   }
 }
 export async function POST(request) {
-  const staff = await validateStaffRequest(request);
-  if (!staff) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const authorization = await authorizeStaffRequest(request, STAFF_CAPABILITIES.COMMUNICATIONS_WRITE);
+  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status });
+  const staff = authorization.staff;
   const body = await request.json().catch(() => ({}));
   try {
     const issue = await saveNewsletterIssue(body, staff.display_name);

@@ -1,20 +1,28 @@
 import { NextResponse } from "next/server";
-import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
+import { authorizeStaffRequest, staffHasCapability, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
 import { loadStudent360 } from "@/lib/currentStudents";
 import { logAudit, staffActor } from "@/lib/auditLog";
 
 export const runtime = "nodejs";
+const PRIVATE_HEADERS = { "Cache-Control": "private, no-store" };
+const json = (body, status = 200) => NextResponse.json(body, { status, headers: PRIVATE_HEADERS });
 
 export async function GET(request, { params }) {
   const authorization = await authorizeStaffRequest(request, STAFF_CAPABILITIES.STUDENTS_READ);
   if (!authorization.ok) {
-    return NextResponse.json({ error: authorization.error }, { status: authorization.status });
+    return json({ error: authorization.error }, authorization.status);
   }
 
   const { id } = await params;
   try {
-    const student = await loadStudent360(String(id || ""));
-    if (!student) return NextResponse.json({ error: "Student not found" }, { status: 404 });
+    const student = await loadStudent360(String(id || ""), {
+      assets: staffHasCapability(authorization.staff, STAFF_CAPABILITIES.ASSETS_READ),
+      attendance: staffHasCapability(authorization.staff, STAFF_CAPABILITIES.ATTENDANCE_EVENTS_READ),
+      finance: staffHasCapability(authorization.staff, STAFF_CAPABILITIES.BILLING_READ),
+      forms: staffHasCapability(authorization.staff, STAFF_CAPABILITIES.FORMS_STATUS_READ),
+      memberships: staffHasCapability(authorization.staff, STAFF_CAPABILITIES.MEMBERSHIPS_READ),
+    });
+    if (!student) return json({ error: "Student not found" }, 404);
     await logAudit({
       actor: staffActor(authorization.staff),
       action: "view",
@@ -22,9 +30,9 @@ export async function GET(request, { params }) {
       recordId: student.id,
       route: "/api/admin/current-students/[id]",
     });
-    return NextResponse.json({ student });
+    return json({ student });
   } catch (error) {
     console.error("[student-360] load failed:", error?.message || error);
-    return NextResponse.json({ error: "The connected student record could not be loaded." }, { status: 500 });
+    return json({ error: "The connected student record could not be loaded." }, 500);
   }
 }

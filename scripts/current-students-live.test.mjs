@@ -7,7 +7,7 @@ const workspace = readFileSync("app/admin/students/CurrentStudentsWorkspace.jsx"
 const listRoute = readFileSync("app/api/admin/current-students/route.js", "utf8");
 const detailRoute = readFileSync("app/api/admin/current-students/[id]/route.js", "utf8");
 const dataLayer = readFileSync("lib/currentStudents.js", "utf8");
-const authorization = readFileSync("lib/staffAuthorization.js", "utf8");
+const capabilities = readFileSync("lib/staffCapabilities.js", "utf8");
 const managePage = readFileSync("app/admin/students/manage/page.jsx", "utf8");
 const logicUrl = new URL("../app/admin/students/current-students.logic.mjs", import.meta.url);
 const { compareStudents, contactReady, emailValuesForStudents } = await import(logicUrl);
@@ -16,7 +16,7 @@ test("the live roster is protected and its server page contains no student value
   assert.match(workspace, /<StaffGate>/);
   assert.match(listRoute, /STUDENTS_READ/);
   assert.match(detailRoute, /STUDENTS_READ/);
-  assert.match(authorization, /director:\s*\["\*"\]/);
+  assert.match(capabilities, /director:\s*\["\*"\]/);
   assert.doesNotMatch(page, /supabase|school_email|guardian/i);
 });
 
@@ -38,8 +38,11 @@ test("fees and sponsorship gifts remain separate connected records", () => {
   assert.match(dataLayer, /loadStudentLedgers/);
   assert.match(dataLayer, /from\("sponsor_gifts"\)/);
   assert.match(dataLayer, /confirmedSponsorshipCents/);
-  assert.match(dataLayer, /creditedSponsorshipCents/);
-  assert.match(workspace, /Money is kept in two records/);
+  assert.match(dataLayer, /legacySponsorshipCreditCents/);
+  assert.match(dataLayer, /campaignRaisedCents = sum\(campaignContributions\) \+ confirmedSponsorshipCents/);
+  assert.match(workspace, /title="Program fees and campaign funding"/);
+  assert.match(workspace, /label="Fee balance"/);
+  assert.match(workspace, /label="Campaign raised"/);
 });
 
 test("student detail reads normalized current memberships", () => {

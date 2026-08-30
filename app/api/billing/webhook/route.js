@@ -125,16 +125,29 @@ export async function POST(request) {
     } else if (plan?.ledger === "sponsor" && plan.status === "refunded") {
       await refundSponsorGift(resource);
     } else if (plan?.ledger === "family" && plan.status === "completed" && invoiceId) {
-      const { error } = await supabaseAdmin
+      const { data: payment, error: paymentError } = await supabaseAdmin
         .from("fee_payments")
-        .update({
-          status: "completed",
-          paypal_capture_id: resource.id || "",
-          received_at: new Date().toISOString()
-        })
+        .select("id,student_id,invoice_id,amount_cents,kind,status")
         .eq("invoice_id", invoiceId)
-        .eq("status", "pending");
-      if (error) throw new Error(error.message);
+        .maybeSingle();
+      if (paymentError || !payment) throw new Error(paymentError?.message || "Family payment not found.");
+      if (
+        payment.kind !== "fee"
+        || amountToCents(resource.amount?.value) !== Number(payment.amount_cents)
+        || resource.amount?.currency_code !== "USD"
+        || (resource.custom_id && resource.custom_id !== payment.student_id)
+      ) throw new Error("PayPal family capture does not match the stored fee payment.");
+      if (payment.status === "pending") {
+        const { error } = await supabaseAdmin.rpc("settle_online_fee_payment_with_audit", {
+          p_payment_id: payment.id,
+          p_capture_id: resource.id || "",
+          p_actor_type: "system",
+          p_actor_id: eventId || null,
+          p_actor_name: "PayPal webhook",
+          p_route: "/api/billing/webhook",
+        });
+        if (error) throw new Error(error.message);
+      }
     } else if (plan?.ledger === "family" && plan.status === "refunded") {
       if (!invoiceId && await refundSponsorGift(resource)) {
         return NextResponse.json({ ok: true });

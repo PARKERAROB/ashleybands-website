@@ -1,19 +1,34 @@
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { checkRateLimit, clientIp } from "@/lib/rateLimit";
+import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
+import { logAudit, staffActor } from "@/lib/auditLog";
 
 export async function POST(request) {
+  const access = await authorizeStaffRequest(request, STAFF_CAPABILITIES.ASSETS_WRITE);
+  if (!access.ok) {
+    return Response.json({ error: access.error }, {
+      status: access.status,
+      headers: { "Cache-Control": "private, no-store" }
+    });
+  }
   const { allowed } = await checkRateLimit({
     key: `music-library:${clientIp(request)}`,
     limit: 10,
     windowMs: 10 * 60 * 1000
   });
   if (!allowed) {
-    return Response.json({ error: "Too many submissions. Please try again in a little while." }, { status: 429 });
+    return Response.json({ error: "Too many submissions. Please try again in a little while." }, {
+      status: 429,
+      headers: { "Cache-Control": "private, no-store" }
+    });
   }
   try {
     const payload = await request.json();
     if (!String(payload.title || "").trim()) {
-      return Response.json({ error: "Title is required" }, { status: 400 });
+      return Response.json({ error: "Title is required" }, {
+        status: 400,
+        headers: { "Cache-Control": "private, no-store" }
+      });
     }
 
     const { data, error } = await supabaseAdmin
@@ -42,9 +57,25 @@ export async function POST(request) {
       .select("id")
       .single();
 
-    if (error) return Response.json({ error: error.message }, { status: 500 });
-    return Response.json({ id: data.id });
-  } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    if (error) {
+      return Response.json({ error: "Could not save the music record." }, {
+        status: 500,
+        headers: { "Cache-Control": "private, no-store" }
+      });
+    }
+    await logAudit({
+      actor: staffActor(access.staff),
+      action: "music_library.created",
+      table: "music_library_inventory",
+      recordId: data.id,
+      changes: { title_present: true },
+      route: "/api/music-library"
+    });
+    return Response.json({ id: data.id }, { headers: { "Cache-Control": "private, no-store" } });
+  } catch {
+    return Response.json({ error: "Could not save the music record." }, {
+      status: 500,
+      headers: { "Cache-Control": "private, no-store" }
+    });
   }
 }

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { validateStaffRequest } from "@/lib/staffAuth";
+import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
 import { logAudit, staffActor } from "@/lib/auditLog";
 
 export const runtime = "nodejs";
@@ -33,8 +33,9 @@ function text(v) {
 // GET ?studentId=<uuid> -> the current measurement row for that student (or null).
 // GET (no studentId)    -> { measuredCount } across all students, for a progress readout.
 export async function GET(req) {
-  const staff = await validateStaffRequest(req);
-  if (!staff) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.STUDENTS_READ);
+  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status });
+  const staff = authorization.staff;
 
   const studentId = text(new URL(req.url).searchParams.get("studentId"));
 
@@ -66,8 +67,9 @@ export async function GET(req) {
 
 // PUT -> upsert the measurement row for a student. body: studentId + measurement fields.
 export async function PUT(req) {
-  const staff = await validateStaffRequest(req);
-  if (!staff) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.STUDENTS_WRITE);
+  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status });
+  const staff = authorization.staff;
 
   const body = await req.json().catch(() => ({}));
   const studentId = text(body.studentId);
