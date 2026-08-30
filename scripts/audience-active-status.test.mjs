@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { allStudentIds, resolveStudentIds } from "../lib/audience.js";
+import { allStudentIds, resolveAudience, resolveStudentIds } from "../lib/audience.js";
 import {
   createAudienceConfirmation,
   enforcedBroadcastAudience,
@@ -101,6 +101,53 @@ test("a direct student audience is still intersected with current status", async
     predicates: [{ key: "student_id", op: "in", values: ["active-1", "inactive-9"] }]
   }, client);
   assert.deepEqual(ids, ["active-1"]);
+});
+
+test("guardian contact lookups are batched for a large current audience", async () => {
+  const people = Array.from({ length: 205 }, (_, index) => ({
+    student_id: "active-1",
+    person_id: `person-${index}`,
+    portal_people: { person_type: "guardian" },
+  }));
+  const contactBatchSizes = [];
+  const client = {
+    from(table) {
+      const filters = [];
+      const query = {
+        select() { return query; },
+        eq(field, value) { filters.push(["eq", field, value]); return query; },
+        in(field, values) { filters.push(["in", field, values]); return query; },
+        then(resolve, reject) {
+          let result;
+          if (table === "portal_students") {
+            result = { data: [{ id: "active-1" }], error: null };
+          } else if (table === "portal_student_people") {
+            result = { data: people, error: null };
+          } else if (table === "portal_contact_methods") {
+            const ids = filters.find(([op, field]) => op === "in" && field === "person_id")?.[2] || [];
+            contactBatchSizes.push(ids.length);
+            result = {
+              data: ids.map((personId) => ({
+                person_id: personId,
+                value_display: `${personId}@example.com`,
+                value_normalized: `${personId}@example.com`,
+                verification_status: "verified_email_code",
+              })),
+              error: null,
+            };
+          } else {
+            throw new Error(`Unexpected table ${table}`);
+          }
+          return Promise.resolve(result).then(resolve, reject);
+        },
+      };
+      return query;
+    },
+  };
+
+  const audience = await resolveAudience({}, "guardians", client);
+  assert.equal(audience.count, 205);
+  assert.deepEqual(contactBatchSizes, [100, 100, 5]);
 });
 
 test("direct-student broadcast mode cannot be expanded by client filters or axis", () => {
