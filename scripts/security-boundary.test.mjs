@@ -29,6 +29,23 @@ const PRIVATE_OPERATIONAL_TABLES = [
   "school_class_sections",
   "student_class_enrollments",
   "group_class_expectations",
+  "band_camp_attendance_2026",
+  "attendance_events",
+  "attendance_calendar_groups",
+  "attendance_event_roster",
+  "attendance_event_roster_groups",
+  "attendance_observations",
+  "attendance_exceptions",
+  "attendance_staff_observations",
+  "attendance_record_corrections",
+  "attendance_observation_revisions",
+  "portal_student_external_identifiers",
+  "school_attendance_imports",
+  "school_attendance_import_sections",
+  "school_attendance_import_roster",
+  "school_attendance_import_dates",
+  "school_attendance_marks",
+  "school_attendance_import_issues",
 ];
 
 const migrationDir = path.resolve("supabase", "migrations");
@@ -41,6 +58,27 @@ const migrations = readdirSync(migrationDir)
 
 function escapedTable(table) {
   return table.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+const SAFE_FILTER_COLUMN = {
+  portal_student_profiles: "student_id",
+  portal_student_music_profiles: "student_id",
+  portal_student_other_instruments: "student_id",
+  portal_student_interests: "student_id",
+  portal_onboarding_progress: "student_id",
+  group_class_expectations: "group_id",
+  band_camp_attendance_2026: "portal_student_id",
+  attendance_calendar_groups: "group_id",
+  attendance_event_roster: "attendance_event_id",
+  attendance_event_roster_groups: "attendance_event_id",
+  attendance_observations: "attendance_event_id",
+  school_attendance_import_dates: "import_id",
+};
+
+async function assertPermissionDenied(response, label) {
+  const body = await response.json().catch(() => ({}));
+  assert.ok([401, 403].includes(response.status), `${label} returned HTTP ${response.status} instead of permission denied`);
+  assert.equal(body?.code, "42501", `${label} returned ${body?.code || "no SQLSTATE"} instead of permission denied`);
 }
 
 test("private operational tables enable row-level security", () => {
@@ -77,12 +115,7 @@ test("production publishable key cannot read private operational rows", {
         Authorization: `Bearer ${key}`,
       },
     });
-    const body = await response.json();
-    assert.equal(
-      Array.isArray(body) ? body.length : 0,
-      0,
-      `${table} exposed a row to the production publishable key`,
-    );
+    await assertPermissionDenied(response, `${table} SELECT`);
   }
 });
 
@@ -94,7 +127,8 @@ test("production publishable key cannot write private operational rows", {
   assert.ok(url && key, "live boundary check requires the production publishable configuration");
 
   for (const table of PRIVATE_OPERATIONAL_TABLES) {
-    for (const [method, suffix] of [["POST", ""], ["PATCH", "?id=eq.00000000-0000-0000-0000-000000000000"], ["DELETE", "?id=eq.00000000-0000-0000-0000-000000000000"]]) {
+    const filterColumn = SAFE_FILTER_COLUMN[table] || "id";
+    for (const [method, suffix] of [["POST", ""], ["PATCH", `?${filterColumn}=eq.00000000-0000-0000-0000-000000000000`], ["DELETE", `?${filterColumn}=eq.00000000-0000-0000-0000-000000000000`]]) {
       const response = await fetch(`${url}/rest/v1/${table}${suffix}`, {
         method,
         headers: {
@@ -105,7 +139,38 @@ test("production publishable key cannot write private operational rows", {
         },
         body: method === "DELETE" ? undefined : "{}",
       });
-      assert.ok(!response.ok, `${table} accepted a production publishable-key ${method}`);
+      await assertPermissionDenied(response, `${table} ${method}`);
     }
+  }
+});
+
+test("production publishable key cannot execute protected attendance mutations", {
+  skip: process.env.SECURITY_LIVE !== "1",
+}, async () => {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  assert.ok(url && key, "live boundary check requires the production publishable configuration");
+  const requests = [
+    ["reconcile_attendance_event_roster", { p_event_id: "00000000-0000-0000-0000-000000000000", p_lock: false }],
+    ["adjust_attendance_event_roster", { p_event_id: "00000000-0000-0000-0000-000000000000", p_student_id: "00000000-0000-0000-0000-000000000000", p_include: true, p_actor_staff_id: "00000000-0000-0000-0000-000000000000" }],
+    ["complete_attendance_event", { p_event_id: "00000000-0000-0000-0000-000000000000", p_actor_staff_id: "00000000-0000-0000-0000-000000000000" }],
+    ["begin_historical_attendance_reconstruction", { p_event_id: "00000000-0000-0000-0000-000000000000", p_actor_staff_id: "00000000-0000-0000-0000-000000000000" }],
+    ["certify_attendance_event_roster", { p_event_id: "00000000-0000-0000-0000-000000000000", p_actor_staff_id: "00000000-0000-0000-0000-000000000000", p_note: "test" }],
+    ["reopen_attendance_event", { p_event_id: "00000000-0000-0000-0000-000000000000", p_actor_staff_id: "00000000-0000-0000-0000-000000000000", p_reason: "test" }],
+    ["remove_attendance_event_student_with_records", { p_event_id: "00000000-0000-0000-0000-000000000000", p_student_id: "00000000-0000-0000-0000-000000000000", p_actor_staff_id: "00000000-0000-0000-0000-000000000000", p_reason: "test" }],
+    ["correct_attendance_observation", { p_event_id: "00000000-0000-0000-0000-000000000000", p_student_id: "00000000-0000-0000-0000-000000000000", p_actor_staff_id: "00000000-0000-0000-0000-000000000000", p_status: "present", p_note: null, p_arrived_at: null, p_departed_at: null }],
+    ["accept_school_attendance_import", { p_payload: {}, p_actor_staff_id: "00000000-0000-0000-0000-000000000000" }],
+  ];
+  for (const [name, body] of requests) {
+    const response = await fetch(`${url}/rest/v1/rpc/${name}`, {
+      method: "POST",
+      headers: {
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+    await assertPermissionDenied(response, `${name} RPC`);
   }
 });

@@ -1,9 +1,15 @@
 import { NextResponse } from "next/server";
-import { validateAttendanceRequest } from "@/lib/attendanceAuth";
-import { logAudit } from "@/lib/auditLog";
+import { logAudit, staffActor } from "@/lib/auditLog";
+import {
+  authorizeStaffRequest,
+  STAFF_CAPABILITIES,
+  staffHasCapability
+} from "@/lib/staffAuthorization";
 import {
   attendanceAuditTables,
+  completeAttendanceEvent,
   getAttendanceSheet,
+  prepareAttendanceEvent,
   saveApprovedAttendanceException,
   updateAttendanceObservation,
   updateStaffAttendance
@@ -11,26 +17,47 @@ import {
 
 export const runtime = "nodejs";
 
-function unauthorized() {
-  return NextResponse.json({ error: "Attendance PIN required." }, { status: 401 });
+const PRIVATE_HEADERS = { "Cache-Control": "private, no-store, max-age=0" };
+
+function json(body, status = 200) {
+  return NextResponse.json(body, { status, headers: PRIVATE_HEADERS });
 }
 
-function failure(error, fallback = "Attendance could not be updated.") {
-  return NextResponse.json(
-    { error: error?.message || fallback },
-    { status: error?.status || 500 }
-  );
+function safeFailure(error, fallback = "Attendance could not be updated.") {
+  const status = Number(error?.status);
+  if (status >= 400 && status < 500) return json({ error: error.message || fallback }, status);
+  console.error("[attendance] request failed:", error?.message || error);
+  return json({ error: fallback }, 500);
+}
+
+function sessionFor(staff) {
+  return {
+    actor: staffActor(staff),
+    access: "staff",
+    permissions: {
+      eventsWrite: staffHasCapability(staff, STAFF_CAPABILITIES.ATTENDANCE_EVENTS_WRITE),
+      exceptionsWrite: staffHasCapability(staff, STAFF_CAPABILITIES.ATTENDANCE_EXCEPTIONS_WRITE),
+      staffWrite: staffHasCapability(staff, STAFF_CAPABILITIES.ATTENDANCE_STAFF_WRITE),
+      reportSend: staffHasCapability(staff, STAFF_CAPABILITIES.ATTENDANCE_REPORT_SEND)
+    }
+  };
+}
+
+async function authorize(request, capability) {
+  const authorization = await authorizeStaffRequest(request, capability);
+  if (!authorization.ok) return { response: json({ error: authorization.error }, authorization.status) };
+  return { authorization, session: sessionFor(authorization.staff) };
 }
 
 export async function GET(request) {
-  const session = await validateAttendanceRequest(request);
-  if (!session) return unauthorized();
+  const access = await authorize(request, STAFF_CAPABILITIES.ATTENDANCE_EVENTS_READ);
+  if (access.response) return access.response;
   const occurrenceKey = new URL(request.url).searchParams.get("occurrence") || undefined;
 
   try {
-    const sheet = await getAttendanceSheet({ occurrenceKey, session });
+    const sheet = await getAttendanceSheet({ occurrenceKey, session: access.session });
     await logAudit({
-      actor: session.actor,
+      actor: access.session.actor,
       action: "attendance.sheet.read",
       table: attendanceAuditTables(),
       changes: {
@@ -41,19 +68,57 @@ export async function GET(request) {
       },
       route: "/api/attendance"
     });
-    return NextResponse.json(sheet);
+    return json(sheet);
   } catch (error) {
-    return failure(error, "Attendance could not be loaded.");
+    return safeFailure(error, "Attendance could not be loaded.");
   }
 }
 
 export async function PATCH(request) {
-  const session = await validateAttendanceRequest(request);
-  if (!session) return unauthorized();
   const body = await request.json().catch(() => ({}));
   const occurrenceKey = String(body.occurrenceKey || "").trim() || undefined;
+  const capability = body.prepare
+    ? STAFF_CAPABILITIES.ATTENDANCE_EVENTS_WRITE
+    : body.staffAttendance
+      ? STAFF_CAPABILITIES.ATTENDANCE_STAFF_WRITE
+      : body.exception
+        ? STAFF_CAPABILITIES.ATTENDANCE_EXCEPTIONS_WRITE
+        : STAFF_CAPABILITIES.ATTENDANCE_EVENTS_WRITE;
+  const access = await authorize(request, capability);
+  if (access.response) return access.response;
 
   try {
+    if (body.prepare) {
+      const prepared = await prepareAttendanceEvent({
+        occurrenceKey,
+        actorStaffId: access.authorization.staff.id
+      });
+      await logAudit({
+        actor: access.session.actor,
+        action: "attendance.event.prepared",
+        table: "attendance_events,attendance_event_roster,attendance_event_roster_groups",
+        changes: { occurrence_key: occurrenceKey, roster_count: prepared?.rosterCount || 0 },
+        route: "/api/attendance"
+      });
+      return json({ ok: true, ...prepared });
+    }
+
+    if (body.complete) {
+      const completed = await completeAttendanceEvent({
+        occurrenceKey,
+        actorStaffId: access.authorization.staff.id,
+        note: body.completionNote
+      });
+      await logAudit({
+        actor: access.session.actor,
+        action: "attendance.event.completed",
+        table: "attendance_events,attendance_event_roster,attendance_observations",
+        changes: { occurrence_key: occurrenceKey, completed: true },
+        route: "/api/attendance"
+      });
+      return json({ ok: true, ...completed });
+    }
+
     if (body.staffAttendance) {
       const staffAttendance = body.staffAttendance || {};
       const allowedKeys = ["status", "arrivedTime", "departedTime", "roleAssignment", "workNotes"];
@@ -70,7 +135,7 @@ export async function PATCH(request) {
         changes
       });
       await logAudit({
-        actor: session.actor,
+        actor: access.session.actor,
         action: "attendance.staff.updated",
         table: "attendance_staff_observations,staff,attendance_events",
         recordId: result.staffAttendance.id || result.staffAttendance.staffId,
@@ -85,13 +150,11 @@ export async function PATCH(request) {
         },
         route: "/api/attendance"
       });
-      return NextResponse.json(result.staffAttendance);
+      return json(result.staffAttendance);
     }
 
     const studentId = String(body.studentId || "").trim();
-    if (!studentId) {
-      return NextResponse.json({ error: "Choose a student." }, { status: 400 });
-    }
+    if (!studentId) return json({ error: "Choose a student." }, 400);
     if (body.exception) {
       const result = await saveApprovedAttendanceException({
         occurrenceKey,
@@ -99,10 +162,10 @@ export async function PATCH(request) {
         kind: String(body.exception.kind || "").trim(),
         expectedTime: body.exception.expectedTime,
         note: body.exception.note,
-        session
+        session: access.session
       });
       await logAudit({
-        actor: session.actor,
+        actor: access.session.actor,
         action: "attendance.exception.approved",
         table: "attendance_exceptions,portal_students,attendance_events",
         recordId: result.exception.id,
@@ -114,7 +177,7 @@ export async function PATCH(request) {
         },
         route: "/api/attendance"
       });
-      return NextResponse.json(result.exception);
+      return json(result.exception);
     }
 
     const allowedKeys = ["status", "note", "arrivedTime", "departedTime"];
@@ -123,16 +186,15 @@ export async function PATCH(request) {
         .filter((key) => Object.prototype.hasOwnProperty.call(body, key))
         .map((key) => [key, body[key]])
     );
-    if (!Object.keys(changes).length) {
-      return NextResponse.json({ error: "No attendance change was provided." }, { status: 400 });
-    }
+    if (!Object.keys(changes).length) return json({ error: "No attendance change was provided." }, 400);
     const result = await updateAttendanceObservation({
       occurrenceKey,
       studentId,
-      changes
+      changes,
+      actorStaffId: access.authorization.staff.id
     });
     await logAudit({
-      actor: session.actor,
+      actor: access.session.actor,
       action: "attendance.observation.updated",
       table: "attendance_observations,portal_students,attendance_events",
       recordId: result.student.id,
@@ -145,7 +207,7 @@ export async function PATCH(request) {
       },
       route: "/api/attendance"
     });
-    return NextResponse.json({
+    return json({
       studentId: result.student.id,
       status: result.observation.status,
       note: result.observation.note || "",
@@ -153,6 +215,6 @@ export async function PATCH(request) {
       departedAt: result.observation.departed_at
     });
   } catch (error) {
-    return failure(error);
+    return safeFailure(error);
   }
 }

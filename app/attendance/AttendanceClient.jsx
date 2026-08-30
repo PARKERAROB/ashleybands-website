@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { StaffGate } from "@/components/StaffGate";
 import { groupAttendanceOccurrencesByWeek } from "@/lib/attendanceEvents.mjs";
+import { staffAuthHeaders } from "@/lib/staffSession";
 import styles from "./attendance.module.css";
 
 const STATUS = {
@@ -89,14 +91,33 @@ function timeInputValue(iso, timeZone) {
   return `${values.hour}:${values.minute}`;
 }
 
-export default function AttendanceClient() {
-  const [access, setAccess] = useState("checking");
+export default function AttendanceClient({ initialOccurrenceKey = "", initialStudentId = "" }) {
+  return (
+    <StaffGate>
+      {(session, signOut) => (
+        <AuthenticatedAttendance
+          initialOccurrenceKey={initialOccurrenceKey}
+          initialStudentId={initialStudentId}
+          session={session}
+          signOut={signOut}
+        />
+      )}
+    </StaffGate>
+  );
+}
+
+function AuthenticatedAttendance({ initialOccurrenceKey, initialStudentId, session, signOut }) {
   const [students, setStudents] = useState([]);
   const [staff, setStaff] = useState([]);
   const [event, setEvent] = useState(null);
   const [occurrences, setOccurrences] = useState([]);
   const [exceptions, setExceptions] = useState([]);
+  const [canWriteAttendance, setCanWriteAttendance] = useState(false);
   const [canManageExceptions, setCanManageExceptions] = useState(false);
+  const [canManageStaff, setCanManageStaff] = useState(false);
+  const [canPrepare, setCanPrepare] = useState(false);
+  const [canComplete, setCanComplete] = useState(false);
+  const [canSendReport, setCanSendReport] = useState(false);
   const [query, setQuery] = useState("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -108,25 +129,32 @@ export default function AttendanceClient() {
   const [openDepartures, setOpenDepartures] = useState(new Set());
   const [departureDrafts, setDepartureDrafts] = useState({});
   const [sending, setSending] = useState(false);
+  const [preparing, setPreparing] = useState(false);
+  const [completing, setCompleting] = useState(false);
+  const [highlightedStudentId, setHighlightedStudentId] = useState("");
   const [lastSynced, setLastSynced] = useState(null);
   const loadedKey = useRef(null);
+  const savingRef = useRef(saving);
+  const noteSavingRef = useRef(noteSaving);
+
+  useEffect(() => { savingRef.current = saving; }, [saving]);
+  useEffect(() => { noteSavingRef.current = noteSaving; }, [noteSaving]);
 
   const loadRoster = useCallback(async ({ quiet = false, occurrenceKey } = {}) => {
     try {
       const key = occurrenceKey || loadedKey.current;
       const params = key ? `?occurrence=${encodeURIComponent(key)}` : "";
-      const response = await fetch(`/api/attendance${params}`, { cache: "no-store" });
+      const response = await fetch(`/api/attendance${params}`, {
+        cache: "no-store",
+        headers: staffAuthHeaders(session)
+      });
       const data = await response.json().catch(() => ({}));
-      if (response.status === 401) {
-        setAccess("locked");
-        return;
-      }
       if (!response.ok) throw new Error(data.error || "Attendance could not be loaded.");
       const changingOccurrence = loadedKey.current !== data.event?.occurrenceKey;
       setStudents((current) => {
         if (changingOccurrence || !loadedKey.current) return data.students || [];
         const localById = new Map(current.map((student) => [student.id, student]));
-        return (data.students || []).map((student) => saving.has(student.id) || noteSaving.has(student.id)
+        return (data.students || []).map((student) => savingRef.current.has(student.id) || noteSavingRef.current.has(student.id)
           ? localById.get(student.id) || student
           : student);
       });
@@ -135,25 +163,55 @@ export default function AttendanceClient() {
       setEvent(data.event || null);
       setOccurrences(data.occurrences || []);
       setExceptions(data.exceptions || []);
+      setCanWriteAttendance(Boolean(data.canWriteAttendance));
       setCanManageExceptions(Boolean(data.canManageExceptions));
+      setCanManageStaff(Boolean(data.canManageStaff));
+      setCanPrepare(Boolean(data.canPrepare));
+      setCanComplete(Boolean(data.canComplete));
+      setCanSendReport(Boolean(data.canSendReport));
       setLastSynced(new Date());
-      setAccess("open");
       if (!quiet) setError("");
+      const requestedStudentId = new URLSearchParams(window.location.search).get("student") || initialStudentId;
+      const requestedStudent = (data.students || []).find((student) => student.id === requestedStudentId);
+      if (requestedStudentId && requestedStudent) {
+        setHighlightedStudentId(requestedStudentId);
+        if (!quiet) setNotice(`Showing ${requestedStudent.name} in this event roster.`);
+        if (!quiet) {
+          window.requestAnimationFrame(() => {
+            const target = document.querySelector(`[data-student-id="${CSS.escape(requestedStudentId)}"]`);
+            target?.scrollIntoView({ block: "center", behavior: "smooth" });
+            target?.focus({ preventScroll: true });
+          });
+        }
+      } else if (requestedStudentId) {
+        setHighlightedStudentId("");
+        if (!quiet) setNotice("That student is not expected for this attendance session.");
+      } else {
+        setHighlightedStudentId("");
+      }
     } catch (loadError) {
       if (!quiet) setError(loadError.message);
     }
-  }, [noteSaving, saving]);
+  }, [initialStudentId, session]);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => loadRoster(), 0);
+    const timer = window.setTimeout(() => loadRoster({ occurrenceKey: initialOccurrenceKey || undefined }), 0);
     return () => window.clearTimeout(timer);
+  }, [initialOccurrenceKey, loadRoster]);
+
+  useEffect(() => {
+    const restoreOccurrence = () => {
+      const occurrenceKey = new URLSearchParams(window.location.search).get("occurrence") || undefined;
+      loadRoster({ occurrenceKey });
+    };
+    window.addEventListener("popstate", restoreOccurrence);
+    return () => window.removeEventListener("popstate", restoreOccurrence);
   }, [loadRoster]);
 
   useEffect(() => {
-    if (access !== "open") return undefined;
     const timer = window.setInterval(() => loadRoster({ quiet: true }), 15000);
     return () => window.clearInterval(timer);
-  }, [access, loadRoster]);
+  }, [loadRoster]);
 
   const counts = useMemo(() => students.reduce((total, student) => {
     total[student.status || "unmarked"] += 1;
@@ -180,7 +238,7 @@ export default function AttendanceClient() {
   const patchStudent = async (studentId, changes) => {
     const response = await fetch("/api/attendance", {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: staffAuthHeaders(session),
       body: JSON.stringify({ occurrenceKey: event.occurrenceKey, studentId, ...changes })
     });
     const data = await response.json().catch(() => ({}));
@@ -192,7 +250,66 @@ export default function AttendanceClient() {
     setQuery("");
     setOpenNotes(new Set());
     setOpenDepartures(new Set());
+    const params = new URLSearchParams(window.location.search);
+    params.set("occurrence", occurrenceKey);
+    window.history.pushState(null, "", `${window.location.pathname}?${params.toString()}`);
     loadRoster({ occurrenceKey });
+  };
+
+  const prepareEvent = async () => {
+    const mappedGroups = Array.from(new Set([
+      ...(Array.isArray(event.groups) ? event.groups : []),
+      ...students.flatMap((student) => Array.isArray(student.groups) ? student.groups : [])
+    ].filter(Boolean)));
+    const expectedCount = event.expectedCount !== null && event.expectedCount !== undefined
+      && Number.isFinite(Number(event.expectedCount))
+      ? Number(event.expectedCount)
+      : students.length || null;
+    const confirmationDetails = [
+      mappedGroups.length ? `Mapped groups: ${mappedGroups.join(" + ")}.` : "",
+      expectedCount !== null ? `Expected students: ${expectedCount}.` : ""
+    ].filter(Boolean).join("\n");
+    if (!window.confirm(`Prepare attendance for ${event.title}?\n\n${confirmationDetails || "This saves the expected roster for this date."}\n\nThe saved roster stays with this event even if memberships change later.`)) return;
+    setPreparing(true);
+    setError("");
+    setNotice("");
+    try {
+      const response = await fetch("/api/attendance", {
+        method: "PATCH",
+        headers: staffAuthHeaders(session),
+        body: JSON.stringify({ occurrenceKey: event.occurrenceKey, prepare: true })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "This event could not be prepared.");
+      await loadRoster({ occurrenceKey: event.occurrenceKey });
+      setNotice(`Attendance is ready with ${data.rosterCount || 0} expected students.`);
+    } catch (prepareError) {
+      setError(prepareError.message);
+    } finally {
+      setPreparing(false);
+    }
+  };
+
+  const completeEvent = async () => {
+    if (!window.confirm(`Complete attendance for ${event.title}? The roster will become read-only.`)) return;
+    setCompleting(true);
+    setError("");
+    setNotice("");
+    try {
+      const response = await fetch("/api/attendance", {
+        method: "PATCH",
+        headers: staffAuthHeaders(session),
+        body: JSON.stringify({ occurrenceKey: event.occurrenceKey, complete: true })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "This attendance session could not be completed.");
+      await loadRoster({ occurrenceKey: event.occurrenceKey });
+      setNotice("Attendance session completed.");
+    } catch (completeError) {
+      setError(completeError.message);
+    } finally {
+      setCompleting(false);
+    }
   };
 
   const saveStaffAttendance = async (member, changes) => {
@@ -203,7 +320,7 @@ export default function AttendanceClient() {
     try {
       const response = await fetch("/api/attendance", {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: staffAuthHeaders(session),
         body: JSON.stringify({
           occurrenceKey: event.occurrenceKey,
           staffAttendance: {
@@ -358,7 +475,7 @@ export default function AttendanceClient() {
     try {
       const response = await fetch("/api/attendance/report", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: staffAuthHeaders(session),
         body: JSON.stringify({ occurrenceKey: event.occurrenceKey })
       });
       const data = await response.json().catch(() => ({}));
@@ -371,11 +488,21 @@ export default function AttendanceClient() {
     }
   };
 
-  if (access === "checking") {
-    return <main className={styles.shell}><p className={styles.loading}>Opening attendance…</p></main>;
-  }
-  if (access === "locked") {
-    return <AttendanceGate onOpen={() => { loadedKey.current = null; loadRoster(); }} />;
+  if (!event) {
+    return (
+      <main className={styles.shell}>
+        <div className={styles.loadFailure} role={error ? "alert" : "status"}>
+          <h1>Attendance</h1>
+          <p>{error || "Opening attendance…"}</p>
+          {error && <button type="button" onClick={() => {
+            window.history.replaceState(null, "", window.location.pathname);
+            loadedKey.current = null;
+            setError("");
+            loadRoster({ occurrenceKey: undefined });
+          }}>Open current session</button>}
+        </div>
+      </main>
+    );
   }
 
   const staffReportableCount = staff.filter((member) => member.status
@@ -385,6 +512,9 @@ export default function AttendanceClient() {
     || member.workNotes).length;
   const hasReportableDetails = counts.absent || counts.tardy || counts.notes || counts.departed
     || exceptions.length || staffReportableCount;
+  const historicalRecordsOnly = event.rosterCompleteness === "observed_only";
+  const workspaceParams = new URLSearchParams({ occurrence: event.occurrenceKey });
+  if (initialStudentId) workspaceParams.set("student", initialStudentId);
 
   return (
     <main className={styles.shell}>
@@ -398,10 +528,10 @@ export default function AttendanceClient() {
             </div>
             <p>{eventDate(event)} · {eventTime(event)}</p>
           </div>
-          <button className={styles.signOut} type="button" onClick={async () => {
-            await fetch("/api/attendance/access", { method: "DELETE" });
-            setAccess("locked");
-          }}>Lock</button>
+          <div className={styles.headerActions}>
+            <a href={`/admin/attendance?${workspaceParams.toString()}`}>Attendance workspace</a>
+            <button className={styles.signOut} type="button" onClick={signOut}>Sign out</button>
+          </div>
         </div>
         <div className={styles.sessionNavigator} aria-label="Move among attendance sessions">
           <button
@@ -441,28 +571,18 @@ export default function AttendanceClient() {
         </label>
       </header>
 
-      <ExpectedExceptions
-        exceptions={exceptions}
+      <RosterState
         event={event}
-        students={students}
-        canManage={canManageExceptions}
-        onSaved={() => loadRoster({ occurrenceKey: event.occurrenceKey })}
-        onError={setError}
-        onNotice={setNotice}
-      />
-
-      <StaffAttendance
-        key={event?.occurrenceKey}
-        event={event}
-        staff={staff}
-        saving={staffSaving}
-        onSave={saveStaffAttendance}
-        onError={setError}
+        canPrepare={canPrepare}
+        preparing={preparing}
+        onPrepare={prepareEvent}
       />
 
       <section className={styles.toolbar} aria-label="Attendance summary">
         <div className={styles.counts}>
-          <span><strong>{counts.unmarked}</strong> Unmarked</span>
+          {historicalRecordsOnly
+            ? <span><strong>{students.length}</strong> Saved records</span>
+            : <span><strong>{counts.unmarked}</strong> Unmarked</span>}
           <span className={styles.presentCount}><strong>{counts.present}</strong> Present</span>
           <span className={styles.tardyCount}><strong>{counts.tardy}</strong> Tardy</span>
           <span className={styles.absentCount}><strong>{counts.absent}</strong> Absent</span>
@@ -491,7 +611,7 @@ export default function AttendanceClient() {
       )}
 
       <div className={styles.listHeader}>
-        <span>{visible.length} of {students.length} students</span>
+        <span>{visible.length} of {students.length} {historicalRecordsOnly ? "saved records" : "students"}</span>
         <span>Tap selected letter again to clear</span>
       </div>
 
@@ -505,7 +625,11 @@ export default function AttendanceClient() {
                   {student.section}
                 </h2>
               )}
-              <article className={`${styles.student} ${student.provisional ? styles.provisionalStudent : ""}`}>
+              <article
+                className={`${styles.student} ${student.provisional ? styles.provisionalStudent : ""} ${student.id === highlightedStudentId ? styles.highlightedStudent : ""}`}
+                data-student-id={student.id}
+                tabIndex={-1}
+              >
                 <div className={styles.studentMain}>
                   <div className={styles.identity}>
                     <h3>{student.name}</h3>
@@ -523,7 +647,7 @@ export default function AttendanceClient() {
                         className={`${styles.statusButton} ${styles[value]} ${student.status === value ? styles.selected : ""}`}
                         aria-label={`${student.name}: ${option.label}`}
                         aria-pressed={student.status === value}
-                        disabled={saving.has(student.id)}
+                        disabled={!canWriteAttendance || saving.has(student.id)}
                         onClick={() => mark(student.id, student.status === value ? null : value)}
                       ><span aria-hidden="true">{option.short}</span></button>
                     ))}
@@ -539,12 +663,14 @@ export default function AttendanceClient() {
                     className={`${styles.noteToggle} ${student.note ? styles.hasNote : ""}`}
                     type="button"
                     aria-expanded={openNotes.has(student.id)}
+                    disabled={!canWriteAttendance}
                     onClick={() => toggleNote(student)}
                   >{student.note ? `Staff note: ${student.note}` : "+ Add staff note"}</button>
                   <button
                     className={`${styles.departureToggle} ${student.departedAt ? styles.hasDeparture : ""}`}
                     type="button"
                     aria-expanded={openDepartures.has(student.id)}
+                    disabled={!canWriteAttendance}
                     onClick={() => toggleDeparture(student)}
                   >{student.departedAt ? `Departed ${timeLabel(student.departedAt, event.timeZone)}` : "+ Record departure"}</button>
                 </div>
@@ -604,7 +730,41 @@ export default function AttendanceClient() {
         {!visible.length && <p className={styles.empty}>No students match that search.</p>}
       </section>
 
-      <div className={styles.reportBar}>
+      {event.lifecycleState === "open" && event.rosterCompleteness === "locked" && (
+        <section className={styles.completionBar}>
+          <div>
+            <strong>{canComplete ? "Every expected student is marked." : `${counts.unmarked} students remain unmarked.`}</strong>
+            <span>Complete the session when the roster is finished.</span>
+          </div>
+          <button type="button" disabled={!canComplete || completing} onClick={completeEvent}>
+            {completing ? "Completing…" : "Complete session"}
+          </button>
+        </section>
+      )}
+
+      <ExpectedExceptions
+        key={`exceptions:${event?.occurrenceKey}`}
+        exceptions={exceptions}
+        event={event}
+        students={students}
+        canManage={canManageExceptions}
+        onSaved={() => loadRoster({ occurrenceKey: event.occurrenceKey })}
+        onError={setError}
+        onNotice={setNotice}
+        session={session}
+      />
+
+      {(canManageStaff || staff.length > 0) && <StaffAttendance
+        key={`staff:${event?.occurrenceKey}`}
+        event={event}
+        staff={staff}
+        saving={staffSaving}
+        onSave={saveStaffAttendance}
+        onError={setError}
+        canEdit={canManageStaff}
+      />}
+
+      {canSendReport && event.lifecycleState === "completed" ? <div className={styles.reportBar}>
         <div>
           <strong>{counts.absent} absent · {counts.tardy} tardy · {staffReportableCount} staff entries</strong>
           <span>The report includes saved student and staff details for this session.</span>
@@ -614,8 +774,31 @@ export default function AttendanceClient() {
           disabled={!hasReportableDetails || sending || saving.size > 0 || noteSaving.size > 0 || staffSaving.size > 0}
           onClick={sendReport}
         >{sending ? "Sending…" : "Send selected report"}</button>
-      </div>
+      </div> : null}
     </main>
+  );
+}
+
+function RosterState({ event, canPrepare, preparing, onPrepare }) {
+  if (event.rosterCompleteness === "locked") return null;
+  const observedOnly = event.rosterCompleteness === "observed_only";
+  const reconstructing = event.rosterCompleteness === "reconstructing";
+  return (
+    <section className={`${styles.rosterState} ${observedOnly || reconstructing ? styles.rosterStateHistorical : ""}`} role="status">
+      <div>
+        <strong>{reconstructing ? "Expected roster is being rebuilt" : observedOnly ? "Saved records only" : "Expected roster not prepared"}</strong>
+        <p>{reconstructing
+          ? "Finish and certify the expected roster in the Attendance workspace before marking this session."
+          : observedOnly
+          ? "The expected roster was not preserved for this historical event. Saved marks remain available, but missing students and completion percentages are unknown."
+          : "Prepare this event once to save its expected students. That roster stays attached to this date even if memberships change later."}</p>
+      </div>
+      {canPrepare && (
+        <button type="button" disabled={preparing} onClick={onPrepare}>
+          {preparing ? "Preparing…" : "Prepare attendance"}
+        </button>
+      )}
+    </section>
   );
 }
 
@@ -628,7 +811,7 @@ function staffDraft(member, event) {
   };
 }
 
-function StaffAttendance({ event, staff, saving, onSave, onError }) {
+function StaffAttendance({ event, staff, saving, onSave, onError, canEdit }) {
   const [drafts, setDrafts] = useState(() => Object.fromEntries(
     staff.map((member) => [member.key, staffDraft(member, event)])));
   const [newName, setNewName] = useState("");
@@ -673,15 +856,15 @@ function StaffAttendance({ event, staff, saving, onSave, onError }) {
   const markedCount = staff.filter((member) => member.status).length;
 
   return (
-    <section className={styles.staffSection} aria-labelledby="staff-attendance-heading">
-      <div className={styles.staffHeading}>
-        <div>
-          <p className={styles.eyebrow}>Same session · separate records</p>
-          <h2 id="staff-attendance-heading">Staff attendance</h2>
-          <p>Record each person’s status, times, assignment, and short work notes for this date.</p>
-        </div>
+    <details className={styles.staffSection} aria-labelledby="staff-attendance-heading">
+      <summary className={styles.compactSummary}>
+        <span><small>Same session · separate records</small><strong id="staff-attendance-heading">Staff attendance</strong></span>
         <strong>{markedCount}/{staff.length}</strong>
-      </div>
+      </summary>
+      <div className={styles.collapsibleBody}>
+      <p className={styles.sectionIntro}>{canEdit
+        ? "Record each person’s status, times, assignment, and short work notes for this date."
+        : "Saved staff records for this completed session."}</p>
 
       <div className={styles.staffList}>
         {staff.map((member) => {
@@ -705,7 +888,7 @@ function StaffAttendance({ event, staff, saving, onSave, onError }) {
                     type="button"
                     className={`${styles.staffStatusButton} ${styles[value]} ${member.status === value ? styles.selected : ""}`}
                     aria-pressed={member.status === value}
-                    disabled={busy}
+                    disabled={busy || !canEdit}
                     onClick={async () => {
                       try {
                         await onSave(member, { status: member.status === value ? "unmarked" : value });
@@ -720,6 +903,7 @@ function StaffAttendance({ event, staff, saving, onSave, onError }) {
                 <label>Arrival time
                   <input
                     type="time"
+                    disabled={!canEdit}
                     value={draft.arrivedTime}
                     onChange={(changeEvent) => updateDraft(member.key, { arrivedTime: changeEvent.target.value })}
                   />
@@ -727,6 +911,7 @@ function StaffAttendance({ event, staff, saving, onSave, onError }) {
                 <label>Departure time
                   <input
                     type="time"
+                    disabled={!canEdit}
                     value={draft.departedTime}
                     onChange={(changeEvent) => updateDraft(member.key, { departedTime: changeEvent.target.value })}
                   />
@@ -734,6 +919,7 @@ function StaffAttendance({ event, staff, saving, onSave, onError }) {
                 <label className={styles.staffAssignment}>Role or assignment
                   <input
                     type="text"
+                    disabled={!canEdit}
                     maxLength={160}
                     placeholder="Director, props, front ensemble…"
                     value={draft.roleAssignment}
@@ -742,6 +928,7 @@ function StaffAttendance({ event, staff, saving, onSave, onError }) {
                 </label>
                 <label className={styles.staffNotes}>Short work notes
                   <textarea
+                    disabled={!canEdit}
                     maxLength={500}
                     placeholder="What did this person cover or complete?"
                     value={draft.workNotes}
@@ -749,18 +936,18 @@ function StaffAttendance({ event, staff, saving, onSave, onError }) {
                   />
                 </label>
               </div>
-              <button
+              {canEdit ? <button
                 className={styles.staffSave}
                 type="button"
                 disabled={busy}
                 onClick={() => saveDetails(member)}
-              >{busy ? "Saving…" : "Save staff details"}</button>
+              >{busy ? "Saving…" : "Save staff details"}</button> : null}
             </article>
           );
         })}
       </div>
 
-      <details className={styles.addStaff}>
+      {canEdit ? <details className={styles.addStaff}>
         <summary>Add staff for this session</summary>
         <form onSubmit={addStaff}>
           <label>Name
@@ -781,12 +968,13 @@ function StaffAttendance({ event, staff, saving, onSave, onError }) {
           </label>
           <button type="submit" disabled={adding}>{adding ? "Adding…" : "Add to this session"}</button>
         </form>
-      </details>
-    </section>
+      </details> : null}
+      </div>
+    </details>
   );
 }
 
-function ExpectedExceptions({ exceptions, event, students, canManage, onSaved, onError, onNotice }) {
+function ExpectedExceptions({ exceptions, event, students, canManage, onSaved, onError, onNotice, session }) {
   const [studentId, setStudentId] = useState("");
   const [kind, setKind] = useState("absent");
   const [expectedTime, setExpectedTime] = useState("");
@@ -801,7 +989,7 @@ function ExpectedExceptions({ exceptions, event, students, canManage, onSaved, o
     try {
       const response = await fetch("/api/attendance", {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: staffAuthHeaders(session),
         body: JSON.stringify({
           occurrenceKey: event.occurrenceKey,
           studentId,
@@ -823,14 +1011,12 @@ function ExpectedExceptions({ exceptions, event, students, canManage, onSaved, o
   };
 
   return (
-    <section className={styles.expected} aria-labelledby="expected-heading">
-      <div className={styles.expectedHeading}>
-        <div>
-          <p className={styles.eyebrow}>Approved plans</p>
-          <h2 id="expected-heading">Expected for this event</h2>
-        </div>
+    <details className={styles.expected} aria-labelledby="expected-heading">
+      <summary className={styles.compactSummary}>
+        <span><small>Approved plans</small><strong id="expected-heading">Expected exceptions</strong></span>
         <strong>{exceptions.length}</strong>
-      </div>
+      </summary>
+      <div className={styles.collapsibleBody}>
       {exceptions.length ? (
         <ul>
           {exceptions.map((item) => (
@@ -867,54 +1053,7 @@ function ExpectedExceptions({ exceptions, event, students, canManage, onSaved, o
           </form>
         </details>
       )}
-    </section>
-  );
-}
-
-function AttendanceGate({ onOpen }) {
-  const [pin, setPin] = useState("");
-  const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
-  const submit = async (submitEvent) => {
-    submitEvent.preventDefault();
-    setBusy(true);
-    setError("");
-    try {
-      const response = await fetch("/api/attendance/access", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pin })
-      });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.error || "PIN not recognized.");
-      onOpen();
-    } catch (accessError) {
-      setError(accessError.message);
-    } finally {
-      setBusy(false);
-    }
-  };
-  return (
-    <main className={`${styles.shell} ${styles.gateShell}`}>
-      <form className={styles.gate} onSubmit={submit}>
-        <p className={styles.eyebrow}>Ashley Bands · Private staff tool</p>
-        <h1>Marching Band Attendance</h1>
-        <p>Use the established program PIN to open the shared event roster.</p>
-        <label htmlFor="attendance-pin">Attendance PIN</label>
-        <input
-          id="attendance-pin"
-          type="password"
-          inputMode="numeric"
-          autoComplete="current-password"
-          required
-          autoFocus
-          value={pin}
-          onChange={(changeEvent) => setPin(changeEvent.target.value)}
-        />
-        {error && <p className={styles.gateError} role="alert">{error}</p>}
-        <button type="submit" disabled={busy}>{busy ? "Opening…" : "Open attendance"}</button>
-        <small>Student information stays behind this access gate. Lock the page when you are finished.</small>
-      </form>
-    </main>
+      </div>
+    </details>
   );
 }

@@ -31,7 +31,7 @@ test("repeated calendar events have a stable key for each local occurrence date"
   assert.equal(buildOccurrenceKey(calendar[1]), "evt-0007:2026-08-04");
 });
 
-test("only explicitly configured marching events become attendance occurrences", () => {
+test("only explicitly configured program events become attendance occurrences", () => {
   const occurrences = configuredAttendanceOccurrences(calendar);
   assert.deepEqual(occurrences.map((event) => event.occurrenceKey), [
     "evt-0007:2026-08-03",
@@ -45,9 +45,9 @@ test("two configured events on one date remain distinct", () => {
   assert.notEqual(occurrences[1].occurrenceKey, occurrences[2].occurrenceKey);
 });
 
-test("the authoritative projection provides camp, rehearsal, and football sessions independently", () => {
+test("the authoritative projection provides camp, rehearsal, football, competition, and concert sessions independently", () => {
   const occurrences = configuredAttendanceOccurrences(projectedCalendar);
-  assert.equal(occurrences.length, 32);
+  assert.equal(occurrences.length, 36);
   assert.deepEqual(
     occurrences
       .filter((event) => ["2026-08-25", "2026-08-27", "2026-08-28"].includes(event.localDate))
@@ -60,6 +60,7 @@ test("the authoritative projection provides camp, rehearsal, and football sessio
   );
   assert.equal(occurrences.filter((event) => event.calendarEventId === "evt-0108").length, 16);
   assert.equal(occurrences.filter((event) => /^evt-00(09|10|12|16|20|22)$/.test(event.calendarEventId)).length, 6);
+  assert.equal(occurrences.filter((event) => ["evt-0019", "evt-0028", "evt-0053"].includes(event.calendarEventId)).length, 3);
 });
 
 test("sessions are grouped into Monday-based weeks without losing date order", () => {

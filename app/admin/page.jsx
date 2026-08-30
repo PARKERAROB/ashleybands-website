@@ -7,6 +7,12 @@ import { StaffGate } from "@/components/StaffGate";
 // this is a prototype of the proposed admin IA, reacted to before it's built.
 const SECTIONS = [
   {
+    title: "Daily Operations",
+    links: [
+      { href: "/admin/attendance", emoji: "✅", label: "Attendance", desc: "Program events and Infinite Campus tracking, kept separate and student-connected" }
+    ]
+  },
+  {
     title: "People & Profiles",
     links: [
       { href: "/admin/students", emoji: "🎓", label: "Current Students", desc: "Search, filter, and open a connected student record" },

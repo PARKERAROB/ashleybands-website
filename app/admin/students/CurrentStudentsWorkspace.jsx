@@ -353,7 +353,7 @@ function StudentDetail({ student, onClose, onCopyContacts }) {
 
       <DetailSection title="Connected work">
         <div className={styles.workGrid}>
-          <WorkCard label="Attendance" value={student.attendance.total ? `${student.attendance.present} present · ${student.attendance.absent} absent` : "No observations"} href={`/attendance?student=${encodeURIComponent(student.id)}`} />
+          <WorkCard label="Attendance" value={student.attendance.total ? `${student.attendance.present} present · ${student.attendance.absent} absent` : "Open both attendance sources"} href={`/admin/attendance?student=${encodeURIComponent(student.id)}`} />
           <WorkCard label="Fees" value={money(student.finances.balanceCents) + " balance"} href={`/admin/billing?studentId=${encodeURIComponent(student.id)}`} />
           <WorkCard label="Sponsorship" value={`${money(student.finances.confirmedSponsorshipCents)} confirmed`} href={`/admin/marching-band/funding?studentId=${encodeURIComponent(student.id)}`} />
           <WorkCard label="Assets" value={`${student.instruments.length + (student.resources ? 1 : 0)} connected`} href={`/admin/instrument-inventory?studentId=${encodeURIComponent(student.id)}`} />
