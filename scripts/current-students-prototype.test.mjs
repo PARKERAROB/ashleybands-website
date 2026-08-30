@@ -48,6 +48,7 @@ test("the roster supports combined filtering, sorting, and list actions", () => 
   assert.match(client, /Student \+ guardian/);
   assert.match(client, /School email,Personal email,Student mobile,Guardian,Guardian email,Guardian phone/);
   assert.match(client, /Export contacts/);
+  assert.match(client, /ensembles-memberships-prototype\?student=/);
 });
 
 test("open needs identify the missing follow-up instead of showing only a count", () => {

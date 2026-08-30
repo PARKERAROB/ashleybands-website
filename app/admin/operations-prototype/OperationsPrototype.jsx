@@ -47,6 +47,11 @@ const ASSIGNED_ASSETS = ACTIVE.flatMap((student) => student.assets.map((asset, i
 })));
 const INVENTORY = [...ASSIGNED_ASSETS, ...AVAILABLE_ASSETS];
 const ENSEMBLES = [...new Set(ACTIVE.flatMap((student) => student.ensembles))].sort();
+const DEDICATED_ROUTES = {
+  attendance: "/admin/attendance-workspace-prototype",
+  inventory: "/admin/assets-inventory-prototype",
+  ensembles: "/admin/ensembles-memberships-prototype"
+};
 
 const AREAS = [
   { id: "students", number: ACTIVE.length, unit: "current students", title: "Students", prompt: "Find anyone or build a roster.", description: "Search the current program and move into one whole-student picture.", accent: "garnet" },
@@ -177,8 +182,8 @@ function Home({ onOpenArea }) {
         <p>Start with the program, an operational area, or a student. Every route reconnects to the same records.</p>
       </section>
       <section className={styles.areaGrid} aria-label="Operational areas">
-        {AREAS.map((item) => ["attendance", "inventory"].includes(item.id) ? (
-          <Link key={item.id} href={item.id === "attendance" ? "/admin/attendance-workspace-prototype" : "/admin/assets-inventory-prototype"} className={styles.areaCard} data-accent={item.accent}>
+        {AREAS.map((item) => DEDICATED_ROUTES[item.id] ? (
+          <Link key={item.id} href={DEDICATED_ROUTES[item.id]} className={styles.areaCard} data-accent={item.accent}>
             <span className={styles.areaMetric}><strong>{item.number}</strong> {item.unit}</span>
             <span className={styles.areaTitle}>{item.title}<b>→</b></span>
             <span className={styles.areaPrompt}>{item.prompt}</span>
@@ -223,13 +228,14 @@ function StudentScope({ student, area, onClear }) {
 }
 
 function Connections({ student, currentArea, onOpenArea }) {
-  const related = ["attendance", "funding", "forms", "inventory"].filter((item) => item !== currentArea);
+  const related = ["attendance", "funding", "forms", "inventory", "ensembles"].filter((item) => item !== currentArea);
   return (
     <section className={styles.connections}>
       <div><span>Keep {student.displayName}</span><strong>Move across the connected record</strong></div>
       <div>{related.map((area) => {
         if (area === "attendance") return <Link key={area} href={`/admin/attendance-workspace-prototype?student=${encodeURIComponent(student.id)}`}>Attendance →</Link>;
         if (area === "inventory") return <Link key={area} href={`/admin/assets-inventory-prototype?student=${encodeURIComponent(student.id)}`}>Assets & inventory →</Link>;
+        if (area === "ensembles") return <Link key={area} href={`/admin/ensembles-memberships-prototype?student=${encodeURIComponent(student.id)}`}>Ensembles →</Link>;
         return <button key={area} onClick={() => onOpenArea(area, student.id)}>{AREAS.find((item) => item.id === area).title} →</button>;
       })}</div>
     </section>

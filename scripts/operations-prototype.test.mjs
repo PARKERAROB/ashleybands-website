@@ -41,6 +41,7 @@ test("student context moves into domains and back to the full student", () => {
   assert.match(studentClient, /assets-inventory-prototype\?student=/);
   assert.match(client, /assets-inventory-prototype/);
   assert.match(client, /attendance-workspace-prototype/);
+  assert.match(client, /ensembles-memberships-prototype/);
   assert.match(client, /Student context retained/);
   assert.match(client, /Open full student/);
   assert.match(client, /Move across the connected record/);
