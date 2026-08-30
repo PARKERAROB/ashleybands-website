@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { validateStaffRequest } from "@/lib/staffAuth";
+import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
+import { logAuditRequired, staffActor } from "@/lib/auditLog";
 
 export const runtime = "nodejs";
 
@@ -11,8 +12,8 @@ function csvCell(value) {
 
 // GET /api/admin/billing/export -> CSV of every payment (financial record).
 export async function GET(req) {
-  const staff = await validateStaffRequest(req);
-  if (!staff) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.BILLING_EXPORT);
+  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status, headers: { "Cache-Control": "private, no-store" } });
 
   const { data: payments, error } = await supabaseAdmin
     .from("fee_payments")
@@ -21,7 +22,7 @@ export async function GET(req) {
     )
     .order("created_at", { ascending: true });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return NextResponse.json({ error: "Could not export payments." }, { status: 500, headers: { "Cache-Control": "private, no-store" } });
 
   const header = [
     "student",
@@ -55,11 +56,17 @@ export async function GET(req) {
 
   const csv = [header.join(","), ...rows].join("\n");
   const stamp = new Date().toISOString().slice(0, 10);
+  try {
+    await logAuditRequired({ actor: staffActor(authorization.staff), action: "export", table: "fee_payments", recordId: "all-payment-history", route: "/api/admin/billing/export", changes: { row_count: rows.length } });
+  } catch {
+    return NextResponse.json({ error: "The required export record could not be saved." }, { status: 503, headers: { "Cache-Control": "private, no-store" } });
+  }
 
   return new Response(csv, {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": `attachment; filename="ashley-bands-payments-${stamp}.csv"`
+      "Content-Disposition": `attachment; filename="ashley-bands-payments-${stamp}.csv"`,
+      "Cache-Control": "private, no-store"
     }
   });
 }

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { validateStaffRequest } from "@/lib/staffAuth";
+import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
 import { logAudit, staffActor } from "@/lib/auditLog";
 
 export const runtime = "nodejs";
@@ -289,8 +289,9 @@ async function loadOverrides() {
 }
 
 export async function GET(req) {
-  const staff = await validateStaffRequest(req);
-  if (!staff) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.MEMBERSHIPS_READ);
+  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status });
+  const staff = authorization.staff;
 
   try {
     const [
@@ -337,8 +338,9 @@ export async function GET(req) {
 }
 
 export async function PATCH(req) {
-  const staff = await validateStaffRequest(req);
-  if (!staff) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.MEMBERSHIPS_WRITE);
+  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status });
+  const staff = authorization.staff;
 
   const body = await req.json().catch(() => ({}));
   const sourceStudentId = clean(body.sourceStudentId);

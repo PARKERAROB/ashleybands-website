@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { StaffGate } from "@/components/StaffGate";
 import { staffAuthHeaders } from "@/lib/staffSession";
 import {
@@ -30,7 +30,7 @@ function unique(values) {
 }
 
 function money(cents) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format((Number(cents) || 0) / 100);
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format((Number(cents) || 0) / 100);
 }
 
 function dateLabel(value) {
@@ -63,6 +63,16 @@ function LiveWorkspace({ session, signOut, initialStudentId }) {
   const [detail, setDetail] = useState(null);
   const [detailState, setDetailState] = useState({ loading: false, error: "" });
   const [notice, setNotice] = useState("");
+  const detailRef = useRef(null);
+
+  useEffect(() => {
+    if (!focusedId || !detailRef.current || typeof window.matchMedia !== "function" || !window.matchMedia("(max-width: 780px)").matches) return;
+    const frame = window.requestAnimationFrame(() => {
+      detailRef.current?.focus({ preventScroll: true });
+      detailRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [detail, detailState.loading, focusedId]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -266,12 +276,12 @@ function LiveWorkspace({ session, signOut, initialStudentId }) {
               <tbody>
                 {filtered.map((student) => (
                   <tr key={student.id} className={focusedId === student.id ? styles.focusedRow : ""}>
-                    <td className={styles.checkCell}><input type="checkbox" aria-label={`Select ${student.displayName}`} checked={selectedIds.includes(student.id)} onChange={() => toggleSelected(student.id)} /></td>
-                    <td><button className={styles.studentButton} onClick={() => openStudent(student.id)}><strong>{student.displayName}</strong><span>{student.status === "inactive" ? student.inactiveReason : student.schoolEmail || student.legalName}</span></button></td>
-                    <td>{student.grade}</td>
-                    <td><div className={styles.ensembleStack}>{student.ensembles.length ? student.ensembles.map((item) => <span key={item}>{item}</span>) : <span>Not listed</span>}</div></td>
-                    <td>{student.programInstrument}</td>
-                    <td><div className={styles.signalStack}>
+                    <td data-label="Select" className={styles.checkCell}><input type="checkbox" aria-label={`Select ${student.displayName}`} checked={selectedIds.includes(student.id)} onChange={() => toggleSelected(student.id)} /></td>
+                    <td data-label="Student"><button className={styles.studentButton} onClick={() => openStudent(student.id)}><strong>{student.displayName}</strong><span>{student.status === "inactive" ? student.inactiveReason : student.schoolEmail || student.legalName}</span></button></td>
+                    <td data-label="Grade">{student.grade}</td>
+                    <td data-label="Ensemble"><div className={styles.ensembleStack}>{student.ensembles.length ? student.ensembles.map((item) => <span key={item}>{item}</span>) : <span>Not listed</span>}</div></td>
+                    <td data-label="Instrument">{student.programInstrument}</td>
+                    <td data-label="Signals"><div className={styles.signalStack}>
                       <span className={contactReady(student) ? styles.goodSignal : styles.gapSignal}>{contactReady(student) ? "Contact ready" : "Contact gap"}</span>
                       {student.needs.map((item) => <span key={item} className={styles.needSignal}>{item}</span>)}
                     </div></td>
@@ -284,9 +294,9 @@ function LiveWorkspace({ session, signOut, initialStudentId }) {
         </section>
 
         {focusedId ? (
-          detailState.loading ? <DetailMessage message="Loading connected student record…" />
-            : detailState.error ? <DetailMessage message={detailState.error} />
-              : detail ? <StudentDetail student={detail} onClose={() => { setFocusedId(""); setDetail(null); }} onCopyContacts={() => copyStudentAndGuardians(detail)} /> : null
+          detailState.loading ? <DetailMessage detailRef={detailRef} message="Loading connected student record…" />
+            : detailState.error ? <DetailMessage detailRef={detailRef} message={detailState.error} />
+              : detail ? <StudentDetail detailRef={detailRef} student={detail} onClose={() => { setFocusedId(""); setDetail(null); }} onCopyContacts={() => copyStudentAndGuardians(detail)} /> : null
         ) : null}
       </div>
     </main>
@@ -297,14 +307,14 @@ function FilterSelect({ label, value, onChange, options }) {
   return <label><span>{label}</span><select value={value} onChange={(event) => onChange(event.target.value)}><option>{ALL}</option>{options.map((option) => <option key={option}>{option}</option>)}</select></label>;
 }
 
-function DetailMessage({ message }) {
-  return <aside className={styles.detail}><section className={styles.detailSection}><p>{message}</p></section></aside>;
+function DetailMessage({ message, detailRef }) {
+  return <aside ref={detailRef} tabIndex={-1} className={styles.detail}><section className={styles.detailSection}><p>{message}</p></section></aside>;
 }
 
-function StudentDetail({ student, onClose, onCopyContacts }) {
+function StudentDetail({ student, onClose, onCopyContacts, detailRef }) {
   const currentRequest = student.instrumentRequests[0];
   return (
-    <aside className={styles.detail} aria-label={`${student.displayName} details`}>
+    <aside ref={detailRef} tabIndex={-1} className={styles.detail} aria-label={`${student.displayName} details`}>
       <header>
         <div><span>{student.status === "active" ? "Current student" : student.inactiveReason}</span><h2>{student.displayName}</h2></div>
         <button onClick={onClose} aria-label="Close student details">×</button>
@@ -353,30 +363,32 @@ function StudentDetail({ student, onClose, onCopyContacts }) {
 
       <DetailSection title="Connected work">
         <div className={styles.workGrid}>
-          <WorkCard label="Attendance" value={student.attendance.total ? `${student.attendance.present} present · ${student.attendance.absent} absent` : "Open both attendance sources"} href={`/admin/attendance?student=${encodeURIComponent(student.id)}`} />
-          <WorkCard label="Fees" value={money(student.finances.balanceCents) + " balance"} href={`/admin/billing?studentId=${encodeURIComponent(student.id)}`} />
-          <WorkCard label="Sponsorship" value={`${money(student.finances.confirmedSponsorshipCents)} confirmed`} href={`/admin/marching-band/funding?studentId=${encodeURIComponent(student.id)}`} />
-          <WorkCard label="Assets" value={`${student.instruments.length + (student.resources ? 1 : 0)} connected`} href={`/admin/instrument-inventory?studentId=${encodeURIComponent(student.id)}`} />
-          <WorkCard label="Memberships" value={`${student.programMemberships.length} current`} href={`/admin/ensembles?view=students&student=${encodeURIComponent(student.id)}`} />
-          <WorkCard label="Forms" value="Catalog not connected" href="/admin/operations-prototype?area=forms&filter=incomplete" />
+          {student.access?.attendance !== false ? <WorkCard label="Attendance" value={student.attendance.total ? `${student.attendance.present} present · ${student.attendance.absent} absent` : "Open both attendance sources"} href={`/admin/attendance?student=${encodeURIComponent(student.id)}`} /> : null}
+          {student.finances ? <WorkCard label="Fees" value={money(student.finances.feeBalanceCents) + " balance"} href={`/admin/financial?view=fees&student=${encodeURIComponent(student.id)}`} /> : null}
+          {student.finances ? <WorkCard label="Campaign" value={`${money(student.finances.campaignRaisedCents)} raised`} href={`/admin/financial?view=campaign&student=${encodeURIComponent(student.id)}`} /> : null}
+          {student.access?.assets !== false ? <WorkCard label="Assets" value={`${student.assets.length} connected`} href={`/admin/assets?student=${encodeURIComponent(student.id)}`} /> : null}
+          {student.access?.memberships !== false ? <WorkCard label="Memberships" value={`${student.programMemberships.length} current`} href={`/admin/ensembles?view=students&student=${encodeURIComponent(student.id)}`} /> : null}
+          {student.forms ? <WorkCard label="Forms" value={student.forms.available ? `${student.forms.action} need action` : "No current requirements"} href={`/admin/forms?student=${encodeURIComponent(student.id)}`} /> : null}
         </div>
         {student.needs.length ? <div className={styles.openNeeds}><span>Open follow-up</span><ul>{student.needs.map((item) => <li key={item}><strong>{item}</strong><small>{needDescription(item)}</small></li>)}</ul></div> : <div className={styles.clearNeeds}>No open follow-up in the connected records</div>}
       </DetailSection>
 
-      <DetailSection title="Equipment and resources">
+      {student.access?.assets !== false ? <DetailSection title="Equipment and resources">
         <DetailLine label="Instrument request" value={currentRequest ? `${currentRequest.status} · ${currentRequest.school_year}` : "None"} />
         <DetailLine label="Assigned instruments" value={student.instruments.length ? student.instruments.map((item) => [item.instrument_type, item.brand, item.model_markings].filter(Boolean).join(" · ")).join(", ") : "None"} />
         <DetailLine label="Locker" value={student.resources?.lockerNumber || "None"} />
         <DetailLine label="Tuner" value={student.resources?.tunerNumber || "None"} />
-      </DetailSection>
+      </DetailSection> : null}
 
-      <DetailSection title="Money is kept in two records">
-        <DetailLine label="Fees charged" value={money(student.finances.chargedCents)} />
-        <DetailLine label="Fee payments" value={money(student.finances.paidCents)} />
-        <DetailLine label="Fee balance" value={money(student.finances.balanceCents)} />
+      {student.finances ? <DetailSection title="Program fees and campaign funding">
+        <DetailLine label="Fees charged" value={money(student.finances.feeChargedCents)} />
+        <DetailLine label="Fee payments" value={money(student.finances.feePaidCents)} />
+        <DetailLine label="Fee balance" value={money(student.finances.feeBalanceCents)} />
+        <DetailLine label="Campaign goal" value={money(student.finances.campaignGoalCents)} />
+        <DetailLine label="Campaign raised" value={money(student.finances.campaignRaisedCents)} />
         <DetailLine label="Confirmed gifts" value={money(student.finances.confirmedSponsorshipCents)} />
-        <DetailLine label="Gift credits" value={money(student.finances.creditedSponsorshipCents)} />
-      </DetailSection>
+        {student.finances.legacySponsorshipCreditCents ? <DetailLine label="Older gift credits" value={`${money(student.finances.legacySponsorshipCreditCents)} · awaiting reconciliation`} /> : null}
+      </DetailSection> : null}
     </aside>
   );
 }

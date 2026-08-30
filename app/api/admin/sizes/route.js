@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { validateStaffRequest } from "@/lib/staffAuth";
+import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
 import { logAudit, staffActor } from "@/lib/auditLog";
 import { computeSize, chartForRole } from "@/lib/uniformSizing";
 
@@ -72,8 +72,9 @@ function buildRow(student, measurement) {
 // Students with no measurements are omitted: a size table is about what we can size,
 // and the measured-count on /admin/measurements already tracks fitting progress.
 export async function GET(req) {
-  const staff = await validateStaffRequest(req);
-  if (!staff) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.STUDENTS_READ);
+  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status });
+  const staff = authorization.staff;
 
   const { data: measurements, error: mErr } = await supabaseAdmin
     .from("portal_student_measurements")
@@ -111,8 +112,9 @@ export async function GET(req) {
 
 // PUT { studentId, size } -> set (or clear, with size="") Rob's override.
 export async function PUT(req) {
-  const staff = await validateStaffRequest(req);
-  if (!staff) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.STUDENTS_WRITE);
+  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status });
+  const staff = authorization.staff;
 
   const body = await req.json().catch(() => ({}));
   const studentId = text(body.studentId);

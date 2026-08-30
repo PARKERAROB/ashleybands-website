@@ -46,6 +46,36 @@ export async function POST(request) {
     .eq("id", studentId)
     .maybeSingle();
 
+  const requestedCategory = String(body.category || "").trim();
+  let chargeQuery = supabaseAdmin.from("fee_charges")
+    .select("category,amount_cents")
+    .eq("student_id", studentId)
+    .eq("status", "active")
+    .eq("kind", "fee");
+  if (requestedCategory) chargeQuery = chargeQuery.eq("category", requestedCategory);
+  const { data: feeCharges, error: chargeError } = await chargeQuery;
+  const feeCategories = [...new Set((feeCharges || []).map((charge) => charge.category))];
+  if (chargeError || feeCategories.length !== 1) {
+    return NextResponse.json({ error: feeCategories.length > 1 ? "Choose which fee this payment applies to." : "No active program fee was found for this payment." }, { status: 409 });
+  }
+  const paymentCategory = feeCategories[0];
+  const { data: completedPayments, error: paymentError } = await supabaseAdmin
+    .from("fee_payments")
+    .select("amount_cents")
+    .eq("student_id", studentId)
+    .eq("category", paymentCategory)
+    .eq("kind", "fee")
+    .eq("status", "completed");
+  if (paymentError) {
+    return NextResponse.json({ error: "Could not verify the current fee balance." }, { status: 503 });
+  }
+  const chargedCents = (feeCharges || []).reduce((total, charge) => total + (Number(charge.amount_cents) || 0), 0);
+  const paidCents = (completedPayments || []).reduce((total, payment) => total + (Number(payment.amount_cents) || 0), 0);
+  const remainingCents = Math.max(chargedCents - paidCents, 0);
+  if (!remainingCents || amountCents > remainingCents) {
+    return NextResponse.json({ error: "The payment amount is greater than the current fee balance." }, { status: 409 });
+  }
+
   const invoiceId = generateInvoiceId();
 
   // Record a pending payment first so the webhook/capture can reconcile by invoice_id.
@@ -56,7 +86,8 @@ export async function POST(request) {
       amount_cents: amountCents,
       method: "paypal",
       status: "pending",
-      category: String(body.category || "marching_band_2026"),
+      category: paymentCategory,
+      kind: "fee",
       invoice_id: invoiceId,
       recorded_by: "family_online"
     })
@@ -72,7 +103,8 @@ export async function POST(request) {
       amountCents,
       studentId,
       invoiceId,
-      description: `Ashley Bands fee — ${student?.display_name || "student"}`
+      description: `Ashley Bands program fee — ${student?.display_name || "student"}`,
+      requestId: invoiceId,
     });
 
     await supabaseAdmin

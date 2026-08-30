@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { readPortalSession } from "@/lib/portalTokens";
 import { isTrustedGuardian } from "@/lib/billing";
-import { captureOrder, extractCapture, centsToAmount } from "@/lib/paypal";
+import { amountToCents, captureOrder, extractCapture, centsToAmount } from "@/lib/paypal";
 import { sendFeePaymentReceiptEmail } from "@/lib/portalEmail";
 
 export const runtime = "nodejs";
@@ -28,7 +28,7 @@ export async function POST(request) {
   // Find the pending payment we created for this order and confirm ownership.
   const { data: payment } = await supabaseAdmin
     .from("fee_payments")
-    .select("id, student_id, amount_cents, status, invoice_id, category")
+    .select("id, student_id, amount_cents, status, invoice_id, category, kind")
     .eq("paypal_order_id", orderId)
     .maybeSingle();
 
@@ -56,17 +56,27 @@ export async function POST(request) {
   if (detail.captureStatus !== "COMPLETED" && detail.status !== "COMPLETED") {
     return NextResponse.json({ error: "Payment was not completed." }, { status: 402 });
   }
+  if (
+    payment.kind !== "fee"
+    || detail.invoiceId !== payment.invoice_id
+    || detail.customId !== payment.student_id
+    || amountToCents(detail.amountValue) !== Number(payment.amount_cents)
+    || detail.currencyCode !== "USD"
+  ) {
+    return NextResponse.json({ error: "The completed payment did not match the expected fee record." }, { status: 409 });
+  }
 
-  // Idempotent settle — only flip a still-pending row.
-  await supabaseAdmin
-    .from("fee_payments")
-    .update({
-      status: "completed",
-      paypal_capture_id: detail.captureId,
-      received_at: new Date().toISOString()
-    })
-    .eq("id", payment.id)
-    .eq("status", "pending");
+  const { error: settleError } = await supabaseAdmin.rpc("settle_online_fee_payment_with_audit", {
+    p_payment_id: payment.id,
+    p_capture_id: detail.captureId,
+    p_actor_type: "parent",
+    p_actor_id: session.personId,
+    p_actor_name: session.email || "Family portal",
+    p_route: "/api/billing/capture-order",
+  });
+  if (settleError) {
+    return NextResponse.json({ error: "The payment was captured but could not be reconciled automatically." }, { status: 503 });
+  }
 
   // Receipt (best effort — never fail the payment on email error).
   try {
@@ -76,7 +86,7 @@ export async function POST(request) {
       .eq("id", payment.student_id)
       .maybeSingle();
     const { data: balance } = await supabaseAdmin
-      .from("student_fee_balances")
+      .from("student_program_fee_summary")
       .select("balance_cents")
       .eq("student_id", payment.student_id)
       .maybeSingle();

@@ -74,15 +74,14 @@ function StaffLogin({ onAuthed }) {
 
 export default function AdminBillingPage() {
   const [session, setSession] = useState(() => readSession());
+  const [studentScope, setStudentScope] = useState(() => typeof window === "undefined" ? "" : new URLSearchParams(window.location.search).get("studentId") || "");
   const [roster, setRoster] = useState([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [onlyBalance, setOnlyBalance] = useState(false);
-  const [mbOnly, setMbOnly] = useState(false);
   const [sortBy, setSortBy] = useState("lastName");
   const [selected, setSelected] = useState({});
   const [msg, setMsg] = useState("");
-  const [syncing, setSyncing] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
 
   const load = async () => {
@@ -106,9 +105,9 @@ export default function AdminBillingPage() {
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     const rows = roster.filter((r) => {
+      if (studentScope && r.id !== studentScope) return false;
       if (q && !lastFirst(r).toLowerCase().includes(q) && !r.name.toLowerCase().includes(q)) return false;
       if (onlyBalance && r.balanceCents <= 0) return false;
-      if (mbOnly && !r.marchingBand) return false;
       return true;
     });
     const sorted = [...rows];
@@ -120,7 +119,7 @@ export default function AdminBillingPage() {
       sorted.sort((a, b) => lastNameKey(a).localeCompare(lastNameKey(b)));
     }
     return sorted;
-  }, [roster, query, onlyBalance, mbOnly, sortBy]);
+  }, [roster, query, onlyBalance, sortBy, studentScope]);
 
   const totals = useMemo(() => {
     return roster.reduce(
@@ -175,32 +174,14 @@ export default function AdminBillingPage() {
     URL.revokeObjectURL(url);
   };
 
-  const syncMarchingBand = async () => {
-    setSyncing(true);
-    setMsg("");
-    const res = await fetch("/api/admin/billing/sync-marching-band", {
-      method: "POST",
-      headers: authHeaders(session)
-    });
-    const data = await res.json().catch(() => ({}));
-    setSyncing(false);
-    if (!res.ok) {
-      setMsg(data.error || "Sync failed.");
-      return;
-    }
-    const unmatched = data.unmatchedSignups
-      ? ` · ${data.unmatchedSignups} signup(s) not matched to a student`
-      : "";
-    setMsg(`MB season fee: added ${data.inserted}, skipped ${data.skipped} already charged${unmatched}.`);
-    load();
-  };
-
   if (!session) return <StaffLogin onAuthed={(s) => { setSession(s); setLoading(true); }} />;
   if (loading) return <div style={pageStyle}><p>Loading...</p></div>;
 
   return (
     <div style={pageStyle}>
-      <h2>💵 Student Billing</h2>
+      <h2>🧾 Fee ledger tools</h2>
+      <p style={{ color: "#7b1829", fontSize: 13 }}>Use the <a href="/admin/financial">Financial workspace</a> for current totals. This page is for recording and correcting ledger entries.</p>
+      {studentScope ? <p style={{ color: "#446349", fontSize: 13 }}>Student fee ledger selected. <button onClick={() => setStudentScope("")} style={linkBtnStyle}>Show all students</button></p> : null}
       <p style={{ color: "#555", fontSize: 14 }}>
         Charged {usd(totals.charged)} · Paid {usd(totals.paid)} · Outstanding {usd(totals.balance)} ·{" "}
         <button onClick={() => setShowSummary((v) => !v)} style={{ ...btnStyle, background: "#245c73", padding: "2px 10px" }}>
@@ -226,13 +207,6 @@ export default function AdminBillingPage() {
           <input type="checkbox" checked={onlyBalance} onChange={(e) => setOnlyBalance(e.target.checked)} />
           Owes money only
         </label>
-        <label style={{ fontSize: 13, display: "flex", gap: 4, alignItems: "center" }}>
-          <input type="checkbox" checked={mbOnly} onChange={(e) => setMbOnly(e.target.checked)} />
-          Marching band only
-        </label>
-        <button onClick={syncMarchingBand} disabled={syncing} style={{ ...btnStyle, background: "#7b1829" }}>
-          {syncing ? "Applying…" : "Apply MB season fee to signups"}
-        </button>
         <button onClick={exportCsv} style={{ ...btnStyle, background: "#245c73" }}>Transactions CSV</button>
         <button onClick={exportBalances} style={{ ...btnStyle, background: "#245c73" }}>Balances CSV</button>
       </div>
@@ -260,6 +234,7 @@ export default function AdminBillingPage() {
               checked={Boolean(selected[r.id])}
               onCheck={(v) => setSelected((prev) => ({ ...prev, [r.id]: v }))}
               onChanged={load}
+              initialOpen={r.id === studentScope}
             />
           ))}
         </tbody>
@@ -359,8 +334,8 @@ function Stat({ label, value, sub, strong }) {
 
 const subhead = { fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#6f675a" };
 
-function StudentRow({ row, session, checked, onCheck, onChanged }) {
-  const [open, setOpen] = useState(false);
+function StudentRow({ row, session, checked, onCheck, onChanged, initialOpen = false }) {
+  const [open, setOpen] = useState(initialOpen);
   return (
     <>
       <tr style={{ borderBottom: "1px solid #eee" }}>
@@ -455,19 +430,21 @@ function StudentManage({ studentId, session, onChanged }) {
           {(detail.payments || []).length === 0 && <li style={{ color: "#999" }}>None</li>}
         </ul>
       </div>
-      <RecordPayment studentId={studentId} session={session} onDone={() => { load(); onChanged(); }} />
+      <RecordPayment studentId={studentId} charges={detail.charges || []} session={session} onDone={() => { load(); onChanged(); }} />
     </div>
   );
 }
 
-function RecordPayment({ studentId, session, onDone }) {
-  const [form, setForm] = useState({ amount: "", method: "check", payerName: "", checkNumber: "", isSponsorship: false, notes: "" });
+function RecordPayment({ studentId, charges, session, onDone }) {
+  const categories = [...new Map(charges.filter((charge) => charge.status === "active").map((charge) => [charge.category, charge.label || charge.category])).entries()];
+  const [form, setForm] = useState({ amount: "", method: "check", category: "", payerName: "", checkNumber: "", notes: "" });
   const [status, setStatus] = useState("");
 
   const submit = async () => {
     setStatus("");
     const amountCents = Math.round(Number(form.amount) * 100);
     if (!amountCents || amountCents <= 0) { setStatus("Enter an amount."); return; }
+    if (!form.category) { setStatus("Choose the fee or campaign category."); return; }
     const res = await fetch("/api/admin/billing/payments", {
       method: "POST",
       headers: authHeaders(session),
@@ -475,16 +452,17 @@ function RecordPayment({ studentId, session, onDone }) {
         studentId,
         amountCents,
         method: form.method,
+        category: form.category,
         payerName: form.payerName,
         checkNumber: form.checkNumber,
-        isSponsorship: form.isSponsorship,
+        isSponsorship: false,
         notes: form.notes
       })
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) { setStatus(data.error || "Failed."); return; }
     setStatus("Recorded.");
-    setForm({ amount: "", method: "check", payerName: "", checkNumber: "", isSponsorship: false, notes: "" });
+    setForm({ amount: "", method: "check", category: "", payerName: "", checkNumber: "", notes: "" });
     onDone();
   };
 
@@ -492,6 +470,10 @@ function RecordPayment({ studentId, session, onDone }) {
     <div style={{ minWidth: 240 }}>
       <strong style={{ fontSize: 13 }}>Record offline payment</strong>
       <input placeholder="Amount (USD)" type="number" step="0.01" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} style={{ ...inputStyle, marginTop: 6 }} />
+      <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} style={{ ...inputStyle, marginTop: 6 }}>
+        <option value="">Choose category…</option>
+        {categories.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+      </select>
       <select value={form.method} onChange={(e) => setForm({ ...form, method: e.target.value })} style={{ ...inputStyle, marginTop: 6 }}>
         <option value="check">Check</option>
         <option value="cash">Cash</option>
@@ -502,10 +484,7 @@ function RecordPayment({ studentId, session, onDone }) {
       {form.method === "check" && (
         <input placeholder="Check #" value={form.checkNumber} onChange={(e) => setForm({ ...form, checkNumber: e.target.value })} style={{ ...inputStyle, marginTop: 6 }} />
       )}
-      <label style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, fontSize: 13 }}>
-        <input type="checkbox" checked={form.isSponsorship} onChange={(e) => setForm({ ...form, isSponsorship: e.target.checked })} />
-        This is a sponsorship
-      </label>
+      <p style={{ fontSize: 11.5, color: "#6f675a", margin: "6px 0 0" }}>Sponsorship gifts are recorded in the sponsorship ledger, not as fee payments.</p>
       <input placeholder="Notes (context only — not check # or payer)" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} style={{ ...inputStyle, marginTop: 6 }} />
       <button onClick={submit} style={{ ...btnStyle, marginTop: 8, background: "#446349" }}>Record</button>
       {status && <p style={{ fontSize: 12, marginTop: 4 }}>{status}</p>}
@@ -514,7 +493,7 @@ function RecordPayment({ studentId, session, onDone }) {
 }
 
 function BulkCharge({ session, selectedIds, onDone }) {
-  const [form, setForm] = useState({ amount: "", label: "Marching Band 2026 season fee", category: "marching_band_2026", skip: true });
+  const [form, setForm] = useState({ amount: "", label: "", category: "", kind: "fee", skip: true });
   const [status, setStatus] = useState("");
 
   const submit = async () => {
@@ -522,10 +501,13 @@ function BulkCharge({ session, selectedIds, onDone }) {
     if (!selectedIds.length) { setStatus("Select students first."); return; }
     const amountCents = Math.round(Number(form.amount) * 100);
     if (!amountCents || amountCents <= 0) { setStatus("Enter an amount."); return; }
+    if (!form.category.trim()) { setStatus("Enter a category."); return; }
+    const kindLabel = form.kind === "funding_goal" ? "campaign goal" : "program fee";
+    if (!window.confirm(`Create a ${kindLabel} of ${usd(amountCents)} for ${selectedIds.length} student(s) in category “${form.category.trim()}”?`)) return;
     const res = await fetch("/api/admin/billing/charges", {
       method: "POST",
       headers: authHeaders(session),
-      body: JSON.stringify({ studentIds: selectedIds, amountCents, label: form.label, category: form.category, skipExistingCategory: form.skip })
+      body: JSON.stringify({ studentIds: selectedIds, amountCents, label: form.label, category: form.category, kind: form.kind, skipExistingCategory: form.skip })
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) { setStatus(data.error || "Failed."); return; }
@@ -537,6 +519,7 @@ function BulkCharge({ session, selectedIds, onDone }) {
       <strong style={{ fontSize: 14 }}>Assign a charge to selected students ({selectedIds.length})</strong>
       <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap", alignItems: "center" }}>
         <input placeholder="Amount (USD)" type="number" step="0.01" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} style={{ ...inputStyle, width: 140 }} />
+        <select value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value })} style={{ ...inputStyle, width: 170 }}><option value="fee">Program fee</option><option value="funding_goal">Campaign goal</option></select>
         <input placeholder="Label" value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} style={{ ...inputStyle, width: 280 }} />
         <input placeholder="Category" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} style={{ ...inputStyle, width: 180 }} />
         <label style={{ fontSize: 13, display: "flex", gap: 4, alignItems: "center" }}>

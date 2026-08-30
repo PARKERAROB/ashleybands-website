@@ -48,13 +48,14 @@ export default function AdminInventoryPage() {
   const [session, setSession] = useState(() => readSession());
   const [items, setItems] = useState([]);
   const [eligibleStudents, setEligibleStudents] = useState([]);
+  const [connectedAssets, setConnectedAssets] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!session) return;
     fetch("/api/instrument-inventory/admin", { headers: authHeaders(session) })
       .then((r) => r.json())
-      .then((d) => { setItems(d.items || []); setEligibleStudents(d.eligibleStudents || []); setLoading(false); })
+      .then((d) => { setItems(d.items || []); setEligibleStudents(d.eligibleStudents || []); setConnectedAssets(d.connectedAssets || []); setLoading(false); })
       .catch(() => setLoading(false));
   }, [session]);
 
@@ -82,6 +83,20 @@ export default function AdminInventoryPage() {
     }
     setEligibleStudents((previous) => previous.filter((item) => item.id !== values.requestId));
     setItems((previous) => previous.map((item) => item.id === id ? { ...item, instrument_request_id: values.requestId } : item));
+  };
+
+  const linkAsset = async (event, id) => {
+    event.preventDefault();
+    const values = Object.fromEntries(new FormData(event.currentTarget));
+    if (!window.confirm("Match this observation to the selected connected instrument?")) return;
+    const res = await fetch("/api/instrument-inventory/admin", {
+      method: "PATCH",
+      headers: authHeaders(session),
+      body: JSON.stringify({ id, action: "link", canonicalAssetId: values.canonicalAssetId })
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) { window.alert(body.error || "Could not match the instrument."); return; }
+    setItems((previous) => previous.map((item) => item.id === id ? { ...item, canonical_asset_id: body.canonicalAssetId } : item));
   };
 
   if (!session) return <StaffLogin onAuthed={(s) => { setSession(s); setLoading(true); }} />;
@@ -132,7 +147,7 @@ export default function AdminInventoryPage() {
               <p style={{ margin: "4px 0 0", fontStyle: "italic" }}>{item.raw_transcript}</p>
             </details>
           )}
-          {!item.instrument_request_id ? (
+          {!item.instrument_request_id && item.canonical_asset_id ? (
             <form onSubmit={(event) => assign(event, item.id)} style={{ marginTop: 14, paddingTop: 12, borderTop: "1px solid #eee" }}>
               <label style={{ display: "block", fontSize: 13, fontWeight: 600 }}>
                 Assign to student with signed form
@@ -160,8 +175,23 @@ export default function AdminInventoryPage() {
                 Assign this instrument
               </button>
             </form>
-          ) : (
+          ) : item.instrument_request_id ? (
             <p style={{ fontSize: 13, fontWeight: 600, color: "#2c7a4b", marginTop: 12 }}>Assigned to signed student</p>
+          ) : (
+            <form onSubmit={(event) => linkAsset(event, item.id)} style={{ marginTop: 14, paddingTop: 12, borderTop: "1px solid #eee" }}>
+              <label style={{ display: "block", fontSize: 13, fontWeight: 600 }}>
+                Match to connected instrument
+                <select name="canonicalAssetId" required defaultValue="" style={{ ...inputStyle, marginTop: 5 }}>
+                  <option value="" disabled>Select the verified asset…</option>
+                  {connectedAssets.map((asset) => {
+                    const instrument = Array.isArray(asset.asset_instruments) ? asset.asset_instruments[0] : asset.asset_instruments;
+                    return <option key={asset.id} value={asset.id}>{[asset.asset_tag, instrument?.instrument_type, instrument?.brand, instrument?.serial_number].filter(Boolean).join(" · ")}</option>;
+                  })}
+                </select>
+              </label>
+              <p style={{ fontSize: 12, color: "#775b16" }}>Choose only after the asset tag, serial, type, and brand have been reviewed.</p>
+              <button disabled={!connectedAssets.length} style={{ ...btnStyle, background: "#775b16" }}>Save verified match</button>
+            </form>
           )}
           <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
             <button onClick={() => mark(item.id, "verified")} style={{ ...btnStyle, background: "#2ecc71" }}>✅ Verified</button>

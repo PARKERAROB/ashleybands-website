@@ -117,6 +117,7 @@ export async function POST(request) {
     method: "credit",
     status: "completed",
     category: "marching_band_2026",
+    kind: "funding_goal",
     invoice_id: invoiceId,
     is_sponsorship: false,
     payer_name: "Spring Trip refund (forgone)",

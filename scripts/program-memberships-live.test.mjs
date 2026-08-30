@@ -9,7 +9,7 @@ const contactsRoute = readFileSync("app/api/admin/program-memberships/contacts/r
 const studentAdminRoute = readFileSync("app/api/admin/students/route.js", "utf8");
 const reviewRoute = readFileSync("app/api/admin/profile-requests/route.js", "utf8");
 const dataLayer = readFileSync("lib/programMemberships.js", "utf8");
-const authorization = readFileSync("lib/staffAuthorization.js", "utf8");
+const capabilities = readFileSync("lib/staffCapabilities.js", "utf8");
 const migration = readFileSync("supabase/migrations/202608300004_program_memberships.sql", "utf8");
 const logicUrl = new URL("../app/admin/ensembles/program-memberships.logic.mjs", import.meta.url);
 const { compareMembershipStudents, matchesMembershipStudent, sourceLabel } = await import(logicUrl);
@@ -17,7 +17,7 @@ const { compareMembershipStudents, matchesMembershipStudent, sourceLabel } = awa
 test("the live memberships workspace is protected and server HTML contains no roster", () => {
   assert.match(workspace, /<StaffGate>/);
   assert.match(route, /MEMBERSHIPS_READ/);
-  assert.match(authorization, /MEMBERSHIPS_READ:\s*"memberships\.read"/);
+  assert.match(capabilities, /MEMBERSHIPS_READ:\s*"memberships\.read"/);
   assert.doesNotMatch(page, /portal_students|displayName|school_email/);
 });
 
@@ -92,6 +92,6 @@ test("roster sync and approved participation changes use the normalized reconcil
 test("director-only membership mutations reject the sponsorship-only role by capability", () => {
   assert.match(studentAdminRoute, /STUDENTS_WRITE/);
   assert.match(reviewRoute, /MEMBERSHIPS_WRITE/);
-  assert.match(authorization, /sponsor_lead:\s*\["sponsorship\.read", "sponsorship\.write"\]/);
-  assert.doesNotMatch(authorization, /sponsor_lead:[^\n]*(students|memberships)\./);
+  assert.match(capabilities, /sponsor_lead:\s*\["sponsorship\.read", "sponsorship\.write"\]/);
+  assert.doesNotMatch(capabilities, /sponsor_lead:[^\n]*(students|memberships)\./);
 });

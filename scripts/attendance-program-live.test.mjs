@@ -9,7 +9,7 @@ const page = readFileSync("app/attendance/page.jsx", "utf8");
 const client = readFileSync("app/attendance/AttendanceClient.jsx", "utf8");
 const reportRoute = readFileSync("app/api/attendance/report/route.js", "utf8");
 const attendanceRoute = readFileSync("app/api/attendance/route.js", "utf8");
-const authorization = readFileSync("lib/staffAuthorization.js", "utf8");
+const capabilities = readFileSync("lib/staffCapabilities.js", "utf8");
 
 test("program events use normalized group scope and a stable occurrence roster", () => {
   assert.match(migration, /create table if not exists public\.attendance_calendar_groups/);
@@ -67,7 +67,7 @@ test("the field tool honors occurrence and student URL context", () => {
 test("report sending requires a named staff capability", () => {
   assert.match(reportRoute, /ATTENDANCE_REPORT_SEND/);
   assert.match(reportRoute, /authorizeStaffRequest/);
-  assert.match(authorization, /ATTENDANCE_REPORT_SEND:\s*"attendance\.report\.send"/);
+  assert.match(capabilities, /ATTENDANCE_REPORT_SEND:\s*"attendance\.report\.send"/);
   assert.doesNotMatch(reportRoute, /validateAttendanceRequest/);
   assert.match(attendanceRoute, /ATTENDANCE_EVENTS_READ/);
   assert.doesNotMatch(attendanceRoute, /validateAttendanceRequest/);

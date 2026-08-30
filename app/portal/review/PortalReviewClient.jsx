@@ -346,12 +346,21 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
       .reduce((s, p) => s + (Number(p.amountCents) || 0), 0);
     return { charges, charged, paid, sponsorship, remaining: Math.max(charged - paid, 0) };
   };
-  const goal = kindTotals("funding_goal");
+  const calculatedGoal = kindTotals("funding_goal");
+  const goal = student.campaign ? {
+    ...calculatedGoal,
+    charged: Number(student.campaign.goalCents) || 0,
+    paid: Number(student.campaign.raisedCents) || 0,
+    sponsorship: Number(student.campaign.confirmedGiftCents) || 0,
+    remaining: Number(student.campaign.remainingCents) || 0,
+    legacy: Number(student.campaign.legacySponsorshipCreditCents) || 0,
+  } : calculatedGoal;
   const fee = kindTotals("fee");
-  const hasGoal = goal.charges.length > 0 || goal.paid > 0;
+  const hasGoal = goal.charges.length > 0 || goal.charged > 0 || goal.paid > 0;
   const hasFee = fee.charges.length > 0 || fee.paid > 0;
+  const feeCategories = [...new Set(fee.charges.map((charge) => charge.category).filter(Boolean))];
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
-  const canPayOnline = owes && paymentsEnabled && Boolean(clientId);
+  const canPayOnline = owes && paymentsEnabled && Boolean(clientId) && feeCategories.length === 1;
 
   const [showPay, setShowPay] = useState(false);
   const [amount, setAmount] = useState((balanceCents / 100).toFixed(2));
@@ -413,6 +422,7 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
           <span className="portal-field-note">
             This is the 2026 Marching Band goal, not a bill. Sponsorships and fundraising count toward it.
           </span>
+          {goal.legacy > 0 ? <span className="portal-field-note">An older {formatUsd(goal.legacy)} sponsorship credit is being reconciled separately and is not double-counted here.</span> : null}
         </div>
       ) : null}
 
@@ -520,6 +530,7 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
             <PayPalButton
               clientId={clientId}
               studentId={student.id}
+              category={feeCategories[0]}
               amountRef={amountRef}
               onPaid={() => {
                 setShowPay(false);
@@ -584,7 +595,7 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
   );
 }
 
-function PayPalButton({ clientId, studentId, amountRef, onPaid }) {
+function PayPalButton({ clientId, studentId, category, amountRef, onPaid }) {
   const containerRef = useRef(null);
   const [status, setStatus] = useState("");
 
@@ -601,7 +612,7 @@ function PayPalButton({ clientId, studentId, amountRef, onPaid }) {
             const res = await fetch("/api/billing/create-order", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ studentId, amountCents })
+              body: JSON.stringify({ studentId, amountCents, category })
             });
             const json = await res.json().catch(() => ({}));
             if (!res.ok) throw new Error(json.error || "Could not start payment.");
@@ -630,7 +641,7 @@ function PayPalButton({ clientId, studentId, amountRef, onPaid }) {
       cancelled = true;
       if (buttons && buttons.close) buttons.close();
     };
-  }, [clientId, studentId, amountRef, onPaid]);
+  }, [clientId, studentId, category, amountRef, onPaid]);
 
   return (
     <div>

@@ -147,4 +147,11 @@
   .filterHeading, .filterNote { grid-column: auto; }
   .rosterToolbar { align-items: stretch; flex-direction: column; }
   .rosterTools, .listActions { justify-content: flex-start; }
+  .tableWrap { overflow: visible; }
+  .tableWrap table, .tableWrap tbody, .tableWrap tr, .tableWrap td { display: block; min-width: 0; }
+  .tableWrap thead { display: none; }
+  .tableWrap tr { margin: .65rem; border: 1px solid #ddd4c7; border-radius: 10px; padding: .5rem; background: #fff; }
+  .tableWrap td { display: grid; grid-template-columns: 78px minmax(0,1fr); gap: .5rem; border: 0; padding: .32rem; text-align: left !important; }
+  .tableWrap td::before { content: attr(data-label); color: var(--staff-muted); font-size: .58rem; font-weight: 850; text-transform: uppercase; }
+  .tableWrap .checkCell { width: auto; }
 }

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { validateStaffRequest } from "@/lib/staffAuth";
+import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
 import { logAudit, staffActor } from "@/lib/auditLog";
 
 export const runtime = "nodejs";
@@ -112,11 +112,14 @@ function toCsv(people) {
 //   ?export=csv       -> CSV download of the same data
 //   ?personId=<id>     -> recent audit_log history for that person, JSON
 export async function GET(req) {
-  const staff = await validateStaffRequest(req);
-  if (!staff) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
-
   const params = new URL(req.url).searchParams;
   const personId = text(params.get("personId"));
+  const capability = text(params.get("export")) === "csv"
+    ? STAFF_CAPABILITIES.CONTACTS_EXPORT
+    : STAFF_CAPABILITIES.STUDENTS_READ;
+  const authorization = await authorizeStaffRequest(req, capability);
+  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status });
+  const staff = authorization.staff;
 
   if (personId) {
     const { data: history, error } = await supabaseAdmin
@@ -178,8 +181,9 @@ export async function GET(req) {
 // person's full contact history — profile edits and contact-method edits
 // alike — reads back as one timeline from a single record_id lookup.
 export async function PATCH(req) {
-  const staff = await validateStaffRequest(req);
-  if (!staff) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.STUDENTS_WRITE);
+  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status });
+  const staff = authorization.staff;
 
   const body = await req.json().catch(() => ({}));
   const personId = text(body.personId);
