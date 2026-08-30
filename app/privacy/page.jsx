@@ -1,4 +1,4 @@
-// Privacy Notice — approved by Mr. Parker 2026-07-10 (word-by-word, v4).
+// Privacy Notice — approved by Mr. Parker 2026-08-30 (word-by-word, v5).
 // Source of record: BandsofAHS/projects/placement-authority-2026-27/privacy-notice-DRAFT.md
 // Any wording change goes back through Mr. Parker.
 
@@ -11,7 +11,7 @@ export default function PrivacyNoticePage() {
   return (
     <main className="narrow-page">
       <h1>Privacy Notice</h1>
-      <p className="lede">Effective date: July 10, 2026 · ashleybands.com</p>
+      <p className="lede">Effective date: August 30, 2026 · ashleybands.com</p>
 
       <p>
         This site supports the Ashley High School band program. This notice describes the
@@ -26,7 +26,8 @@ export default function PrivacyNoticePage() {
         </li>
         <li>
           <strong>Contact information</strong> provided by your family through the portal, such as
-          names, email addresses, and phone numbers.
+          names, email addresses, and phone numbers, and email addresses provided through the
+          AshleyBands Weekly signup form.
         </li>
         <li>
           <strong>Payment records</strong>: fees charged, payments received, and sponsorships.
@@ -53,6 +54,10 @@ export default function PrivacyNoticePage() {
       <p>
         You can review and update your information at any time in the portal. To request deletion
         of your information, contact Mr. Parker; requests are honored promptly.
+      </p>
+      <p>
+        Community newsletter subscribers can unsubscribe at any time using the link in each issue.
+        Newsletter preferences do not change urgent or transactional program messages.
       </p>
 
       <h2>Contact</h2>
