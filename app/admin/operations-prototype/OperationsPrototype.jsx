@@ -177,8 +177,8 @@ function Home({ onOpenArea }) {
         <p>Start with the program, an operational area, or a student. Every route reconnects to the same records.</p>
       </section>
       <section className={styles.areaGrid} aria-label="Operational areas">
-        {AREAS.map((item) => item.id === "inventory" ? (
-          <Link key={item.id} href="/admin/assets-inventory-prototype" className={styles.areaCard} data-accent={item.accent}>
+        {AREAS.map((item) => ["attendance", "inventory"].includes(item.id) ? (
+          <Link key={item.id} href={item.id === "attendance" ? "/admin/attendance-workspace-prototype" : "/admin/assets-inventory-prototype"} className={styles.areaCard} data-accent={item.accent}>
             <span className={styles.areaMetric}><strong>{item.number}</strong> {item.unit}</span>
             <span className={styles.areaTitle}>{item.title}<b>→</b></span>
             <span className={styles.areaPrompt}>{item.prompt}</span>
@@ -227,10 +227,11 @@ function Connections({ student, currentArea, onOpenArea }) {
   return (
     <section className={styles.connections}>
       <div><span>Keep {student.displayName}</span><strong>Move across the connected record</strong></div>
-      <div>{related.map((area) => area === "inventory"
-        ? <Link key={area} href={`/admin/assets-inventory-prototype?student=${encodeURIComponent(student.id)}`}>Assets & inventory →</Link>
-        : <button key={area} onClick={() => onOpenArea(area, student.id)}>{AREAS.find((item) => item.id === area).title} →</button>
-      )}</div>
+      <div>{related.map((area) => {
+        if (area === "attendance") return <Link key={area} href={`/admin/attendance-workspace-prototype?student=${encodeURIComponent(student.id)}`}>Attendance →</Link>;
+        if (area === "inventory") return <Link key={area} href={`/admin/assets-inventory-prototype?student=${encodeURIComponent(student.id)}`}>Assets & inventory →</Link>;
+        return <button key={area} onClick={() => onOpenArea(area, student.id)}>{AREAS.find((item) => item.id === area).title} →</button>;
+      })}</div>
     </section>
   );
 }

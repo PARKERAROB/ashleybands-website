@@ -356,7 +356,7 @@ function StudentDetail({ student, onClose, onCopyContacts }) {
 
       <DetailSection title="Connected work">
         <div className={styles.workGrid}>
-          <WorkCard label="Attendance" value={`${attended} of ${total}`} href={"/admin/operations-prototype?area=attendance&student=" + encodeURIComponent(student.id)} />
+          <WorkCard label="Attendance" value={`${attended} of ${total}`} href={"/admin/attendance-workspace-prototype?student=" + encodeURIComponent(student.id)} />
           <WorkCard label="Funding" value={goal ? `$${raised} of $${goal}` : "No goal"} href={"/admin/operations-prototype?area=funding&student=" + encodeURIComponent(student.id)} />
           <WorkCard label="Forms" value={`${formsComplete} of ${formsTotal}`} href={"/admin/operations-prototype?area=forms&student=" + encodeURIComponent(student.id)} />
           <WorkCard label="Assets" value={student.assets.length ? `${student.assets.length} assigned` : "None"} href={"/admin/assets-inventory-prototype?student=" + encodeURIComponent(student.id)} />
