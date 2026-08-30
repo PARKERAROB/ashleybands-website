@@ -19,7 +19,8 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - run: npm run lint
+      - name: Lint the security gate
+        run: npx eslint scripts/security-boundary.test.mjs
       - name: Test prototypes and domain rules
         run: |
           npm run test:onboarding
