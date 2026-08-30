@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { readStaffSession, saveStaffSession, clearStaffSession } from "@/lib/staffSession";
+import { readStaffSession, saveStaffSession, revokeStaffSession } from "@/lib/staffSession";
 
 // Wraps any staff-only UI. Renders a login form until the staff member is
 // authenticated, then calls children(session, signOut). Reuses the shared
@@ -29,10 +29,10 @@ export function StaffGate({ children }) {
     return <StaffLogin onAuthed={(nextSession) => setAuth({ ready: true, session: nextSession })} />;
   }
 
-  const signOut = () => {
-    // Clear the httpOnly cookie server-side, then the local display copy.
-    fetch("/api/sponsors/staff-signout", { method: "POST" }).catch(() => {});
-    clearStaffSession();
+  const signOut = async () => {
+    // Keep the visible session until server-side revocation succeeds. This lets
+    // the user retry instead of silently abandoning a still-valid cookie.
+    if (!await revokeStaffSession()) return;
     setAuth({ ready: true, session: null });
   };
 

@@ -8,16 +8,16 @@ function GuardianCard({ number, form, update }) {
       <legend>Guardian {number}{number === 1 ? <small>Primary + emergency</small> : null}</legend>
       <div className={styles.formGrid}>
         <Field id={key + "Name"} label="Full name" required={number === 1}>
-          <input id={key + "Name"} value={form[key + "Name"]} onChange={(event) => update(key + "Name", event.target.value)} />
+          <input id={key + "Name"} required={number === 1} value={form[key + "Name"]} onChange={(event) => update(key + "Name", event.target.value)} />
         </Field>
         <Field id={key + "Relationship"} label="Relationship to student" required={number === 1}>
-          <input id={key + "Relationship"} value={form[key + "Relationship"]} placeholder="Parent, grandparent, guardian…" onChange={(event) => update(key + "Relationship", event.target.value)} />
+          <input id={key + "Relationship"} required={number === 1} value={form[key + "Relationship"]} placeholder="Parent, grandparent, guardian…" onChange={(event) => update(key + "Relationship", event.target.value)} />
         </Field>
         <Field id={key + "Email"} label="Email" required={number === 1}>
-          <input id={key + "Email"} type="email" value={form[key + "Email"]} onChange={(event) => update(key + "Email", event.target.value)} />
+          <input id={key + "Email"} type="email" required={number === 1} value={form[key + "Email"]} onChange={(event) => update(key + "Email", event.target.value)} />
         </Field>
         <Field id={key + "Phone"} label="Phone" required={number === 1}>
-          <input id={key + "Phone"} type="tel" value={form[key + "Phone"]} onChange={(event) => update(key + "Phone", event.target.value)} />
+          <input id={key + "Phone"} type="tel" required={number === 1} value={form[key + "Phone"]} onChange={(event) => update(key + "Phone", event.target.value)} />
         </Field>
       </div>
     </fieldset>

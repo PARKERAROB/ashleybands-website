@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import styles from "./billing.module.css";
 
 const STORAGE_KEY = "bdos_staff_session_v1";
 
@@ -13,8 +14,8 @@ function readSession() {
   }
 }
 
-function authHeaders(session) {
-  return { "Content-Type": "application/json", "x-staff-id": session.id, "x-staff-token": session.token };
+function authHeaders() {
+  return { "Content-Type": "application/json" };
 }
 
 function usd(cents) {
@@ -121,8 +122,9 @@ export default function AdminBillingPage() {
     return sorted;
   }, [roster, query, onlyBalance, sortBy, studentScope]);
 
+  const totalRows = useMemo(() => studentScope ? roster.filter((row) => row.id === studentScope) : roster, [roster, studentScope]);
   const totals = useMemo(() => {
-    return roster.reduce(
+    return totalRows.reduce(
       (acc, r) => {
         acc.charged += r.chargedCents;
         acc.paid += r.paidCents;
@@ -131,9 +133,14 @@ export default function AdminBillingPage() {
       },
       { charged: 0, paid: 0, balance: 0 }
     );
-  }, [roster]);
+  }, [totalRows]);
 
   const selectedIds = Object.keys(selected).filter((id) => selected[id]);
+
+  const clearStudentScope = () => {
+    setStudentScope("");
+    window.history.replaceState(null, "", "/admin/billing");
+  };
 
   const exportCsv = async () => {
     const res = await fetch("/api/admin/billing/export", { headers: authHeaders(session) });
@@ -179,19 +186,19 @@ export default function AdminBillingPage() {
 
   return (
     <div style={pageStyle}>
-      <h2>🧾 Fee ledger tools</h2>
+      <h2>🧾 {studentScope ? "Student fee ledger" : "Fee ledger tools"}</h2>
       <p style={{ color: "#7b1829", fontSize: 13 }}>Use the <a href="/admin/financial">Financial workspace</a> for current totals. This page is for recording and correcting ledger entries.</p>
-      {studentScope ? <p style={{ color: "#446349", fontSize: 13 }}>Student fee ledger selected. <button onClick={() => setStudentScope("")} style={linkBtnStyle}>Show all students</button></p> : null}
+      {studentScope ? <p style={{ color: "#446349", fontSize: 13 }}>Showing one student&apos;s fee ledger. <button onClick={clearStudentScope} style={linkBtnStyle}>Show all students</button></p> : null}
       <p style={{ color: "#555", fontSize: 14 }}>
-        Charged {usd(totals.charged)} · Paid {usd(totals.paid)} · Outstanding {usd(totals.balance)} ·{" "}
-        <button onClick={() => setShowSummary((v) => !v)} style={{ ...btnStyle, background: "#245c73", padding: "2px 10px" }}>
+        {studentScope ? "Student totals" : "Program totals"} · Charged {usd(totals.charged)} · Paid {usd(totals.paid)} · Outstanding {usd(totals.balance)}{" "}
+        {!studentScope ? <button onClick={() => setShowSummary((v) => !v)} style={{ ...btnStyle, background: "#245c73", padding: "2px 10px" }}>
           {showSummary ? "Hide summary" : "Treasurer summary"}
-        </button>
+        </button> : null}
       </p>
 
-      {showSummary && <FinancialSummary roster={roster} />}
+      {!studentScope && showSummary ? <FinancialSummary roster={roster} /> : null}
 
-      <BulkCharge session={session} selectedIds={selectedIds} onDone={(m) => { setMsg(m); setSelected({}); load(); }} />
+      {!studentScope ? <BulkCharge session={session} selectedIds={selectedIds} onDone={(m) => { setMsg(m); setSelected({}); load(); }} /> : null}
 
       <div style={{ display: "flex", gap: 8, alignItems: "center", margin: "12px 0", flexWrap: "wrap" }}>
         <input placeholder="Search name..." value={query} onChange={(e) => setQuery(e.target.value)} style={{ ...inputStyle, width: 200 }} />
@@ -207,12 +214,12 @@ export default function AdminBillingPage() {
           <input type="checkbox" checked={onlyBalance} onChange={(e) => setOnlyBalance(e.target.checked)} />
           Owes money only
         </label>
-        <button onClick={exportCsv} style={{ ...btnStyle, background: "#245c73" }}>Transactions CSV</button>
-        <button onClick={exportBalances} style={{ ...btnStyle, background: "#245c73" }}>Balances CSV</button>
+        {!studentScope ? <button onClick={exportCsv} style={{ ...btnStyle, background: "#245c73" }}>Transactions CSV</button> : null}
+        {!studentScope ? <button onClick={exportBalances} style={{ ...btnStyle, background: "#245c73" }}>Balances CSV</button> : null}
       </div>
       {msg && <p style={{ color: "#446349", fontSize: 13 }}>{msg}</p>}
 
-      <table style={{ width: "100%", fontSize: 13, borderCollapse: "collapse", marginTop: 8 }}>
+      <div className={styles.tableWrap}><table className={styles.ledgerTable}>
         <thead>
           <tr style={{ textAlign: "left", borderBottom: "2px solid #ddd" }}>
             <th style={thStyle}></th>
@@ -238,7 +245,7 @@ export default function AdminBillingPage() {
             />
           ))}
         </tbody>
-      </table>
+      </table></div>
       {filtered.length === 0 && <p style={{ color: "#999", marginTop: 16 }}>No students match.</p>}
     </div>
   );
@@ -338,23 +345,23 @@ function StudentRow({ row, session, checked, onCheck, onChanged, initialOpen = f
   const [open, setOpen] = useState(initialOpen);
   return (
     <>
-      <tr style={{ borderBottom: "1px solid #eee" }}>
-        <td style={tdStyle}><input type="checkbox" checked={checked} onChange={(e) => onCheck(e.target.checked)} /></td>
-        <td style={tdStyle}>
+      <tr className={styles.studentRow}>
+        <td data-label="Select" style={tdStyle}><input type="checkbox" aria-label={`Select ${lastFirst(row)}`} checked={checked} onChange={(e) => onCheck(e.target.checked)} /></td>
+        <td data-label="Student" style={tdStyle}>
           {lastFirst(row)}
           {row.marchingBand ? <span style={mbTagStyle}>MB</span> : null}
         </td>
-        <td style={tdStyle}>{row.grade}</td>
-        <td style={tdStyle}>{usd(row.chargedCents)}</td>
-        <td style={tdStyle}>{usd(row.cashPaidCents)}</td>
-        <td style={tdStyle}>{row.sponsorshipCents ? usd(row.sponsorshipCents) : "—"}</td>
-        <td style={{ ...tdStyle, fontWeight: 700, color: row.balanceCents > 0 ? "#7b1829" : "#446349" }}>{usd(row.balanceCents)}</td>
-        <td style={tdStyle}>
+        <td data-label="Grade" style={tdStyle}>{row.grade}</td>
+        <td data-label="Charged" style={tdStyle}>{usd(row.chargedCents)}</td>
+        <td data-label="Paid" style={tdStyle}>{usd(row.cashPaidCents)}</td>
+        <td data-label="Sponsor" style={tdStyle}>{row.sponsorshipCents ? usd(row.sponsorshipCents) : "—"}</td>
+        <td data-label="Balance" style={{ ...tdStyle, fontWeight: 700, color: row.balanceCents > 0 ? "#7b1829" : "#446349" }}>{usd(row.balanceCents)}</td>
+        <td data-label="Actions" style={tdStyle}>
           <button onClick={() => setOpen((v) => !v)} style={{ ...btnStyle, background: "#6f675a", padding: "4px 10px" }}>{open ? "Close" : "Manage"}</button>
         </td>
       </tr>
       {open && (
-        <tr>
+        <tr className={styles.detailRow}>
           <td colSpan={8} style={{ padding: "8px 8px 16px", background: "#faf7ef" }}>
             <StudentManage studentId={row.id} session={session} onChanged={onChanged} />
           </td>

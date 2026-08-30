@@ -11,10 +11,6 @@ const MAX_PAYMENT_CENTS = 1_000_000;
 // POST: record an offline payment / credit against a student.
 // body: { studentId, amountCents, method, category?, receivedAt?, notes? }
 export async function POST(req) {
-  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.BILLING_WRITE);
-  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status, headers: { "Cache-Control": "private, no-store" } });
-  const staff = authorization.staff;
-
   let body;
   try {
     body = await req.json();
@@ -28,6 +24,11 @@ export async function POST(req) {
   const category = String(body.category || "").trim();
 
   if (!studentId) return NextResponse.json({ error: "Missing student" }, { status: 400 });
+  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.BILLING_WRITE, {
+    scope: { type: "student", ref: studentId },
+  });
+  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status, headers: { "Cache-Control": "private, no-store" } });
+  const staff = authorization.staff;
   if (!category) return NextResponse.json({ error: "Choose the fee or campaign category this payment belongs to." }, { status: 400 });
   if (!OFFLINE_METHODS.includes(method)) {
     return NextResponse.json({ error: "Invalid payment method" }, { status: 400 });
@@ -76,10 +77,6 @@ export async function POST(req) {
 
 // PATCH: change a payment's status (e.g. mark refunded). body: { id, status, notes? }
 export async function PATCH(req) {
-  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.BILLING_WRITE);
-  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status, headers: { "Cache-Control": "private, no-store" } });
-  const staff = authorization.staff;
-
   let body;
   try {
     body = await req.json();
@@ -92,6 +89,19 @@ export async function PATCH(req) {
   if (!id || !["completed", "refunded", "failed"].includes(status)) {
     return NextResponse.json({ error: "Valid id and status required" }, { status: 400 });
   }
+
+  const capabilityAuthorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.BILLING_WRITE, {
+    safeCapabilityOnly: true,
+  });
+  if (!capabilityAuthorization.ok) return NextResponse.json({ error: capabilityAuthorization.error }, { status: capabilityAuthorization.status, headers: { "Cache-Control": "private, no-store" } });
+
+  const { data: payment } = await supabaseAdmin.from("fee_payments").select("student_id").eq("id", id).maybeSingle();
+  if (!payment) return NextResponse.json({ error: "Payment not found" }, { status: 404 });
+  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.BILLING_WRITE, {
+    scope: { type: "student", ref: payment.student_id },
+  });
+  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status, headers: { "Cache-Control": "private, no-store" } });
+  const staff = authorization.staff;
 
   const { error } = await supabaseAdmin.rpc("update_fee_payment_with_audit", {
     p_payment_id: id,

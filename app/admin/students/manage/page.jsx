@@ -1,36 +1,66 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { StaffGate } from "@/components/StaffGate";
 import { staffAuthHeaders } from "@/lib/staffSession";
+import styles from "./manage.module.css";
 
 export default function AdminStudentsPage() {
   return <StaffGate>{(session) => <StudentsAdmin session={session} />}</StaffGate>;
+}
+
+function studentStatusLabel(status) {
+  return {
+    active: "Current",
+    inactive: "Inactive",
+    "inactive-dropped": "Inactive — left program",
+    "inactive-moved": "Inactive — moved",
+    "inactive-graduated": "Graduated",
+  }[status] || status;
 }
 
 function StudentsAdmin({ session }) {
   const [q, setQ] = useState("");
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [showNew, setShowNew] = useState(false);
+  const [statusView, setStatusView] = useState("active");
+  const queryRef = useRef("");
 
-  const search = async () => {
+  useEffect(() => { queryRef.current = q; }, [q]);
+
+  const loadStudents = useCallback(async (status = statusView, query = queryRef.current) => {
     setLoading(true);
-    const res = await fetch(`/api/admin/students?q=${encodeURIComponent(q)}`, { headers: staffAuthHeaders(session) });
-    const data = await res.json().catch(() => ({}));
-    setStudents(data.students || []);
-    setLoading(false);
-  };
+    setError("");
+    try {
+      const res = await fetch(`/api/admin/students?q=${encodeURIComponent(query)}&status=${encodeURIComponent(status)}`, { headers: staffAuthHeaders(session), cache: "no-store" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Student records could not be loaded.");
+      setStudents(data.students || []);
+    } catch (loadError) {
+      setStudents([]);
+      setError(loadError.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [session, statusView]);
+
+  const search = () => loadStudents(statusView, q);
+
+  useEffect(() => {
+    loadStudents(statusView, queryRef.current);
+  }, [loadStudents, statusView]);
 
   return (
-    <div style={page}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+    <div style={page} className={styles.page}>
+      <div className={styles.topbar}>
         <h1 style={{ margin: 0 }}>Students &amp; Guardians</h1>
         <a href="/admin" style={link}>← Staff home</a>
       </div>
       <p style={{ color: "#6f675a", fontSize: 14 }}>Add a new student, edit details, or link a guardian.</p>
 
-      <div style={{ display: "flex", gap: 8, margin: "12px 0", flexWrap: "wrap" }}>
+      <div className={styles.toolbar}>
         <input
           placeholder="Search by name or email…"
           value={q}
@@ -39,6 +69,12 @@ function StudentsAdmin({ session }) {
           style={{ ...input, width: 280 }}
         />
         <button onClick={search} style={btn}>Search</button>
+        <select value={statusView} onChange={(event) => setStatusView(event.target.value)} style={{ ...input, width: 170 }} aria-label="Student status view">
+          <option value="active">Current students</option>
+          <option value="inactive">Inactive students</option>
+          <option value="inactive-graduated">Graduated students</option>
+          <option value="all">All students</option>
+        </select>
         <button onClick={() => setShowNew((v) => !v)} style={{ ...btn, background: "#446349" }}>
           {showNew ? "Close new student" : "+ New student"}
         </button>
@@ -48,11 +84,12 @@ function StudentsAdmin({ session }) {
 
       <UnmatchedSignups session={session} />
 
+      {error ? <div className={styles.error} role="alert"><span>{error}</span><button type="button" onClick={search}>Retry</button></div> : null}
       {loading ? <p>Loading…</p> : null}
       {students.map((s) => (
         <StudentEditor key={s.id} student={s} session={session} onChanged={search} />
       ))}
-      {!loading && students.length === 0 && <p style={{ color: "#999" }}>No students loaded. Search or add one.</p>}
+      {!loading && !error && students.length === 0 && <p style={{ color: "#766f65" }}>No students match this view.</p>}
     </div>
   );
 }
@@ -61,19 +98,39 @@ function UnmatchedSignups({ session }) {
   const [items, setItems] = useState(null);
   const [busyId, setBusyId] = useState("");
   const [msg, setMsg] = useState("");
+  const [error, setError] = useState("");
 
-  const reload = () => {
-    fetch("/api/admin/students/unmatched-signups", { headers: staffAuthHeaders(session) })
-      .then((r) => r.json())
-      .then((d) => setItems(d.unmatched || []))
-      .catch(() => setItems([]));
-  };
+  const reload = useCallback(async () => {
+    setError("");
+    try {
+      const response = await fetch("/api/admin/students/unmatched-signups", { headers: staffAuthHeaders(session), cache: "no-store" });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.error || "Unmatched signups could not be loaded.");
+      setItems(body.unmatched || []);
+    } catch (loadError) {
+      setItems([]);
+      setError(loadError.message);
+    }
+  }, [session]);
 
   useEffect(() => {
-    fetch("/api/admin/students/unmatched-signups", { headers: staffAuthHeaders(session) })
-      .then((r) => r.json())
-      .then((d) => setItems(d.unmatched || []))
-      .catch(() => setItems([]));
+    let active = true;
+    fetch("/api/admin/students/unmatched-signups", { headers: staffAuthHeaders(session), cache: "no-store" })
+      .then(async (response) => {
+        const body = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(body.error || "Unmatched signups could not be loaded.");
+        if (active) {
+          setError("");
+          setItems(body.unmatched || []);
+        }
+      })
+      .catch((loadError) => {
+        if (active) {
+          setItems([]);
+          setError(loadError.message);
+        }
+      });
+    return () => { active = false; };
   }, [session]);
 
   const create = async (signupId) => {
@@ -91,6 +148,7 @@ function UnmatchedSignups({ session }) {
     reload();
   };
 
+  if (error) return <div className={styles.error} role="alert"><span>{error}</span><button type="button" onClick={reload}>Retry</button></div>;
   if (!items || items.length === 0) return null;
 
   return (
@@ -101,7 +159,7 @@ function UnmatchedSignups({ session }) {
       </p>
       {msg && <p style={{ fontSize: 13, color: "#446349" }}>{msg}</p>}
       {items.map((u) => (
-        <div key={u.signupId} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, padding: "6px 0", borderTop: "1px solid #eaddc9", flexWrap: "wrap" }}>
+        <div key={u.signupId} className={styles.unmatchedRow}>
           <span style={{ fontSize: 13 }}>
             <strong>{u.student.firstName} {u.student.lastName}</strong>{" "}
             <span style={{ color: "#6f675a" }}>
@@ -159,14 +217,15 @@ function StudentEditor({ student, session, onChanged }) {
     cellPhone: student.cell_phone || "",
     status: student.status || "active"
   });
+  const [statusReason, setStatusReason] = useState("");
   const [msg, setMsg] = useState("");
 
   const save = async () => {
     setMsg("");
-    const res = await fetch("/api/admin/students", { method: "PATCH", headers: staffAuthHeaders(session), body: JSON.stringify({ id: student.id, ...form }) });
+    const res = await fetch("/api/admin/students", { method: "PATCH", headers: staffAuthHeaders(session), body: JSON.stringify({ id: student.id, ...form, statusReason }) });
     const data = await res.json().catch(() => ({}));
     setMsg(res.ok ? "Saved." : data.error || "Failed.");
-    if (res.ok) onChanged();
+    if (res.ok) { setStatusReason(""); onChanged(); }
   };
 
   const displayLast = [student.legal_last, student.preferred_first || student.legal_first].filter(Boolean).join(", ");
@@ -184,7 +243,7 @@ function StudentEditor({ student, session, onChanged }) {
           </span>
         </span>
         <span style={{ fontSize: 12, color: "#6f675a" }}>
-          {student.grade_fall26} {student.source === "manual" ? "· manual" : ""} ·{" "}
+          {studentStatusLabel(student.status)}{student.grade_fall26 ? ` · ${student.grade_fall26}` : ""} {student.source === "manual" ? "· manual" : ""} ·{" "}
           <button onClick={() => setOpen((v) => !v)} style={link}>{open ? "close" : "manage"}</button> ·{" "}
           <a href={`/admin/measurements?studentId=${student.id}&name=${encodeURIComponent(student.display_name || "")}`} style={link}>Measurements →</a>
         </span>
@@ -209,12 +268,13 @@ function StudentEditor({ student, session, onChanged }) {
               <input placeholder="School email" value={form.schoolEmail} onChange={(e) => setForm({ ...form, schoolEmail: e.target.value })} style={input} />
               <input placeholder="Cell phone" value={form.cellPhone} onChange={(e) => setForm({ ...form, cellPhone: e.target.value })} style={input} />
               <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} style={input}>
-                <option value="active">active</option>
-                <option value="inactive">inactive</option>
-                <option value="inactive-graduated">inactive-graduated</option>
+                <option value="active">Current</option>
+                <option value="inactive">Inactive</option>
+                <option value="inactive-graduated">Graduated</option>
               </select>
+              {form.status !== student.status ? <input placeholder="Reason for status change *" value={statusReason} onChange={(event) => setStatusReason(event.target.value)} style={input} /> : null}
             </div>
-            <button onClick={save} style={{ ...btn, marginTop: 8 }}>Save</button>
+            <button onClick={save} disabled={form.status !== student.status && !statusReason.trim()} style={{ ...btn, marginTop: 8 }}>Save</button>
             {msg && <span style={{ fontSize: 12, marginLeft: 8 }}>{msg}</span>}
           </div>
           <AddGuardian studentId={student.id} session={session} onAdded={onChanged} />

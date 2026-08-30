@@ -1,0 +1,99 @@
+.page {
+  overflow-x: hidden;
+  overflow-wrap: anywhere;
+}
+
+.topbar,
+.toolbar,
+.unmatchedRow,
+.error {
+  display: flex;
+}
+
+.topbar {
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.toolbar {
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.unmatchedRow {
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-top: 1px solid #eaddc9;
+  padding: 8px 0;
+}
+
+.unmatchedRow > span {
+  min-width: 0;
+}
+
+.error {
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 10px 0;
+  border: 1px solid #d8a69f;
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: #fff1ef;
+  color: #76251d;
+}
+
+.error button {
+  min-height: 40px;
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  padding: 8px 14px;
+  background: #fff;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 520px) {
+  .page {
+    margin-top: 24px !important;
+  }
+
+  .topbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .page :is(button, input:not([type="checkbox"]), select, a) {
+    min-height: 44px;
+  }
+
+  .page a {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .toolbar > * {
+    width: 100% !important;
+  }
+
+  .unmatchedRow {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .unmatchedRow button,
+  .error button {
+    width: 100%;
+  }
+
+  .error {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

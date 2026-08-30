@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { privateJson } from "@/lib/privateResponse";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { readPortalSession } from "@/lib/portalTokens";
 import { isTrustedGuardian, forgoRefundLive } from "@/lib/billing";
@@ -25,127 +25,53 @@ export async function POST(request) {
   // DARK until go-live. Endpoint is closed when the flag is off, even though the
   // table + rows already exist — go-live is timed WITH Rob's parent email.
   if (!forgoRefundLive()) {
-    return NextResponse.json({ error: "Not available." }, { status: 403 });
+    return privateJson({ error: "Not available." }, 403);
   }
 
   const session = readPortalSession(request);
   if (!session?.personId) {
-    return NextResponse.json({ error: "Not signed in." }, { status: 401 });
+    return privateJson({ error: "Not signed in." }, 401);
   }
 
   let body;
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "Invalid request." }, { status: 400 });
+    return privateJson({ error: "Invalid request." }, 400);
   }
 
   const studentId = String(body.studentId || "");
   const choice = String(body.choice || "");
   if (!studentId) {
-    return NextResponse.json({ error: "Missing student." }, { status: 400 });
+    return privateJson({ error: "Missing student." }, 400);
   }
   if (choice !== "forgo" && choice !== "check") {
-    return NextResponse.json({ error: "Invalid choice." }, { status: 400 });
+    return privateJson({ error: "Invalid choice." }, 400);
   }
 
   // A family can only act on their OWN student.
   const allowed = await isTrustedGuardian(session.personId, studentId);
   if (!allowed) {
-    return NextResponse.json({ error: "Not authorized for this student." }, { status: 403 });
+    return privateJson({ error: "Not authorized for this student." }, 403);
   }
 
-  // Must have an offer on file.
-  const { data: credit } = await supabaseAdmin
-    .from("spring_trip_refund_credits")
-    .select("student_id, confirmed_cents, topup_cents, full_cents, status, applied_at")
-    .eq("student_id", studentId)
-    .maybeSingle();
-
-  if (!credit) {
-    return NextResponse.json({ error: "No refund offer on file." }, { status: 404 });
-  }
-
-  // Already decided -> idempotent no-op. One-time, final, no undo: we never change
-  // a settled choice, in either direction.
-  if (credit.status !== "offered") {
-    return NextResponse.json({ changed: false, springTripRefund: stateOf(credit) });
-  }
-
-  const nowIso = new Date().toISOString();
-
-  // ---- Take the refund check: just record the choice, write no payment. ----
-  if (choice === "check") {
-    const { data: updated } = await supabaseAdmin
-      .from("spring_trip_refund_credits")
-      .update({ status: "check", applied_at: nowIso })
-      .eq("student_id", studentId)
-      .eq("status", "offered") // lock: only the 'offered' -> done transition
-      .select("student_id, confirmed_cents, topup_cents, full_cents, status, applied_at")
-      .maybeSingle();
-    const row = updated || credit;
-    return NextResponse.json({ changed: Boolean(updated), springTripRefund: stateOf(row) });
-  }
-
-  // ---- Forgo the check: credit confirmed_cents to the MB funding goal. ----
-  // Claim the offer first. The conditional update is the concurrency lock: only one
-  // request can flip 'offered' -> 'applied_mb', so a double-click can't double-credit.
-  const { data: claimed } = await supabaseAdmin
-    .from("spring_trip_refund_credits")
-    .update({ status: "applied_mb", applied_at: nowIso })
-    .eq("student_id", studentId)
-    .eq("status", "offered")
-    .select("student_id, confirmed_cents, topup_cents, full_cents, status, applied_at")
-    .maybeSingle();
-
-  if (!claimed) {
-    // Lost the race (already applied by a concurrent request) -> idempotent no-op.
-    const { data: fresh } = await supabaseAdmin
-      .from("spring_trip_refund_credits")
-      .select("student_id, confirmed_cents, topup_cents, full_cents, status, applied_at")
-      .eq("student_id", studentId)
-      .maybeSingle();
-    return NextResponse.json({ changed: false, springTripRefund: stateOf(fresh || credit) });
-  }
-
-  // Write the funding-goal credit. Deterministic invoice_id is a UNIQUE backstop:
-  // even if this ran twice, the second insert fails and no second credit lands.
-  const invoiceId = `sptrip-forgo-${studentId}`;
-  const { error: payError } = await supabaseAdmin.from("fee_payments").insert({
-    student_id: studentId,
-    amount_cents: claimed.confirmed_cents,
-    method: "credit",
-    status: "completed",
-    category: "marching_band_2026",
-    kind: "funding_goal",
-    invoice_id: invoiceId,
-    is_sponsorship: false,
-    payer_name: "Spring Trip refund (forgone)",
-    recorded_by: "family_online",
-    received_at: nowIso,
-    notes:
-      "Family forwent their cancelled Spring Trip 2026 refund; credited to the marching band funding goal."
+  // The offer lock, funding-goal credit, final disposition, and audit row share
+  // one database transaction. The RPC also re-checks guardian authority so a
+  // stale application session cannot widen the family boundary.
+  const { data, error } = await supabaseAdmin.rpc("apply_spring_trip_refund_choice", {
+    p_student_id: studentId,
+    p_choice: choice,
+    p_actor_person_id: session.personId,
+    p_route: "/api/billing/forgo-refund",
   });
-
-  if (payError) {
-    // If the payment already exists (deterministic invoice_id collision from a retry),
-    // the credit is on file -> treat as success. Otherwise roll the claim back to
-    // 'offered' so the family can try again; never leave 'applied_mb' with no credit.
-    const { data: existingPayment } = await supabaseAdmin
-      .from("fee_payments")
-      .select("id")
-      .eq("invoice_id", invoiceId)
-      .maybeSingle();
-
-    if (!existingPayment) {
-      await supabaseAdmin
-        .from("spring_trip_refund_credits")
-        .update({ status: "offered", applied_at: null })
-        .eq("student_id", studentId)
-        .eq("status", "applied_mb");
-      return NextResponse.json({ error: "Could not apply your refund. Please try again." }, { status: 500 });
+  if (error) {
+    if (error.code === "P0002") {
+      return privateJson({ error: "No refund offer on file." }, 404);
     }
+    return privateJson({ error: "Could not record this choice. Please try again." }, 500);
   }
-
-  return NextResponse.json({ changed: true, springTripRefund: stateOf(claimed) });
+  return privateJson({
+    changed: Boolean(data?.changed),
+    springTripRefund: stateOf(data || {}),
+  });
 }

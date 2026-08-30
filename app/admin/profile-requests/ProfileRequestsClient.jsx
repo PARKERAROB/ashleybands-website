@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { revokeStaffSession } from "@/lib/staffSession";
 
 const STORAGE_KEY = "bdos_staff_session_v1";
 
@@ -20,8 +21,8 @@ function writeSession(session) {
   else window.localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
 }
 
-function authHeaders(session) {
-  return { "Content-Type": "application/json", "x-staff-id": session.id, "x-staff-token": session.token };
+function authHeaders() {
+  return { "Content-Type": "application/json" };
 }
 
 function StaffLogin({ onAuthed }) {
@@ -44,7 +45,7 @@ function StaffLogin({ onAuthed }) {
       setError(data.error || "Sign in failed.");
       return;
     }
-    const session = { id: data.id, token: data.token, role: data.role, display_name: data.display_name };
+    const session = { id: data.id, role: data.role, display_name: data.display_name };
     writeSession(session);
     onAuthed(session);
   }
@@ -142,9 +143,8 @@ export default function ProfileRequestsClient() {
           <button
             type="button"
             className="sponsors-btn"
-            onClick={() => {
-              fetch("/api/sponsors/staff-signout", { method: "POST" }).catch(() => {});
-              writeSession(null);
+            onClick={async () => {
+              if (!await revokeStaffSession()) return;
               setSession(null);
             }}
           >

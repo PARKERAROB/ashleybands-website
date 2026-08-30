@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
+import { privateJson } from "@/lib/privateResponse";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { readPortalSession } from "@/lib/portalTokens";
+import { logAuditRequired } from "@/lib/auditLog";
 
 export const runtime = "nodejs";
 
@@ -22,7 +23,7 @@ function oneRelation(value) {
 export async function GET(request) {
   const session = readPortalSession(request);
   if (!session?.personId) {
-    return NextResponse.json({ error: "Not signed in." }, { status: 401 });
+    return privateJson({ error: "Not signed in." }, 401);
   }
 
   const [{ data: person, error: personError }, { data: ownContacts }, { data: links, error: linksError }] =
@@ -39,14 +40,15 @@ export async function GET(request) {
       supabaseAdmin
         .from("portal_student_people")
         .select(
-          "student_id, relationship_status, role, primary_contact, assurance_level, portal_students(id, display_name, preferred_first, grade_fall26, status, school_email, cell_phone, notes, band_class_2026, band_period_2026, ensemble_2026, instrument_2026, marching_2026, mb_role_2026, marching_role_category_2026, marching_assignment_2026, portal_student_resources(locker_number, lock_serial, lock_combination, tuner_number, tuner_shared_with, assignment_status))"
+          "student_id, relationship_status, role, primary_contact, assurance_level, portal_students!inner(id, display_name, preferred_first, grade_fall26, status, school_email, cell_phone, notes, band_class_2026, band_period_2026, ensemble_2026, instrument_2026, marching_2026, mb_role_2026, marching_role_category_2026, marching_assignment_2026, portal_student_resources(locker_number, lock_serial, lock_combination, tuner_number, tuner_shared_with, assignment_status))"
         )
         .eq("person_id", session.personId)
         .eq("relationship_status", "trusted")
+        .eq("portal_students.status", "active")
     ]);
 
   if (personError || linksError) {
-    return NextResponse.json({ error: "Could not load portal profile." }, { status: 500 });
+    return privateJson({ error: "Could not load portal profile." }, 500);
   }
 
   const students = (links || [])
@@ -84,7 +86,7 @@ export async function GET(request) {
         guardians: []
       };
     })
-    .filter((student) => student.id);
+    .filter((student) => student.id && student.status === "active");
 
   // Attach the other adult guardians linked to each student.
   const studentIds = students.map((s) => s.id);
@@ -173,7 +175,21 @@ export async function GET(request) {
     }
   }
 
-  return NextResponse.json({
+  try {
+    await logAuditRequired({
+      actor: { type: person?.person_type === "student" ? "student" : "parent", id: session.personId, name: session.email },
+      action: "view_own_portal_profile",
+      table: "portal_people,portal_student_people,portal_contact_methods,portal_students,portal_student_resources",
+      recordId: session.personId,
+      route: "/api/portal/me",
+      changes: { student_ids: students.map((student) => student.id) },
+    });
+  } catch (error) {
+    console.error("[portal-me-audit]", error?.message || error);
+    return privateJson({ error: "This private profile could not be durably attributed." }, 503);
+  }
+
+  return privateJson({
     person,
     email: session.email,
     contacts: splitContacts(ownContacts),

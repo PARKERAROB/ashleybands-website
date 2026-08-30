@@ -8,7 +8,7 @@ const steps = [
   { id: "portal", number: "01", title: "Connect your family", body: "Your family is signed in and connected to this student." },
   { id: "calendar", number: "02", title: "Subscribe to the calendar", body: "Keep Ashley Bands dates and updates on your family calendar." },
   { id: "day-one", number: "03", title: "Be ready for Day One", body: "Check the instrument, black one-inch binder, and dedicated band pencil." },
-  { id: "forms", number: "04", title: "Complete applicable forms", body: "If a county instrument is needed, submit the responsibility agreement." },
+  { id: "forms", number: "04", title: "Complete applicable forms", body: "If a school instrument is needed, submit the care acknowledgement and request." },
   { id: "how-band-works", number: "05", title: "Know how band works", body: "Review assessments, practice, performances, absences, and communication." },
   { id: "clothing", number: "06", title: "Confirm the red band shirt", body: "Every band student needs the official red shirt. Review it first, then any optional clothing." },
   { id: "boosters", number: "07", title: "Check in with the Band Boosters", body: "Review Level 2 volunteering and tell us where you are in the process." },
@@ -83,7 +83,7 @@ function stillNeededItems(data) {
     dayOne.binderStatus === "need" ? "Get a black one-inch band binder." : null,
     !dayOne.pencilStatus ? "Confirm whether the dedicated band pencil is ready." : null,
     dayOne.pencilStatus === "need" ? "Get a dedicated band pencil and give it a name." : null,
-    dayOne.instrumentStatus === "county" && !data?.external?.instrumentRequest ? "Submit the county instrument responsibility agreement." : null,
+    dayOne.instrumentStatus === "county" && !data?.external?.instrumentRequest ? "Submit the school instrument acknowledgement and request." : null,
     dayOne.instrumentStatus === "help" ? "Talk with Mr. Parker about the student’s instrument." : null,
     !data?.readiness?.complete?.["how-band-works"] ? "Review how band works and confirm the family understands." : null,
     !data?.readiness?.complete?.clothing ? "Review the Open House clothing collection." : null,
@@ -360,7 +360,7 @@ function DayOneStep({ data, save, busy, href, navigate }) {
       <form className={styles.form} onSubmit={(event) => { event.preventDefault(); save("day-one", form); }}>
         <fieldset><legend>1. Instrument</legend><p>Will the student bring a personal instrument, or do they need a county instrument?</p>
           <Choice name="instrument" checked={form.instrumentStatus === "personal"} onChange={() => update("instrumentStatus", "personal")} title="Personal instrument" detail="The student will bring their own instrument." />
-          <Choice name="instrument" checked={form.instrumentStatus === "county"} onChange={() => update("instrumentStatus", "county")} title="County instrument" detail="The family will complete the county responsibility agreement in the next step." />
+          <Choice name="instrument" checked={form.instrumentStatus === "county"} onChange={() => update("instrumentStatus", "county")} title="School instrument" detail="The family will complete the care acknowledgement and request in the next step." />
           <Choice name="instrument" checked={form.instrumentStatus === "help"} onChange={() => update("instrumentStatus", "help")} title="We need help" detail="Mr. Parker should follow up about the best instrument path." />
         </fieldset>
         <fieldset><legend>2. Black one-inch band binder</legend><p>This binder holds the student&apos;s music and band handouts.</p>
@@ -395,15 +395,15 @@ function FormsStep({ data, href, navigate }) {
           <h2>{data.readiness.complete.forms ? "This step is covered." : "One form is still needed."}</h2>
           <p>Day One instrument choice: <strong>{instrumentLabel(dayOne.instrumentStatus)}</strong></p>
           {!answered ? <p>Return to the Day One step and choose the student&apos;s instrument path first.</p> : null}
-          {county && request ? <p>The county instrument responsibility agreement was submitted{request.submitted_at ? ` on ${formatDate(request.submitted_at)}` : ""}. Mr. Parker will add the assigned instrument information after processing it.</p> : null}
-          {county && !request ? <p>Complete the county instrument responsibility agreement. It will go into the band instrument system for Mr. Parker to process.</p> : null}
-          {dayOne.instrumentStatus === "personal" ? <p>No county instrument agreement is needed.</p> : null}
+          {county && request ? <p>The school instrument acknowledgement and request was submitted{request.submitted_at ? ` on ${formatDate(request.submitted_at)}` : ""}. Mr. Parker will add the assigned instrument information after processing it.</p> : null}
+          {county && !request ? <p>Complete the school instrument acknowledgement and request. It will go into the band instrument system for Mr. Parker to process.</p> : null}
+          {dayOne.instrumentStatus === "personal" ? <p>No school instrument request is needed.</p> : null}
           {dayOne.instrumentStatus === "help" ? <p>No form is required right now. Your final summary will remind the family to follow up with Mr. Parker.</p> : null}
         </div>
       </div>
       <div className={styles.actionLinks}>
         {!answered ? <BandReadyLink className={styles.primaryButton} href={href("/portal/band-ready/day-one")} destination="day-one" navigate={navigate}>Return to Day One</BandReadyLink> : null}
-        {county && !request ? <Link className={styles.primaryButton} href={`/portal/review?studentId=${encodeURIComponent(data.student.id)}#instrument-request-heading`}>Complete instrument agreement</Link> : null}
+        {county && !request ? <Link className={styles.primaryButton} href={`/portal/review?studentId=${encodeURIComponent(data.student.id)}#instrument-request-heading`}>Complete instrument request</Link> : null}
         {answered && data.readiness.complete.forms ? <BandReadyLink className={styles.primaryButton} href={href("/portal/band-ready/how-band-works")} destination="how-band-works" navigate={navigate}>Continue to how band works</BandReadyLink> : null}
       </div>
     </StepShell>

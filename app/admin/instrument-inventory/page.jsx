@@ -10,8 +10,8 @@ function readSession() {
   catch { return null; }
 }
 
-function authHeaders(session) {
-  return { "Content-Type": "application/json", "x-staff-id": session.id, "x-staff-token": session.token };
+function authHeaders() {
+  return { "Content-Type": "application/json" };
 }
 
 function StaffLogin({ onAuthed }) {

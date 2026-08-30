@@ -84,14 +84,14 @@ export async function POST(request) {
     return NextResponse.json({ error: "Choose a student." }, { status: 400 });
   }
   if (action === "agreement" && (!studentSignature || !guardianSignature || !accepted)) {
-    return NextResponse.json({ error: "Complete both signatures and accept the responsibility agreement." }, { status: 400 });
+    return NextResponse.json({ error: "Complete both signatures and accept the care acknowledgement." }, { status: 400 });
   }
 
   const link = await trustedStudent(session.personId, studentId);
   if (!link) return NextResponse.json({ error: "Student access not found." }, { status: 403 });
   const actorPerson = Array.isArray(link.portal_people) ? link.portal_people[0] : link.portal_people;
   if (action === "agreement" && (actorPerson?.person_type !== "guardian" || !["medium", "high"].includes(link.assurance_level))) {
-    return NextResponse.json({ error: "A verified guardian must submit the responsibility agreement." }, { status: 403 });
+    return NextResponse.json({ error: "A verified guardian must submit the care acknowledgement." }, { status: 403 });
   }
   const studentName = link.portal_students?.display_name || "Student";
   const studentInstrument = link.portal_students?.instrument_2026 || "";
@@ -104,7 +104,7 @@ export async function POST(request) {
     .maybeSingle();
   if (action === "identify") {
     if (!existing) {
-      return NextResponse.json({ error: "Submit the county instrument agreement before identifying the instrument." }, { status: 409 });
+      return NextResponse.json({ error: "Submit the school instrument acknowledgement before identifying the instrument." }, { status: 409 });
     }
     const assetTag = String(body.assetId || "").trim().slice(0, 120);
     const serialNumber = String(body.serialNumber || "").trim().slice(0, 120);
@@ -157,7 +157,7 @@ export async function POST(request) {
     }, { headers: { "Cache-Control": "private, no-store" } });
   }
   if (existing) {
-    return NextResponse.json({ error: "An instrument agreement has already been submitted for this student." }, { status: 409 });
+    return NextResponse.json({ error: "A school instrument request has already been submitted for this student." }, { status: 409 });
   }
 
   const { data: submission, error } = await supabaseAdmin
@@ -168,11 +168,12 @@ export async function POST(request) {
       school_year: SCHOOL_YEAR,
       student_signature: studentSignature,
       guardian_signature: guardianSignature,
-      responsibility_accepted: true
+      responsibility_accepted: true,
+      agreement_version: "ashleybands_interim_instrument_acknowledgement_v1"
     })
     .select("id, submitted_at")
     .single();
-  if (error) return NextResponse.json({ error: "Could not save the instrument agreement." }, { status: 500 });
+  if (error) return NextResponse.json({ error: "Could not save the school instrument request." }, { status: 500 });
 
   await logAudit({
     actor: { type: "portal_user", id: session.personId, name: session.email },
@@ -185,8 +186,8 @@ export async function POST(request) {
 
   try {
     await sendPortalReviewAlert({
-      subject: `Instrument agreement submitted — ${studentName}`,
-      summary: `${guardianSignature} submitted the NHCS instrument responsibility agreement for ${studentName}.`,
+      subject: `School instrument request submitted — ${studentName}`,
+      summary: `${guardianSignature} submitted the AshleyBands interim care acknowledgement for ${studentName}.`,
       reviewUrl: `${new URL(request.url).origin}/admin/instrument-inventory`,
       details: [
         `School year: ${SCHOOL_YEAR}`,

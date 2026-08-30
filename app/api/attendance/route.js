@@ -5,6 +5,7 @@ import {
   STAFF_CAPABILITIES,
   staffHasCapability
 } from "@/lib/staffAuthorization";
+import { staffUsesAssignedScopes } from "@/lib/staffCapabilities";
 import {
   attendanceAuditTables,
   completeAttendanceEvent,
@@ -43,19 +44,26 @@ function sessionFor(staff) {
   };
 }
 
-async function authorize(request, capability) {
-  const authorization = await authorizeStaffRequest(request, capability);
+async function authorize(request, capability, occurrenceKey) {
+  const authorization = await authorizeStaffRequest(request, capability, {
+    scope: occurrenceKey
+      ? { type: "attendance_event", ref: occurrenceKey }
+      : { type: "global" },
+  });
   if (!authorization.ok) return { response: json({ error: authorization.error }, authorization.status) };
   return { authorization, session: sessionFor(authorization.staff) };
 }
 
 export async function GET(request) {
-  const access = await authorize(request, STAFF_CAPABILITIES.ATTENDANCE_EVENTS_READ);
-  if (access.response) return access.response;
   const occurrenceKey = new URL(request.url).searchParams.get("occurrence") || undefined;
+  const access = await authorize(request, STAFF_CAPABILITIES.ATTENDANCE_EVENTS_READ, occurrenceKey);
+  if (access.response) return access.response;
 
   try {
     const sheet = await getAttendanceSheet({ occurrenceKey, session: access.session });
+    if (occurrenceKey && staffUsesAssignedScopes(access.authorization.staff)) {
+      sheet.occurrences = sheet.occurrences.filter((event) => event.occurrenceKey === occurrenceKey);
+    }
     await logAudit({
       actor: access.session.actor,
       action: "attendance.sheet.read",
@@ -84,7 +92,7 @@ export async function PATCH(request) {
       : body.exception
         ? STAFF_CAPABILITIES.ATTENDANCE_EXCEPTIONS_WRITE
         : STAFF_CAPABILITIES.ATTENDANCE_EVENTS_WRITE;
-  const access = await authorize(request, capability);
+  const access = await authorize(request, capability, occurrenceKey);
   if (access.response) return access.response;
 
   try {

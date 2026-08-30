@@ -27,10 +27,10 @@ export default function InstrumentRequestSection({ student }) {
       .then((res) => res.json().then((body) => ({ ok: res.ok, body })))
       .then(({ ok, body }) => {
         if (cancelled) return;
-        if (!ok) setMessage(body.error || "Could not load the instrument agreement.");
+        if (!ok) setMessage(body.error || "Could not load the school instrument request.");
         else setRecord((body.requests || []).find((item) => item.student_id === student.id) || null);
       })
-      .catch(() => !cancelled && setMessage("Could not load the instrument agreement."))
+      .catch(() => !cancelled && setMessage("Could not load the school instrument request."))
       .finally(() => !cancelled && setLoading(false));
     return () => { cancelled = true; };
   }, [student.id]);
@@ -86,7 +86,7 @@ export default function InstrumentRequestSection({ student }) {
       <div className="portal-section-heading">
         <PortalSectionIcon type="instrument" />
         <div className="portal-section-heading-copy">
-          <h2 id="instrument-request-heading">County instrument</h2>
+          <h2 id="instrument-request-heading">School instrument request</h2>
           <p>Complete this only if {student.displayName} needs to borrow a school-owned instrument.</p>
         </div>
       </div>
@@ -95,7 +95,7 @@ export default function InstrumentRequestSection({ student }) {
       {record ? (
         <>
           <div className="portal-field">
-            <span className="portal-field-label">Agreement received</span>
+            <span className="portal-field-label">Acknowledgement received</span>
             <span className="portal-field-value">
               {record.status === "assigned" && record.assignment?.instrument_type
                 ? `${record.assignment.instrument_type}${record.assignment.brand ? ` — ${record.assignment.brand}` : ""}`
@@ -144,8 +144,9 @@ export default function InstrumentRequestSection({ student }) {
       ) : !loading ? (
         <form className="portal-form" onSubmit={submit}>
           <p className="portal-copy">
-            NHCS provides this instrument in good playing condition. The student and family agree to care for it,
-            return it in the condition issued, and accept responsibility for costs resulting from damage or loss.
+            AshleyBands is collecting this care acknowledgement while the final county checkout language is confirmed.
+            The student and family understand that a school instrument must be cared for and returned in the condition issued.
+            Submitting this request does not guarantee an assignment.
           </p>
           <label>
             Student signature
@@ -162,10 +163,10 @@ export default function InstrumentRequestSection({ student }) {
               checked={form.responsibilityAccepted}
               onChange={(event) => setForm({ ...form, responsibilityAccepted: event.target.checked })}
             />
-            I have read and agree to the instrument care, return, damage, and loss responsibilities above.
+            I have read and understand the instrument care and return responsibilities above.
           </label>
           <button type="submit" className="portal-action-link" disabled={busy}>
-            {busy ? "Submitting…" : "Submit instrument agreement"}
+            {busy ? "Submitting…" : "Submit acknowledgement and request"}
           </button>
         </form>
       ) : null}

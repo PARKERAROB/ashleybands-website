@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
 import { loadCurrentStudents } from "@/lib/currentStudents";
-import { logAudit, staffActor } from "@/lib/auditLog";
+import { logAuditRequired, staffActor } from "@/lib/auditLog";
 
 export const runtime = "nodejs";
 const PRIVATE_HEADERS = { "Cache-Control": "private, no-store" };
@@ -18,7 +18,7 @@ export async function GET(request) {
 
   try {
     const result = await loadCurrentStudents(view);
-    await logAudit({
+    await logAuditRequired({
       actor: staffActor(authorization.staff),
       action: "view",
       table: "portal_students,portal_student_people,portal_contact_methods,portal_instrument_requests",
@@ -28,6 +28,6 @@ export async function GET(request) {
     return json({ ...result, view });
   } catch (error) {
     console.error("[current-students] load failed:", error?.message || error);
-    return json({ error: "Current student records could not be loaded." }, 500);
+    return json({ error: "Current student records could not be loaded or durably attributed." }, 503);
   }
 }
