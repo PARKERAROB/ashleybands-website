@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { readStaffSession } from "@/lib/sponsorAuth";
 import { resolveSponsorFamily, sponsorFunnelLive } from "@/lib/sponsorFamily";
+import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
+import { logAuditRequired, staffActor } from "@/lib/auditLog";
+import { privateJson, privateServerError } from "@/lib/privateResponse";
 
 export const runtime = "nodejs";
 
@@ -25,37 +26,46 @@ async function authorize(req, prospectId) {
   if (!sponsorFunnelLive()) {
     return { ok: false, status: 404, error: "Sponsorship area is not open yet." };
   }
-  const { data: prospect } = await supabaseAdmin
+  const resolved = await resolveSponsorFamily(req);
+  if (resolved?.family) {
+    const { data: prospect, error } = await supabaseAdmin
+      .from("prospects")
+      .select("id, family_id, business_id, lead_kind")
+      .eq("id", prospectId)
+      .eq("family_id", resolved.family.id)
+      .maybeSingle();
+    if (error) return { ok: false, status: 500, error: "The sponsorship record could not be verified.", cause: error };
+    if (prospect) return { ok: true, prospect, actor: "family", family: resolved.family };
+  }
+
+  const staffAuthorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.SPONSORSHIP_WRITE);
+  if (!staffAuthorization.ok) {
+    return resolved?.family
+      ? { ok: false, status: 404, error: "Prospect not found" }
+      : { ok: false, status: staffAuthorization.status, error: staffAuthorization.error };
+  }
+  const { data: prospect, error } = await supabaseAdmin
     .from("prospects")
     .select("id, family_id, business_id, lead_kind")
     .eq("id", prospectId)
     .maybeSingle();
+  if (error) return { ok: false, status: 500, error: "The sponsorship record could not be verified.", cause: error };
   if (!prospect) return { ok: false, status: 404, error: "Prospect not found" };
+  return { ok: true, prospect, actor: "staff", staff: staffAuthorization.staff };
+}
 
-  const resolved = await resolveSponsorFamily(req);
-  if (resolved?.family && resolved.family.id === prospect.family_id) {
-    return { ok: true, prospect, actor: "family" };
-  }
-
-  const staff = readStaffSession(req);
-  if (staff.staffId && staff.token) {
-    const { data } = await supabaseAdmin
-      .from("staff")
-      .select("id, session_token")
-      .eq("id", staff.staffId)
-      .maybeSingle();
-    if (data && data.session_token === staff.token) {
-      return { ok: true, prospect, actor: "staff" };
-    }
-  }
-
-  return { ok: false, status: 401, error: "Not signed in" };
+function actorFor(auth) {
+  return auth.actor === "staff"
+    ? staffActor(auth.staff)
+    : { type: "parent", id: auth.family?.id, name: auth.family?.display_name };
 }
 
 export async function PATCH(req, { params }) {
   const { id } = await params;
   const auth = await authorize(req, id);
-  if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status });
+  if (!auth.ok) return auth.status >= 500
+    ? privateServerError("sponsor-prospect", auth.cause, auth.error)
+    : privateJson({ error: auth.error }, auth.status);
 
   const body = await req.json().catch(() => ({}));
   const update = {};
@@ -69,26 +79,34 @@ export async function PATCH(req, { params }) {
   // Mark-contacted (build-spec §4 step 5): the student reports they made contact. Record the
   // timestamp and — if this is a claimed warmed lead — freeze the reclaim timer so the
   // business stays theirs (claim_contacted_at), instead of auto-releasing back to the pool.
-  if (body.contacted === true) {
-    const now = new Date().toISOString();
-    update.contacted_at = now;
-    if (!("dropped_off_at" in update)) update.dropped_off_at = now.slice(0, 10);
-    await supabaseAdmin
-      .from("businesses")
-      .update({ claim_contacted_at: now })
-      .eq("id", auth.prospect.business_id)
-      .eq("claimed_by_family_id", auth.prospect.family_id);
+  const contactedAt = body.contacted === true ? new Date().toISOString() : null;
+  if (contactedAt) {
+    update.contacted_at = contactedAt;
+    if (!("dropped_off_at" in update)) update.dropped_off_at = contactedAt.slice(0, 10);
   }
 
   // Confirming money is a staff-only action — families can report a "yes" but only
   // the sponsor lead, holding the signed form, marks it confirmed (banked).
   if ("confirmed_by_lead" in body) {
     if (auth.actor !== "staff") {
-      return NextResponse.json({ error: "Only staff can confirm a commitment." }, { status: 403 });
+      return privateJson({ error: "Only staff can confirm a commitment." }, 403);
     }
     const confirmed = body.confirmed_by_lead === true;
     update.confirmed_by_lead = confirmed;
     update.confirmed_at = confirmed ? new Date().toISOString() : null;
+  }
+
+  try {
+    await logAuditRequired({ actor: actorFor(auth), action: "update_requested", table: "prospects", recordId: id, route: "/api/sponsors/prospects/[id]", changes: { fields: Object.keys(update) } });
+  } catch (error) {
+    return privateServerError("sponsor-prospect-audit", error, "The sponsorship prospect could not be updated.");
+  }
+  if (contactedAt) {
+    await supabaseAdmin
+      .from("businesses")
+      .update({ claim_contacted_at: contactedAt })
+      .eq("id", auth.prospect.business_id)
+      .eq("claimed_by_family_id", auth.prospect.family_id);
   }
 
   const { data, error } = await supabaseAdmin
@@ -99,16 +117,23 @@ export async function PATCH(req, { params }) {
       "id, status, contact_name, contact_email, contact_phone, business_address, relationship_note, contact_mode, lead_kind, contacted_at, dropped_off_at, follow_up_at, ask_again_at, committed_amount, committed_tier, sent_to_lead, sent_at, confirmed_by_lead, confirmed_at, business:businesses(id, name_display)"
     )
     .single();
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ prospect: data });
+  if (error) return privateServerError("sponsor-prospect", error, "The sponsorship prospect could not be updated.");
+  return privateJson({ prospect: data });
 }
 
 export async function DELETE(req, { params }) {
   const { id } = await params;
   const auth = await authorize(req, id);
-  if (!auth.ok) return NextResponse.json({ error: auth.error }, { status: auth.status });
+  if (!auth.ok) return auth.status >= 500
+    ? privateServerError("sponsor-prospect", auth.cause, auth.error)
+    : privateJson({ error: auth.error }, auth.status);
 
+  try {
+    await logAuditRequired({ actor: actorFor(auth), action: "delete_requested", table: "prospects", recordId: id, route: "/api/sponsors/prospects/[id]" });
+  } catch (error) {
+    return privateServerError("sponsor-prospect-audit", error, "The sponsorship prospect could not be removed.");
+  }
   const { error } = await supabaseAdmin.from("prospects").delete().eq("id", id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ ok: true });
+  if (error) return privateServerError("sponsor-prospect", error, "The sponsorship prospect could not be removed.");
+  return privateJson({ ok: true });
 }

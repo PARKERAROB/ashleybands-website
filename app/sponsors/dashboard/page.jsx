@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { revokeStaffSession } from "@/lib/staffSession";
 
 const STORAGE_KEY = "bdos_staff_session_v1";
 
@@ -20,8 +21,8 @@ function writeSession(s) {
   else window.localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
 }
 
-function authHeaders(s) {
-  return { "Content-Type": "application/json", "x-staff-id": s.id, "x-staff-token": s.token };
+function authHeaders() {
+  return { "Content-Type": "application/json" };
 }
 
 const STATUS_LABELS = {
@@ -48,7 +49,7 @@ function StaffLogin({ onAuthed }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      const s = { id: data.id, token: data.token, role: data.role, display_name: data.display_name };
+      const s = { id: data.id, role: data.role, display_name: data.display_name };
       writeSession(s);
       onAuthed(s);
     } catch (err) {
@@ -147,7 +148,7 @@ function Dashboard({ session, onLogout }) {
           <p className="eyebrow">Sponsorship Dashboard</p>
           <h2>{session.display_name} <span className="dashboard-role">({session.role})</span></h2>
         </div>
-        <button type="button" className="sponsors-btn" onClick={() => { writeSession(null); onLogout(); }}>
+        <button type="button" className="sponsors-btn" onClick={onLogout}>
           Log out
         </button>
       </header>
@@ -431,6 +432,11 @@ export default function DashboardPage() {
 
   if (!mounted) return null;
 
+  async function logout() {
+    if (!await revokeStaffSession()) return;
+    setSession(null);
+  }
+
   return (
     <main className="sponsors-page">
       <section className="sponsors-hero">
@@ -447,7 +453,7 @@ export default function DashboardPage() {
 
       <section className="sponsors-section">
         {!session && <StaffLogin onAuthed={setSession} />}
-        {session && <Dashboard session={session} onLogout={() => setSession(null)} />}
+        {session && <Dashboard session={session} onLogout={logout} />}
       </section>
     </main>
   );

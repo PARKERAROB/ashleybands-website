@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { readStaffSession } from "@/lib/sponsorAuth";
+import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
+import { logAuditRequired, staffActor } from "@/lib/auditLog";
+import { privateJson, privateServerError } from "@/lib/privateResponse";
 
 export const runtime = "nodejs";
 
@@ -21,21 +22,9 @@ const ALLOWED = [
   "notes"
 ];
 
-async function validateStaff(req) {
-  const { staffId, token } = readStaffSession(req);
-  if (!staffId || !token) return null;
-  const { data } = await supabaseAdmin
-    .from("staff")
-    .select("id, role, session_token")
-    .eq("id", staffId)
-    .maybeSingle();
-  if (!data || data.session_token !== token) return null;
-  return data;
-}
-
 export async function PATCH(req, { params }) {
-  const staff = await validateStaff(req);
-  if (!staff) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.SPONSORSHIP_WRITE);
+  if (!authorization.ok) return privateJson({ error: authorization.error }, authorization.status);
 
   const { id } = await params;
   const body = await req.json().catch(() => ({}));
@@ -47,21 +36,32 @@ export async function PATCH(req, { params }) {
   if (update.outreach_status === "willing") update.willing_at = new Date().toISOString();
   if (update.outreach_status === "declined") update.declined_at = new Date().toISOString();
 
+  try {
+    await logAuditRequired({ actor: staffActor(authorization.staff), action: "update_requested", table: "businesses", recordId: id, route: "/api/sponsors/businesses/[id]", changes: { fields: Object.keys(update) } });
+  } catch (error) {
+    return privateServerError("sponsor-business-audit", error, "The sponsor business could not be updated.");
+  }
+
   const { data, error } = await supabaseAdmin
     .from("businesses")
     .update(update)
     .eq("id", id)
     .select("*")
     .single();
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ business: data });
+  if (error) return privateServerError("sponsor-business", error, "The sponsor business could not be updated.");
+  return privateJson({ business: data });
 }
 
 export async function DELETE(req, { params }) {
-  const staff = await validateStaff(req);
-  if (!staff) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.SPONSORSHIP_WRITE);
+  if (!authorization.ok) return privateJson({ error: authorization.error }, authorization.status);
   const { id } = await params;
+  try {
+    await logAuditRequired({ actor: staffActor(authorization.staff), action: "delete_requested", table: "businesses", recordId: id, route: "/api/sponsors/businesses/[id]" });
+  } catch (error) {
+    return privateServerError("sponsor-business-audit", error, "The sponsor business could not be removed.");
+  }
   const { error } = await supabaseAdmin.from("businesses").delete().eq("id", id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ ok: true });
+  if (error) return privateServerError("sponsor-business", error, "The sponsor business could not be removed.");
+  return privateJson({ ok: true });
 }

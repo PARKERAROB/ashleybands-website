@@ -10,11 +10,13 @@ export const runtime = "nodejs";
 // GET /api/admin/billing            -> roster of all students with balances
 // GET /api/admin/billing?studentId= -> full ledger for one student
 export async function GET(req) {
-  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.BILLING_READ);
-  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status, headers: { "Cache-Control": "private, no-store" } });
-
   const url = new URL(req.url);
   const studentId = url.searchParams.get("studentId");
+  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.BILLING_READ, {
+    scope: studentId ? { type: "student", ref: studentId } : undefined,
+    collectionScopeType: studentId ? undefined : "student",
+  });
+  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status, headers: { "Cache-Control": "private, no-store" } });
 
   if (studentId) {
     const { data: student } = await supabaseAdmin
@@ -39,7 +41,9 @@ export async function GET(req) {
 
   let operations;
   try {
-    operations = await loadFinancialOperations();
+    operations = await loadFinancialOperations({
+      studentIds: authorization.scopeFilter?.global === false ? authorization.scopeFilter.refs : null,
+    });
   } catch {
     return NextResponse.json({ error: "Could not load billing records." }, { status: 500, headers: { "Cache-Control": "private, no-store" } });
   }

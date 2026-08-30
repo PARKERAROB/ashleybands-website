@@ -48,20 +48,36 @@ export async function PATCH(request) {
     return privateJson({ error: "This status is owned by its connected portal workflow." }, 409);
   }
   const note = String(body.note || "").trim().slice(0, 300);
-  const { data, error } = await supabaseAdmin.rpc("set_student_form_requirement_state", {
+  const referenceType = String(body.referenceType || "").trim();
+  const sourceRecordId = String(body.sourceRecordId || "").trim().slice(0, 300);
+  if (Boolean(referenceType) !== Boolean(sourceRecordId)) {
+    return privateJson({ error: "A reference type and record id must be provided together." }, 400);
+  }
+  const referenceMetadata = body.referenceMetadata && typeof body.referenceMetadata === "object"
+    ? body.referenceMetadata
+    : {};
+  if (JSON.stringify(referenceMetadata).length > 5000) {
+    return privateJson({ error: "Reference metadata is too large." }, 400);
+  }
+  const { data, error } = await supabaseAdmin.rpc("record_form_submission_with_reference", {
     p_requirement_id: requirementId,
     p_student_id: studentId,
     p_state: state,
     p_completion_mode: completionMode,
     p_next_action: String(body.nextAction || "").trim().slice(0, 200),
     p_note_summary: note,
+    p_reference_type: referenceType || null,
+    p_source_table: String(body.sourceTable || "").trim().slice(0, 100),
+    p_source_record_id: sourceRecordId,
+    p_received_at: body.receivedAt || null,
+    p_reference_metadata: referenceMetadata,
     p_actor_staff_id: authorization.staff.id,
+    p_route: "/api/admin/forms",
   });
   if (error) return privateJson({ error: "Could not update the form status." }, 500);
-  await logAudit({
-    actor: staffActor(authorization.staff), action: "update_status",
-    table: "student_form_requirements", recordId: data,
-    route: "/api/admin/forms", changes: { student_id: studentId, requirement_id: requirementId, state },
+  return privateJson({
+    id: data?.studentRequirementId || null,
+    referenceId: data?.referenceId || null,
+    state: data?.state || state,
   });
-  return privateJson({ id: data, state });
 }

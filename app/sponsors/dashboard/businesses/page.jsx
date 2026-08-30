@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { revokeStaffSession } from "@/lib/staffSession";
 import {
   COLD_EMAIL_SUBJECT,
   renderColdEmailHTML
@@ -18,8 +19,8 @@ function readSession() {
   }
 }
 
-function authHeaders(s) {
-  return { "Content-Type": "application/json", "x-staff-id": s.id, "x-staff-token": s.token };
+function authHeaders() {
+  return { "Content-Type": "application/json" };
 }
 
 const STATUS_OPTIONS = ["untested", "asked", "willing", "declined", "silent", "already-sponsor", "skip"];
@@ -136,7 +137,10 @@ function SendQueuePanel({ session, askedCount }) {
   }, [session]);
 
   // Refetch when the queued count likely changed (a queue/unqueue flips asked count).
-  useEffect(() => { loadCount(); }, [loadCount, askedCount]);
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => { void loadCount(); });
+    return () => window.cancelAnimationFrame(frame);
+  }, [loadCount, askedCount]);
 
   async function send() {
     if (!queued) return;
@@ -337,7 +341,10 @@ function Dashboard({ session, onLogout }) {
     finally { setLoading(false); }
   }, [session, filter, sort, onLogout]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => { void load(); });
+    return () => window.cancelAnimationFrame(frame);
+  }, [load]);
 
   const t = data.totals;
   function updateSort(key, dir) {
@@ -460,11 +467,19 @@ export default function BusinessCurationPage() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setSession(readSession());
-    setMounted(true);
+    const frame = window.requestAnimationFrame(() => {
+      setSession(readSession());
+      setMounted(true);
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
   if (!mounted) return null;
+
+  async function logout() {
+    if (!await revokeStaffSession()) return;
+    setSession(null);
+  }
 
   if (!session) {
     return (
@@ -491,7 +506,7 @@ export default function BusinessCurationPage() {
         </p>
       </section>
       <section className="sponsors-section">
-        <Dashboard session={session} onLogout={() => { window.localStorage.removeItem(STORAGE_KEY); setSession(null); }} />
+        <Dashboard session={session} onLogout={logout} />
       </section>
     </main>
   );

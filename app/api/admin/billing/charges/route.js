@@ -9,10 +9,6 @@ const MAX_CHARGE_CENTS = 1_000_000;
 // POST: assign a charge to one or many students.
 // body: { studentIds: [...], category, label, amountCents, notes?, skipExistingCategory? }
 export async function POST(req) {
-  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.BILLING_WRITE);
-  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status, headers: { "Cache-Control": "private, no-store" } });
-  const staff = authorization.staff;
-
   let body;
   try {
     body = await req.json();
@@ -26,6 +22,12 @@ export async function POST(req) {
   const kind = body.kind === "funding_goal" ? "funding_goal" : body.kind === "fee" ? "fee" : "";
   const label = String(body.label || "").slice(0, 200);
   const notes = String(body.notes || "").slice(0, 500);
+
+  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.BILLING_WRITE, {
+    scopes: studentIds.map((ref) => ({ type: "student", ref })),
+  });
+  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status, headers: { "Cache-Control": "private, no-store" } });
+  const staff = authorization.staff;
 
   if (!studentIds.length) {
     return NextResponse.json({ error: "Select at least one student" }, { status: 400 });
@@ -73,10 +75,6 @@ export async function POST(req) {
 
 // PATCH: void a charge. body: { id }
 export async function PATCH(req) {
-  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.BILLING_WRITE);
-  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status, headers: { "Cache-Control": "private, no-store" } });
-  const staff = authorization.staff;
-
   let body;
   try {
     body = await req.json();
@@ -86,6 +84,19 @@ export async function PATCH(req) {
 
   const id = String(body.id || "");
   if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+
+  const capabilityAuthorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.BILLING_WRITE, {
+    safeCapabilityOnly: true,
+  });
+  if (!capabilityAuthorization.ok) return NextResponse.json({ error: capabilityAuthorization.error }, { status: capabilityAuthorization.status, headers: { "Cache-Control": "private, no-store" } });
+
+  const { data: charge } = await supabaseAdmin.from("fee_charges").select("student_id").eq("id", id).maybeSingle();
+  if (!charge) return NextResponse.json({ error: "Charge not found" }, { status: 404 });
+  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.BILLING_WRITE, {
+    scope: { type: "student", ref: charge.student_id },
+  });
+  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status, headers: { "Cache-Control": "private, no-store" } });
+  const staff = authorization.staff;
 
   const { error } = await supabaseAdmin.rpc("update_fee_charge_with_audit", {
     p_charge_id: id,

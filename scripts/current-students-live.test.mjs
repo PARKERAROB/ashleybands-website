@@ -6,6 +6,7 @@ const page = readFileSync("app/admin/students/page.jsx", "utf8");
 const workspace = readFileSync("app/admin/students/CurrentStudentsWorkspace.jsx", "utf8");
 const listRoute = readFileSync("app/api/admin/current-students/route.js", "utf8");
 const detailRoute = readFileSync("app/api/admin/current-students/[id]/route.js", "utf8");
+const exportRoute = readFileSync("app/api/admin/current-students/export/route.js", "utf8");
 const dataLayer = readFileSync("lib/currentStudents.js", "utf8");
 const capabilities = readFileSync("lib/staffCapabilities.js", "utf8");
 const managePage = readFileSync("app/admin/students/manage/page.jsx", "utf8");
@@ -50,12 +51,19 @@ test("student detail reads normalized current memberships", () => {
   assert.match(dataLayer, /programMemberships/);
   assert.match(workspace, /student\.programMemberships/);
   assert.match(workspace, /\/admin\/ensembles\?view=students&student=/);
+  assert.match(dataLayer, /portal_student_status_events/);
+  assert.match(workspace, /Status history/);
 });
 
 test("the accepted filtering, sorting, contact, and management paths remain available", () => {
   assert.match(workspace, /Filters combine/);
   assert.match(workspace, /Student \+ guardian/);
   assert.match(workspace, /Export contacts/);
+  assert.match(workspace, /\/api\/admin\/current-students\/export/);
+  assert.match(exportRoute, /CONTACTS_EXPORT/);
+  assert.match(exportRoute, /logAuditRequired/);
+  assert.match(exportRoute, /spreadsheetSafe/);
+  assert.match(exportRoute, /\^\[=\+\\-@\\t\\r\]/);
   assert.match(workspace, /Manage records/);
   assert.match(managePage, /New student/);
 

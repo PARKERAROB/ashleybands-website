@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { StaffLogin } from "@/components/StaffGate";
 
@@ -14,12 +15,8 @@ function readSession() {
   }
 }
 
-function authHeaders(session) {
-  return {
-    "Content-Type": "application/json",
-    "x-staff-id": session.id,
-    "x-staff-token": session.token
-  };
+function authHeaders() {
+  return { "Content-Type": "application/json" };
 }
 
 const AXES = [
@@ -27,31 +24,6 @@ const AXES = [
   { value: "students", label: "Students (NHCS school email)" },
   { value: "both", label: "Both" }
 ];
-
-const OPEN_HOUSE_SUBJECT = "Welcome to Ashley Bands - Complete Your Band Ready Challenge";
-const OPEN_HOUSE_BODY = `Hello Ashley Bands families,
-
-Welcome to band! We are excited to begin the new school year with you.
-
-You can complete the band portion of Open House through our Band Ready Challenge:
-
-https://ashleybands.com/open-house
-
-The challenge will connect you to the Family Portal and walk you through the calendar, Day 1 necessities, county instrument agreement, clothing order, grading, attendance, communication, and the Band Booster Level 2 volunteer check-in. AshleyBands.com is our one-stop shop for band information and forms.
-
-Once you finish the eight quick stops, show the completed screen to a student helper during Open House and choose a sticker. We may also have individually wrapped candy while supplies last.
-
-You are always welcome to stop by the band room, say hello, and tell me something you enjoyed this summer, what you liked about band camp, or what you are excited about in band this year. I want to be available for individual conversations even though I will not be able to meet with every family at length that evening.
-
-Our Band Boosters will also be in the band room to share ways families can volunteer and support the program. One of our long-term goals is to raise $150,000 over the next ten years so every Ashley band student can have access to a quality instrument.
-
-If you have a question, email me at robert.parker@nhcs.net. Email is the best way for families to reach me.
-
-Welcome to Ashley Bands,
-
-Robert A. Parker
-Director of Bands
-Ashley High School`;
 
 export default function BroadcastPage() {
   const [session, setSession] = useState(() => readSession());
@@ -69,15 +41,29 @@ export default function BroadcastPage() {
   const [previewing, setPreviewing] = useState(false);
   const [sending, setSending] = useState(false);
   const [msg, setMsg] = useState("");
+  const [directStudent, setDirectStudent] = useState("");
+  const [directStudentName, setDirectStudentName] = useState("");
+
+  useEffect(() => {
+    const studentId = new URLSearchParams(window.location.search).get("student") || "";
+    const studentName = new URLSearchParams(window.location.search).get("name") || "";
+    if (!studentId) return undefined;
+    const frame = window.requestAnimationFrame(() => {
+      setDirectStudent(studentId);
+      setDirectStudentName(studentName);
+      setAxis("both");
+      setSelected({ student_id: new Set([studentId]) });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
 
   async function load() {
     if (!session) return;
     const res = await fetch("/api/admin/broadcast", { headers: authHeaders(session) });
-    if (res.ok) {
-      const data = await res.json();
-      setFacets(data.facets || []);
-      setLog(data.broadcasts || []);
-    }
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || "Broadcast history could not be loaded.");
+    setFacets(data.facets || []);
+    setLog(data.broadcasts || []);
     setLoading(false);
   }
 
@@ -86,29 +72,45 @@ export default function BroadcastPage() {
     let active = true;
     (async () => {
       const res = await fetch("/api/admin/broadcast", { headers: authHeaders(session) });
-      if (!active || !res.ok) {
-        if (active) setLoading(false);
-        return;
-      }
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Broadcast history could not be loaded.");
       if (!active) return;
       setFacets(data.facets || []);
       setLog(data.broadcasts || []);
       setLoading(false);
-    })();
+    })().catch((loadError) => {
+      if (!active) return;
+      setMsg(loadError.message);
+      setLoading(false);
+    });
     return () => {
       active = false;
     };
   }, [session]);
 
   const audienceFilter = useMemo(() => {
+    if (directStudent) {
+      return { match: "all", predicates: [{ key: "student_id", op: "in", values: [directStudent] }] };
+    }
     const predicates = Object.entries(selected)
       .map(([key, set]) => ({ key, op: "in", values: [...set] }))
       .filter((p) => p.values.length);
     return predicates.length ? { match, predicates } : {};
-  }, [selected, match]);
+  }, [selected, match, directStudent]);
 
   const isEveryone = !audienceFilter.predicates;
+
+  function clearDirectStudent() {
+    setDirectStudent("");
+    setDirectStudentName("");
+    setSelected({});
+    setAxis("guardians");
+    setPreview(null);
+    const url = new URL(window.location.href);
+    url.searchParams.delete("student");
+    url.searchParams.delete("name");
+    window.history.replaceState({}, "", `${url.pathname}${url.search}`);
+  }
 
   function toggleValue(key, value) {
     setPreview(null);
@@ -126,11 +128,12 @@ export default function BroadcastPage() {
   async function runPreview() {
     setPreviewing(true);
     setMsg("");
+    setPreview(null);
     try {
       const res = await fetch("/api/admin/broadcast/preview", {
         method: "POST",
         headers: authHeaders(session),
-        body: JSON.stringify({ audienceFilter, recipientAxis: axis })
+        body: JSON.stringify({ audienceFilter, recipientAxis: axis, directStudentId: directStudent })
       });
       const data = await res.json();
       if (!res.ok) {
@@ -165,23 +168,33 @@ export default function BroadcastPage() {
           body,
           audienceFilter,
           recipientAxis: axis,
+          directStudentId: directStudent,
+          confirmationToken: preview.confirmationToken,
           confirm: true
         })
       });
       const data = await res.json();
       if (!res.ok) {
+        if (res.status === 409) setPreview(null);
         setMsg(data.error || "Send failed.");
         return;
       }
       const tail = data.remaining
-        ? ` ${data.remaining} still queued — click Resend on the log row to finish.`
+        ? ` ${data.remaining} still queued — click Retry unsent on the log row to finish.`
         : "";
       setMsg(`Sent ${data.sent}/${data.recipientCount}. ${data.failed} failed.${tail}`);
       setSubject("");
       setBody("");
-      setSelected({});
-      setPreview(null);
-      load();
+      if (directStudent) clearDirectStudent();
+      else {
+        setSelected({});
+        setPreview(null);
+      }
+      try {
+        await load();
+      } catch (loadError) {
+        setMsg((current) => `${current} Broadcast history did not refresh: ${loadError.message}`);
+      }
     } finally {
       setSending(false);
     }
@@ -189,14 +202,18 @@ export default function BroadcastPage() {
 
   async function resume(broadcastId) {
     setMsg("");
-    const res = await fetch("/api/admin/broadcast/send", {
-      method: "POST",
-      headers: authHeaders(session),
-      body: JSON.stringify({ broadcastId })
-    });
-    const data = await res.json();
-    setMsg(res.ok ? `Resumed: ${data.sent} sent, ${data.remaining} remaining.` : data.error);
-    load();
+    try {
+      const res = await fetch("/api/admin/broadcast/send", {
+        method: "POST",
+        headers: authHeaders(session),
+        body: JSON.stringify({ broadcastId })
+      });
+      const data = await res.json().catch(() => ({}));
+      setMsg(res.ok ? `Retry complete: ${data.sent} sent, ${data.remaining} remaining.` : data.error || "The retry could not be completed.");
+      if (res.ok) await load();
+    } catch (resumeError) {
+      setMsg(resumeError.message || "The retry could not be completed.");
+    }
   }
 
   if (!session) {
@@ -217,20 +234,6 @@ export default function BroadcastPage() {
 
       <section style={card}>
         <h2 style={h2}>Message</h2>
-        <button
-          type="button"
-          style={{ ...chip, marginBottom: 10 }}
-          onClick={() => {
-            setSubject(OPEN_HOUSE_SUBJECT);
-            setBody(OPEN_HOUSE_BODY);
-            setAxis("guardians");
-            setSelected({ open_house_roster: new Set(["2026-08-17_current_classes"]) });
-            setPreview(null);
-            setMsg("Open House welcome staged for the confirmed August 17 roster. Preview before sending.");
-          }}
-        >
-          Load Open House welcome
-        </button>
         <input
           style={input}
           placeholder="Subject"
@@ -248,16 +251,25 @@ export default function BroadcastPage() {
       <section style={card}>
         <h2 style={h2}>Audience</h2>
 
+        {directStudent ? <div style={banner}>
+          <strong>{directStudentName || "Selected student"} + connected guardians</strong>
+          <p style={{ margin: "4px 0 8px" }}>This audience cannot be broadened. Preview the exact recipients before sending.</p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            <button type="button" onClick={clearDirectStudent} style={btnSecondary}>Clear student scope</button>
+            <Link href={`/admin/students?student=${encodeURIComponent(directStudent)}`} style={{ ...btnSecondary, display: "inline-flex", alignItems: "center", textDecoration: "none" }}>Back to student</Link>
+          </div>
+        </div> : null}
+
         <div style={{ marginBottom: 12 }}>
           <label style={label}>Send to</label>
-          <select style={input} value={axis} onChange={(e) => { setAxis(e.target.value); setPreview(null); }}>
+          <select style={input} value={axis} disabled={Boolean(directStudent)} onChange={(e) => { setAxis(e.target.value); setPreview(null); }}>
             {AXES.map((a) => (
               <option key={a.value} value={a.value}>{a.label}</option>
             ))}
           </select>
         </div>
 
-        {facets.length > 0 && (
+        {!directStudent && facets.length > 0 && (
           <div style={{ marginBottom: 12 }}>
             <label style={label}>Match</label>
             <div style={{ display: "flex", gap: 16 }}>
@@ -275,7 +287,7 @@ export default function BroadcastPage() {
           </div>
         )}
 
-        {facets.length === 0 ? (
+        {directStudent ? null : facets.length === 0 ? (
           <p style={muted}>
             No attributes on records yet, so the only audience is <strong>everyone</strong>.
             As students get attributes (instrument, ensemble, leadership…), filters appear here.
@@ -283,7 +295,7 @@ export default function BroadcastPage() {
         ) : (
           facets.map((facet) => (
             <div key={facet.key} style={{ marginBottom: 12 }}>
-              <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 4 }}>{facet.key}</div>
+              <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 4 }}>{facet.label || facet.key}</div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {facet.values.map((v) => {
                   const on = (selected[facet.key] || new Set()).has(v.value);
@@ -294,7 +306,7 @@ export default function BroadcastPage() {
                       onClick={() => toggleValue(facet.key, v.value)}
                       style={on ? chipOn : chip}
                     >
-                      {v.value} ({v.count})
+                      {v.label || v.value} ({v.count})
                     </button>
                   );
                 })}
@@ -304,7 +316,9 @@ export default function BroadcastPage() {
         )}
 
         <div style={{ marginTop: 12, padding: "8px 12px", background: "#fffaf0", borderRadius: 6, fontSize: 14 }}>
-          {isEveryone
+          {directStudent
+            ? `Audience: ${directStudentName || "selected student"} and connected guardians.`
+            : isEveryone
             ? "Audience: everyone (all families)."
             : `Audience: ${match === "all" ? "students matching ALL" : "students matching ANY"} of the selected filters.`}
         </div>
@@ -343,34 +357,13 @@ export default function BroadcastPage() {
         ) : log.length === 0 ? (
           <p style={muted}>No broadcasts yet.</p>
         ) : (
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
-            <thead>
-              <tr style={{ textAlign: "left", borderBottom: "1px solid #ded4bf" }}>
-                <th style={th}>When</th>
-                <th style={th}>Subject</th>
-                <th style={th}>To</th>
-                <th style={th}>Count</th>
-                <th style={th}>Status</th>
-                <th style={th}></th>
-              </tr>
-            </thead>
-            <tbody>
-              {log.map((b) => (
-                <tr key={b.id} style={{ borderBottom: "1px solid #f0e9da" }}>
-                  <td style={td}>{new Date(b.sent_at || b.created_at).toLocaleString()}</td>
-                  <td style={td}>{b.subject}</td>
-                  <td style={td}>{b.recipient_axis}</td>
-                  <td style={td}>{b.recipient_count}</td>
-                  <td style={td}>{b.status}</td>
-                  <td style={td}>
-                    {b.status === "failed" && (
-                      <button type="button" onClick={() => resume(b.id)} style={btnTiny}>Resend</button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div style={{ display: "grid", gap: 8 }}>
+            {log.map((broadcast) => <article key={broadcast.id} style={logCard}>
+              <div><strong>{broadcast.subject}</strong><small>{new Date(broadcast.sent_at || broadcast.created_at).toLocaleString()}</small></div>
+              <div><span>{broadcast.recipient_axis}</span><span>{broadcast.recipient_count} recipients</span><span>{broadcast.status}</span></div>
+              {broadcast.status === "failed" ? <button type="button" onClick={() => resume(broadcast.id)} style={btnTiny}>Retry unsent</button> : null}
+            </article>)}
+          </div>
         )}
       </section>
     </main>
@@ -384,11 +377,10 @@ const h2 = { marginTop: 0, fontSize: 16 };
 const label = { display: "block", fontSize: 13, fontWeight: 600, marginBottom: 4 };
 const input = { boxSizing: "border-box", width: "100%", padding: "10px 12px", fontSize: 14, border: "1px solid #ccc", borderRadius: 6, marginBottom: 10 };
 const banner = { marginTop: 12, padding: "10px 12px", background: "#eef7ee", border: "1px solid #bcdcbc", borderRadius: 6, fontSize: 14 };
-const chip = { padding: "5px 10px", fontSize: 13, border: "1px solid #ccc", borderRadius: 16, background: "#fff", cursor: "pointer" };
+const chip = { minHeight: 44, padding: "8px 12px", fontSize: 13, border: "1px solid #ccc", borderRadius: 22, background: "#fff", cursor: "pointer" };
 const chipOn = { ...chip, background: "#7b1829", color: "#fff", borderColor: "#7b1829" };
 const btnPrimary = { marginTop: 12, padding: "10px 18px", fontSize: 14, fontWeight: 600, border: "none", borderRadius: 6, color: "#fff", background: "#7b1829", cursor: "pointer" };
 const btnDisabled = { ...btnPrimary, background: "#c9bfa9", cursor: "not-allowed" };
-const btnSecondary = { padding: "9px 16px", fontSize: 14, fontWeight: 600, border: "1px solid #7b1829", borderRadius: 6, color: "#7b1829", background: "#fff", cursor: "pointer" };
-const btnTiny = { padding: "4px 10px", fontSize: 12, fontWeight: 600, border: "1px solid #7b1829", borderRadius: 4, color: "#7b1829", background: "#fff", cursor: "pointer" };
-const th = { padding: "6px 8px", fontSize: 12, color: "#6f675a", fontWeight: 600 };
-const td = { padding: "6px 8px" };
+const btnSecondary = { minHeight: 44, padding: "9px 16px", fontSize: 14, fontWeight: 600, border: "1px solid #7b1829", borderRadius: 6, color: "#7b1829", background: "#fff", cursor: "pointer" };
+const btnTiny = { minHeight: 44, padding: "8px 12px", fontSize: 12, fontWeight: 600, border: "1px solid #7b1829", borderRadius: 4, color: "#7b1829", background: "#fff", cursor: "pointer" };
+const logCard = { border: "1px solid #e3dac9", borderRadius: 7, padding: 12, display: "grid", gap: 8, overflowWrap: "anywhere" };

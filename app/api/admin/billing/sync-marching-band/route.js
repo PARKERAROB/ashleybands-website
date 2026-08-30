@@ -12,7 +12,7 @@ export const runtime = "nodejs";
 // POST: assign the $500 MB season fee to every signup-matched student that does
 // not already have an active marching_band_2026 charge. Idempotent + re-runnable.
 export async function POST(req) {
-  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.BILLING_WRITE);
+  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.BILLING_WRITE, { scope: { type: "global" } });
   if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status, headers: { "Cache-Control": "private, no-store" } });
   const staff = authorization.staff;
 

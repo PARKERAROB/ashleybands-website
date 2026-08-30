@@ -4,6 +4,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { revokeStaffSession } from "@/lib/staffSession";
 
 const STORAGE_KEY = "bdos_staff_session_v1";
 
@@ -42,8 +43,8 @@ function writeSession(session) {
   else window.localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
 }
 
-function authHeaders(session) {
-  return { "Content-Type": "application/json", "x-staff-id": session.id, "x-staff-token": session.token };
+function authHeaders() {
+  return { "Content-Type": "application/json" };
 }
 
 function StaffLogin({ onAuthed }) {
@@ -66,7 +67,7 @@ function StaffLogin({ onAuthed }) {
       setError(data.error || "Sign in failed.");
       return;
     }
-    const session = { id: data.id, token: data.token, role: data.role, display_name: data.display_name };
+    const session = { id: data.id, role: data.role, display_name: data.display_name };
     writeSession(session);
     onAuthed(session);
   }
@@ -289,7 +290,7 @@ export default function MarchingBandAdminClient() {
           </div>
           <div className="mb-admin-actions">
             <button type="button" className="sponsors-btn" onClick={load}>Refresh</button>
-            <button type="button" className="sponsors-btn" onClick={() => { writeSession(null); setSession(null); }}>
+            <button type="button" className="sponsors-btn" onClick={async () => { if (await revokeStaffSession()) setSession(null); }}>
               Log out
             </button>
           </div>

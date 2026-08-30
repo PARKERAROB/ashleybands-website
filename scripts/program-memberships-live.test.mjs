@@ -92,6 +92,8 @@ test("roster sync and approved participation changes use the normalized reconcil
 test("director-only membership mutations reject the sponsorship-only role by capability", () => {
   assert.match(studentAdminRoute, /STUDENTS_WRITE/);
   assert.match(reviewRoute, /MEMBERSHIPS_WRITE/);
-  assert.match(capabilities, /sponsor_lead:\s*\["sponsorship\.read", "sponsorship\.write"\]/);
-  assert.doesNotMatch(capabilities, /sponsor_lead:[^\n]*(students|memberships)\./);
+  const sponsorLead = capabilities.match(/sponsor_lead:\s*\[([\s\S]*?)\],/i)?.[1] || "";
+  assert.match(sponsorLead, /sponsorship\.read/);
+  assert.match(sponsorLead, /sponsorship\.write/);
+  assert.doesNotMatch(sponsorLead, /students\.|memberships\./);
 });

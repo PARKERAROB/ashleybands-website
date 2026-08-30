@@ -10,6 +10,7 @@ import { loadProgramAttendanceWorkspace } from "@/lib/attendanceWorkspace";
 import { logAudit, staffActor } from "@/lib/auditLog";
 import { loadSchoolAttendanceWorkspace } from "@/lib/schoolAttendance";
 import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
+import { staffUsesAssignedScopes } from "@/lib/staffCapabilities";
 
 export const runtime = "nodejs";
 
@@ -32,7 +33,13 @@ export async function GET(request) {
   const capability = source === "school"
     ? STAFF_CAPABILITIES.ATTENDANCE_SCHOOL_READ
     : STAFF_CAPABILITIES.ATTENDANCE_EVENTS_READ;
-  const authorization = await authorizeStaffRequest(request, capability);
+  const occurrenceKey = url.searchParams.get("occurrence") || "";
+  const authorization = await authorizeStaffRequest(request, capability, {
+    scope: source === "program" && occurrenceKey
+      ? { type: "attendance_event", ref: occurrenceKey }
+      : source === "school" ? { type: "global" } : undefined,
+    collectionScopeType: source === "program" && !occurrenceKey ? "attendance_event" : undefined,
+  });
   if (!authorization.ok) return json({ error: authorization.error }, authorization.status);
   try {
     const result = source === "school"
@@ -40,8 +47,10 @@ export async function GET(request) {
           studentId: url.searchParams.get("student") || ""
         })
       : await loadProgramAttendanceWorkspace({
-          occurrenceKey: url.searchParams.get("occurrence") || "",
-          studentId: url.searchParams.get("student") || ""
+          occurrenceKey,
+          occurrenceKeys: authorization.scopeFilter?.global === false ? authorization.scopeFilter.refs : null,
+          studentId: url.searchParams.get("student") || "",
+          includeCandidates: !staffUsesAssignedScopes(authorization.staff),
         });
     await logAudit({
       actor: staffActor(authorization.staff),
@@ -63,11 +72,13 @@ export async function GET(request) {
 }
 
 export async function PATCH(request) {
-  const authorization = await authorizeStaffRequest(request, STAFF_CAPABILITIES.ATTENDANCE_EVENTS_WRITE);
-  if (!authorization.ok) return json({ error: authorization.error }, authorization.status);
   const body = await request.json().catch(() => ({}));
   const occurrenceKey = String(body.occurrenceKey || "").trim();
   const studentId = String(body.studentId || "").trim();
+  const authorization = await authorizeStaffRequest(request, STAFF_CAPABILITIES.ATTENDANCE_EVENTS_WRITE, {
+    scope: occurrenceKey ? { type: "attendance_event", ref: occurrenceKey } : { type: "global" },
+  });
+  if (!authorization.ok) return json({ error: authorization.error }, authorization.status);
   if (body.startReconstruction) {
     if (!occurrenceKey) return json({ error: "Choose a historical event." }, 400);
     try {

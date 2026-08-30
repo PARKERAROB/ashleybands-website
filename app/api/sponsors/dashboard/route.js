@@ -1,24 +1,14 @@
-import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { readStaffSession } from "@/lib/sponsorAuth";
+import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
+import { logAudit, staffActor } from "@/lib/auditLog";
+import { privateJson, privateServerError } from "@/lib/privateResponse";
 
 export const runtime = "nodejs";
 
-async function validateStaff(req) {
-  const { staffId, token } = readStaffSession(req);
-  if (!staffId || !token) return null;
-  const { data } = await supabaseAdmin
-    .from("staff")
-    .select("id, role, display_name, session_token")
-    .eq("id", staffId)
-    .maybeSingle();
-  if (!data || data.session_token !== token) return null;
-  return data;
-}
-
 export async function GET(req) {
-  const staff = await validateStaff(req);
-  if (!staff) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.SPONSORSHIP_READ);
+  if (!authorization.ok) return privateJson({ error: authorization.error }, authorization.status);
+  const staff = authorization.staff;
 
   const [{ data: prospects, error: pErr }, { data: dedup, error: dErr }, { data: families }] = await Promise.all([
     supabaseAdmin
@@ -31,8 +21,8 @@ export async function GET(req) {
     supabaseAdmin.from("families").select("id, display_name, student_first, student_last, section, created_at")
   ]);
 
-  if (pErr) return NextResponse.json({ error: pErr.message }, { status: 500 });
-  if (dErr) return NextResponse.json({ error: dErr.message }, { status: 500 });
+  if (pErr) return privateServerError("sponsors-dashboard", pErr, "Sponsorship records could not be loaded.");
+  if (dErr) return privateServerError("sponsors-dashboard", dErr, "Sponsorship records could not be loaded.");
 
   const totals = (prospects || []).reduce(
     (acc, p) => {
@@ -49,7 +39,15 @@ export async function GET(req) {
     { count: 0, pending: 0, yes: 0, no: 0, later: 0, committed_amount: 0, committed_confirmed: 0 }
   );
 
-  return NextResponse.json({
+  await logAudit({
+    actor: staffActor(staff),
+    action: "view",
+    table: "prospects,businesses,families",
+    recordId: "sponsorship-dashboard",
+    route: "/api/sponsors/dashboard",
+  });
+
+  return privateJson({
     staff: { display_name: staff.display_name, role: staff.role },
     prospects: prospects || [],
     dedup: dedup || [],

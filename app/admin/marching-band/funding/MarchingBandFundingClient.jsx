@@ -5,8 +5,8 @@ import { useEffect, useMemo, useState } from "react";
 import { StaffGate } from "@/components/StaffGate";
 import styles from "./FundingRoster.module.css";
 
-function authHeaders(session) {
-  return { "Content-Type": "application/json", "x-staff-id": session.id, "x-staff-token": session.token };
+function authHeaders() {
+  return { "Content-Type": "application/json" };
 }
 
 function usd(cents) {

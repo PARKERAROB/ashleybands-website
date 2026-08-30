@@ -73,7 +73,7 @@ function LiveWorkspace({ session, signOut, initialView, initialStudentId, initia
         if (filter === "open" && student.fee.balanceCents <= 0) return false;
         if (filter === "paid" && !(student.fee.chargedCents > 0 && student.fee.balanceCents <= 0)) return false;
       } else {
-        if (filter === "under100" && student.campaign.raisedCents >= 10_000) return false;
+        if (filter === "under100" && (student.campaign.goalCents <= 0 || student.campaign.raisedCents >= 10_000)) return false;
         if (filter === "missing" && student.campaign.goalCents > 0) return false;
         if (filter === "met" && !student.campaign.goalMet) return false;
       }

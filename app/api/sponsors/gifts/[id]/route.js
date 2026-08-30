@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { readStaffSession } from "@/lib/sponsorAuth";
 import { confirmGift } from "@/lib/sponsorRecognition";
+import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
+import { logAuditRequired, staffActor } from "@/lib/auditLog";
+import { privateJson, privateServerError } from "@/lib/privateResponse";
 
 export const runtime = "nodejs";
 
@@ -9,25 +10,14 @@ export const runtime = "nodejs";
 // once the money is in hand → fires Lane A recognition (receipt + auto-list + badge). Also
 // supports correcting the amount / FMV before confirming, and voiding a pledge that never
 // arrived. Staff-only. (Online gifts auto-confirm at PayPal capture and don't need this.)
-async function validateStaff(req) {
-  const { staffId, token } = readStaffSession(req);
-  if (!staffId || !token) return null;
-  const { data } = await supabaseAdmin
-    .from("staff")
-    .select("id, role, display_name, session_token")
-    .eq("id", staffId)
-    .maybeSingle();
-  if (!data || data.session_token !== token) return null;
-  return data;
-}
-
 function siteOrigin(req) {
   return process.env.NEXT_PUBLIC_SITE_ORIGIN || new URL(req.url).origin;
 }
 
 export async function PATCH(req, { params }) {
-  const staff = await validateStaff(req);
-  if (!staff) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.SPONSORSHIP_GIFTS_WRITE);
+  if (!authorization.ok) return privateJson({ error: authorization.error }, authorization.status);
+  const staff = authorization.staff;
   const { id } = await params;
 
   const body = await req.json().catch(() => ({}));
@@ -42,9 +32,26 @@ export async function PATCH(req, { params }) {
   }
   if (typeof body.payer_email === "string") pre.payer_email = body.payer_email.trim();
   if (typeof body.notes === "string") pre.notes = body.notes;
+  const requestedAction = ["confirm", "void", "unlist", "list"].includes(body.action)
+    ? `${body.action}_requested`
+    : Object.keys(pre).length ? "update_requested" : null;
+  if (requestedAction) {
+    try {
+      await logAuditRequired({
+        actor: staffActor(staff),
+        action: requestedAction,
+        table: "sponsor_gifts",
+        recordId: id,
+        route: "/api/sponsors/gifts/[id]",
+        changes: { fields: Object.keys(pre) },
+      });
+    } catch (error) {
+      return privateServerError("sponsor-gift-audit", error, "The sponsor gift could not be updated.");
+    }
+  }
   if (Object.keys(pre).length) {
     const { error } = await supabaseAdmin.from("sponsor_gifts").update(pre).eq("id", id).eq("status", "pending");
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) return privateServerError("sponsor-gift", error, "The sponsor gift could not be updated.");
   }
 
   if (body.action === "confirm") {
@@ -54,9 +61,9 @@ export async function PATCH(req, { params }) {
         origin: siteOrigin(req),
         listOnSite: true
       });
-      return NextResponse.json(result);
+      return privateJson(result);
     } catch (err) {
-      return NextResponse.json({ error: String(err?.message || err) }, { status: 500 });
+      return privateServerError("sponsor-gift", err, "The sponsor gift could not be confirmed.");
     }
   }
 
@@ -65,8 +72,8 @@ export async function PATCH(req, { params }) {
       .from("sponsor_gifts")
       .update({ status: "void", listed_on_site: false })
       .eq("id", id);
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json({ ok: true, status: "void" });
+    if (error) return privateServerError("sponsor-gift", error, "The sponsor gift could not be voided.");
+    return privateJson({ ok: true, status: "void" });
   }
 
   if (body.action === "unlist") {
@@ -74,8 +81,8 @@ export async function PATCH(req, { params }) {
       .from("sponsor_gifts")
       .update({ listed_on_site: false })
       .eq("id", id);
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json({ ok: true });
+    if (error) return privateServerError("sponsor-gift", error, "The sponsor gift could not be unpublished.");
+    return privateJson({ ok: true });
   }
 
   if (body.action === "list") {
@@ -86,10 +93,9 @@ export async function PATCH(req, { params }) {
       .eq("status", "confirmed")
       .select("id")
       .maybeSingle();
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    if (!data) return NextResponse.json({ error: "Only confirmed gifts can be published." }, { status: 409 });
-    return NextResponse.json({ ok: true, listed_on_site: true });
+    if (error) return privateServerError("sponsor-gift", error, "The sponsor gift could not be published.");
+    if (!data) return privateJson({ error: "Only confirmed gifts can be published." }, 409);
+    return privateJson({ ok: true, listed_on_site: true });
   }
-
-  return NextResponse.json({ ok: true, updated: Object.keys(pre) });
+  return privateJson({ ok: true, updated: Object.keys(pre) });
 }

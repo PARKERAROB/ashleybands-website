@@ -21,12 +21,8 @@ const EMPTY = {
   status: "draft"
 };
 
-function authHeaders(session) {
-  return {
-    "Content-Type": "application/json",
-    "x-staff-id": session.id,
-    "x-staff-token": session.token
-  };
+function authHeaders() {
+  return { "Content-Type": "application/json" };
 }
 
 function isoDate(date) {

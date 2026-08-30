@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { readStaffSession } from "@/lib/sponsorAuth";
+import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
+import { logAudit, staffActor } from "@/lib/auditLog";
+import { privateJson, privateServerError } from "@/lib/privateResponse";
 
 export const runtime = "nodejs";
 
@@ -17,21 +18,9 @@ const SORT_COLUMNS = {
   last_outreach: "last_outreach_at"
 };
 
-async function validateStaff(req) {
-  const { staffId, token } = readStaffSession(req);
-  if (!staffId || !token) return null;
-  const { data } = await supabaseAdmin
-    .from("staff")
-    .select("id, role, display_name, session_token")
-    .eq("id", staffId)
-    .maybeSingle();
-  if (!data || data.session_token !== token) return null;
-  return data;
-}
-
 export async function GET(req) {
-  const staff = await validateStaff(req);
-  if (!staff) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.SPONSORSHIP_READ);
+  if (!authorization.ok) return privateJson({ error: authorization.error }, authorization.status);
 
   const url = new URL(req.url);
   const zone = url.searchParams.get("zone") || "";
@@ -67,7 +56,7 @@ export async function GET(req) {
   q = q.limit(500);
 
   const { data, error } = await q;
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return privateServerError("sponsor-businesses", error, "Sponsor businesses could not be loaded.");
 
   // Cross-path overlap: how many families are also pursuing each business via the
   // warm tracker. Lets staff see a cold-DB business that's already being worked in
@@ -96,5 +85,12 @@ export async function GET(req) {
     { count: 0, with_email: 0, prior: 0, by_status: {}, by_zone: {} }
   );
 
-  return NextResponse.json({ businesses: data, totals });
+  await logAudit({
+    actor: staffActor(authorization.staff),
+    action: "view",
+    table: "businesses,prospects",
+    recordId: "sponsor-business-directory",
+    route: "/api/sponsors/businesses",
+  });
+  return privateJson({ businesses: data, totals });
 }

@@ -10,8 +10,8 @@ function readSession() {
   catch { return null; }
 }
 
-function authHeaders(session) {
-  return { "Content-Type": "application/json", "x-staff-id": session.id, "x-staff-token": session.token };
+function authHeaders() {
+  return { "Content-Type": "application/json" };
 }
 
 function StaffLogin({ onAuthed }) {
@@ -44,9 +44,12 @@ export default function AdminMusicLibraryPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const s = readSession();
-    if (s) setSession(s);
-    else setLoading(false);
+    const frame = window.requestAnimationFrame(() => {
+      const savedSession = readSession();
+      setSession(savedSession);
+      setLoading(Boolean(savedSession));
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
   useEffect(() => {
@@ -77,7 +80,7 @@ export default function AdminMusicLibraryPage() {
 
       {pending.map((item) => (
         <div key={item.id} style={{ border: "1px solid #ddd", borderRadius: 8, padding: 16, margin: "12px 0" }}>
-          <div style={{ fontWeight: 600, fontSize: 16 }}>"{item.title}"</div>
+          <div style={{ fontWeight: 600, fontSize: 16 }}>&ldquo;{item.title}&rdquo;</div>
           {item.composer && <div style={{ fontSize: 14, color: "#555" }}>— {item.composer}</div>}
           <div style={{ fontSize: 13, color: "#777", marginTop: 4 }}>
             Submitted by {item.submitted_by} · {new Date(item.submitted_at).toLocaleString()}

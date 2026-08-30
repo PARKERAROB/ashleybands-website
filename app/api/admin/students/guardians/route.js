@@ -1,127 +1,37 @@
-import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
-import { logAudit, staffActor } from "@/lib/auditLog";
+import { privateJson } from "@/lib/privateResponse";
 
 export const runtime = "nodejs";
 
-function text(v) {
-  return String(v || "").trim();
-}
-function normEmail(v) {
-  return text(v).toLowerCase();
-}
-function normPhone(v) {
-  return text(v).replace(/\D/g, "");
+function text(value) {
+  return String(value || "").trim();
 }
 
-// POST -> add a guardian to a student (person + contacts + trusted link).
-// body: { studentId, name, email?, phone?, role?, primary? }
-// Reuses an existing person if the email already exists as a contact.
-export async function POST(req) {
-  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.STUDENTS_WRITE);
-  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status });
-  const staff = authorization.staff;
-
-  const body = await req.json().catch(() => ({}));
+export async function POST(request) {
+  const authorization = await authorizeStaffRequest(request, STAFF_CAPABILITIES.STUDENTS_WRITE);
+  if (!authorization.ok) return privateJson({ error: authorization.error }, authorization.status);
+  const body = await request.json().catch(() => ({}));
   const studentId = text(body.studentId);
   const name = text(body.name);
-  const email = normEmail(body.email);
+  const email = text(body.email);
   const phone = text(body.phone);
-  if (!studentId || !name) {
-    return NextResponse.json({ error: "Student and guardian name are required." }, { status: 400 });
-  }
-  if (!email && !phone) {
-    return NextResponse.json({ error: "Provide at least an email or phone." }, { status: 400 });
-  }
+  if (!studentId || !name) return privateJson({ error: "Student and guardian name are required." }, 400);
+  if (!email && !phone) return privateJson({ error: "Provide at least an email or phone." }, 400);
 
-  const { data: student } = await supabaseAdmin
-    .from("portal_students")
-    .select("id")
-    .eq("id", studentId)
-    .maybeSingle();
-  if (!student) return NextResponse.json({ error: "Student not found" }, { status: 404 });
-
-  // Reuse an existing person if this email is already on file.
-  let personId = null;
-  if (email) {
-    const { data: existingContact } = await supabaseAdmin
-      .from("portal_contact_methods")
-      .select("person_id")
-      .eq("contact_type", "email")
-      .eq("value_normalized", email)
-      .maybeSingle();
-    if (existingContact) personId = existingContact.person_id;
-  }
-
-  if (!personId) {
-    const sourceKey = `guardian:manual:${email || normPhone(phone)}:${Date.now().toString(36)}`;
-    const { data: person, error: personError } = await supabaseAdmin
-      .from("portal_people")
-      .insert({
-        source_person_key: sourceKey,
-        person_type: "guardian",
-        display_name: name,
-        first_name: name.split(/\s+/)[0] || name,
-        last_name: name.split(/\s+/).slice(1).join(" ") || null,
-        source: "manual"
-      })
-      .select("id")
-      .single();
-    if (personError) return NextResponse.json({ error: personError.message }, { status: 500 });
-    personId = person.id;
-
-    if (email) {
-      await supabaseAdmin.from("portal_contact_methods").insert({
-        person_id: personId,
-        contact_type: "email",
-        value_display: text(body.email),
-        value_normalized: email,
-        verification_status: "unverified",
-        source: "manual"
-      });
-    }
-    if (phone) {
-      await supabaseAdmin.from("portal_contact_methods").insert({
-        person_id: personId,
-        contact_type: "phone",
-        value_display: phone,
-        value_normalized: normPhone(phone),
-        verification_status: "unverified",
-        source: "manual"
-      });
-    }
-  }
-
-  // Trusted link (idempotent: unique on student_id + person_id).
-  const { error: linkError } = await supabaseAdmin
-    .from("portal_student_people")
-    .upsert(
-      {
-        student_id: studentId,
-        person_id: personId,
-        role: text(body.role) || "Parent",
-        relationship_status: "trusted",
-        primary_contact: Boolean(body.primary),
-        source: "manual"
-      },
-      { onConflict: "student_id,person_id" }
-    );
-  if (linkError) return NextResponse.json({ error: linkError.message }, { status: 500 });
-
-  await logAudit({
-    actor: staffActor(staff),
-    action: "insert",
-    table: "portal_student_people",
-    recordId: `${studentId}:${personId}`,
-    route: "/api/admin/students/guardians",
-    changes: {
-      student_id: { old: null, new: studentId },
-      person_id: { old: null, new: personId },
-      name: { old: null, new: name },
-      role: { old: null, new: text(body.role) || "Parent" }
-    }
+  const { data, error } = await supabaseAdmin.rpc("staff_add_guardian_with_audit", {
+    p_student_id: studentId,
+    p_name: name,
+    p_email: email || null,
+    p_phone: phone || null,
+    p_role: text(body.role) || "Parent",
+    p_primary: Boolean(body.primary),
+    p_actor_staff_id: authorization.staff.id,
+    p_route: "/api/admin/students/guardians",
   });
-
-  return NextResponse.json({ ok: true, personId });
+  if (error) {
+    console.error("[staff-add-guardian]", error.message);
+    return privateJson({ error: "The guardian link was not completed." }, 400);
+  }
+  return privateJson({ ok: true, personId: data?.personId || null });
 }

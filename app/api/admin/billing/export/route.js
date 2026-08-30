@@ -12,7 +12,7 @@ function csvCell(value) {
 
 // GET /api/admin/billing/export -> CSV of every payment (financial record).
 export async function GET(req) {
-  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.BILLING_EXPORT);
+  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.BILLING_EXPORT, { scope: { type: "global" } });
   if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status, headers: { "Cache-Control": "private, no-store" } });
 
   const { data: payments, error } = await supabaseAdmin

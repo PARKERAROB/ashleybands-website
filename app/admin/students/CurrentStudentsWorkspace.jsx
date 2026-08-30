@@ -7,7 +7,6 @@ import { staffAuthHeaders } from "@/lib/staffSession";
 import {
   compareStudents,
   contactReady,
-  emailValuesForStudents,
   needDescription,
 } from "./current-students.logic.mjs";
 import styles from "../current-students-prototype/current-students-prototype.module.css";
@@ -38,32 +37,58 @@ function dateLabel(value) {
   return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(new Date(value));
 }
 
-export default function CurrentStudentsWorkspace({ initialStudentId = "" }) {
+export default function CurrentStudentsWorkspace(props) {
   return (
     <StaffGate>
-      {(session, signOut) => <LiveWorkspace session={session} signOut={signOut} initialStudentId={initialStudentId} />}
+      {(session, signOut) => <LiveWorkspace session={session} signOut={signOut} {...props} />}
     </StaffGate>
   );
 }
 
-function LiveWorkspace({ session, signOut, initialStudentId }) {
-  const [view, setView] = useState("active");
+function LiveWorkspace({
+  session,
+  signOut,
+  initialView = "active",
+  initialStudentId = "",
+  initialSearch = "",
+  initialGrade = ALL,
+  initialEnsemble = ALL,
+  initialInstrument = ALL,
+  initialNeed = ALL,
+  initialSort = "last-asc",
+}) {
+  const [view, setView] = useState(initialView === "inactive" ? "inactive" : "active");
   const [students, setStudents] = useState([]);
   const [counts, setCounts] = useState({ active: 0, inactive: 0 });
   const [updatedAt, setUpdatedAt] = useState(null);
   const [loadState, setLoadState] = useState({ loading: true, error: "" });
-  const [search, setSearch] = useState("");
-  const [grade, setGrade] = useState(ALL);
-  const [ensemble, setEnsemble] = useState(ALL);
-  const [instrument, setInstrument] = useState(ALL);
-  const [need, setNeed] = useState(ALL);
-  const [sortBy, setSortBy] = useState("last-asc");
+  const [search, setSearch] = useState(initialSearch);
+  const [grade, setGrade] = useState(initialGrade || ALL);
+  const [ensemble, setEnsemble] = useState(initialEnsemble || ALL);
+  const [instrument, setInstrument] = useState(initialInstrument || ALL);
+  const [need, setNeed] = useState(initialNeed || ALL);
+  const [sortBy, setSortBy] = useState(SORT_OPTIONS.some(([value]) => value === initialSort) ? initialSort : "last-asc");
   const [selectedIds, setSelectedIds] = useState([]);
   const [focusedId, setFocusedId] = useState(initialStudentId);
   const [detail, setDetail] = useState(null);
   const [detailState, setDetailState] = useState({ loading: false, error: "" });
   const [notice, setNotice] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
   const detailRef = useRef(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (view === "inactive") params.set("view", "inactive");
+    if (focusedId) params.set("student", focusedId);
+    if (search) params.set("q", search);
+    if (grade !== ALL) params.set("grade", grade);
+    if (ensemble !== ALL) params.set("ensemble", ensemble);
+    if (instrument !== ALL) params.set("instrument", instrument);
+    if (need !== ALL) params.set("need", need);
+    if (sortBy !== "last-asc") params.set("sort", sortBy);
+    const query = params.toString();
+    window.history.replaceState(null, "", `/admin/students${query ? `?${query}` : ""}`);
+  }, [ensemble, focusedId, grade, instrument, need, search, sortBy, view]);
 
   useEffect(() => {
     if (!focusedId || !detailRef.current || typeof window.matchMedia !== "function" || !window.matchMedia("(max-width: 780px)").matches) return;
@@ -90,9 +115,11 @@ function LiveWorkspace({ session, signOut, initialStudentId }) {
         setCounts(body.counts || { active: 0, inactive: 0 });
         setUpdatedAt(body.updatedAt || null);
         setLoadState({ loading: false, error: "" });
-        const requested = (body.students || []).find((student) => student.id === focusedId);
-        const first = requested || (body.students || [])[0];
-        if (first) openStudent(first.id, controller.signal);
+        const requested = focusedId ? (body.students || []).find((student) => student.id === focusedId) : null;
+        const first = (body.students || [])[0];
+        if (requested) openStudent(requested.id, controller.signal);
+        else if (focusedId) openStudent(focusedId, controller.signal, { reconcileView: true });
+        else if (first) openStudent(first.id, controller.signal);
         else { setFocusedId(""); setDetail(null); }
       })
       .catch((error) => {
@@ -101,9 +128,9 @@ function LiveWorkspace({ session, signOut, initialStudentId }) {
     return () => controller.abort();
     // The request is intentionally keyed to the authenticated session and status view.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, view]);
+  }, [session, view, reloadKey]);
 
-  function openStudent(studentId, signal) {
+  function openStudent(studentId, signal, { reconcileView = false } = {}) {
     setFocusedId(studentId);
     setDetailState({ loading: true, error: "" });
     fetch(`/api/admin/current-students/${encodeURIComponent(studentId)}`, {
@@ -116,8 +143,15 @@ function LiveWorkspace({ session, signOut, initialStudentId }) {
         return body;
       })
       .then((body) => {
-        setDetail(body.student || null);
+        const student = body.student || null;
+        setDetail(student);
         setDetailState({ loading: false, error: "" });
+        if (reconcileView && student?.status && student.status !== view) {
+          setView(student.status);
+          setStudents([]);
+          setSelectedIds([]);
+          setLoadState({ loading: true, error: "" });
+        }
       })
       .catch((error) => {
         if (error.name !== "AbortError") setDetailState({ loading: false, error: error.message });
@@ -159,6 +193,12 @@ function LiveWorkspace({ session, signOut, initialStudentId }) {
     setLoadState({ loading: true, error: "" });
   }
 
+  function closeStudent() {
+    setFocusedId("");
+    setDetail(null);
+    setDetailState({ loading: false, error: "" });
+  }
+
   function clearFilters() {
     setSearch(""); setGrade(ALL); setEnsemble(ALL); setInstrument(ALL); setNeed(ALL);
   }
@@ -174,40 +214,56 @@ function LiveWorkspace({ session, signOut, initialStudentId }) {
       : [...new Set([...current, ...visibleIds])]);
   }
 
+  async function requestContactAction(studentIds, { axis = "both", format = "emails" } = {}) {
+    const response = await fetch("/api/admin/current-students/export", {
+      method: "POST",
+      headers: { ...staffAuthHeaders(session), "Content-Type": "application/json" },
+      body: JSON.stringify({ studentIds, view, axis, format }),
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(body.error || "The contact action could not be completed.");
+    return body;
+  }
+
   async function copyEmails(axis) {
     const chosen = students.filter((student) => selectedIds.includes(student.id));
-    const values = emailValuesForStudents(chosen, axis);
-    if (!values.length) { setNotice("No matching emails are available in the selected rows."); return; }
-    await navigator.clipboard?.writeText(values.join(", "));
-    const label = axis === "student" ? "student" : axis === "guardian" ? "guardian" : "student + guardian";
-    setNotice(`${values.length} ${label} emails copied.`);
+    try {
+      const result = await requestContactAction(chosen.map((student) => student.id), { axis });
+      if (!result.emails.length) { setNotice("No matching emails are available in the selected rows."); return; }
+      await navigator.clipboard?.writeText(result.emails.join(", "));
+      const label = axis === "student" ? "student" : axis === "guardian" ? "guardian" : "student + guardian";
+      setNotice(`${result.emails.length} ${label} emails copied.`);
+    } catch (error) {
+      setNotice(error.message);
+    }
   }
 
   async function copyStudentAndGuardians(student) {
-    const values = emailValuesForStudents([student], "both");
-    if (!values.length) { setNotice(`No student or guardian email is available for ${student.displayName}.`); return; }
-    await navigator.clipboard?.writeText(values.join(", "));
-    setNotice(`${values.length} student + guardian emails copied for ${student.displayName}.`);
+    try {
+      const result = await requestContactAction([student.id], { axis: "both" });
+      if (!result.emails.length) { setNotice(`No student or guardian email is available for ${student.displayName}.`); return; }
+      await navigator.clipboard?.writeText(result.emails.join(", "));
+      setNotice(`${result.emails.length} student + guardian emails copied for ${student.displayName}.`);
+    } catch (error) {
+      setNotice(error.message);
+    }
   }
 
-  function exportList() {
+  async function exportList() {
     const chosen = students.filter((student) => selectedIds.includes(student.id));
     if (!chosen.length) { setNotice("Select at least one student first."); return; }
-    const lines = ["Student,Legal name,Grade,Ensembles,Program instrument,School email,Personal email,Student mobile,Guardians,Guardian emails,Guardian phones"];
-    for (const student of chosen) lines.push([
-      student.displayName, student.legalName, student.grade, student.ensembles.join(" + "), student.programInstrument,
-      student.schoolEmail, student.personalEmail, student.mobile,
-      student.guardians.map((guardian) => guardian.name).join(" + "),
-      student.guardians.flatMap((guardian) => guardian.emails).join(" + "),
-      student.guardians.flatMap((guardian) => guardian.phones).join(" + "),
-    ].map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(","));
-    const url = URL.createObjectURL(new Blob([lines.join("\n")], { type: "text/csv" }));
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = `${view}-students.csv`;
-    anchor.click();
-    URL.revokeObjectURL(url);
-    setNotice(`${chosen.length} contact rows exported.`);
+    try {
+      const result = await requestContactAction(chosen.map((student) => student.id), { format: "csv" });
+      const url = URL.createObjectURL(new Blob([result.csv], { type: "text/csv" }));
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = result.filename;
+      anchor.click();
+      URL.revokeObjectURL(url);
+      setNotice(`${result.count} contact rows exported.`);
+    } catch (error) {
+      setNotice(error.message);
+    }
   }
 
   return (
@@ -240,7 +296,7 @@ function LiveWorkspace({ session, signOut, initialStudentId }) {
         <p>{updatedAt ? `Current record update · ${dateLabel(updatedAt)}` : "Current operational records"}</p>
       </section>
 
-      {loadState.error ? <p className={styles.notice} role="alert">{loadState.error}</p> : null}
+      {loadState.error ? <div className={styles.loadError} role="alert"><span>{loadState.error}</span><button type="button" onClick={() => { setLoadState({ loading: true, error: "" }); setReloadKey((value) => value + 1); }}>Retry</button></div> : null}
 
       <div className={`${styles.workspace} ${focusedId ? styles.withDetail : ""}`}>
         <aside className={styles.filters} aria-label="Student filters">
@@ -295,8 +351,8 @@ function LiveWorkspace({ session, signOut, initialStudentId }) {
 
         {focusedId ? (
           detailState.loading ? <DetailMessage detailRef={detailRef} message="Loading connected student record…" />
-            : detailState.error ? <DetailMessage detailRef={detailRef} message={detailState.error} />
-              : detail ? <StudentDetail detailRef={detailRef} student={detail} onClose={() => { setFocusedId(""); setDetail(null); }} onCopyContacts={() => copyStudentAndGuardians(detail)} /> : null
+            : detailState.error ? <DetailMessage detailRef={detailRef} message={detailState.error} onClose={closeStudent} />
+              : detail ? <StudentDetail detailRef={detailRef} student={detail} onClose={closeStudent} onCopyContacts={() => copyStudentAndGuardians(detail)} /> : null
         ) : null}
       </div>
     </main>
@@ -307,8 +363,8 @@ function FilterSelect({ label, value, onChange, options }) {
   return <label><span>{label}</span><select value={value} onChange={(event) => onChange(event.target.value)}><option>{ALL}</option>{options.map((option) => <option key={option}>{option}</option>)}</select></label>;
 }
 
-function DetailMessage({ message, detailRef }) {
-  return <aside ref={detailRef} tabIndex={-1} className={styles.detail}><section className={styles.detailSection}><p>{message}</p></section></aside>;
+function DetailMessage({ message, detailRef, onClose }) {
+  return <aside ref={detailRef} tabIndex={-1} className={styles.detail}>{onClose ? <header><div><span>Student record</span><h2>Not available</h2></div><button onClick={onClose} aria-label="Close student details">×</button></header> : null}<section className={styles.detailSection}><p>{message}</p>{onClose ? <button type="button" className={styles.detailContactAction} onClick={onClose}>Clear selected student</button> : null}</section></aside>;
 }
 
 function StudentDetail({ student, onClose, onCopyContacts, detailRef }) {
@@ -351,9 +407,9 @@ function StudentDetail({ student, onClose, onCopyContacts, detailRef }) {
         <DetailLine label="School email" value={student.schoolEmail || "Missing"} />
         <DetailLine label="Personal email" value={student.personalEmail || "Not provided"} />
         <DetailLine label="Student mobile" value={student.mobile || "Not provided"} />
-        {student.guardians.length ? student.guardians.map((guardian, index) => (
+        {student.guardians.length ? student.guardians.map((guardian) => (
           <div className={styles.guardianCard} key={guardian.id}>
-            <span>{index === 0 ? "Primary + emergency" : guardian.relationship}</span>
+            <span>{guardian.primary ? "Primary contact" : guardian.relationship || "Guardian"}</span>
             <strong>{guardian.name}</strong>
             <p>{guardian.emails.join(", ") || "No email"} · {guardian.phones.join(", ") || "No phone"}</p>
           </div>
@@ -369,6 +425,8 @@ function StudentDetail({ student, onClose, onCopyContacts, detailRef }) {
           {student.access?.assets !== false ? <WorkCard label="Assets" value={`${student.assets.length} connected`} href={`/admin/assets?student=${encodeURIComponent(student.id)}`} /> : null}
           {student.access?.memberships !== false ? <WorkCard label="Memberships" value={`${student.programMemberships.length} current`} href={`/admin/ensembles?view=students&student=${encodeURIComponent(student.id)}`} /> : null}
           {student.forms ? <WorkCard label="Forms" value={student.forms.available ? `${student.forms.action} need action` : "No current requirements"} href={`/admin/forms?student=${encodeURIComponent(student.id)}`} /> : null}
+          {student.access?.attendance !== false ? <WorkCard label="Full program calendar" value="All program dates" href="/calendar" /> : null}
+          {student.access?.communications !== false ? <WorkCard label="Communication" value="Student + guardians" href={`/admin/broadcast?student=${encodeURIComponent(student.id)}&name=${encodeURIComponent(student.displayName)}`} /> : null}
         </div>
         {student.needs.length ? <div className={styles.openNeeds}><span>Open follow-up</span><ul>{student.needs.map((item) => <li key={item}><strong>{item}</strong><small>{needDescription(item)}</small></li>)}</ul></div> : <div className={styles.clearNeeds}>No open follow-up in the connected records</div>}
       </DetailSection>
@@ -389,6 +447,14 @@ function StudentDetail({ student, onClose, onCopyContacts, detailRef }) {
         <DetailLine label="Confirmed gifts" value={money(student.finances.confirmedSponsorshipCents)} />
         {student.finances.legacySponsorshipCreditCents ? <DetailLine label="Older gift credits" value={`${money(student.finances.legacySponsorshipCreditCents)} · awaiting reconciliation`} /> : null}
       </DetailSection> : null}
+
+      <DetailSection title="Status history">
+        {student.statusHistory.length ? student.statusHistory.map((event) => <div className={styles.guardianCard} key={event.id}>
+          <span>{dateLabel(event.effective_at)} · {event.changed_by || event.source}</span>
+          <strong>{event.from_status || "new"} → {event.to_status}</strong>
+          <p>{event.reason}</p>
+        </div>) : <DetailLine label="History" value="No prior status transition is recorded" />}
+      </DetailSection>
     </aside>
   );
 }

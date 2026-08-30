@@ -13,7 +13,7 @@ function sum(rows, field) {
 // Staff-only marching roster joined to the existing funding ledger. The roster
 // owns who is marching; the ledger owns goals and money received.
 export async function GET(request) {
-  const authorization = await authorizeStaffRequest(request, STAFF_CAPABILITIES.FUNDING_READ);
+  const authorization = await authorizeStaffRequest(request, STAFF_CAPABILITIES.FUNDING_READ, { scope: { type: "global" } });
   if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status, headers: { "Cache-Control": "private, no-store" } });
   const staff = authorization.staff;
 

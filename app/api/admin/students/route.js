@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
-import { logAudit, staffActor } from "@/lib/auditLog";
+import { logAuditRequired, staffActor } from "@/lib/auditLog";
+import { privateJson } from "@/lib/privateResponse";
 
 export const runtime = "nodejs";
 
@@ -15,20 +15,31 @@ function buildDisplayName({ preferredFirst, legalFirst, legalLast }) {
 // GET ?q=  -> search students (with guardians). No q -> recent/first 50.
 export async function GET(req) {
   const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.STUDENTS_READ);
-  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status });
+  if (!authorization.ok) return privateJson({ error: authorization.error }, authorization.status);
   const staff = authorization.staff;
 
-  const q = text(new URL(req.url).searchParams.get("q")).toLowerCase();
+  const url = new URL(req.url);
+  const q = text(url.searchParams.get("q")).toLowerCase();
+  const requestedStatus = text(url.searchParams.get("status")) || "active";
+  const allowedStatuses = new Set(["active", "inactive", "inactive-graduated", "all"]);
+  if (!allowedStatuses.has(requestedStatus)) {
+    return privateJson({ error: "Invalid student status." }, 400);
+  }
 
   let query = supabaseAdmin
     .from("portal_students")
     .select("id, source_student_id, legal_first, legal_last, preferred_first, display_name, grade_fall26, school_email, cell_phone, status, source")
     .order("legal_last", { ascending: true })
     .limit(50);
+  if (requestedStatus === "inactive") {
+    query = query.in("status", ["inactive", "inactive-dropped", "inactive-moved"]);
+  } else if (requestedStatus !== "all") {
+    query = query.eq("status", requestedStatus);
+  }
   if (q) query = query.or(`display_name.ilike.%${q}%,legal_last.ilike.%${q}%,school_email.ilike.%${q}%`);
 
   const { data: students, error } = await query;
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return privateJson({ error: "Student records could not be loaded." }, 500);
 
   // Attach guardians (trusted links + contacts) for the returned students.
   const ids = (students || []).map((s) => s.id);
@@ -95,30 +106,37 @@ export async function GET(req) {
 
   // Page-level read log (not per-query): one entry per admin view of student
   // PII (roster/search + embedded guardian contacts).
-  await logAudit({
+  try {
+    await logAuditRequired({
     actor: staffActor(staff),
     action: "view",
     table: "portal_students",
     recordId: q ? `search:${q}` : null,
     route: "/api/admin/students"
-  });
+    });
+  } catch {
+    return privateJson({ error: "This sensitive read could not be durably attributed." }, 503);
+  }
 
-  return NextResponse.json({ students: result });
+  return privateJson({ students: result });
 }
 
 // POST -> create a student. body: legalFirst, legalLast, preferredFirst?, gradeFall26?, schoolEmail?, cellPhone?, status?
 export async function POST(req) {
   const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.STUDENTS_WRITE);
-  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status });
+  if (!authorization.ok) return privateJson({ error: authorization.error }, authorization.status);
   const staff = authorization.staff;
 
   const body = await req.json().catch(() => ({}));
   const legalFirst = text(body.legalFirst);
   const legalLast = text(body.legalLast);
   if (!legalFirst || !legalLast) {
-    return NextResponse.json({ error: "First and last name are required." }, { status: 400 });
+    return privateJson({ error: "First and last name are required." }, 400);
   }
   const schoolEmail = text(body.schoolEmail).toLowerCase();
+  if (body.status != null && text(body.status) !== "active") {
+    return privateJson({ error: "Create the current student as active, then record any status transition with a reason." }, 400);
+  }
   // Match roster convention: school email is the source_student_id when present.
   const sourceStudentId = schoolEmail || `${legalFirst}${legalLast}`.toLowerCase().replace(/[^a-z0-9]/g, "") + `-manual-${Date.now().toString(36)}`;
 
@@ -128,7 +146,17 @@ export async function POST(req) {
     .eq("source_student_id", sourceStudentId)
     .maybeSingle();
   if (existing) {
-    return NextResponse.json({ error: "A student with this email already exists." }, { status: 409 });
+    return privateJson({ error: "A student with this email already exists." }, 409);
+  }
+
+  try {
+    await logAuditRequired({
+      actor: staffActor(staff), action: "insert_requested", table: "portal_students",
+      recordId: sourceStudentId, route: "/api/admin/students",
+      changes: { legal_first: { old: null, new: legalFirst }, legal_last: { old: null, new: legalLast }, school_email: { old: null, new: schoolEmail || null } },
+    });
+  } catch {
+    return privateJson({ error: "The student was not created because the action could not be durably attributed." }, 503);
   }
 
   const { data, error } = await supabaseAdmin
@@ -142,95 +170,59 @@ export async function POST(req) {
       grade_fall26: text(body.gradeFall26) || null,
       school_email: schoolEmail || null,
       cell_phone: text(body.cellPhone) || null,
-      status: text(body.status) || "active",
+      status: "active",
       source: "manual",
       notes: text(body.notes) || `Added via admin by ${staff.display_name}`
     })
     .select("id")
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return privateJson({ error: "The student could not be created." }, 500);
 
-  await logAudit({
-    actor: staffActor(staff),
-    action: "insert",
-    table: "portal_students",
-    recordId: data.id,
-    route: "/api/admin/students",
-    changes: {
-      legal_first: { old: null, new: legalFirst },
-      legal_last: { old: null, new: legalLast },
-      school_email: { old: null, new: schoolEmail || null }
-    }
-  });
-
-  return NextResponse.json({ id: data.id });
+  return privateJson({ id: data.id });
 }
 
 // PATCH -> update a student. body: id + any of the editable fields.
 export async function PATCH(req) {
   const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.STUDENTS_WRITE);
-  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status });
+  if (!authorization.ok) return privateJson({ error: authorization.error }, authorization.status);
   const staff = authorization.staff;
 
   const body = await req.json().catch(() => ({}));
   const id = text(body.id);
-  if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
-
-  const { data: current, error: loadError } = await supabaseAdmin
-    .from("portal_students")
-    .select("legal_first, legal_last, preferred_first, grade_fall26, school_email, cell_phone, status, display_name")
-    .eq("id", id)
-    .maybeSingle();
-  if (loadError || !current) return NextResponse.json({ error: "Student not found" }, { status: 404 });
+  if (!id) return privateJson({ error: "Missing id" }, 400);
 
   const update = {};
-  if (body.legalFirst != null) update.legal_first = text(body.legalFirst);
-  if (body.legalLast != null) update.legal_last = text(body.legalLast);
+  if (body.legalFirst != null) {
+    update.legal_first = text(body.legalFirst);
+    if (!update.legal_first) return privateJson({ error: "Legal first name is required." }, 400);
+  }
+  if (body.legalLast != null) {
+    update.legal_last = text(body.legalLast);
+    if (!update.legal_last) return privateJson({ error: "Legal last name is required." }, 400);
+  }
   if (body.preferredFirst != null) update.preferred_first = text(body.preferredFirst) || null;
   if (body.gradeFall26 != null) update.grade_fall26 = text(body.gradeFall26) || null;
   if (body.schoolEmail != null) update.school_email = text(body.schoolEmail).toLowerCase() || null;
   if (body.cellPhone != null) update.cell_phone = text(body.cellPhone) || null;
-  if (body.status != null) update.status = text(body.status) || null;
+  const nextStatus = body.status != null ? text(body.status) : null;
+  if (nextStatus && !["active", "inactive", "inactive-graduated"].includes(nextStatus)) {
+    return privateJson({ error: "Invalid student status." }, 400);
+  }
+  const statusReason = text(body.statusReason);
 
-  // Recompute display_name from the resulting name fields.
-  update.display_name = buildDisplayName({
-    preferredFirst: update.preferred_first !== undefined ? update.preferred_first : current.preferred_first,
-    legalFirst: update.legal_first !== undefined ? update.legal_first : current.legal_first,
-    legalLast: update.legal_last !== undefined ? update.legal_last : current.legal_last
+  const { error } = await supabaseAdmin.rpc("update_student_profile_and_status_with_audit", {
+    p_student_id: id,
+    p_profile: update,
+    p_to_status: nextStatus,
+    p_reason: statusReason || null,
+    p_actor_staff_id: staff.id,
+    p_route: "/api/admin/students",
   });
-
-  const nextStatus = Object.hasOwn(update, "status") ? update.status : undefined;
-  if (nextStatus !== undefined) delete update.status;
-  if (Object.keys(update).length) {
-    const { error } = await supabaseAdmin.from("portal_students").update(update).eq("id", id);
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-  if (nextStatus !== undefined) {
-    const { error: statusError } = await supabaseAdmin.rpc("portal_set_student_status_and_reconcile", {
-      p_student_id: id,
-      p_status: nextStatus,
-    });
-    if (statusError) return NextResponse.json({ error: statusError.message }, { status: 500 });
-    update.status = nextStatus;
+  if (error) {
+    console.error("[student-profile-update]", error.message);
+    return privateJson({ error: "The student changes were not saved." }, 400);
   }
 
-  const changes = {};
-  for (const field of Object.keys(update)) {
-    const oldValue = current[field] ?? null;
-    const newValue = update[field] ?? null;
-    if (oldValue !== newValue) changes[field] = { old: oldValue, new: newValue };
-  }
-  if (Object.keys(changes).length) {
-    await logAudit({
-      actor: staffActor(staff),
-      action: "update",
-      table: "portal_students",
-      recordId: id,
-      route: "/api/admin/students",
-      changes
-    });
-  }
-
-  return NextResponse.json({ ok: true });
+  return privateJson({ ok: true });
 }

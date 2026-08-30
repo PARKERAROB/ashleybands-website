@@ -34,15 +34,19 @@ export async function GET(request) {
   try {
     const url = new URL(request.url);
     const studentId = url.searchParams.get("student") || "";
+    const assetId = url.searchParams.get("asset") || "";
     const requestedCategory = url.searchParams.get("category") || "";
     const requestedStatus = url.searchParams.get("status") || "";
+    let assetQuery = supabaseAdmin.from("assets")
+      .select("id,asset_type,asset_tag,display_name,lifecycle_status,operational_status,condition_summary,location,source_system,source_key,last_verified_at,source_updated_at,updated_at,metadata,asset_instruments(instrument_type,brand,model,model_markings,serial_number,serial_location,finish,key_pitch,level,play_status,repair_needed,repair_priority,visible_issues),asset_locks(serial_number,confidence,inventoried),asset_lockers(locker_prefix,locker_number,bank_label,notes),asset_tuners(tuner_number,model,physical_status,notes),asset_music(title,composer,arranger,publisher,catalog_number,grade_level,copy_count,notes),asset_uniforms(uniform_type,piece_number,size_label,style_label,notes)")
+      .order("asset_type", { ascending: true })
+      .order("display_name", { ascending: true })
+      .limit(2000);
+    assetQuery = assetId
+      ? assetQuery.eq("id", assetId)
+      : assetQuery.eq("lifecycle_status", "active");
     const [{ data: assets, error: assetError }, { data: assignments, error: assignmentError }, { data: requestedStudent, error: studentError }] = await Promise.all([
-      supabaseAdmin.from("assets")
-        .select("id,asset_type,asset_tag,display_name,lifecycle_status,operational_status,condition_summary,location,source_system,source_key,last_verified_at,source_updated_at,updated_at,metadata,asset_instruments(instrument_type,brand,model,model_markings,serial_number,serial_location,finish,key_pitch,level,play_status,repair_needed,repair_priority,visible_issues),asset_locks(serial_number,confidence,inventoried)")
-        .eq("lifecycle_status", "active")
-        .order("asset_type", { ascending: true })
-        .order("display_name", { ascending: true })
-        .limit(2000),
+      assetQuery,
       supabaseAdmin.from("asset_assignments")
         .select("id,asset_id,student_id,holder_label,starts_at,ends_at,assignment_status,source_system,source_ref,updated_at,portal_students(id,display_name,status)")
         .is("ends_at", null)
@@ -61,6 +65,10 @@ export async function GET(request) {
       const holderRow = Array.isArray(assignment?.portal_students) ? assignment.portal_students[0] : assignment?.portal_students;
       const instrument = Array.isArray(asset.asset_instruments) ? asset.asset_instruments[0] : asset.asset_instruments;
       const lock = Array.isArray(asset.asset_locks) ? asset.asset_locks[0] : asset.asset_locks;
+      const locker = Array.isArray(asset.asset_lockers) ? asset.asset_lockers[0] : asset.asset_lockers;
+      const tuner = Array.isArray(asset.asset_tuners) ? asset.asset_tuners[0] : asset.asset_tuners;
+      const music = Array.isArray(asset.asset_music) ? asset.asset_music[0] : asset.asset_music;
+      const uniform = Array.isArray(asset.asset_uniforms) ? asset.asset_uniforms[0] : asset.asset_uniforms;
       const category = CATEGORY[asset.asset_type] || { id: asset.asset_type, label: title(asset.asset_type), connected: true, dedicatedHref: "" };
       const details = [];
       if (instrument) {
@@ -68,8 +76,10 @@ export async function GET(request) {
         if (instrument.repair_needed) details.push(["Repair", instrument.repair_needed]);
       }
       if (lock) details.push(["Serial", lock.serial_number || "Not recorded"], ["Inventoried", lock.inventoried == null ? "Not recorded" : lock.inventoried ? "Yes" : "No"]);
-      if (asset.asset_type === "tuner") details.push(["Tuner number", asset.metadata?.tuner_number || asset.asset_tag || "Not recorded"]);
-      if (asset.asset_type === "locker") details.push(["Locker", asset.metadata?.locker_number || asset.asset_tag || "Not recorded"]);
+      if (tuner) details.push(["Tuner number", tuner.tuner_number || asset.asset_tag || "Not recorded"], ["Physical status", tuner.physical_status || "Not recorded"]);
+      if (locker) details.push(["Locker", [locker.locker_prefix, locker.locker_number].filter(Boolean).join(" ") || asset.asset_tag || "Not recorded"]);
+      if (music) details.push(["Composer", music.composer || "Not recorded"], ["Catalog", music.catalog_number || "Not recorded"]);
+      if (uniform) details.push(["Uniform type", uniform.uniform_type || "Not recorded"], ["Size", uniform.size_label || "Not recorded"]);
       const state = stateFor(asset, assignment);
       return {
         id: asset.id,
@@ -134,13 +144,63 @@ export async function GET(request) {
       connected: true,
       dateLabel: allRecords.find((record) => record.source === source && record.sourceUpdatedAt === updatedAt)?.sourceDateLabel || "Imported",
     }));
+    let history = null;
+    if (assetId) {
+      const [historyAssignments, events, relationships] = await Promise.all([
+        supabaseAdmin.from("asset_assignments")
+          .select("id,student_id,program_group_id,holder_label,starts_at,ends_at,assignment_status,source_system,source_ref,notes,created_at,updated_at,portal_students(id,display_name,status),program_groups(id,name,status)")
+          .eq("asset_id", assetId)
+          .order("created_at", { ascending: false }),
+        supabaseAdmin.from("asset_events")
+          .select("id,event_type,occurred_at,actor_staff_id,source_system,source_ref,summary,details,created_at,staff(display_name)")
+          .eq("asset_id", assetId)
+          .order("occurred_at", { ascending: false }),
+        supabaseAdmin.from("asset_relationships")
+          .select("id,asset_id,related_asset_id,relationship_type,starts_at,ends_at,source_system,created_at")
+          .or(`asset_id.eq.${assetId},related_asset_id.eq.${assetId}`)
+          .order("created_at", { ascending: false }),
+      ]);
+      if (historyAssignments.error || events.error || relationships.error) throw new Error("asset-history-read");
+      history = {
+        assignments: historyAssignments.data || [],
+        events: events.data || [],
+        relationships: relationships.data || [],
+      };
+    }
     await logAudit({
       actor: staffActor(authorization.staff), action: "view",
-      table: "assets,asset_assignments", recordId: studentId || requestedCategory || "current-assets",
+      table: history ? "assets,asset_assignments,asset_events,asset_relationships" : "assets,asset_assignments",
+      recordId: assetId || studentId || requestedCategory || "current-assets",
       route: "/api/admin/assets", changes: { student_scope: studentId || null, category: requestedCategory || null },
     });
-    return privateJson({ records, categories, students, requestedStudent: requestedStudent ? { id: requestedStudent.id, name: requestedStudent.display_name } : null, summary, sourceFreshness });
+    return privateJson({ records, categories, students, requestedStudent: requestedStudent ? { id: requestedStudent.id, name: requestedStudent.display_name } : null, summary, sourceFreshness, history });
   } catch {
     return privateJson({ error: "Could not load current asset records." }, 500);
   }
+}
+
+export async function POST(request) {
+  const body = await request.json().catch(() => ({}));
+  const operation = String(body.operation || "").trim().toLowerCase();
+  const assignmentOperation = ["assign", "transfer", "return"].includes(operation);
+  const capability = assignmentOperation ? STAFF_CAPABILITIES.ASSETS_ASSIGN : STAFF_CAPABILITIES.ASSETS_WRITE;
+  const authorization = await authorizeStaffRequest(request, capability);
+  if (!authorization.ok) return privateJson({ error: authorization.error }, authorization.status);
+  const assetId = String(body.assetId || "").trim();
+  const note = String(body.note || "").trim().slice(0, 500);
+  if (!assetId || !["assign", "transfer", "return", "condition", "missing"].includes(operation) || !note) {
+    return privateJson({ error: "A valid asset, operation, and note are required." }, 400);
+  }
+  const { data, error } = await supabaseAdmin.rpc("record_asset_operation_with_audit", {
+    p_asset_id: assetId,
+    p_operation: operation,
+    p_student_id: body.studentId ? String(body.studentId) : null,
+    p_condition_summary: String(body.condition || "").trim().slice(0, 500),
+    p_operational_status: String(body.operationalStatus || "").trim().slice(0, 100),
+    p_note: note,
+    p_actor_staff_id: authorization.staff.id,
+    p_route: "/api/admin/assets",
+  });
+  if (error) return privateJson({ error: "Could not record the asset operation." }, 409);
+  return privateJson(data);
 }

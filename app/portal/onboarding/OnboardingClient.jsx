@@ -128,10 +128,12 @@ export default function OnboardingClient() {
   );
   const musicComplete = Boolean(form?.primaryInstrument && form?.originSchool && outsideCountyComplete);
   const requiredRecordComplete = Boolean(
-    form?.guardian1Name.trim() && form?.guardian1Email.trim() && form?.guardian1Phone.trim() && musicComplete,
+    form?.guardian1Name.trim() && form?.guardian1Relationship.trim()
+      && form?.guardian1Email.trim() && form?.guardian1Phone.trim() && musicComplete,
   );
   const canContinue = stepIndex === 0 ? true
-    : stepIndex === 2 ? Boolean(form?.guardian1Name.trim() && form?.guardian1Email.trim() && form?.guardian1Phone.trim())
+    : stepIndex === 2 ? Boolean(form?.guardian1Name.trim() && form?.guardian1Relationship.trim()
+      && form?.guardian1Email.trim() && form?.guardian1Phone.trim())
       : stepIndex === 3 ? musicComplete
         : stepIndex === 5 ? Boolean(form?.accurate && requiredRecordComplete) : true;
 

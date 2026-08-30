@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
+import { PrivateResponse as NextResponse, privateServerError } from "@/lib/privateResponse";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { sendPortalReviewAlert } from "@/lib/portalEmail";
 import { readPortalSession } from "@/lib/portalTokens";
-import { logAudit } from "@/lib/auditLog";
+import { logAuditRequired } from "@/lib/auditLog";
 
 export const runtime = "nodejs";
 
@@ -10,13 +10,15 @@ function normalizePhone(value) {
   return String(value || "").replace(/[^0-9]/g, "");
 }
 
-async function trustedStudentAccess(personId, studentId) {
+async function verifiedGuardianAccess(personId, studentId) {
   const { data } = await supabaseAdmin
     .from("portal_student_people")
-    .select("id, portal_students(display_name)")
+    .select("id,assurance_level,portal_students(display_name),portal_people!inner(person_type)")
     .eq("person_id", personId)
     .eq("student_id", studentId)
     .eq("relationship_status", "trusted")
+    .in("assurance_level", ["medium", "high"])
+    .eq("portal_people.person_type", "guardian")
     .maybeSingle();
   return data || null;
 }
@@ -45,8 +47,8 @@ export async function POST(request) {
     return NextResponse.json({ error: "Enter a phone or email for the guardian." }, { status: 400 });
   }
 
-  const link = await trustedStudentAccess(session.personId, studentId);
-  if (!link) return NextResponse.json({ error: "Student access not found." }, { status: 403 });
+  const link = await verifiedGuardianAccess(session.personId, studentId);
+  if (!link) return NextResponse.json({ error: "A verified guardian must make this change." }, { status: 403 });
 
   const studentName = link.portal_students?.display_name || "this student";
   const emailNorm = email.toLowerCase();
@@ -76,6 +78,29 @@ export async function POST(request) {
       .limit(1)
       .maybeSingle();
     if (cm) personId = cm.person_id;
+  }
+  if (personId) {
+    const { data: resolvedPerson } = await supabaseAdmin
+      .from("portal_people")
+      .select("person_type")
+      .eq("id", personId)
+      .maybeSingle();
+    if (resolvedPerson?.person_type === "student") {
+      return NextResponse.json({ error: "Use an adult guardian contact for this connection." }, { status: 409 });
+    }
+  }
+
+  try {
+    await logAuditRequired({
+      actor: { type: "parent", id: session.personId, name: session.email },
+      action: "add_guardian_requested",
+      table: "portal_student_people",
+      recordId: studentId,
+      route: "/api/portal/guardian-request",
+      changes: { studentId, relationship, phone: Boolean(phone), email: Boolean(email) },
+    });
+  } catch (error) {
+    return privateServerError("guardian-request-audit", error, "Could not add this guardian.");
   }
 
   // 2) Create the person + contact methods if new.
@@ -114,20 +139,31 @@ export async function POST(request) {
   // 3) Grant the TRUSTED student link (flip an existing link, or create one).
   const { data: existingLink } = await supabaseAdmin
     .from("portal_student_people")
-    .select("id")
+    .select("id,assurance_level")
     .eq("student_id", studentId)
     .eq("person_id", personId)
     .maybeSingle();
   if (existingLink) {
     await supabaseAdmin
       .from("portal_student_people")
-      .update({ relationship_status: "trusted", role: relationship || null, updated_at: nowIso })
+      .update({
+        relationship_status: "trusted",
+        role: relationship || null,
+        assurance_level: existingLink.assurance_level === "high" ? "high" : "medium",
+        trust_source: "trusted_guardian_add",
+        assured_at: nowIso,
+        assured_by: session.personId,
+        source: "portal_self_add",
+        updated_at: nowIso,
+      })
       .eq("id", existingLink.id);
   } else {
     const { error: linkError } = await supabaseAdmin.from("portal_student_people").insert({
       student_id: studentId, person_id: personId,
       relationship_status: "trusted", role: relationship || null,
-      primary_contact: false, source: "portal_self_add"
+      primary_contact: false, source: "portal_self_add",
+      assurance_level: "medium", trust_source: "trusted_guardian_add",
+      assured_at: nowIso, assured_by: session.personId,
     });
     if (linkError) return NextResponse.json({ error: "Could not grant access." }, { status: 500 });
   }
@@ -204,15 +240,6 @@ export async function POST(request) {
     // non-fatal
   }
 
-  await logAudit({
-    actor: { type: "parent", id: session.personId, name: session.email },
-    action: "insert",
-    table: "portal_people",
-    recordId: personId,
-    route: "/api/portal/guardian-request",
-    changes: { studentId, relationship, phone: Boolean(phone), email: Boolean(email) }
-  });
-
   return NextResponse.json({ ok: true, granted: true });
 }
 
@@ -233,17 +260,20 @@ export async function PATCH(request) {
   if (!studentId || !guardianId) return NextResponse.json({ error: "Guardian record not found." }, { status: 400 });
   if (!name) return NextResponse.json({ error: "Enter the guardian's name." }, { status: 400 });
   if (!phone && !email) return NextResponse.json({ error: "Enter a phone or email for the guardian." }, { status: 400 });
-  const access = await trustedStudentAccess(session.personId, studentId);
-  if (!access) return NextResponse.json({ error: "Student access not found." }, { status: 403 });
+  const access = await verifiedGuardianAccess(session.personId, studentId);
+  if (!access) return NextResponse.json({ error: "A verified guardian must make this change." }, { status: 403 });
 
   const { data: guardianLink } = await supabaseAdmin
     .from("portal_student_people")
-    .select("id, role")
+    .select("id,role,portal_people(person_type)")
     .eq("student_id", studentId)
     .eq("person_id", guardianId)
     .eq("relationship_status", "trusted")
     .maybeSingle();
-  if (!guardianLink) return NextResponse.json({ error: "Guardian record not found." }, { status: 404 });
+  const linkedPerson = Array.isArray(guardianLink?.portal_people) ? guardianLink.portal_people[0] : guardianLink?.portal_people;
+  if (!guardianLink || linkedPerson?.person_type === "student") {
+    return NextResponse.json({ error: "Guardian record not found." }, { status: 404 });
+  }
 
   const { data: person } = await supabaseAdmin
     .from("portal_people")
@@ -265,6 +295,19 @@ export async function PATCH(request) {
   };
   const now = new Date().toISOString();
   const nameParts = name.split(/\s+/);
+
+  try {
+    await logAuditRequired({
+      actor: { type: "parent", id: session.personId, name: session.email },
+      action: "update_guardian_requested",
+      table: "portal_people",
+      recordId: guardianId,
+      route: "/api/portal/guardian-request",
+      changes: { old: oldValue, new: { name, relationship, phone, email }, studentId },
+    });
+  } catch (error) {
+    return privateServerError("guardian-request-audit", error, "Could not update this guardian.");
+  }
 
   const { error: personError } = await supabaseAdmin
     .from("portal_people")
@@ -367,15 +410,6 @@ export async function PATCH(request) {
     await supabaseAdmin.from("portal_update_requests").update({ review_item_id: reviewItem.id }).eq("id", updateRequest.id);
   }
 
-  await logAudit({
-    actor: { type: "parent", id: session.personId, name: session.email },
-    action: "update",
-    table: "portal_people",
-    recordId: guardianId,
-    route: "/api/portal/guardian-request",
-    changes: { old: oldValue, new: newValue, studentId }
-  });
-
   return NextResponse.json({ ok: true, updated: true });
 }
 
@@ -392,8 +426,8 @@ export async function DELETE(request) {
     return NextResponse.json({ error: "Guardian record not found." }, { status: 400 });
   }
 
-  const access = await trustedStudentAccess(session.personId, studentId);
-  if (!access) return NextResponse.json({ error: "Student access not found." }, { status: 403 });
+  const access = await verifiedGuardianAccess(session.personId, studentId);
+  if (!access) return NextResponse.json({ error: "A verified guardian must make this change." }, { status: 403 });
 
   const { data: guardianLink, error: guardianError } = await supabaseAdmin
     .from("portal_student_people")
@@ -421,6 +455,19 @@ export async function DELETE(request) {
     relationshipStatus: "trusted"
   };
   const newValue = { relationshipStatus: "superseded" };
+
+  try {
+    await logAuditRequired({
+      actor: { type: "parent", id: session.personId, name: session.email },
+      action: "remove_guardian_requested",
+      table: "portal_student_people",
+      recordId: guardianLink.id,
+      route: "/api/portal/guardian-request",
+      changes: { old: oldValue, new: newValue, studentId },
+    });
+  } catch (error) {
+    return privateServerError("guardian-request-audit", error, "Could not remove this guardian.");
+  }
 
   // Preserve the person and their links to any other students. Removing a
   // guardian here revokes only this trusted student relationship and keeps the
@@ -481,15 +528,6 @@ export async function DELETE(request) {
       .update({ review_item_id: reviewItem.id })
       .eq("id", updateRequest.id);
   }
-
-  await logAudit({
-    actor: { type: "parent", id: session.personId, name: session.email },
-    action: "update",
-    table: "portal_student_people",
-    recordId: guardianLink.id,
-    route: "/api/portal/guardian-request",
-    changes: { old: oldValue, new: newValue, studentId }
-  });
 
   return NextResponse.json({ ok: true, removed: true });
 }
