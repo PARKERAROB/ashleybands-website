@@ -24,6 +24,7 @@ jobs:
       - name: Test prototypes and domain rules
         run: |
           npm run test:onboarding
+          npm run test:onboarding-live
           npm run test:current-students-prototype
           npm run test:current-students-live
           npm run test:operations-prototype
