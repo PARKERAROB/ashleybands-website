@@ -30,13 +30,23 @@ test("the program view includes event work and student patterns", () => {
   assert.match(client, /Open live attendance tool/);
 });
 
-test("the school-day view tracks official reports without becoming their source", () => {
+test("the school-day view is built around imported Infinite Campus registers", () => {
   assert.match(client, /Infinite Campus tracking copy/);
-  assert.match(client, /Reported in Infinite Campus/);
+  assert.match(client, /Imported from Infinite Campus/);
   assert.match(client, /Infinite Campus remains official/);
-  assert.match(client, /Daily reports/);
+  assert.match(client, /Import register/);
+  assert.match(client, /Registers/);
+  assert.match(client, /Class sections/);
   assert.match(client, /Absences/);
   assert.match(client, /Tardies/);
+  assert.doesNotMatch(client, /Daily reports/);
+});
+
+test("the register model preserves official codes without inferring presence", () => {
+  for (const label of ["Absent excused", "Absent unexcused", "Absent unknown", "Absent exempt", "Off roll"]) assert.match(client, new RegExp(label));
+  assert.match(client, /Retain the original Infinite Campus code/);
+  assert.match(client, /Blank or future cells are never counted as present/);
+  assert.doesNotMatch(client, /schoolSummary|SCHOOL_REPORTS/);
 });
 
 test("command-center and student routes open the connected workspace", () => {

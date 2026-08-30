@@ -2,7 +2,7 @@ import AttendanceWorkspacePrototype from "./AttendanceWorkspacePrototype";
 
 export const metadata = {
   title: "Attendance Workspace Prototype | Ashley Bands",
-  description: "A synthetic, read-only prototype connecting program-event and school-day attendance.",
+  description: "A synthetic, read-only prototype connecting program events with imported Infinite Campus attendance registers.",
   robots: { index: false, follow: false }
 };
 

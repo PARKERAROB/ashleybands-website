@@ -34,9 +34,11 @@
 .sourceSwitch span { margin-top: .12rem; font-size: .59rem; }
 .sourceSwitch .activeSource { background: #fff; color: var(--red-dark); box-shadow: 0 2px 10px rgba(40,31,21,.08); }
 
-.sourceRule { max-width: 1480px; margin: 0 auto .85rem; display: flex; align-items: baseline; gap: .7rem; border: 1px solid #c7d7ca; border-radius: 9px; padding: .65rem .8rem; background: #edf4ef; color: #405047; font-size: .7rem; }
+.sourceRule { max-width: 1480px; margin: 0 auto .85rem; display: flex; align-items: center; justify-content: space-between; gap: .7rem; border: 1px solid #c7d7ca; border-radius: 9px; padding: .65rem .8rem; background: #edf4ef; color: #405047; font-size: .7rem; }
 .sourceRule[data-source="school"] { border-color: #c5d5dc; background: #eaf1f4; color: #385765; }
+.sourceRule > div { display: flex; align-items: baseline; gap: .7rem; }
 .sourceRule strong { white-space: nowrap; }
+.importAction { border: 1px solid #87a6b3; border-radius: 7px; padding: .45rem .65rem; background: #fff; color: #315a6b; font: inherit; font-size: .66rem; font-weight: 850; white-space: nowrap; cursor: pointer; }
 .scopeBar { max-width: 1480px; margin: 0 auto .85rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; border: 1px solid #c7d7ca; border-radius: 10px; padding: .75rem .9rem; background: #edf4ef; }
 .scopeBar > div:first-child { display: grid; grid-template-columns: auto auto; align-items: baseline; gap: .2rem .6rem; }
 .scopeBar span { grid-column: 1 / -1; color: #4e6656; font-size: .58rem; font-weight: 900; letter-spacing: .07em; text-transform: uppercase; }
@@ -114,6 +116,20 @@
 .studentRows button > span:first-child strong, .studentRows button > span:first-child small { display: block; }
 .studentRows button > span:first-child strong { font-size: .68rem; }
 .studentRows button > span:first-child small { margin-top: .1rem; color: var(--muted); font-size: .56rem; }
+.detailCopy { margin: 0; color: var(--muted); font-size: .68rem; line-height: 1.45; }
+.importSteps { display: grid; gap: .35rem; margin-top: .65rem; }
+.importSteps > div { display: flex; align-items: center; gap: .55rem; border: 1px solid #e0d8cc; border-radius: 7px; padding: .5rem; background: #faf7f0; }
+.importSteps strong { display: grid; width: 24px; height: 24px; place-items: center; border-radius: 50%; background: #dce9ee; color: #315a6b; font-size: .65rem; }
+.importSteps span { font-size: .66rem; font-weight: 750; }
+.previewButton { width: 100%; margin-top: .7rem; border: 1px solid #aab9ad; border-radius: 7px; padding: .58rem; background: #fff; color: var(--red-dark); font: inherit; font-size: .68rem; font-weight: 850; cursor: pointer; }
+.ruleList { margin: 0; padding-left: 1rem; color: var(--muted); font-size: .65rem; line-height: 1.55; }
+.metadata { display: grid; grid-template-columns: 1fr 1fr; gap: .35rem; margin: 0; }
+.metadata > div { border: 1px solid #e0d8cc; border-radius: 7px; padding: .48rem; background: #faf7f0; }
+.metadata dt { color: var(--muted); font-size: .54rem; }
+.metadata dd { margin: .14rem 0 0; font-size: .65rem; font-weight: 800; }
+.codeLegend { display: grid; grid-template-columns: 1fr 1fr; gap: .35rem; }
+.codeLegend > div { display: flex; align-items: center; gap: .4rem; font-size: .61rem; }
+.emptyState { margin: 0; padding: 1.25rem; color: var(--muted); font-size: .72rem; }
 
 .page :is(button,input,a):focus-visible { outline: 3px solid rgba(139,29,44,.28); outline-offset: 2px; }
 
@@ -129,7 +145,10 @@
   .heading { align-items: stretch; flex-direction: column; gap: 1rem; }
   .sourceSwitch { width: 100%; }
   .sourceSwitch button { min-width: 0; }
-  .sourceRule { align-items: flex-start; flex-direction: column; gap: .18rem; }
+  .sourceRule, .sourceRule > div { align-items: flex-start; flex-direction: column; }
+  .sourceRule { gap: .55rem; }
+  .sourceRule > div { gap: .18rem; }
+  .importAction { width: 100%; }
   .scopeBar { align-items: flex-start; flex-direction: column; }
   .scopeBar > div:first-child { grid-template-columns: 1fr; }
   .scopeBar span { grid-column: auto; }
