@@ -312,8 +312,22 @@ function StudentDetail({ student, onClose, onCopyContacts }) {
 
       <DetailSection title="Identity">
         <DetailLine label="Legal name" value={student.legalName} />
+        {student.preferredFirst ? <DetailLine label="Preferred name" value={student.preferredFirst} /> : null}
+        {student.profile.namePronunciation ? <DetailLine label="Pronunciation" value={student.profile.namePronunciation} /> : null}
+        {student.profile.pronouns ? <DetailLine label="Pronouns" value={student.profile.pronouns} /> : null}
         <DetailLine label="Grade" value={student.grade} />
+        <DetailLine label="Current school" value={student.enrollment.currentSchool} />
         <DetailLine label="Record status" value={student.statusValue} />
+      </DetailSection>
+
+      <DetailSection title="Music background">
+        <DetailLine label="Student primary instrument" value={student.musicBackground.primaryInstrument} />
+        <DetailLine label="Other instruments" value={student.musicBackground.otherInstruments.join(", ") || "None listed"} />
+        <DetailLine label="Experience" value={student.musicBackground.yearsPlaying} />
+        <DetailLine label="Previous school" value={student.musicBackground.previousSchool} />
+        <DetailLine label="Interests" value={student.musicBackground.interests.join(", ") || "None listed"} />
+        <DetailLine label="Instrument access" value={student.musicBackground.instrumentAccess.replaceAll("_", " ")} />
+        <DetailLine label="Career onboarding" value={student.onboarding ? `Complete · revision ${student.onboarding.revision}` : "Not completed"} />
       </DetailSection>
 
       <DetailSection title="Current program">

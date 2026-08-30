@@ -16,10 +16,11 @@ export async function POST(request) {
   const studentFirst = clean(body.studentFirst);
   const studentLast = clean(body.studentLast);
   const studentGrade = clean(body.studentGrade);
+  const studentSchoolEmail = clean(requesterType === "student" ? requesterEmail : body.studentSchoolEmail).toLowerCase();
   const instrumentOrNote = clean(body.instrumentOrNote);
 
-  if (!requesterName || !requesterEmail || !studentFirst || !studentLast) {
-    return NextResponse.json({ error: "Your name, email, student first name, and student last name are required." }, { status: 400 });
+  if (!requesterName || !requesterEmail || !studentFirst || !studentLast || !studentSchoolEmail) {
+    return NextResponse.json({ error: "Your information and the student's NHCS email are required." }, { status: 400 });
   }
   if (!requesterEmail.includes("@")) {
     return NextResponse.json({ error: "Enter a valid email address." }, { status: 400 });
@@ -27,8 +28,11 @@ export async function POST(request) {
   if (requesterType === "student" && !requesterEmail.endsWith("@student.nhcs.net")) {
     return NextResponse.json({ error: "Students must use their NHCS school email ending in @student.nhcs.net." }, { status: 400 });
   }
+  if (!studentSchoolEmail.endsWith("@student.nhcs.net")) {
+    return NextResponse.json({ error: "Enter the student's NHCS email ending in @student.nhcs.net." }, { status: 400 });
+  }
 
-  const match = await findStudentMatch({ studentFirst, studentLast, studentGrade });
+  const match = await findStudentMatch({ studentFirst, studentLast, studentGrade, studentSchoolEmail });
   const { data: accessRequest, error: requestError } = await supabaseAdmin
     .from("portal_access_requests")
     .insert({
@@ -39,6 +43,7 @@ export async function POST(request) {
       student_first: studentFirst,
       student_last: studentLast,
       student_grade: studentGrade || null,
+      student_school_email: studentSchoolEmail,
       instrument_or_note: instrumentOrNote || null,
       claimed_student_id: match.studentId,
       match_confidence: match.confidence,
@@ -95,18 +100,21 @@ export async function POST(request) {
   return NextResponse.json({ ok: true });
 }
 
-async function findStudentMatch({ studentFirst, studentLast, studentGrade }) {
+async function findStudentMatch({ studentFirst, studentLast, studentGrade, studentSchoolEmail }) {
   const { data } = await supabaseAdmin
     .from("portal_students")
-    .select("id, legal_first, preferred_first, legal_last, grade_fall26")
-    .ilike("legal_last", studentLast)
-    .limit(10);
+    .select("id, legal_first, preferred_first, legal_last, grade_fall26, school_email")
+    .ilike("school_email", studentSchoolEmail)
+    .limit(2);
 
   // Parents write first names like "Riley (Vera)" or "Cassie" - compare every
   // reasonable candidate form against both legal and preferred first names.
   const firstCandidates = firstNameCandidates(studentFirst);
   const gradeNorm = norm(studentGrade);
   const matches = (data || []).filter((student) =>
+    norm(student.school_email) === norm(studentSchoolEmail)
+    && norm(student.legal_last) === norm(studentLast)
+    &&
     [student.legal_first, student.preferred_first].some((name) => firstCandidates.includes(norm(name)))
   );
   if (matches.length === 1) {

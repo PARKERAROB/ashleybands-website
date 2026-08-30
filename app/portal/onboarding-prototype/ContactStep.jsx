@@ -1,14 +1,14 @@
 import { Field, StepIntro } from "./OnboardingFields";
 import styles from "./onboarding.module.css";
 
-export default function ContactStep({ form, update }) {
+export default function ContactStep({ form, update, official }) {
   return (
     <>
       <StepIntro eyebrow="Step 2 of 6" title="Student contact">
         School email is the standard contact. Add backup information below.
       </StepIntro>
       <div className={styles.officialSingle}>
-        <span>Official school email</span><strong>jordan.ellis@student.nhcs.net</strong>
+        <span>Official school email</span><strong>{official?.schoolEmail || "jordan.ellis@student.nhcs.net"}</strong>
       </div>
       <div className={styles.formGrid}>
         <Field id="personalEmail" label="Personal email (optional)" hint="For summer or backup contact.">

@@ -9,10 +9,10 @@ const instrumentOptions = [
 const otherInstrumentOptions = [...instrumentOptions.filter((item) => item !== "None"), "Guitar", "Bass Guitar", "Piano"];
 const interestOptions = ["Concert Band", "Wind Ensemble", "Marching Band", "Color Guard", "Jazz", "Percussion", "Leadership", "Solo and Ensemble"];
 const schoolOptions = [
-  ["murray", "Charles P. Murray Middle"], ["myrtle_grove", "Myrtle Grove Middle"],
-  ["holly_shelter", "Holly Shelter Middle"],
-  ["noble", "MCS Noble Middle"], ["roland_grise", "Roland-Grise Middle"],
-  ["trask", "Emma B. Trask Middle"], ["williston", "Williston Middle"]
+  ["murray-middle", "Charles P. Murray Middle"], ["myrtle-grove-middle", "Myrtle Grove Middle"],
+  ["holly-shelter-middle", "Holly Shelter Middle"],
+  ["noble-middle", "MCS Noble Middle"], ["roland-grise-middle", "Roland-Grise Middle"],
+  ["trask-middle", "Emma B. Trask Middle"], ["williston-middle", "Williston Middle"]
 ];
 
 function InstrumentSection({ form, update, toggleList }) {

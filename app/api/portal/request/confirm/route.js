@@ -203,10 +203,11 @@ async function upsertVerifiedEmail(personId, accessRequest, now) {
       verified_at: now,
       evidence: {
         access_request_id: accessRequest.id,
-        claimed_student: `${accessRequest.student_first} ${accessRequest.student_last}`
+        match_basis: "canonical_student_email"
       },
       source: "portal_access_request",
-      source_row_hash: accessRequest.id
+      source_row_hash: accessRequest.id,
+      contact_purpose: accessRequest.requester_type === "student" ? "school" : "general"
     }, { onConflict: "person_id,contact_type,value_normalized" })
     .select("id")
     .single();
@@ -225,7 +226,11 @@ async function upsertStudentRelationship(accessRequest, personId, relationshipSt
       relationship_status: relationshipStatus,
       primary_contact: false,
       source: "portal_access_request",
-      source_row_hash: accessRequest.id
+      source_row_hash: accessRequest.id,
+      assurance_level: "high",
+      trust_source: "canonical_student_email",
+      assured_at: new Date().toISOString(),
+      assured_by: "portal_email_code"
     }, { onConflict: "student_id,person_id" });
 }
 

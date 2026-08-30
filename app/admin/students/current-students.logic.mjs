@@ -41,6 +41,11 @@ export function needDescription(need) {
   const descriptions = {
     Contact: "Student email or primary guardian contact is missing",
     Instrument: "A school instrument request needs assignment",
+    Transportation: "The family requested transportation follow-up",
+    Schedule: "The family requested class-schedule follow-up",
+    Accessibility: "The family requested accessibility follow-up",
+    Cost: "The family requested cost follow-up",
+    "Something else": "The family requested another follow-up",
   };
   return descriptions[need] || "Follow-up needed";
 }
