@@ -26,7 +26,6 @@ export async function GET(request) {
     return NextResponse.json({ error: String(error?.message || error) }, { status: 500 });
   }
 }
-
 export async function POST(request) {
   const staff = await validateStaffRequest(request);
   if (!staff) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
@@ -46,4 +45,3 @@ export async function POST(request) {
     return NextResponse.json({ error: String(error?.message || error) }, { status: 400 });
   }
 }
-

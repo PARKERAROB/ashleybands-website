@@ -14,4 +14,3 @@ export default async function NewsletterUnsubscribePage({ searchParams }) {
     </main>
   );
 }
-
