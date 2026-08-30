@@ -26,3 +26,7 @@ Warm, credible, and school-specific: paper neutrals, Ashley garnet, restrained g
 ## Marching attendance success
 
 Staff and leadership can open one private, phone-friendly attendance tool and move among Band Camp, regular rehearsals, and football games by week and date. Every session keeps its own student marks, notes, arrival/departure facts, approved plans, and staff attendance. Staff attendance includes present, absent, late, or left early status plus arrival/departure times, a role or assignment, and short work notes. The original August 3 Band Camp attendance remains part of the same history, and a deliberate report action sends only the selected session to the director.
+
+## AshleyBands Weekly success
+
+The director can prepare one short Sunday issue with a public edition and a current-program member edition. Public issues appear in a permanent website archive. Current active students and guardians are resolved fresh from the portal roster for each send, while alumni and community readers enter only through confirmed opt-in. A newsletter preference never suppresses urgent program communication. Drafting, publication, audience preview, and sending remain separate visible actions, and only the director's explicit send action emails real people.

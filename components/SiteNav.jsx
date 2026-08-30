@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { href: "/info/2026-2027-band-information", label: "Info" },
   { href: "/info/marching-band-2026", label: "Marching Band" },
   { href: "/calendar", label: "Calendar" },
+  { href: "/newsletter", label: "Weekly" },
   { href: "/portal", label: "Family Portal", profile: true },
   { href: "/sponsors", label: "Support" },
   { href: "/info/the-band-folder", label: "Resources" },

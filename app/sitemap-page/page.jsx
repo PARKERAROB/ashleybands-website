@@ -17,6 +17,7 @@ export default function SitemapPage() {
   const mainPages = [
     { title: "Home", href: "/" },
     { title: "Band Calendar", href: "/calendar" },
+    { title: "AshleyBands Weekly", href: "/newsletter" },
     { title: "Band Boosters", href: "/boosters" },
     { title: "Family Profile", href: "/portal" },
     { title: "Request Profile Access", href: "/portal/request" },
@@ -42,6 +43,7 @@ export default function SitemapPage() {
   const staffPages = [
     { title: "Staff Hub (all dashboards)", href: "/admin" },
     { title: "Broadcast (email families)", href: "/admin/broadcast" },
+    { title: "AshleyBands Weekly (draft, publish, send)", href: "/admin/newsletter" },
     { title: "Student Billing", href: "/admin/billing" },
     { title: "Add / Edit Student", href: "/admin/students" },
     { title: "Profile Requests", href: "/admin/profile-requests" },

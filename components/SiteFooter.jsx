@@ -13,6 +13,7 @@ const COLUMNS = [
       { href: "/info/2026-2027-band-information", label: "2026-2027 Band Information" },
       { href: "/info/marching-band-2026", label: "Marching Band 2026" },
       { href: "/calendar", label: "Band Calendar" },
+      { href: "/newsletter", label: "AshleyBands Weekly" },
       { href: "/handbook", label: "Handbook" },
       { href: "/repertoire", label: "Performed Repertoire" },
       { href: "/programs", label: "Concert Programs" }

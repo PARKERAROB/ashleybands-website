@@ -38,6 +38,7 @@ const SECTIONS = [
     title: "Forms & Comms",
     links: [
       { href: "/admin/clothing-orders", emoji: "👕", label: "Clothing Orders", desc: "Paid Open House orders and consolidated fulfillment details" },
+      { href: "/admin/newsletter", emoji: "📰", label: "AshleyBands Weekly", desc: "Draft, review, publish, and send the Sunday newsletter" },
       { href: "/admin/broadcast", emoji: "📣", label: "Broadcast", desc: "Email families by audience - band's own sender, you compose and send" },
       { planned: true, emoji: "📋", label: "Family Profile Form", desc: "Who's complete, who's missing, follow-up drafts" }
     ]

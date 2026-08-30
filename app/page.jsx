@@ -7,6 +7,7 @@ import MarkdownBlock from "@/components/MarkdownBlock";
 import { getSiteData } from "@/lib/siteData";
 import Image from "next/image";
 import Link from "next/link";
+import NewsletterSignup from "@/components/NewsletterSignup";
 
 const PROMPTS = [
   "When is the spring concert?",
@@ -180,6 +181,22 @@ export default function HomePage() {
             community performances, parades, and informal events.
           </p>
           <a className="text-link" href={data.quickLinks[3].href}>Open Band Shirts Store</a>
+        </div>
+      </section>
+
+      <section className="home-newsletter" aria-labelledby="home-newsletter-title">
+        <div className="home-newsletter-copy">
+          <p className="eyebrow">Sundays from Ashley Bands</p>
+          <h2 id="home-newsletter-title">The week behind us. The week ahead.</h2>
+          <p>
+            AshleyBands Weekly shares student accomplishments, upcoming dates, and the few things students and families need to do next.
+          </p>
+          <Link className="text-link" href="/newsletter">Read AshleyBands Weekly</Link>
+        </div>
+        <div className="home-newsletter-form">
+          <h3>Parents, alumni, and friends</h3>
+          <p>Subscribe to the public edition. Current students and families receive the member edition separately.</p>
+          <NewsletterSignup compact />
         </div>
       </section>
     </main>
