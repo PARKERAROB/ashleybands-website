@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-17T21:47:41.354Z",
+  "generatedAt": "2026-08-30T23:37:27.037Z",
   "sourceRoot": "content/pka-sources",
   "program": {
     "name": "Bands of Ashley High School",
@@ -41,6 +41,44 @@
     {
       "label": "Band Shirts Store",
       "href": "https://ashleybandshirts.printify.me/"
+    }
+  ],
+  "fundraisers": [
+    {
+      "slug": "popcorn",
+      "title": "Perry's Popcorn Fundraiser",
+      "summary": "Shop online, credit a student, and share one link. Orders ship directly to the purchaser.",
+      "status": "Open now",
+      "timing": "Ends midnight Wednesday, September 9",
+      "location": "Online",
+      "source": "content/sources/fundraising/popcorn.md",
+      "externalHref": "https://www.perrysgourmetpopcornfundraising.com/",
+      "externalLabel": "Shop Perry's Popcorn",
+      "body": "## Do these three things\n\n- Open the Perry's Gourmet Popcorn store.\n- Choose **Ashley HS Band** as the group.\n- Enter the student's full name in the optional seller note at checkout.\n\n**[Shop the popcorn fundraiser](https://www.perrysgourmetpopcornfundraising.com/)**\n\n## The biggest help is sharing\n\nSend the store link to grandparents, relatives, family friends, neighbors, and coworkers. Share it on social media too. A personal message from a student or family is more useful than a general post by itself.\n\n### Short message to share\n\nAshley Bands' popcorn fundraiser is open through midnight Wednesday, September 9. Choose Ashley HS Band at checkout and add the student's full name in the optional seller note. Shop here: https://www.perrysgourmetpopcornfundraising.com/\n\n## What happens after an order\n\n- Ashley Bands receives 40% of every online order.\n- Perry's handles payment and ships directly to the purchaser within the lower 48 states.\n- Students do not collect money, sort orders, or make deliveries.\n- Student credit may be applied to an applicable Ashley Bands funding goal, including marching band or the Carnegie Hall trip.\n\n## Questions\n\nEmail Mr. Parker at [robert.parker@nhcs.net](mailto:robert.parker@nhcs.net)."
+    },
+    {
+      "slug": "mattress",
+      "title": "Ashley Bands Mattress Fundraiser",
+      "summary": "Find one household that needs a mattress and invite them personally to the sale.",
+      "status": "Coming September 26",
+      "timing": "Saturday, September 26 · 10:00 a.m.-4:00 p.m.",
+      "location": "Ashley High School full-size gym",
+      "source": "content/sources/fundraising/mattress.md",
+      "externalHref": "https://raleigh.cfsbeds.com/events/eugene-ashley-high-school",
+      "externalLabel": "Open the CFS event page",
+      "body": "## Find your one family\n\nThink of one household that may need a mattress. It could be a friend, relative, coworker, or neighbor. Send them this page and invite them personally to visit the sale.\n\n**[Open the official CFS Ashley event page](https://raleigh.cfsbeds.com/events/eugene-ashley-high-school)**\n\n## What shoppers will find\n\n- More than 25 name-brand mattress models to try, including Purple and Helix.\n- Prices described by CFS as below retail.\n- Full manufacturer warranties, according to CFS.\n- Prices starting at $259, with financing and delivery available.\n- Purchases support Ashley Bands.\n\n**[Watch the short family video](https://vimeo.com/806462880)**\n\n## Supporting a student\n\nThe referral flyer includes a **Credit goes to** field. If you are supporting a specific student, add the student's name there and bring the flyer to the event. The flyer also includes 20% off accessories with a mattress purchase.\n\n## VIP offer\n\nFaculty, staff, police, fire, EMS, and military guests receive 10% off mattresses over $699. The event flyer includes the full offer.\n\n## Questions\n\nContact Clint Stovall with CFS Beds at [clint.stovall@cfsbeds.com](mailto:clint.stovall@cfsbeds.com) or [(919) 215-9796](tel:+19192159796).",
+      "flyers": [
+        {
+          "src": "/fundraising/mattress-vip-flyer.jpg",
+          "alt": "CFS mattress fundraiser event and VIP discount flyer",
+          "label": "Event and VIP flyer"
+        },
+        {
+          "src": "/fundraising/mattress-referral-flyer.jpg",
+          "alt": "CFS mattress fundraiser student referral flyer",
+          "label": "Student referral flyer"
+        }
+      ]
     }
   ],
   "pages": [

@@ -2,6 +2,12 @@ const nextConfig = {
   async headers() {
     return [
       {
+        source: "/meetings/2026-09-01",
+        headers: [
+          { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" }
+        ]
+      },
+      {
         source: "/:path*",
         headers: [
           { key: "X-Frame-Options", value: "DENY" },

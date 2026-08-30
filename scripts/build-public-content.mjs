@@ -23,6 +23,8 @@ const sources = {
   marchingBand: "content/sources/marching-band-2026.md",
   // marching-band-funding now lives in this repo (content/sources), not PKA — see readRepoSource
   marchingFunding: "content/sources/marching-band-funding.md",
+  popcornFundraiser: "content/sources/fundraising/popcorn.md",
+  mattressFundraiser: "content/sources/fundraising/mattress.md",
   instaraise: "projects/parent-meeting/google-site-page-instaraise.md",
   bandFolder: "projects/band-website/public-pages/the-band-folder.md",
   corporateSponsorship: "projects/band-website/public-pages/corporate-sponsorship.md",
@@ -149,6 +151,45 @@ const pages = [
   }
 ];
 
+const fundraisers = [
+  {
+    slug: "popcorn",
+    title: "Perry's Popcorn Fundraiser",
+    summary: "Shop online, credit a student, and share one link. Orders ship directly to the purchaser.",
+    status: "Open now",
+    timing: "Ends midnight Wednesday, September 9",
+    location: "Online",
+    source: sources.popcornFundraiser,
+    externalHref: "https://www.perrysgourmetpopcornfundraising.com/",
+    externalLabel: "Shop Perry's Popcorn",
+    body: readRepoSource(sources.popcornFundraiser).trim()
+  },
+  {
+    slug: "mattress",
+    title: "Ashley Bands Mattress Fundraiser",
+    summary: "Find one household that needs a mattress and invite them personally to the sale.",
+    status: "Coming September 26",
+    timing: "Saturday, September 26 · 10:00 a.m.-4:00 p.m.",
+    location: "Ashley High School full-size gym",
+    source: sources.mattressFundraiser,
+    externalHref: "https://raleigh.cfsbeds.com/events/eugene-ashley-high-school",
+    externalLabel: "Open the CFS event page",
+    body: readRepoSource(sources.mattressFundraiser).trim(),
+    flyers: [
+      {
+        src: "/fundraising/mattress-vip-flyer.jpg",
+        alt: "CFS mattress fundraiser event and VIP discount flyer",
+        label: "Event and VIP flyer"
+      },
+      {
+        src: "/fundraising/mattress-referral-flyer.jpg",
+        alt: "CFS mattress fundraiser student referral flyer",
+        label: "Student referral flyer"
+      }
+    ]
+  }
+];
+
 const siteDataBody = {
   sourceRoot: process.env.PKA_ROOT ? "external PKA_ROOT override" : "content/pka-sources",
   program: {
@@ -193,6 +234,7 @@ const siteDataBody = {
       href: "https://ashleybandshirts.printify.me/"
     }
   ],
+  fundraisers,
   pages,
 };
 
@@ -230,7 +272,8 @@ const chatbotKnowledge = [
   siteData.program.attire,
   siteData.program.sponsorships,
   siteData.program.sponsors,
-  ...pages.map((page) => `\n\n${page.title.toUpperCase()}\n${page.body}`)
+  ...pages.map((page) => `\n\n${page.title.toUpperCase()}\n${page.body}`),
+  ...fundraisers.map((fundraiser) => `\n\n${fundraiser.title.toUpperCase()}\n${fundraiser.body}`)
 ].join("\n").replace(/\n{3,}/g, "\n\n");
 
 const chatbotCurrent = existsSync(chatbotPath) && readFileSync(chatbotPath, "utf8") === chatbotKnowledge;
@@ -241,7 +284,7 @@ if (CHECK) {
     if (!chatbotCurrent) console.error(`Chatbot projection drift: ${chatbotPath}`);
     process.exit(1);
   }
-  console.log(`Public content projection OK: ${pages.length} pages`);
+  console.log(`Public content projection OK: ${pages.length} pages, ${fundraisers.length} fundraisers`);
   process.exit(0);
 }
 
