@@ -31,6 +31,7 @@ jobs:
           npm run test:assets-inventory-prototype
           npm run test:attendance-workspace-prototype
           npm run test:ensembles-memberships-prototype
+          npm run test:memberships-live
           npm run test:sponsorship
           npm run test:newsletter
           npm run test:security
