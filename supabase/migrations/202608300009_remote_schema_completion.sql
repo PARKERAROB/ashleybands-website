@@ -79,7 +79,32 @@ create table if not exists public.thoughts (
   created_at timestamptz default now(), updated_at timestamptz default now()
 );
 create index if not exists thoughts_created_at_idx on public.thoughts(created_at desc);
-create index if not exists thoughts_embedding_idx on public.thoughts using hnsw (embedding vector_cosine_ops);
+do $$
+declare
+  v_opclass_schema text;
+begin
+  if to_regclass('public.thoughts_embedding_idx') is null then
+    select namespace.nspname
+    into v_opclass_schema
+    from pg_opclass operator_class
+    join pg_namespace namespace on namespace.oid = operator_class.opcnamespace
+    join pg_am access_method on access_method.oid = operator_class.opcmethod
+    where operator_class.opcname = 'vector_cosine_ops'
+      and access_method.amname = 'hnsw'
+    order by (namespace.nspname = 'extensions') desc, namespace.nspname
+    limit 1;
+
+    if v_opclass_schema is null then
+      raise exception 'vector_cosine_ops is unavailable for the hnsw access method';
+    end if;
+
+    execute format(
+      'create index thoughts_embedding_idx on public.thoughts using hnsw (embedding %I.vector_cosine_ops)',
+      v_opclass_schema
+    );
+  end if;
+end;
+$$;
 create index if not exists thoughts_metadata_idx on public.thoughts using gin(metadata);
 create table if not exists public.thought_relationships (
   id uuid primary key default gen_random_uuid(), source_thought_id text not null,
