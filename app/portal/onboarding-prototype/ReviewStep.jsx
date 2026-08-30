@@ -3,12 +3,12 @@ import styles from "./onboarding.module.css";
 
 const accessLabels = { personal: "Has an instrument", school: "Needs a school instrument", percussion: "Percussionist", not_sure: "Not sure yet" };
 const schoolLabels = {
-  murray: "Charles P. Murray Middle", myrtle_grove: "Myrtle Grove Middle", holly_shelter: "Holly Shelter Middle",
-  noble: "MCS Noble Middle", roland_grise: "Roland-Grise Middle",
-  trask: "Emma B. Trask Middle", williston: "Williston Middle", no_previous: "No previous school music program"
+  "murray-middle": "Charles P. Murray Middle", "myrtle-grove-middle": "Myrtle Grove Middle", "holly-shelter-middle": "Holly Shelter Middle",
+  "noble-middle": "MCS Noble Middle", "roland-grise-middle": "Roland-Grise Middle",
+  "trask-middle": "Emma B. Trask Middle", "williston-middle": "Williston Middle", no_previous: "No previous school music program"
 };
 
-export default function ReviewStep({ form, update, jumpTo }) {
+export default function ReviewStep({ form, update, jumpTo, official }) {
   return (
     <>
       <StepIntro eyebrow="Step 6 of 6" title="Review the student picture.">
@@ -16,13 +16,13 @@ export default function ReviewStep({ form, update, jumpTo }) {
       </StepIntro>
       <div className={styles.reviewStack}>
         <ReviewGroup title="Student" onEdit={() => jumpTo(0)}>
-          <ReviewLine label="Official record" value="Jordan Ellis · Murray Middle · 8th Grade" />
+          <ReviewLine label="Official record" value={official ? [official.legalName, official.currentSchool, official.grade].filter(Boolean).join(" · ") : "Jordan Ellis · Murray Middle · 8th Grade"} />
           <ReviewLine label="Goes by" value={form.preferredFirst} />
           <ReviewLine label="Pronunciation" value={form.pronunciation} />
           <ReviewLine label="Pronouns" value={form.pronouns} />
         </ReviewGroup>
         <ReviewGroup title="Contact" onEdit={() => jumpTo(1)}>
-          <ReviewLine label="School email" value="jordan.ellis@student.nhcs.net" />
+          <ReviewLine label="School email" value={official?.schoolEmail || "jordan.ellis@student.nhcs.net"} />
           <ReviewLine label="Personal email" value={form.personalEmail} />
           <ReviewLine label="Student mobile" value={form.mobile} />
         </ReviewGroup>

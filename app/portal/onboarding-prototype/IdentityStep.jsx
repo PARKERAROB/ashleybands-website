@@ -1,14 +1,20 @@
 import { Field, StepIntro } from "./OnboardingFields";
 import styles from "./onboarding.module.css";
 
-const officialRecord = [
+const syntheticOfficialRecord = [
   ["Legal name", "Jordan Ellis"],
   ["Current school", "Murray Middle School"],
   ["Grade", "8th Grade"],
   ["School email", "jordan.ellis@student.nhcs.net"]
 ];
 
-export default function IdentityStep({ form, update }) {
+export default function IdentityStep({ form, update, official }) {
+  const officialRecord = official ? [
+    ["Legal name", official.legalName],
+    ["Current school", official.currentSchool],
+    ["Grade", official.grade ? `${official.grade}${/grade/i.test(official.grade) ? "" : "th Grade"}` : "Not connected yet"],
+    ["School email", official.schoolEmail],
+  ] : syntheticOfficialRecord;
   return (
     <>
       <StepIntro eyebrow="Step 1 of 6" title="About you">

@@ -39,7 +39,7 @@ export async function GET(request) {
       supabaseAdmin
         .from("portal_student_people")
         .select(
-          "student_id, relationship_status, role, primary_contact, portal_students(id, display_name, preferred_first, grade_fall26, status, school_email, cell_phone, notes, band_class_2026, band_period_2026, ensemble_2026, instrument_2026, marching_2026, mb_role_2026, marching_role_category_2026, marching_assignment_2026, portal_student_resources(locker_number, lock_serial, lock_combination, tuner_number, tuner_shared_with, assignment_status))"
+          "student_id, relationship_status, role, primary_contact, assurance_level, portal_students(id, display_name, preferred_first, grade_fall26, status, school_email, cell_phone, notes, band_class_2026, band_period_2026, ensemble_2026, instrument_2026, marching_2026, mb_role_2026, marching_role_category_2026, marching_assignment_2026, portal_student_resources(locker_number, lock_serial, lock_combination, tuner_number, tuner_shared_with, assignment_status))"
         )
         .eq("person_id", session.personId)
         .eq("relationship_status", "trusted")
@@ -79,6 +79,8 @@ export async function GET(request) {
           assignmentStatus: resource.assignment_status || "provisional"
         } : null,
         participationRequest: null,
+        onboardingAccessReady: ["medium", "high"].includes(link.assurance_level),
+        onboarding: { status: "not_started", lastCompletedStep: 0 },
         guardians: []
       };
     })
@@ -87,6 +89,21 @@ export async function GET(request) {
   // Attach the other adult guardians linked to each student.
   const studentIds = students.map((s) => s.id);
   if (studentIds.length) {
+    const { data: onboardingProgress } = await supabaseAdmin
+      .from("portal_onboarding_progress")
+      .select("student_id,last_completed_step,completion_status,updated_at")
+      .in("student_id", studentIds)
+      .eq("form_version", "career-onboarding-v1");
+    for (const progress of onboardingProgress || []) {
+      const student = students.find((item) => item.id === progress.student_id);
+      if (!student) continue;
+      student.onboarding = {
+        status: progress.completion_status,
+        lastCompletedStep: Number(progress.last_completed_step || 0),
+        updatedAt: progress.updated_at,
+      };
+    }
+
     const { data: pendingParticipation } = await supabaseAdmin
       .from("portal_update_requests")
       .select("id, student_id, new_value, submitted_at")

@@ -9,6 +9,20 @@ const PRIVATE_OPERATIONAL_TABLES = [
   "portal_instrument_requests",
   "portal_clothing_orders",
   "portal_clothing_order_items",
+  "portal_schools",
+  "portal_instrument_types",
+  "portal_interest_types",
+  "portal_student_profiles",
+  "portal_student_enrollments",
+  "portal_student_music_profiles",
+  "portal_student_other_instruments",
+  "portal_student_interests",
+  "portal_student_school_background",
+  "portal_support_requests",
+  "portal_student_status_events",
+  "portal_onboarding_completions",
+  "portal_onboarding_progress",
+  "portal_onboarding_step_receipts",
 ];
 
 const migrationDir = path.resolve("supabase", "migrations");
@@ -63,5 +77,27 @@ test("production publishable key cannot read private operational rows", {
       0,
       `${table} exposed a row to the production publishable key`,
     );
+  }
+});
+
+test("production publishable key cannot write private operational rows", {
+  skip: process.env.SECURITY_LIVE !== "1",
+}, async () => {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  assert.ok(url && key, "live boundary check requires the production publishable configuration");
+
+  for (const table of PRIVATE_OPERATIONAL_TABLES) {
+    const response = await fetch(`${url}/rest/v1/${table}`, {
+      method: "POST",
+      headers: {
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+        "Content-Type": "application/json",
+        Prefer: "return=minimal",
+      },
+      body: "{}",
+    });
+    assert.ok(!response.ok, `${table} accepted a production publishable-key insert`);
   }
 });

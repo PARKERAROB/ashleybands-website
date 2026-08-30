@@ -154,6 +154,7 @@ export default function PortalReviewClient() {
               />
               <div className="portal-workspace-main">
                 <BandReadySection student={selectedStudent} />
+                <OnboardingSection student={selectedStudent} />
                 <ParticipationSection student={selectedStudent} onChanged={loadProfile} />
                 <StudentResourcesSection student={selectedStudent} />
                 <InstrumentRequestSection student={selectedStudent} />
@@ -184,6 +185,25 @@ function BandReadySection({ student }) {
         <p>Complete the student&apos;s calendar, Day One supplies, forms, band expectations, clothing, Booster volunteer check-in, and Mr. Parker greeting in one saved path.</p>
       </div>
       <Link className="portal-action-link" href={`/portal/band-ready?studentId=${encodeURIComponent(student.id)}`}>Open Band Ready</Link>
+    </section>
+  );
+}
+
+function OnboardingSection({ student }) {
+  const complete = student.onboarding?.status === "complete";
+  const started = Number(student.onboarding?.lastCompletedStep || 0) > 0;
+  const label = complete ? "Review information" : started ? "Continue onboarding" : "Start onboarding";
+  const href = student.onboardingAccessReady
+    ? `/portal/onboarding?studentId=${encodeURIComponent(student.id)}`
+    : `/portal/request?next=${encodeURIComponent(`/portal/onboarding?studentId=${student.id}`)}`;
+  return (
+    <section className="portal-workspace-section" aria-labelledby="portal-onboarding-heading">
+      <div className="portal-section-heading-copy">
+        <p className="eyebrow">Student record</p>
+        <h2 id="portal-onboarding-heading">Career onboarding</h2>
+        <p>{complete ? "The connected student record is complete. Update only what changed." : "Complete the student information Ashley Bands keeps throughout the student’s career."}</p>
+      </div>
+      <Link className="portal-action-link" href={href}>{student.onboardingAccessReady ? label : "Verify connection"}</Link>
     </section>
   );
 }

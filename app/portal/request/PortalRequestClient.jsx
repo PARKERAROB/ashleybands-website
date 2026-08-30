@@ -23,6 +23,7 @@ export default function PortalRequestClient() {
     studentFirst: "",
     studentLast: "",
     studentGrade: "",
+    studentSchoolEmail: "",
     instrumentOrNote: ""
   });
   const [step, setStep] = useState("form"); // "form" | "code" | "done"
@@ -109,7 +110,7 @@ export default function PortalRequestClient() {
         {step === "form" ? (
           <>
             <p className="portal-copy">
-              Use this when your email is new or not connected to the right student yet. If the student matches the roster, you&apos;ll be connected as soon as your email is verified. If not, Mr. Parker will follow up.
+              Use this when your email is not connected to the right student. The student&apos;s NHCS email verifies the roster connection.
             </p>
             <form className="portal-request-form" onSubmit={submit}>
               <fieldset className="portal-requester-type portal-request-wide">
@@ -132,10 +133,16 @@ export default function PortalRequestClient() {
                 <input type="email" value={form.requesterEmail} onChange={(event) => update("requesterEmail", event.target.value)} placeholder={form.requesterType === "student" ? "name@student.nhcs.net" : ""} required />
               </label>
               {form.requesterType === "guardian" ? (
-                <label>
-                  <span>Guardian phone</span>
-                  <input value={form.requesterPhone} onChange={(event) => update("requesterPhone", event.target.value)} />
-                </label>
+                <>
+                  <label>
+                    <span>Guardian phone</span>
+                    <input value={form.requesterPhone} onChange={(event) => update("requesterPhone", event.target.value)} />
+                  </label>
+                  <label>
+                    <span>Student NHCS email</span>
+                    <input type="email" value={form.studentSchoolEmail} onChange={(event) => update("studentSchoolEmail", event.target.value)} placeholder="name@student.nhcs.net" required />
+                  </label>
+                </>
               ) : null}
               <label>
                 <span>Student first name</span>
