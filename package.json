@@ -26,11 +26,13 @@
     "test:uniform-sizing": "node --test scripts/uniform-sizing.test.mjs",
     "test:sponsorship": "node --test scripts/sponsorship-security.test.mjs",
     "test:newsletter": "node --test scripts/newsletter.test.mjs",
+    "test:security": "node --test scripts/security-boundary.test.mjs",
+    "test:security:live": "SECURITY_LIVE=1 node --env-file=.env.local --test scripts/security-boundary.test.mjs",
     "integration:doctor": "node scripts/integration.mjs doctor",
     "integration:doctor:online": "node scripts/integration.mjs doctor --online",
     "integration:sync": "node scripts/integration.mjs sync",
     "deploy:preflight": "node scripts/deploy-preflight.mjs",
-    "deploy:checked": "npm run deploy:preflight && node scripts/integration.mjs sync --deploy && npm run lint:integration && npm run lint:provenance && npm run test:audience && npm run test:sponsorship && npm run test:newsletter && npm run lint:sponsorship && npm run lint:newsletter && npm run build && npx --yes vercel@59.1.4 --prod --yes --scope robs-projects-9eb69de7",
+    "deploy:checked": "npm run deploy:preflight && node scripts/integration.mjs sync --deploy && npm run lint:integration && npm run lint:provenance && npm run test:audience && npm run test:sponsorship && npm run test:newsletter && npm run test:security:live && npm run lint:sponsorship && npm run lint:newsletter && npm run build && npx --yes vercel@59.1.4 --prod --yes --scope robs-projects-9eb69de7",
     "supabase:production": "node scripts/supabase-production.mjs"
   },
   "dependencies": {

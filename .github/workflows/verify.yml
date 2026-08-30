@@ -1,0 +1,34 @@
+name: Verify
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Lint the security gate
+        run: npx eslint scripts/security-boundary.test.mjs
+      - name: Test prototypes and domain rules
+        run: |
+          npm run test:onboarding
+          npm run test:current-students-prototype
+          npm run test:operations-prototype
+          npm run test:assets-inventory-prototype
+          npm run test:attendance-workspace-prototype
+          npm run test:ensembles-memberships-prototype
+          npm run test:sponsorship
+          npm run test:newsletter
+          npm run test:security
