@@ -54,14 +54,17 @@ function backupState(backup) {
 }
 
 function recoveryState(backup, verification) {
-  if (!backup) return { state: "warn", label: "Waiting for a backup", tied: false };
+  if (!backup) return { state: "warn", label: "Waiting for a backup", tied: false, typed: false };
   const tied = Boolean(verification
     && verification.backup_run_id === backup.id
     && verification.manifest_sha256
     && verification.manifest_sha256 === backup.manifest_sha256);
-  if (!tied) return { state: "warn", label: "Not checked for latest backup", tied: false };
-  if (verification.status !== "passed") return { state: "warn", label: verification.status || "Incomplete", tied: true };
-  return { state: "info", label: "JSON integrity verified", tied: true };
+  if (!tied) return { state: "warn", label: "Not checked for latest backup", tied: false, typed: false };
+  if (verification.status !== "passed") return { state: "warn", label: verification.status || "Incomplete", tied: true, typed: false };
+  const typed = verification.target_label === "isolated_pglite_exact_migrations";
+  return typed
+    ? { state: "good", label: "Typed restore verified", tied: true, typed: true }
+    : { state: "info", label: "Integrity verified", tied: true, typed: false };
 }
 
 export default function SystemPage() {
@@ -145,7 +148,7 @@ function SystemWorkspace({ session }) {
     {data ? <>
       <section className={styles.healthGrid} aria-label="Recovery health">
         <article data-state={backupHealth.state}><span>Latest private backup</span><strong>{backupHealth.label}</strong><small>{latestBackup ? `${latestBackup.object_count} tables · ${latestBackup.row_count} rows · ${dateTime(latestBackup.completed_at)}` : "No completed backup is recorded."}</small></article>
-        <article data-state={recoveryHealth.state}><span>Latest recovery check</span><strong>{recoveryHealth.label}</strong><small>{recoveryHealth.tied && latestRestore ? `${latestRestore.verified_object_count} tables · ${latestRestore.verified_row_count} rows · ${dateTime(latestRestore.completed_at)}. Checksums and JSON replay only; a typed database restore is not yet proven.` : "The latest backup does not have a matching integrity check."}</small></article>
+        <article data-state={recoveryHealth.state}><span>Latest recovery check</span><strong>{recoveryHealth.label}</strong><small>{recoveryHealth.tied && latestRestore ? `${latestRestore.verified_object_count} tables · ${latestRestore.verified_row_count} rows · ${dateTime(latestRestore.completed_at)}. ${recoveryHealth.typed ? "Exact migrations and typed records restored in an isolated database." : "Checksums and JSON replay verified; a typed restore is not recorded."}` : "The latest backup does not have a matching integrity check."}</small></article>
         <article data-state={auditIsRecent ? "good" : "info"}><span>Audit trail</span><strong>{latestAudit ? (auditIsRecent ? "Recent activity" : "No recent activity") : "No evidence"}</strong><small>{latestAudit ? `Latest attributed action · ${dateTime(latestAudit.occurred_at)}` : "No attributed action is visible."}</small></article>
       </section>
 
