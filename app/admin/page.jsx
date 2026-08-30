@@ -9,7 +9,8 @@ const SECTIONS = [
   {
     title: "People & Profiles",
     links: [
-      { href: "/admin/students", emoji: "➕", label: "Students", desc: "Add or edit a student and guardians" },
+      { href: "/admin/students", emoji: "🎓", label: "Current Students", desc: "Search, filter, and open a connected student record" },
+      { href: "/admin/ensembles", emoji: "🎶", label: "Ensembles & Memberships", desc: "Build rosters across program groups and school classes" },
       { href: "/admin/contacts", emoji: "📇", label: "Contacts & Guardians", desc: "Every contact value, with where it came from" },
       { href: "/admin/profile-requests", emoji: "🗒️", label: "Profile Activity", desc: "Audit log of portal access + profile edits (not an approval queue)" },
       { href: "/admin/measurements", emoji: "📏", label: "Measurements & Sizes", desc: "Staff-entered Band Shoppe measurements, per student" }

@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { validateStaffRequest } from "@/lib/staffAuth";
+import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
 import { logAudit, staffActor } from "@/lib/auditLog";
 
 export const runtime = "nodejs";
 
 export async function GET(req) {
-  const staff = await validateStaffRequest(req);
-  if (!staff) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.STUDENTS_READ);
+  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status });
+  const staff = authorization.staff;
 
   const { data, error } = await supabaseAdmin
     .from("portal_review_queue")
@@ -26,8 +27,9 @@ export async function GET(req) {
 }
 
 export async function PATCH(req) {
-  const staff = await validateStaffRequest(req);
-  if (!staff) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.MEMBERSHIPS_WRITE);
+  if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status });
+  const staff = authorization.staff;
 
   const body = await req.json().catch(() => ({}));
   const id = String(body.id || "");
@@ -46,18 +48,16 @@ export async function PATCH(req) {
   const reviewedAt = new Date().toISOString();
   if (item.item_type === "participation_change" && status === "approved") {
     const requested = item.details?.requested_value || {};
-    const { error: studentError } = await supabaseAdmin
-      .from("portal_students")
-      .update({
-        band_period_2026: requested.bandPeriod || null,
-        ensemble_2026: requested.ensemble === "Not currently assigned" ? null : requested.ensemble || null,
-        instrument_2026: requested.concertInstrument || null,
-        marching_2026: requested.marchingEnrollment || null,
-        marching_role_category_2026: requested.marchingEnrollment === "Yes" ? requested.marchingRole || null : null,
-        marching_assignment_2026: requested.marchingEnrollment === "Yes" ? requested.marchingAssignment || null : null,
-        updated_at: reviewedAt
-      })
-      .eq("id", item.student_id);
+    const { error: studentError } = await supabaseAdmin.rpc("portal_apply_participation_change", {
+      p_student_id: item.student_id,
+      p_band_period: requested.bandPeriod || null,
+      p_ensemble: requested.ensemble === "Not currently assigned" ? null : requested.ensemble || null,
+      p_instrument: requested.concertInstrument || null,
+      p_marching: requested.marchingEnrollment || null,
+      p_marching_role_category: requested.marchingEnrollment === "Yes" ? requested.marchingRole || null : null,
+      p_marching_assignment: requested.marchingEnrollment === "Yes" ? requested.marchingAssignment || null : null,
+      p_changed_at: reviewedAt,
+    });
     if (studentError) return NextResponse.json({ error: studentError.message }, { status: 500 });
   }
 

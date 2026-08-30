@@ -397,6 +397,10 @@ async function applySync() {
     }
     await upsert("portal_students", existingStudentRows, "source_student_id");
     await upsert("portal_students", newStudentRows, "source_student_id");
+    const { data: membershipReconciliation, error: membershipReconciliationError } = await supabase
+      .rpc("reconcile_program_memberships_from_roster");
+    if (membershipReconciliationError) throw membershipReconciliationError;
+    console.log(`program memberships reconciled ${JSON.stringify(membershipReconciliation)}`);
 
     const existingPersonRows = [];
     const newPersonRows = [];
