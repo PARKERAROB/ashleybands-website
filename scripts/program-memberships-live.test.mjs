@@ -75,7 +75,7 @@ test("the accepted navigation paths remain connected", () => {
   assert.match(workspace, /\/admin\/students\?student=/);
   assert.doesNotMatch(workspace, /attendance-workspace-prototype\?student=/);
   assert.doesNotMatch(workspace, /assets-inventory-prototype\?student=/);
-  assert.match(workspace, /Attendance and assets will connect here/);
+  assert.match(workspace, /\/admin\/attendance\?student=/);
   assert.match(workspace, /scrollIntoView/);
   assert.match(workspace, /Back to membership results/);
 });

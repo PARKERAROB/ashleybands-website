@@ -69,6 +69,7 @@
 .filterNote { margin: .75rem 0 0; border-radius: 7px; padding: .65rem; background: #edf4ef; color: #405047; font-size: .65rem; line-height: 1.4; }
 
 .resultsPanel { min-width: 0; overflow: hidden; }
+.resultGroups > div + div { border-top: 8px solid var(--paper); }
 .resultHeader { min-height: 61px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; border-bottom: 1px solid #e2dbd0; padding: .7rem .9rem; }
 .resultHeader div strong, .resultHeader div span { display: block; }
 .resultHeader strong { font-size: .85rem; }
@@ -95,6 +96,7 @@
 .studentSummary strong { margin-top: .15rem; font-size: .74rem; }
 
 .detail { position: sticky; top: .75rem; max-height: calc(100vh - 1.5rem); overflow-y: auto; }
+.detail:focus { outline: none; }
 .detail > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; border-bottom: 1px solid #ddd5c9; padding: 1rem; background: var(--red-dark); color: #fffaf0; }
 .detail header span { color: #e0c56f; font-size: .58rem; font-weight: 900; letter-spacing: .07em; text-transform: uppercase; }
 .detail h2 { margin: .2rem 0 0; font-size: 1.4rem; line-height: 1.05; letter-spacing: -.03em; }
@@ -110,6 +112,13 @@
 .detailCounts span { margin-top: .08rem; color: var(--muted); font-size: .5rem; }
 .liveLink { display: inline-block; margin-top: .6rem; color: var(--red); font-size: .66rem; font-weight: 850; text-decoration: none; }
 .officialNote { margin: .6rem 0 0; color: var(--blue); font-size: .64rem; font-weight: 850; }
+.matchRow { border-bottom: 1px solid #ece5db; padding: .55rem 0; }
+.matchRow > strong, .matchRow > small { display: block; }
+.matchRow > strong { font-size: .68rem; }
+.matchRow > small { margin-top: .1rem; color: var(--muted); font-size: .56rem; }
+.matchDisclosure { margin-top: .65rem; border: 1px solid #d8d1c4; border-radius: 7px; padding: 0 .65rem; background: #faf7f0; }
+.matchDisclosure > summary { min-height: 44px; display: flex; align-items: center; color: var(--blue); font-size: .65rem; font-weight: 850; cursor: pointer; }
+.matchDisclosure[open] > summary { border-bottom: 1px solid #e5ded3; }
 .studentRows { display: grid; }
 .studentRows > button { display: flex; align-items: center; justify-content: space-between; gap: .6rem; border: 0; border-bottom: 1px solid #ece5db; padding: .5rem 0; background: none; color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
 .studentRows > button:last-child { border-bottom: 0; }
@@ -148,7 +157,7 @@
   .sourceRule, .sourceRule > div { align-items: flex-start; flex-direction: column; }
   .sourceRule { gap: .55rem; }
   .sourceRule > div { gap: .18rem; }
-  .importAction { width: 100%; }
+  .importAction { width: 100%; min-height: 44px; }
   .scopeBar { align-items: flex-start; flex-direction: column; }
   .scopeBar > div:first-child { grid-template-columns: 1fr; }
   .scopeBar span { grid-column: auto; }
@@ -159,7 +168,19 @@
   .workspace, .workspace.withDetail { grid-template-columns: 1fr; }
   .filters { position: relative; top: auto; }
   .viewButtons { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .viewButtons button, .scopeBar a, .scopeBar button { min-height: 44px; }
   .detail { grid-column: 1; }
+  .detail header button { width: 44px; height: 44px; }
+  .tableWrap { overflow: visible; padding: .55rem; }
+  .tableWrap table, .tableWrap tbody, .tableWrap tr, .tableWrap td { display: block; width: 100%; min-width: 0; }
+  .tableWrap thead { display: none; }
+  .tableWrap tbody { display: grid; gap: .55rem; }
+  .tableWrap tr { overflow: hidden; border: 1px solid #ddd5c9; border-radius: 9px; background: #fff; }
+  .tableWrap td { min-height: 40px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; border-bottom: 1px solid #ebe5db; padding: .58rem .65rem; text-align: right; }
+  .tableWrap td::before { content: attr(data-label); flex: 0 0 34%; color: var(--muted); font-size: .57rem; font-weight: 850; letter-spacing: .05em; text-align: left; text-transform: uppercase; }
+  .tableWrap td:last-child { border-bottom: 0; }
+  .tableWrap td small { text-align: right; }
+  .rowAction { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; padding: .45rem .55rem; }
 }
 
 @media (max-width: 520px) {

@@ -1,11 +1,21 @@
 import { NextResponse } from "next/server";
-import { validateAttendanceRequest } from "@/lib/attendanceAuth";
+import {
+  authorizeStaffRequest,
+  STAFF_CAPABILITIES,
+  staffHasCapability
+} from "@/lib/staffAuthorization";
 import { logAudit } from "@/lib/auditLog";
 import { getAttendanceSheet, attendanceAuditTables } from "@/lib/attendance";
 import { buildAttendanceReport } from "@/lib/attendanceEvents.mjs";
 import { sendPortalReviewAlert } from "@/lib/portalEmail";
 
 export const runtime = "nodejs";
+
+const PRIVATE_HEADERS = { "Cache-Control": "private, no-store, max-age=0" };
+
+function json(body, status = 200) {
+  return NextResponse.json(body, { status, headers: PRIVATE_HEADERS });
+}
 
 function eventDateLabel(event) {
   return new Intl.DateTimeFormat("en-US", {
@@ -18,8 +28,24 @@ function eventDateLabel(event) {
 }
 
 export async function POST(request) {
-  const session = await validateAttendanceRequest(request);
-  if (!session) return NextResponse.json({ error: "Attendance PIN required." }, { status: 401 });
+  const authorization = await authorizeStaffRequest(request, STAFF_CAPABILITIES.ATTENDANCE_REPORT_SEND);
+  if (!authorization.ok) {
+    return json({ error: authorization.error }, authorization.status);
+  }
+  const session = {
+    actor: {
+      type: "staff",
+      id: authorization.staff.id,
+      name: authorization.staff.display_name
+    },
+    access: "staff",
+    permissions: {
+      eventsWrite: staffHasCapability(authorization.staff, STAFF_CAPABILITIES.ATTENDANCE_EVENTS_WRITE),
+      exceptionsWrite: staffHasCapability(authorization.staff, STAFF_CAPABILITIES.ATTENDANCE_EXCEPTIONS_WRITE),
+      staffWrite: staffHasCapability(authorization.staff, STAFF_CAPABILITIES.ATTENDANCE_STAFF_WRITE),
+      reportSend: true
+    }
+  };
   const body = await request.json().catch(() => ({}));
   const occurrenceKey = String(body.occurrenceKey || "").trim() || undefined;
 
@@ -27,11 +53,12 @@ export async function POST(request) {
   try {
     sheet = await getAttendanceSheet({ occurrenceKey, session });
   } catch (error) {
-    return NextResponse.json(
-      { error: error?.message || "The attendance report could not be loaded." },
-      { status: error?.status || 500 }
-    );
+    const status = Number(error?.status);
+    if (status >= 400 && status < 500) return json({ error: error.message }, status);
+    console.error("[attendance-report] load failed:", error?.message || error);
+    return json({ error: "The attendance report could not be loaded." }, 500);
   }
+  if (!sheet.canSendReport) return json({ error: "This attendance session is not ready to report." }, 409);
   const report = buildAttendanceReport(sheet);
   await logAudit({
     actor: session.actor,
@@ -50,7 +77,7 @@ export async function POST(request) {
   });
 
   if (!report.details.length) {
-    return NextResponse.json({ error: "There are no reportable attendance details." }, { status: 400 });
+    return json({ error: "There are no reportable attendance details." }, 400);
   }
 
   const dateLabel = eventDateLabel(sheet.event);
@@ -66,10 +93,8 @@ export async function POST(request) {
       details: report.details
     });
   } catch (emailError) {
-    return NextResponse.json(
-      { error: emailError.message || "The attendance report could not be sent." },
-      { status: 502 }
-    );
+    console.error("[attendance-report] delivery failed:", emailError?.message || emailError);
+    return json({ error: "The attendance report could not be sent." }, 502);
   }
 
   await logAudit({
@@ -87,7 +112,7 @@ export async function POST(request) {
     },
     route: "/api/attendance/report"
   });
-  return NextResponse.json({
+  return json({
     ok: true,
     absentCount: report.absentCount,
     tardyCount: report.tardyCount,

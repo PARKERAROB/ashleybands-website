@@ -88,7 +88,18 @@ if (vercel.status !== 0 || vercel.stdout.trim() !== "robertparker-6198") {
   fail("Vercel CLI is not authenticated as robertparker-6198");
 }
 
+const vercelEnv = spawnSync(
+  "npx",
+  ["--yes", "vercel@59.1.4", "env", "ls", "--scope", "robs-projects-9eb69de7"],
+  { cwd: bandWebsiteRoot, encoding: "utf8" }
+);
+if (vercelEnv.status !== 0
+  || !/^\s*ATTENDANCE_IDENTIFIER_SECRET\s+\S+.*\bProduction\b/m.test(vercelEnv.stdout)) {
+  fail("ATTENDANCE_IDENTIFIER_SECRET is missing from the Vercel Production environment");
+}
+
 console.log("PASS  production deployment preflight");
 console.log("PASS  main HEAD carries the verified Vercel author identity");
 console.log("PASS  Vercel and Supabase links point to the AshleyBands production projects");
 console.log("PASS  production Supabase REST is responding");
+console.log("PASS  protected attendance identifiers have a dedicated production secret");
