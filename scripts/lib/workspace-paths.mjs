@@ -13,11 +13,24 @@ export const bandWebsiteEnvPath = path.resolve(
   process.env.BAND_WEBSITE_ENV || path.join(bandWebsiteRoot, ".env.local")
 );
 
+function envValue(raw) {
+  const value = raw.trim();
+  if (value.startsWith('"') && value.endsWith('"')) {
+    try {
+      return JSON.parse(value);
+    } catch {
+      return value.slice(1, -1);
+    }
+  }
+  if (value.startsWith("'") && value.endsWith("'")) return value.slice(1, -1);
+  return value;
+}
+
 export function loadBandWebsiteEnv() {
   try {
     for (const line of readFileSync(bandWebsiteEnvPath, "utf8").split("\n")) {
       const match = line.match(/^([A-Z0-9_]+)=(.*)$/);
-      if (match && !process.env[match[1]]) process.env[match[1]] = match[2];
+      if (match && !process.env[match[1]]) process.env[match[1]] = envValue(match[2]);
     }
   } catch {
     // Commands that only inspect local files do not require hosted credentials.
