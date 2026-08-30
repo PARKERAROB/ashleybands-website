@@ -25,6 +25,7 @@ jobs:
         run: |
           npm run test:onboarding
           npm run test:current-students-prototype
+          npm run test:current-students-live
           npm run test:operations-prototype
           npm run test:assets-inventory-prototype
           npm run test:attendance-workspace-prototype
