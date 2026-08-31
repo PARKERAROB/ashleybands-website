@@ -101,9 +101,10 @@ export default function HomePage() {
             and check uniform measurements in one secure place.
           </p>
         </div>
-        <Link className="family-portal-cta" href="/portal">
-          Open Family Portal
-        </Link>
+        <div className="family-portal-actions">
+          <Link className="family-portal-cta" href="/carnegie-2027/commit">Carnegie commitment</Link>
+          <Link className="family-portal-cta family-portal-cta-secondary" href="/portal">Open Family Portal</Link>
+        </div>
       </section>
 
       <section className="photo-band">

@@ -31,6 +31,7 @@ const SUPPORTING = [
   {
     title: "Operational tools",
     links: [
+      { capability: [STAFF_CAPABILITIES.FORMS_STATUS_READ, STAFF_CAPABILITIES.BILLING_READ], href: "/admin/carnegie-2027", label: "Carnegie commitment sheet" },
       { capability: STAFF_CAPABILITIES.BILLING_WRITE, href: "/admin/billing", label: "Fee ledger tools" },
       { capability: STAFF_CAPABILITIES.ASSETS_READ, href: "/admin/instrument-inventory", label: "Instrument fulfillment" },
       { capability: STAFF_CAPABILITIES.ASSETS_READ, href: "/admin/music-library", label: "Music intake" },

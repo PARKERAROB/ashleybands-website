@@ -11,6 +11,7 @@
     "lint:integration": "eslint scripts/integration.mjs scripts/deploy-preflight.mjs scripts/supabase-production.mjs scripts/lib/workspace-paths.mjs scripts/build-public-content.mjs scripts/build-instruments-public.mjs scripts/sync-portal-csv.mjs scripts/sync-assets.mjs scripts/apply-business-enrichment.mjs scripts/apply-contact-enrichment.mjs scripts/backfill-geo.mjs scripts/discover-places.mjs scripts/enrich-contacts-firecrawl.mjs scripts/export-sponsorship-status.mjs scripts/gen_qr.mjs scripts/generate-prospect-view.mjs scripts/mark-chains-skip.mjs",
     "lint:sponsorship": "eslint lib/sponsorGiftPolicy.mjs lib/sponsorGiveToken.mjs lib/sponsorFamily.js lib/sponsorGifts.js lib/sponsorRecognition.js lib/sponsorStudentLinks.js lib/paypal.js lib/rateLimit.js app/api/sponsors app/api/billing/webhook/route.js app/sponsors/give/GiveClient.jsx app/portal/sponsorship/SponsorshipClient.jsx app/sponsors/tracker/page.jsx app/sponsors/dashboard/page.jsx 'app/support/[code]/page.jsx'",
     "lint:newsletter": "eslint lib/newsletter.js lib/newsletterFormat.mjs components/NewsletterSignup.jsx components/NewsletterPreferenceAction.jsx app/api/newsletter app/api/admin/newsletter app/newsletter app/admin/newsletter",
+    "lint:carnegie": "eslint app/admin/carnegie-2027 app/api/admin/carnegie-2027 app/api/carnegie-2027 app/carnegie-2027 app/portal/carnegie-2027 app/meetings/2026-09-01 lib/carnegieTrip.js lib/carnegieTripConstants.js lib/paypal.js app/api/billing/webhook/route.js",
     "lint:operations": "eslint app/admin/page.jsx app/admin/students app/admin/system app/admin/billing app/admin/broadcast app/api/admin/assets app/api/admin/current-students app/api/admin/forms app/api/admin/operations-summary app/api/admin/students app/api/admin/system app/api/billing/forgo-refund app/api/portal/guardian-request app/api/portal/instrument-request app/api/portal/me lib/audience.js lib/currentStudents.js lib/formOperations.js lib/operationsSummary.js lib/privateResponse.js lib/staffAuth.js lib/staffAuthCookie.js lib/staffAuthorization.js lib/staffCapabilities.js lib/staffSession.js",
     "instruments:build": "node scripts/build-instruments-public.mjs",
     "content:build": "node scripts/build-public-content.mjs",
@@ -36,13 +37,14 @@
     "test:uniform-sizing": "node --test scripts/uniform-sizing.test.mjs",
     "test:sponsorship": "node --test scripts/sponsorship-security.test.mjs",
     "test:newsletter": "node --test scripts/newsletter.test.mjs",
+    "test:carnegie": "node --test scripts/carnegie-commitment.test.mjs",
     "test:security": "node --test scripts/security-boundary.test.mjs",
     "test:security:live": "SECURITY_LIVE=1 node --env-file=.env.local --test scripts/security-boundary.test.mjs",
     "integration:doctor": "node scripts/integration.mjs doctor",
     "integration:doctor:online": "node scripts/integration.mjs doctor --online",
     "integration:sync": "node scripts/integration.mjs sync",
     "deploy:preflight": "node scripts/deploy-preflight.mjs",
-    "deploy:checked": "npm run deploy:preflight && node scripts/integration.mjs sync --deploy && npm run lint:integration && npm run lint:provenance && npm run lint:operations && npm run test:audience && npm run test:sponsorship && npm run test:newsletter && npm run test:onboarding-live && npm run test:memberships-live && npm run test:attendance && npm run test:attendance-program-live && npm run test:attendance-school-live && npm run test:assets-inventory-prototype && npm run test:operations-completion && npm run test:security:live && npm run lint:sponsorship && npm run lint:newsletter && npm run build && npx --yes vercel@59.1.4 --prod --yes --scope robs-projects-9eb69de7",
+    "deploy:checked": "npm run deploy:preflight && node scripts/integration.mjs sync --deploy && npm run lint:integration && npm run lint:provenance && npm run lint:operations && npm run lint:carnegie && npm run test:audience && npm run test:sponsorship && npm run test:newsletter && npm run test:carnegie && npm run test:onboarding-live && npm run test:memberships-live && npm run test:attendance && npm run test:attendance-program-live && npm run test:attendance-school-live && npm run test:assets-inventory-prototype && npm run test:operations-completion && npm run test:security:live && npm run lint:sponsorship && npm run lint:newsletter && npm run build && npx --yes vercel@59.1.4 --prod --yes --scope robs-projects-9eb69de7",
     "supabase:production": "node scripts/supabase-production.mjs"
   },
   "dependencies": {

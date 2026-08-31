@@ -82,8 +82,10 @@ export async function GET(request) {
           id: p.id,
           amountCents: p.amount_cents,
           method: p.method,
+          category: p.category,
           kind: p.kind || chargeKindForCategory(p.category),
           isSponsorship: !!p.is_sponsorship,
+          payerName: p.payer_name || "",
           receivedAt: p.received_at || p.created_at
         }))
     };

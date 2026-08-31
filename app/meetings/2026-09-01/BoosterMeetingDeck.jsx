@@ -121,8 +121,13 @@ function SlideContent({ slide }) {
       <div className="meeting-frame meeting-frame-number">
         <p className="meeting-kicker">{slide.kicker}</p>
         <h2>{slide.title}</h2>
-        <strong className="meeting-hero-number">{slide.number}</strong>
-        <p className="meeting-hero-subtitle">{slide.subtitle}</p>
+        <div className={slide.url ? "meeting-number-with-qr" : ""}>
+          <div>
+            <strong className="meeting-hero-number">{slide.number}</strong>
+            <p className="meeting-hero-subtitle">{slide.subtitle}</p>
+          </div>
+          {slide.url ? <div className="meeting-number-qr"><QRCodeSVG value={slide.url} size={280} bgColor="#fffaf0" fgColor="#4f101c" /><span>Scan to commit and pay</span><a href={slide.url}>{slide.urlLabel}</a></div> : null}
+        </div>
         <p className="meeting-number-body">{slide.body}</p>
         <SourceLine>{slide.source}</SourceLine>
       </div>

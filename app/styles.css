@@ -178,6 +178,8 @@ body {
   background: var(--gold);
   color: #211a08;
 }
+.family-portal-actions { display:flex; flex-wrap:wrap; gap:.65rem; justify-content:flex-end; }
+.family-portal-cta-secondary { background:transparent; color:#fff; border:1px solid rgba(255,255,255,.6); }
 
 .chat-hero-inner {
   position: relative;

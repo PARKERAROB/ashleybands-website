@@ -136,7 +136,9 @@ export const meetingSlides = [
     title: "Confirmation and conditional deposit",
     number: "$50",
     subtitle: "Due Friday, September 4",
-    body: "The deposit remains refundable until Ashley confirms the applicable performer threshold and pays the WorldStrides group deposit. It then becomes nonrefundable and credits the student's trip balance."
+    body: "Scan now to submit the family commitment and pay. The deposit remains refundable until Ashley confirms the applicable performer threshold and pays the WorldStrides group deposit. It then becomes nonrefundable and credits the student's trip balance.",
+    url: "https://ashleybands.com/carnegie-2027/commit",
+    urlLabel: "ashleybands.com/carnegie-2027/commit"
   },
   {
     id: "deposit-math",
@@ -301,7 +303,7 @@ export const meetingSlides = [
       ["3", "Open one door", "Connect us with a business, foundation, media contact, organization, or major donor."],
       ["4", "Help tell the story", "Carnegie Hall, the national festival, seven years of rebuilding, and what this means."]
     ],
-    note: "No money is collected during tonight's presentation."
+    note: "Families may scan and complete the connected $50 commitment now, or return to it from ashleybands.com or the Family Portal by Friday."
   },
   {
     id: "mattress-section",

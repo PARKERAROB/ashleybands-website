@@ -154,6 +154,7 @@ export default function PortalReviewClient() {
               />
               <div className="portal-workspace-main">
                 <BandReadySection student={selectedStudent} />
+                <CarnegieCommitmentSection student={selectedStudent} />
                 <OnboardingSection student={selectedStudent} />
                 <ParticipationSection student={selectedStudent} onChanged={loadProfile} />
                 <StudentResourcesSection student={selectedStudent} />
@@ -189,6 +190,19 @@ function BandReadySection({ student }) {
   );
 }
 
+function CarnegieCommitmentSection({ student }) {
+  return (
+    <section className="portal-workspace-section portal-band-ready-callout" aria-labelledby="portal-carnegie-heading">
+      <div>
+        <p className="eyebrow">Carnegie Hall 2027</p>
+        <h2 id="portal-carnegie-heading">Family commitment and $50 deposit</h2>
+        <p>Submit the family intent for {student.displayName}, then pay the connected conditional deposit. The charge and payment appear in Funding and payments below.</p>
+      </div>
+      <Link className="portal-action-link" href={`/portal/carnegie-2027?studentId=${encodeURIComponent(student.id)}`}>Open Carnegie commitment</Link>
+    </section>
+  );
+}
+
 function OnboardingSection({ student }) {
   const complete = student.onboarding?.status === "complete";
   const started = Number(student.onboarding?.lastCompletedStep || 0) > 0;
@@ -213,6 +227,7 @@ function FamilyResources({ studentId }) {
     <nav className="portal-family-resources" aria-label="Family resources">
       <strong>Family resources</strong>
       <Link href={`/portal/band-ready?studentId=${encodeURIComponent(studentId)}`}>Band Ready checklist</Link>
+      <Link href={`/portal/carnegie-2027?studentId=${encodeURIComponent(studentId)}`}>Carnegie Hall commitment</Link>
       <Link href={`/portal/clothing?studentId=${encodeURIComponent(studentId)}`}>Open House clothing order</Link>
       <Link href="/portal/sponsorship">Business sponsorship</Link>
       <Link href="/info/marching-band-2026">Marching Band information</Link>
@@ -449,7 +464,7 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
             {student.payments.map((p) => (
               <li key={p.id}>
                 {new Date(p.receivedAt).toLocaleDateString()} — {formatUsd(p.amountCents)}{" "}
-                ({p.isSponsorship ? `sponsorship${p.payerName ? ` — ${p.payerName}` : ""}` : p.method})
+                ({p.isSponsorship ? `sponsorship${p.payerName ? ` — ${p.payerName}` : ""}` : p.category === "carnegie_2027_conditional_deposit" ? `Carnegie Hall conditional deposit · ${p.method}` : p.method})
               </li>
             ))}
           </ul>

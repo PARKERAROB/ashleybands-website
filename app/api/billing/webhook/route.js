@@ -152,7 +152,7 @@ export async function POST(request) {
       if (!invoiceId && await refundSponsorGift(resource)) {
         return NextResponse.json({ ok: true });
       }
-      let query = supabaseAdmin.from("fee_payments").update({ status: "refunded" });
+      let query = supabaseAdmin.from("fee_payments").select("id,status,amount_cents");
       if (invoiceId) {
         query = query.eq("invoice_id", invoiceId);
       } else {
@@ -161,8 +161,27 @@ export async function POST(request) {
         if (!captureId) throw new Error("Refund has no family invoice or capture id.");
         query = query.eq("paypal_capture_id", captureId);
       }
-      const { error } = await query.eq("status", "completed");
+      const { data: payment, error } = await query.eq("status", "completed").maybeSingle();
       if (error) throw new Error(error.message);
+      if (payment) {
+        if (amountToCents(resource.amount?.value) !== Number(payment.amount_cents) || resource.amount?.currency_code !== "USD") {
+          throw new Error("PayPal family refund does not match the full stored payment.");
+        }
+        const { error: settleError } = await supabaseAdmin.rpc("settle_online_fee_refund_with_audit", {
+          p_payment_id: payment.id,
+          p_actor_type: "system",
+          p_actor_id: eventId || null,
+          p_actor_name: "PayPal webhook",
+          p_route: "/api/billing/webhook",
+        });
+        if (settleError) throw new Error(settleError.message);
+        await supabaseAdmin.from("carnegie_trip_refund_events").update({
+          status: "completed",
+          paypal_refund_id: String(resource.id || ""),
+          error_summary: "",
+          completed_at: new Date().toISOString(),
+        }).eq("payment_id", payment.id).eq("status", "pending");
+      }
     }
   } catch {
     if (reserved) await supabaseAdmin.from("paypal_webhook_events").delete().eq("event_id", eventId);
