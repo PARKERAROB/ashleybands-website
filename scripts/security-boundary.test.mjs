@@ -78,6 +78,9 @@ const PRIVATE_OPERATIONAL_TABLES = [
   "student_form_requirements",
   "form_submission_references",
   "form_requirement_events",
+  "carnegie_trip_submissions",
+  "carnegie_trip_staff_tracking",
+  "carnegie_trip_refund_events",
   "fee_charges",
   "fee_payments",
   "paypal_webhook_events",
@@ -157,6 +160,7 @@ const SAFE_FILTER_COLUMN = {
   asset_music: "asset_id",
   asset_uniforms: "asset_id",
   staff_scope_assignments: "staff_id",
+  carnegie_trip_staff_tracking: "student_id",
   restore_verifications: "backup_run_id",
 };
 
@@ -525,6 +529,8 @@ test("new security-definer operations are private to the service role", () => {
     "record_asset_operation_with_audit",
     "record_form_submission_with_reference",
     "apply_spring_trip_refund_choice",
+    "record_carnegie_trip_submission",
+    "settle_online_fee_refund_with_audit",
   ]) {
     assert.match(migrations, new RegExp(`revoke\\s+all\\s+on\\s+function\\s+public\\.${name}\\(`));
     assert.match(migrations, new RegExp(`${name}\\([^;]+\\)\\s+from\\s+public\\s*,\\s*anon\\s*,\\s*authenticated`));
@@ -584,6 +590,8 @@ test("production publishable key cannot execute protected mutations", {
     ["record_asset_operation_with_audit", { p_asset_id: "00000000-0000-0000-0000-000000000000", p_operation: "missing", p_student_id: null, p_condition_summary: "", p_operational_status: "", p_note: "test", p_actor_staff_id: "00000000-0000-0000-0000-000000000000", p_route: "test" }],
     ["record_form_submission_with_reference", { p_requirement_id: "00000000-0000-0000-0000-000000000000", p_student_id: "00000000-0000-0000-0000-000000000000", p_state: "complete", p_completion_mode: "staff_record", p_next_action: "", p_note_summary: "test", p_reference_type: null, p_source_table: "", p_source_record_id: "", p_received_at: null, p_reference_metadata: {}, p_actor_staff_id: "00000000-0000-0000-0000-000000000000", p_route: "test" }],
     ["apply_spring_trip_refund_choice", { p_student_id: "00000000-0000-0000-0000-000000000000", p_choice: "forgo", p_actor_person_id: "00000000-0000-0000-0000-000000000000", p_route: "test" }],
+    ["record_carnegie_trip_submission", { p_student_id: "00000000-0000-0000-0000-000000000000", p_source: "public", p_response: "no", p_maximum_family_amount_band: "", p_help_options: [], p_guardian_name: "test", p_guardian_email: "test@example.com", p_guardian_phone: "", p_guardian_signature: "test", p_student_signature: "test", p_agreement_version: "2026-09-01-v1", p_terms_accepted: true, p_submission_key: "security-boundary-test", p_note: "", p_submitted_by_person_id: null, p_submitted_by_staff_id: null, p_actor_type: "system", p_actor_id: "test", p_actor_name: "test", p_ip_created: "", p_user_agent_created: "", p_route: "test" }],
+    ["settle_online_fee_refund_with_audit", { p_payment_id: "00000000-0000-0000-0000-000000000000", p_actor_type: "system", p_actor_id: "test", p_actor_name: "test", p_route: "test" }],
   ];
   for (const [name, body] of requests) {
     const response = await fetch(`${url}/rest/v1/rpc/${name}`, {
