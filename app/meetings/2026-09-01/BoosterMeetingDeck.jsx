@@ -151,7 +151,10 @@ function SlideContent({ slide }) {
       <div className="meeting-frame">
         <p className="meeting-kicker">{slide.kicker}</p>
         <h2>{slide.title}</h2>
-        <div className="meeting-schedule">
+        <div
+          className="meeting-schedule"
+          style={{ "--meeting-schedule-columns": slide.entries.length }}
+        >
           {slide.entries.map(([date, amount, label]) => (
             <div key={`${date}-${label}`}>
               <span className="meeting-schedule-date">{date}</span>

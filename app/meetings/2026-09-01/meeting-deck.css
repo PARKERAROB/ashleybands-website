@@ -389,7 +389,7 @@
 
 .meeting-schedule {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--meeting-schedule-columns, 5), minmax(0, 1fr));
   gap: clamp(12px, 2vw, 30px);
   margin-top: clamp(42px, 7vh, 82px);
 }
