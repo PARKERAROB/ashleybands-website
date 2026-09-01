@@ -71,7 +71,8 @@ test("report sending requires a named staff capability", () => {
   assert.doesNotMatch(reportRoute, /validateAttendanceRequest/);
   assert.match(attendanceRoute, /ATTENDANCE_EVENTS_READ/);
   assert.match(attendanceRoute, /validateAttendanceRequest/);
-  assert.match(attendanceRoute, /sharedPinFieldUpdate/);
+  assert.match(attendanceRoute, /sharedPinFieldOperation/);
+  assert.match(attendanceRoute, /prepare:\s*true/);
   assert.match(attendanceRoute, /Named staff access is required for this operation/);
   assert.match(attendanceRoute, /private, no-store/);
   assert.match(attendance, /selected\.lifecycleState === "completed"/);

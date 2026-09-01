@@ -55,7 +55,7 @@ function sharedPinSession(session) {
       exceptionsWrite: false,
       staffWrite: false,
       reportSend: false,
-      prepare: false,
+      prepare: true,
       complete: false
     }
   };
@@ -118,9 +118,9 @@ export async function PATCH(request) {
       : body.exception
         ? STAFF_CAPABILITIES.ATTENDANCE_EXCEPTIONS_WRITE
         : STAFF_CAPABILITIES.ATTENDANCE_EVENTS_WRITE;
-  const sharedPinFieldUpdate = !body.prepare && !body.complete && !body.staffAttendance && !body.exception;
+  const sharedPinFieldOperation = !body.complete && !body.staffAttendance && !body.exception;
   const access = await authorize(request, capability, occurrenceKey, {
-    allowSharedPin: sharedPinFieldUpdate
+    allowSharedPin: sharedPinFieldOperation
   });
   if (access.response) return access.response;
 
@@ -128,7 +128,7 @@ export async function PATCH(request) {
     if (body.prepare) {
       const prepared = await prepareAttendanceEvent({
         occurrenceKey,
-        actorStaffId: access.authorization.staff.id
+        actorStaffId: access.authorization.staff?.id || null
       });
       await logAudit({
         actor: access.session.actor,
