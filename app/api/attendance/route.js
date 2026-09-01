@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { logAudit, staffActor } from "@/lib/auditLog";
+import { validateAttendanceRequest } from "@/lib/attendanceAuth";
 import {
   authorizeStaffRequest,
   STAFF_CAPABILITIES,
@@ -39,12 +40,35 @@ function sessionFor(staff) {
       eventsWrite: staffHasCapability(staff, STAFF_CAPABILITIES.ATTENDANCE_EVENTS_WRITE),
       exceptionsWrite: staffHasCapability(staff, STAFF_CAPABILITIES.ATTENDANCE_EXCEPTIONS_WRITE),
       staffWrite: staffHasCapability(staff, STAFF_CAPABILITIES.ATTENDANCE_STAFF_WRITE),
-      reportSend: staffHasCapability(staff, STAFF_CAPABILITIES.ATTENDANCE_REPORT_SEND)
+      reportSend: staffHasCapability(staff, STAFF_CAPABILITIES.ATTENDANCE_REPORT_SEND),
+      prepare: staffHasCapability(staff, STAFF_CAPABILITIES.ATTENDANCE_EVENTS_WRITE),
+      complete: staffHasCapability(staff, STAFF_CAPABILITIES.ATTENDANCE_EVENTS_WRITE)
     }
   };
 }
 
-async function authorize(request, capability, occurrenceKey) {
+function sharedPinSession(session) {
+  return {
+    ...session,
+    permissions: {
+      eventsWrite: true,
+      exceptionsWrite: false,
+      staffWrite: false,
+      reportSend: false,
+      prepare: false,
+      complete: false
+    }
+  };
+}
+
+async function authorize(request, capability, occurrenceKey, { allowSharedPin = false } = {}) {
+  const attendanceSession = await validateAttendanceRequest(request);
+  if (attendanceSession?.access === "shared_pin") {
+    if (!allowSharedPin) {
+      return { response: json({ error: "Named staff access is required for this operation." }, 403) };
+    }
+    return { authorization: { staff: null }, session: sharedPinSession(attendanceSession) };
+  }
   const authorization = await authorizeStaffRequest(request, capability, {
     scope: occurrenceKey
       ? { type: "attendance_event", ref: occurrenceKey }
@@ -56,12 +80,14 @@ async function authorize(request, capability, occurrenceKey) {
 
 export async function GET(request) {
   const occurrenceKey = new URL(request.url).searchParams.get("occurrence") || undefined;
-  const access = await authorize(request, STAFF_CAPABILITIES.ATTENDANCE_EVENTS_READ, occurrenceKey);
+  const access = await authorize(request, STAFF_CAPABILITIES.ATTENDANCE_EVENTS_READ, occurrenceKey, {
+    allowSharedPin: true
+  });
   if (access.response) return access.response;
 
   try {
     const sheet = await getAttendanceSheet({ occurrenceKey, session: access.session });
-    if (occurrenceKey && staffUsesAssignedScopes(access.authorization.staff)) {
+    if (occurrenceKey && access.authorization.staff && staffUsesAssignedScopes(access.authorization.staff)) {
       sheet.occurrences = sheet.occurrences.filter((event) => event.occurrenceKey === occurrenceKey);
     }
     await logAudit({
@@ -92,7 +118,10 @@ export async function PATCH(request) {
       : body.exception
         ? STAFF_CAPABILITIES.ATTENDANCE_EXCEPTIONS_WRITE
         : STAFF_CAPABILITIES.ATTENDANCE_EVENTS_WRITE;
-  const access = await authorize(request, capability, occurrenceKey);
+  const sharedPinFieldUpdate = !body.prepare && !body.complete && !body.staffAttendance && !body.exception;
+  const access = await authorize(request, capability, occurrenceKey, {
+    allowSharedPin: sharedPinFieldUpdate
+  });
   if (access.response) return access.response;
 
   try {
@@ -199,7 +228,7 @@ export async function PATCH(request) {
       occurrenceKey,
       studentId,
       changes,
-      actorStaffId: access.authorization.staff.id
+      actorStaffId: access.authorization.staff?.id || null
     });
     await logAudit({
       actor: access.session.actor,

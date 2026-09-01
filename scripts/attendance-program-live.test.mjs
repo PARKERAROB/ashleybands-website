@@ -59,9 +59,9 @@ test("the field tool honors occurrence and student URL context", () => {
   assert.match(client, /scrollIntoView/);
   assert.match(client, /params\.set\("occurrence"/);
   assert.match(page, /robots: \{ index: false, follow: false \}/);
-  assert.match(client, /StaffGate/);
-  assert.match(client, /staffAuthHeaders/);
-  assert.doesNotMatch(client, /AttendanceGate/);
+  assert.match(client, /AttendanceGate/);
+  assert.match(client, /\/api\/attendance\/access/);
+  assert.doesNotMatch(client, /StaffGate/);
 });
 
 test("report sending requires a named staff capability", () => {
@@ -70,7 +70,9 @@ test("report sending requires a named staff capability", () => {
   assert.match(capabilities, /ATTENDANCE_REPORT_SEND:\s*"attendance\.report\.send"/);
   assert.doesNotMatch(reportRoute, /validateAttendanceRequest/);
   assert.match(attendanceRoute, /ATTENDANCE_EVENTS_READ/);
-  assert.doesNotMatch(attendanceRoute, /validateAttendanceRequest/);
+  assert.match(attendanceRoute, /validateAttendanceRequest/);
+  assert.match(attendanceRoute, /sharedPinFieldUpdate/);
+  assert.match(attendanceRoute, /Named staff access is required for this operation/);
   assert.match(attendanceRoute, /private, no-store/);
   assert.match(attendance, /selected\.lifecycleState === "completed"/);
 });

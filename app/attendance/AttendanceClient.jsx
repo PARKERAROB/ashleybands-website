@@ -1,9 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { StaffGate } from "@/components/StaffGate";
 import { groupAttendanceOccurrencesByWeek } from "@/lib/attendanceEvents.mjs";
-import { staffAuthHeaders } from "@/lib/staffSession";
 import styles from "./attendance.module.css";
 
 const STATUS = {
@@ -92,21 +90,7 @@ function timeInputValue(iso, timeZone) {
 }
 
 export default function AttendanceClient({ initialOccurrenceKey = "", initialStudentId = "" }) {
-  return (
-    <StaffGate>
-      {(session, signOut) => (
-        <AuthenticatedAttendance
-          initialOccurrenceKey={initialOccurrenceKey}
-          initialStudentId={initialStudentId}
-          session={session}
-          signOut={signOut}
-        />
-      )}
-    </StaffGate>
-  );
-}
-
-function AuthenticatedAttendance({ initialOccurrenceKey, initialStudentId, session, signOut }) {
+  const [access, setAccess] = useState("checking");
   const [students, setStudents] = useState([]);
   const [staff, setStaff] = useState([]);
   const [event, setEvent] = useState(null);
@@ -145,10 +129,13 @@ function AuthenticatedAttendance({ initialOccurrenceKey, initialStudentId, sessi
       const key = occurrenceKey || loadedKey.current;
       const params = key ? `?occurrence=${encodeURIComponent(key)}` : "";
       const response = await fetch(`/api/attendance${params}`, {
-        cache: "no-store",
-        headers: staffAuthHeaders(session)
+        cache: "no-store"
       });
       const data = await response.json().catch(() => ({}));
+      if (response.status === 401) {
+        setAccess("locked");
+        return;
+      }
       if (!response.ok) throw new Error(data.error || "Attendance could not be loaded.");
       const changingOccurrence = loadedKey.current !== data.event?.occurrenceKey;
       setStudents((current) => {
@@ -170,6 +157,7 @@ function AuthenticatedAttendance({ initialOccurrenceKey, initialStudentId, sessi
       setCanComplete(Boolean(data.canComplete));
       setCanSendReport(Boolean(data.canSendReport));
       setLastSynced(new Date());
+      setAccess("open");
       if (!quiet) setError("");
       const requestedStudentId = new URLSearchParams(window.location.search).get("student") || initialStudentId;
       const requestedStudent = (data.students || []).find((student) => student.id === requestedStudentId);
@@ -192,7 +180,7 @@ function AuthenticatedAttendance({ initialOccurrenceKey, initialStudentId, sessi
     } catch (loadError) {
       if (!quiet) setError(loadError.message);
     }
-  }, [initialStudentId, session]);
+  }, [initialStudentId]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => loadRoster({ occurrenceKey: initialOccurrenceKey || undefined }), 0);
@@ -238,7 +226,7 @@ function AuthenticatedAttendance({ initialOccurrenceKey, initialStudentId, sessi
   const patchStudent = async (studentId, changes) => {
     const response = await fetch("/api/attendance", {
       method: "PATCH",
-      headers: staffAuthHeaders(session),
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ occurrenceKey: event.occurrenceKey, studentId, ...changes })
     });
     const data = await response.json().catch(() => ({}));
@@ -276,7 +264,7 @@ function AuthenticatedAttendance({ initialOccurrenceKey, initialStudentId, sessi
     try {
       const response = await fetch("/api/attendance", {
         method: "PATCH",
-        headers: staffAuthHeaders(session),
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ occurrenceKey: event.occurrenceKey, prepare: true })
       });
       const data = await response.json().catch(() => ({}));
@@ -298,7 +286,7 @@ function AuthenticatedAttendance({ initialOccurrenceKey, initialStudentId, sessi
     try {
       const response = await fetch("/api/attendance", {
         method: "PATCH",
-        headers: staffAuthHeaders(session),
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ occurrenceKey: event.occurrenceKey, complete: true })
       });
       const data = await response.json().catch(() => ({}));
@@ -320,7 +308,7 @@ function AuthenticatedAttendance({ initialOccurrenceKey, initialStudentId, sessi
     try {
       const response = await fetch("/api/attendance", {
         method: "PATCH",
-        headers: staffAuthHeaders(session),
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           occurrenceKey: event.occurrenceKey,
           staffAttendance: {
@@ -475,7 +463,7 @@ function AuthenticatedAttendance({ initialOccurrenceKey, initialStudentId, sessi
     try {
       const response = await fetch("/api/attendance/report", {
         method: "POST",
-        headers: staffAuthHeaders(session),
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ occurrenceKey: event.occurrenceKey })
       });
       const data = await response.json().catch(() => ({}));
@@ -488,6 +476,16 @@ function AuthenticatedAttendance({ initialOccurrenceKey, initialStudentId, sessi
     }
   };
 
+  if (access === "checking") {
+    return <main className={styles.shell}><p className={styles.loading}>Opening attendance…</p></main>;
+  }
+  if (access === "locked") {
+    return <AttendanceGate onOpen={() => {
+      loadedKey.current = null;
+      setAccess("checking");
+      loadRoster({ occurrenceKey: initialOccurrenceKey || undefined });
+    }} />;
+  }
   if (!event) {
     return (
       <main className={styles.shell}>
@@ -513,9 +511,6 @@ function AuthenticatedAttendance({ initialOccurrenceKey, initialStudentId, sessi
   const hasReportableDetails = counts.absent || counts.tardy || counts.notes || counts.departed
     || exceptions.length || staffReportableCount;
   const historicalRecordsOnly = event.rosterCompleteness === "observed_only";
-  const workspaceParams = new URLSearchParams({ occurrence: event.occurrenceKey });
-  if (initialStudentId) workspaceParams.set("student", initialStudentId);
-
   return (
     <main className={styles.shell}>
       <header className={styles.hero}>
@@ -528,10 +523,10 @@ function AuthenticatedAttendance({ initialOccurrenceKey, initialStudentId, sessi
             </div>
             <p>{eventDate(event)} · {eventTime(event)}</p>
           </div>
-          <div className={styles.headerActions}>
-            <a href={`/admin/attendance?${workspaceParams.toString()}`}>Attendance workspace</a>
-            <button className={styles.signOut} type="button" onClick={signOut}>Sign out</button>
-          </div>
+          <button className={styles.signOut} type="button" onClick={async () => {
+            await fetch("/api/attendance/access", { method: "DELETE" });
+            setAccess("locked");
+          }}>Lock</button>
         </div>
         <div className={styles.sessionNavigator} aria-label="Move among attendance sessions">
           <button
@@ -751,7 +746,6 @@ function AuthenticatedAttendance({ initialOccurrenceKey, initialStudentId, sessi
         onSaved={() => loadRoster({ occurrenceKey: event.occurrenceKey })}
         onError={setError}
         onNotice={setNotice}
-        session={session}
       />
 
       {(canManageStaff || staff.length > 0) && <StaffAttendance
@@ -775,6 +769,56 @@ function AuthenticatedAttendance({ initialOccurrenceKey, initialStudentId, sessi
           onClick={sendReport}
         >{sending ? "Sending…" : "Send selected report"}</button>
       </div> : null}
+    </main>
+  );
+}
+
+function AttendanceGate({ onOpen }) {
+  const [pin, setPin] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const submit = async (submitEvent) => {
+    submitEvent.preventDefault();
+    setBusy(true);
+    setError("");
+    try {
+      const response = await fetch("/api/attendance/access", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pin })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "PIN not recognized.");
+      onOpen();
+    } catch (accessError) {
+      setError(accessError.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <main className={`${styles.shell} ${styles.gateShell}`}>
+      <form className={styles.gate} onSubmit={submit}>
+        <p className={styles.eyebrow}>Ashley Bands · Private leadership tool</p>
+        <h1>Program Attendance</h1>
+        <p>Use the established attendance PIN to open the shared event roster.</p>
+        <label htmlFor="attendance-pin">Attendance PIN</label>
+        <input
+          id="attendance-pin"
+          type="password"
+          inputMode="numeric"
+          autoComplete="current-password"
+          required
+          autoFocus
+          value={pin}
+          onChange={(changeEvent) => setPin(changeEvent.target.value)}
+        />
+        {error && <p className={styles.gateError} role="alert">{error}</p>}
+        <button type="submit" disabled={busy}>{busy ? "Opening…" : "Open attendance"}</button>
+        <small>Student information stays behind this access gate. Lock the page when you are finished.</small>
+      </form>
     </main>
   );
 }
@@ -974,7 +1018,7 @@ function StaffAttendance({ event, staff, saving, onSave, onError, canEdit }) {
   );
 }
 
-function ExpectedExceptions({ exceptions, event, students, canManage, onSaved, onError, onNotice, session }) {
+function ExpectedExceptions({ exceptions, event, students, canManage, onSaved, onError, onNotice }) {
   const [studentId, setStudentId] = useState("");
   const [kind, setKind] = useState("absent");
   const [expectedTime, setExpectedTime] = useState("");
@@ -989,7 +1033,7 @@ function ExpectedExceptions({ exceptions, event, students, canManage, onSaved, o
     try {
       const response = await fetch("/api/attendance", {
         method: "PATCH",
-        headers: staffAuthHeaders(session),
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           occurrenceKey: event.occurrenceKey,
           studentId,
