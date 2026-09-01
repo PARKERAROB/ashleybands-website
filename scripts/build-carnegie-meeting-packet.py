@@ -102,7 +102,13 @@ def build():
     anchors.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), PAPER), ("BOX", (0, 0), (-1, -1), 0.7, colors.HexColor("#D8CBBB")), ("INNERGRID", (0, 0), (-1, -1), 0.7, colors.HexColor("#D8CBBB")), ("TOPPADDING", (0, 0), (-1, -1), 15), ("BOTTOMPADDING", (0, 0), (-1, -1), 14), ("LEFTPADDING", (0, 0), (-1, -1), 12), ("RIGHTPADDING", (0, 0), (-1, -1), 12), ("VALIGN", (0, 0), (-1, -1), "TOP")]))
     story.extend([anchors, Spacer(1, 0.18 * inch), Table([[Paragraph(esc(data["planningFigure"]), styles["Bodyx"])]], colWidths=[doc.width], style=TableStyle([("BACKGROUND", (0, 0), (-1, -1), PALE), ("LINEBEFORE", (0, 0), (0, -1), 4, GOLD), ("LEFTPADDING", (0, 0), (-1, -1), 14), ("RIGHTPADDING", (0, 0), (-1, -1), 14), ("TOPPADDING", (0, 0), (-1, -1), 10), ("BOTTOMPADDING", (0, 0), (-1, -1), 5)])), PageBreak()])
 
-    section(story, styles, "The opportunity", "Ashley was selected - and now the plan has to become real")
+    section(story, styles, "Who is responsible", "Four names, four different roles")
+    role_cells = [[Paragraph(esc(role["actor"]), styles["H3x"]), Paragraph(esc(role["responsibility"]), styles["Bodyx"])] for role in data["roles"]]
+    roles = Table([[role_cells[0], role_cells[1]], [role_cells[2], role_cells[3]]], colWidths=[doc.width / 2] * 2)
+    roles.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), PAPER), ("BOX", (0, 0), (-1, -1), 0.7, colors.HexColor("#D8CBBB")), ("INNERGRID", (0, 0), (-1, -1), 0.7, colors.HexColor("#D8CBBB")), ("VALIGN", (0, 0), (-1, -1), "TOP"), ("TOPPADDING", (0, 0), (-1, -1), 14), ("BOTTOMPADDING", (0, 0), (-1, -1), 8), ("LEFTPADDING", (0, 0), (-1, -1), 14), ("RIGHTPADDING", (0, 0), (-1, -1), 14)]))
+    story.extend([roles, PageBreak()])
+
+    section(story, styles, "The opportunity", "Two Ashley High School ensembles were selected. Now the plan has to become real.")
     story.extend(bullets(data["opportunity"], styles))
     story.append(Spacer(1, 10))
     section(story, styles, "Participation", "The trip can move forward in one of two ways")
@@ -129,7 +135,7 @@ def build():
 
     section(story, styles, "Optional protection", data["frp"]["title"])
     story.append(Paragraph(esc(data["frp"]["summary"]), styles["Bodyx"]))
-    frp_cols = Table([[[Paragraph("WHAT IS KNOWN", styles["H3x"]), *bullets(data["frp"]["known"], styles)], [Paragraph("WHAT ASHLEY IS CONFIRMING", styles["H3x"]), *bullets(data["frp"]["open"], styles)]]], colWidths=[doc.width / 2] * 2)
+    frp_cols = Table([[[Paragraph("WHAT IS KNOWN", styles["H3x"]), *bullets(data["frp"]["known"], styles)], [Paragraph("WHAT MR. PARKER AND THE BOOSTERS ARE CONFIRMING", styles["H3x"]), *bullets(data["frp"]["open"], styles)]]], colWidths=[doc.width / 2] * 2)
     frp_cols.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), PAPER), ("BOX", (0, 0), (-1, -1), 0.7, colors.HexColor("#D8CBBB")), ("INNERGRID", (0, 0), (-1, -1), 0.7, colors.HexColor("#D8CBBB")), ("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 14), ("RIGHTPADDING", (0, 0), (-1, -1), 14), ("TOPPADDING", (0, 0), (-1, -1), 14), ("BOTTOMPADDING", (0, 0), (-1, -1), 8)]))
     story.extend([Spacer(1, 8), frp_cols, Spacer(1, 18)])
     section(story, styles, "The shared campaign", "Moving the family total toward $500 starts tonight")
@@ -140,14 +146,17 @@ def build():
     section(story, styles, "Before the final agreement", "These details still require written answers")
     story.extend(bullets(data["openBeforeFinalAgreement"], styles))
     story.extend([Spacer(1, 12), Paragraph("PARENT QUESTIONS", styles["Eyebrow"]), Paragraph("Frequently asked questions", styles["H1x"])])
-    faq_rows = []
-    for item in data["faq"]:
-        faq_rows.append([Paragraph(esc(item["question"]), styles["H3x"]), Paragraph(esc(item["answer"]), styles["Bodyx"])])
-    faq = Table(faq_rows, colWidths=[2.25 * inch, doc.width - 2.25 * inch])
-    faq.setStyle(TableStyle([("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#D8CBBB")), ("BACKGROUND", (0, 0), (0, -1), PALE), ("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 8), ("RIGHTPADDING", (0, 0), (-1, -1), 8), ("TOPPADDING", (0, 0), (-1, -1), 7), ("BOTTOMPADDING", (0, 0), (-1, -1), 4)]))
-    story.extend([faq, PageBreak()])
+    def faq_table(items):
+        rows = [[Paragraph(esc(item["question"]), styles["H3x"]), Paragraph(esc(item["answer"]), styles["Bodyx"])] for item in items]
+        table = Table(rows, colWidths=[2.25 * inch, doc.width - 2.25 * inch])
+        table.setStyle(TableStyle([("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#D8CBBB")), ("BACKGROUND", (0, 0), (0, -1), PALE), ("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 8), ("RIGHTPADDING", (0, 0), (-1, -1), 8), ("TOPPADDING", (0, 0), (-1, -1), 7), ("BOTTOMPADDING", (0, 0), (-1, -1), 4)]))
+        return table
 
-    section(story, styles, "Due Friday, September 4", "Give Ashley an honest answer")
+    story.extend([faq_table(data["faq"][:4]), PageBreak()])
+    section(story, styles, "Parent questions continued", "Frequently asked questions, continued")
+    story.extend([faq_table(data["faq"][4:]), PageBreak()])
+
+    section(story, styles, "Due Friday, September 4", "Give the band program a reliable answer")
     story.extend([Paragraph("Complete one response per student. A serious yes creates the connected $50 conditional-deposit charge and lets the family pay immediately at ashleybands.com/carnegie-2027/commit.", styles["Bodyx"]), Spacer(1, 18), HRFlowable(width="100%", thickness=3, color=GOLD), Spacer(1, 18), Paragraph("Sources and status", styles["H2x"]), *bullets(data["sources"], styles), Paragraph("Planning information as of September 1, 2026. Estimates and open terms are labeled throughout.", styles["Smallx"])])
 
     doc.build(story)

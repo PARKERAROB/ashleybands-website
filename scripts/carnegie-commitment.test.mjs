@@ -63,6 +63,22 @@ test("meeting deck gives the three family numbers a clear hierarchy", () => {
   assert.doesNotMatch(slides, /\["SEP 15", "\$450"/);
 });
 
+test("family materials assign each Carnegie action to a named actor", () => {
+  const slides = read("app/meetings/2026-09-01/slides.js");
+  const packet = JSON.parse(read("content/carnegie-2027-meeting-packet.json"));
+  const form = read("app/carnegie-2027/commit/CarnegieCommitmentClient.jsx");
+  assert.deepEqual(packet.roles.map((item) => item.actor), [
+    "Ashley Bands",
+    "Mr. Parker",
+    "Ashley High School and NHCS",
+    "Ashley High School Band Boosters",
+  ]);
+  assert.match(slides, /id: "who-does-what"[\s\S]*"Band Boosters"/);
+  assert.doesNotMatch(slides, /until Ashley pays|Give Ashley|What Ashley is confirming/);
+  assert.doesNotMatch(JSON.stringify(packet), /Before Ashley pays|After Ashley pays|tells Ashley it may rely|Ashley cannot responsibly/);
+  assert.match(form, /Ashley High School Band Boosters pay the WorldStrides group deposit/);
+});
+
 test("public family packet and downloadable PDF carry the same decision anchors", () => {
   const packet = JSON.parse(read("content/carnegie-2027-meeting-packet.json"));
   const page = read("app/carnegie-2027/meeting-packet/page.jsx");

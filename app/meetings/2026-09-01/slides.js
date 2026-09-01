@@ -3,8 +3,8 @@ export const meetingSlides = [
     id: "welcome",
     kind: "cover",
     section: "Welcome",
-    kicker: "Tuesday, September 1, 2026",
-    title: "Ashley Bands Booster Meeting",
+    kicker: "Ashley High School • Tuesday, September 1, 2026",
+    title: "Band Boosters Meeting",
     subtitle: "Carnegie Hall • CFS Mattress Fundraiser • Family Actions",
     detail: "Minnie Evans Arts Center • 6:30-7:30 p.m.",
     image: "/528048622_10108973219927428_7681318735311321118_n.jpg"
@@ -28,10 +28,24 @@ export const meetingSlides = [
     kind: "photo",
     section: "Carnegie Hall",
     kicker: "The opportunity",
-    title: "Both Ashley concert ensembles were selected for Carnegie Hall",
-    body: "The 2027 performance can mark the next chapter of a program that has spent seven years rebuilding after COVID.",
+    title: "Two Ashley High School ensembles were selected for Carnegie Hall",
+    body: "The Concert Band and Wind Ensemble can mark the next chapter of a band program that has spent seven years rebuilding after COVID.",
     image: "/656637421_1325880026241163_8640066925134763727_n.jpg",
     caption: "Wind Ensemble in Minnie Evans Arts Center"
+  },
+  {
+    id: "who-does-what",
+    kind: "action",
+    section: "Carnegie Hall",
+    kicker: "Who is responsible",
+    title: "Four names, four different roles",
+    actions: [
+      ["1", "Ashley Bands", "Builds the educational plan and communicates with families."],
+      ["2", "Mr. Parker", "Directs the ensembles, approves performers, and recommends the trip path."],
+      ["3", "School + NHCS", "Approve school travel and district requirements."],
+      ["4", "Band Boosters", "Collect, track, pay, and refund trip money under Booster controls."]
+    ],
+    note: "Each decision stays with the person or organization responsible for it."
   },
   {
     id: "trip-snapshot",
@@ -107,7 +121,7 @@ export const meetingSlides = [
     title: "Confirmation and conditional deposit",
     number: "$50",
     subtitle: "Opens tonight • due Friday, September 4",
-    body: "Scan now to submit the family commitment and pay. The deposit remains refundable until Ashley confirms the applicable performer threshold and pays the WorldStrides group deposit. It then becomes nonrefundable and credits the student's trip balance.",
+    body: "Scan now to submit the family commitment and pay the Boosters through PayPal. The deposit remains refundable until the required performer threshold is reached and the Boosters pay the WorldStrides group deposit. It then becomes nonrefundable and credits the student's trip balance.",
     url: "https://ashleybands.com/carnegie-2027/commit",
     urlLabel: "ashleybands.com/carnegie-2027/commit"
   },
@@ -132,7 +146,7 @@ export const meetingSlides = [
       items: [
         "Sign the initial intent acknowledgement",
         "Pay the conditional $50 deposit",
-        "Refundable until Ashley pays the WorldStrides group deposit"
+        "Refundable until the Boosters pay the WorldStrides group deposit"
       ]
     },
     right: {
@@ -159,14 +173,14 @@ export const meetingSlides = [
       ]
     },
     right: {
-      label: "What Ashley is confirming",
+      label: "What must be confirmed",
       items: [
         "Final price and election deadline",
         "Whether the group or individual travelers elect",
-        "Exactly which Ashley payments are protected"
+        "Which payments collected by the Boosters are protected"
       ]
     },
-    source: "WorldStrides group-billed terms and Ashley's in-progress Letter of Understanding."
+    source: "WorldStrides group-billed terms and Ashley Bands' in-progress Letter of Understanding."
   },
   {
     id: "family-goal",
@@ -190,14 +204,14 @@ export const meetingSlides = [
       ["3", "Story", "Open a door to local media or an arts supporter."],
       ["4", "Campaign", "Help with outreach, events, and donor follow-up."]
     ],
-    note: "Ashley will pursue WorldStrides and SYTA assistance, local and corporate partners, foundations, civic groups, media, and major donors. No award or lower family total is guaranteed yet."
+    note: "Ashley Bands will pursue WorldStrides and SYTA assistance, local and corporate partners, foundations, civic groups, media, and major donors. No award or lower family total is guaranteed yet."
   },
   {
     id: "family-action",
     kind: "action",
     section: "Carnegie Hall",
     kicker: "What families need to do",
-    title: "Give Ashley an honest answer by Friday",
+    title: "Give the band program a reliable answer by Friday",
     actions: [
       ["1", "Answer honestly", "Could your family participate with a total responsibility up to $2,000?"],
       ["2", "Confirm", "Sign and pay the $50 tonight, or complete it by September 4."],
@@ -252,7 +266,7 @@ export const meetingSlides = [
       "Write the student's name in the Credit goes to field",
       "Bring the referral flyer to the event",
       "The flyer includes 20% off accessories with a mattress purchase",
-      "Always share it with the dated Ashley event information"
+      "Always share it with the dated Ashley High School event information"
     ]
   },
   {
@@ -263,7 +277,7 @@ export const meetingSlides = [
     title: "Invite the people who serve our community",
     number: "10%",
     subtitle: "off mattresses over $699",
-    body: "The CFS VIP offer is for faculty, staff, police, fire, EMS, and military guests. Share the Ashley event flyer so the date, time, location, and offer stay together.",
+    body: "The CFS VIP offer is for faculty, staff, police, fire, EMS, and military guests. Share the Ashley High School event flyer so the date, time, location, and offer stay together.",
     source: "CFS VIP flyer received August 30, 2026."
   },
   {

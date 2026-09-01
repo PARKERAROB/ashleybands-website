@@ -39,7 +39,11 @@ export default function CarnegieMeetingPacketPage() {
           <p className={styles.planning}>{packet.planningFigure}</p>
         </section>
 
-        <Section eyebrow="The opportunity" title="Ashley was selected—and now the plan has to become real">
+        <Section eyebrow="Who is responsible" title="Four names, four different roles">
+          <div className={styles.roles}>{packet.roles.map((item) => <article key={item.actor}><h3>{item.actor}</h3><p>{item.responsibility}</p></article>)}</div>
+        </Section>
+
+        <Section eyebrow="The opportunity" title="Two Ashley High School ensembles were selected. Now the plan has to become real.">
           <ul>{packet.opportunity.map((item) => <li key={item}>{item}</li>)}</ul>
         </Section>
 
@@ -62,7 +66,7 @@ export default function CarnegieMeetingPacketPage() {
 
         <Section eyebrow="Optional protection" title={packet.frp.title}>
           <p className={styles.lede}>{packet.frp.summary}</p>
-          <div className={styles.twoColumn}><div><h3>What is known</h3><ul>{packet.frp.known.map((item) => <li key={item}>{item}</li>)}</ul></div><div><h3>What Ashley is confirming</h3><ul>{packet.frp.open.map((item) => <li key={item}>{item}</li>)}</ul></div></div>
+          <div className={styles.twoColumn}><div><h3>What is known</h3><ul>{packet.frp.known.map((item) => <li key={item}>{item}</li>)}</ul></div><div><h3>What Mr. Parker and the Boosters are confirming</h3><ul>{packet.frp.open.map((item) => <li key={item}>{item}</li>)}</ul></div></div>
         </Section>
 
         <Section eyebrow="The shared campaign" title="Moving the family total toward $500 starts tonight">
@@ -81,7 +85,7 @@ export default function CarnegieMeetingPacketPage() {
 
         <section className={styles.finalAction}>
           <p className={styles.eyebrow}>Due Friday, September 4</p>
-          <h2>Give Ashley an honest answer</h2>
+          <h2>Give the band program a reliable answer</h2>
           <p>Complete one response per student. A serious yes creates the connected $50 conditional-deposit charge and lets the family pay immediately.</p>
           <div className={styles.actions}><Link className={styles.primary} href="/carnegie-2027/commit">Sign and continue to payment</Link><a className={styles.secondary} href={PDF_PATH} download>Keep the PDF packet</a></div>
         </section>

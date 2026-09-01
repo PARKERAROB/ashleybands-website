@@ -173,14 +173,14 @@ export default function CarnegieCommitmentClient({ portalMode = false }) {
             ) : (
               <div className={styles.paymentPanel}>
                 <span>Conditional deposit</span><strong>$50</strong>
-                <p>Refundable until the participation threshold is confirmed and Ashley Bands pays the WorldStrides group deposit. If an unapproved Concert Band student pays, the $50 will be refunded.</p>
+                <p>Refundable until the participation threshold is confirmed and the Ashley High School Band Boosters pay the WorldStrides group deposit. If an unapproved Concert Band student pays, the $50 will be refunded.</p>
                 <button className={styles.primaryButton} type="button" onClick={showPayment}>Pay the $50 deposit now</button>
                 <div className={styles.paypal} ref={paypalRef} />
                 {paymentMessage ? <p className={styles.message} role="status">{paymentMessage}</p> : null}
               </div>
             )
           ) : (
-            <p className={styles.notice}>No payment is due for this response. Thank you for giving Ashley Bands clear planning information.</p>
+            <p className={styles.notice}>No payment is due for this response. Thank you for giving the band program clear planning information.</p>
           )}
           <div className={styles.actions}>
             {portalMode ? <Link href="/portal/review">Return to Family Portal</Link> : <Link href="/portal">Open Family Portal</Link>}
@@ -255,8 +255,8 @@ export default function CarnegieCommitmentClient({ portalMode = false }) {
             <li>This is an initial family intent response, not the final trip contract.</li>
             <li>A “yes” includes a $50 conditional deposit credited toward the student&apos;s trip account.</li>
             <li>A “yes” means the family seriously intends to participate if its total responsibility is no more than $2,000.</li>
-            <li>If the eventual family responsibility would exceed $2,000, Ashley must return to families for a new decision; this acknowledgement does not authorize a higher family obligation.</li>
-            <li>The deposit is refundable until the participation threshold is confirmed and Ashley Bands pays the WorldStrides group deposit; after that it becomes nonrefundable.</li>
+            <li>If the eventual family responsibility would exceed $2,000, the band program must return to families for a new decision; this acknowledgement does not authorize the Boosters to collect a higher amount.</li>
+            <li>The deposit is refundable until the participation threshold is confirmed and the Ashley High School Band Boosters pay the WorldStrides group deposit; after that it becomes nonrefundable.</li>
             <li>Concert Band participation remains subject to approval. An unapproved Concert Band student&apos;s $50 will be refunded.</li>
             <li>The current trip price is a planning estimate, not a final price.</li>
           </ul>

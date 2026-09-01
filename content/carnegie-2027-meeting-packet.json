@@ -6,22 +6,40 @@
     {
       "number": "$50",
       "label": "opens tonight",
-      "description": "Conditional deposit due Friday, September 4. It is refundable until Ashley reaches the performer threshold and pays the WorldStrides group deposit."
+      "description": "Conditional deposit due Friday, September 4. It is refundable until the required performer threshold is reached and the WorldStrides group deposit is paid from Booster-held trip funds."
     },
     {
       "number": "$2,000",
       "label": "family ceiling",
-      "description": "Ashley will not ask a participating family to pay more than $2,000 under this commitment. It is not a bill due tonight."
+      "description": "Under this commitment, Ashley Bands will not ask - and the Boosters are not authorized to collect - more than $2,000 from a participating family. It is not a bill due tonight."
     },
     {
       "number": "$500",
       "label": "our goal",
-      "description": "Ashley will work to move the family total toward $500 through significant outside support. This is ambitious and is not guaranteed."
+      "description": "Ashley Bands will lead the work to move the family total toward $500 through significant outside support. This is ambitious and is not guaranteed."
     }
   ],
   "planningFigure": "The trip is currently planning around $2,500 per traveler, excluding personal spending. That is an estimate used to build the trip and funding plan, not another family ask.",
+  "roles": [
+    {
+      "actor": "Ashley Bands",
+      "responsibility": "The band program builds the educational plan and communicates official trip information to students and families."
+    },
+    {
+      "actor": "Mr. Parker",
+      "responsibility": "The Director of Bands directs the ensembles, approves performers, and recommends which performance path can move forward."
+    },
+    {
+      "actor": "Ashley High School and NHCS",
+      "responsibility": "The school and district approve school travel, the authorized signer, supervision, and district requirements."
+    },
+    {
+      "actor": "Ashley High School Band Boosters",
+      "responsibility": "The Boosters receive family payments through PayPal, maintain the trip ledger, make authorized vendor payments, and issue authorized refunds."
+    }
+  ],
   "opportunity": [
-    "Ashley Concert Band and Wind Ensemble were selected for the National Band & Orchestra Festival at Carnegie Hall.",
+    "The Ashley High School Concert Band and Wind Ensemble were selected for the National Band & Orchestra Festival at Carnegie Hall.",
     "Working travel dates are March 23-26, 2027, with both performances on Thursday, March 25.",
     "The intended educational plan includes Carnegie performances and an AIM master class, Broadway, Statue of Liberty and Ellis Island, the Empire State Building or another structured activity, charter transportation, three hotel nights, and selected meals.",
     "The final itemized quote, adult pricing, exact inclusions, and any below-minimum ensemble surcharge are still being finalized."
@@ -49,10 +67,10 @@
   ],
   "commitment": [
     "The form is an initial family intent acknowledgement with typed parent and student signatures. It is not the final trip contract.",
-    "A serious yes tells Ashley it may rely on that response when deciding whether to pay the nonrefundable WorldStrides group deposit.",
+    "A serious yes gives Mr. Parker and the Boosters a reliable count for the performance-path and vendor-deposit decisions.",
     "A family is agreeing that it intends to participate if its total responsibility is no more than $2,000.",
-    "If the eventual family responsibility would exceed $2,000, Ashley must return to families for a new decision. Tonight's acknowledgement does not authorize a higher family obligation.",
-    "The final participation agreement will follow after the performance path and vendor deposit decision, and before the next major family payment."
+    "If the eventual family responsibility would exceed $2,000, the band program must return to families for a new decision. Tonight's acknowledgement does not authorize the Boosters to collect a higher amount.",
+    "The band program will issue the final participation agreement after the performance-path and vendor-deposit decisions and before the Boosters open the next major family payment."
   ],
   "paymentSchedule": [
     { "date": "September 4", "amount": "$50", "meaning": "Conditional deposit" },
@@ -61,14 +79,14 @@
     { "date": "November 15", "amount": "up to $500", "meaning": "Working third payment" },
     { "date": "December 15", "amount": "up to $500", "meaning": "Working final payment" }
   ],
-  "paymentScheduleNote": "Only the $50 is open now. The later amounts are a maximum working model and do not become active until Ashley issues the final family agreement and payment instructions. Confirmed outside support can reduce them.",
+  "paymentScheduleNote": "Only the $50 is open now. The later amounts are a maximum working model and do not become active until the band program issues the final family agreement and the Boosters issue payment instructions. Confirmed outside support can reduce them.",
   "withdrawalStages": [
     {
-      "stage": "Before Ashley pays WorldStrides",
-      "answer": "The conditional $50 is refundable. If the performer threshold is not reached or Ashley does not proceed, Hannah Hales authorizes the Booster refund."
+      "stage": "Before the WorldStrides group deposit is paid",
+      "answer": "The conditional $50 is refundable. If the required performer threshold is not reached or the trip does not proceed, the Boosters issue the refund under Hannah Hales's authorization."
     },
     {
-      "stage": "After Ashley pays the group deposit",
+      "stage": "After the Boosters pay the group deposit",
       "answer": "The $50 becomes nonrefundable and remains credited to the student's trip balance. No later family payment should be collected until the final agreement and written withdrawal rules are issued."
     },
     {
@@ -92,9 +110,9 @@
       "FRP is not a promise that every dollar, fee, or outside travel arrangement will be returned."
     ],
     "open": [
-      "Final Ashley price and election deadline",
+      "Final family price and FRP election deadline",
       "Whether group billing requires the entire group or permits individual travelers to elect",
-      "Exactly which local Ashley payments and nonrefundable amounts are protected",
+      "Exactly which payments collected by the Boosters and which nonrefundable amounts are protected",
       "When the charge must be paid on group 150783"
     ]
   },
@@ -118,23 +136,23 @@
   "faq": [
     {
       "question": "Is the trip definitely happening?",
-      "answer": "Ashley has been selected and is actively planning. The performer threshold, school approval, contract, and WorldStrides deposit still have to close."
+      "answer": "Both Ashley High School ensembles have been selected, and Mr. Parker is actively planning. The performer threshold, Ashley High School and NHCS approvals, final agreement, and Booster-funded WorldStrides deposit still have to close."
     },
     {
       "question": "Why commit before the final price?",
-      "answer": "The group size helps determine the final price, and Ashley cannot responsibly risk a nonrefundable vendor deposit based on casual interest. Tonight's decision is bounded at a $2,000 family ceiling with only the conditional $50 open now."
+      "answer": "Mr. Parker needs a reliable performer count before recommending a performance path, and the Boosters need that count before risking a nonrefundable vendor deposit. Tonight's decision is bounded at a $2,000 family ceiling with only the conditional $50 open now."
     },
     {
       "question": "What if I need to withdraw?",
-      "answer": "Before Ashley pays WorldStrides, the $50 is refundable. After that it is nonrefundable. Later payments follow the final agreement and FRP decision."
+      "answer": "Before the Boosters pay the WorldStrides group deposit, the $50 is refundable. After that it is nonrefundable. Later payments follow the final agreement and FRP decision."
     },
     {
       "question": "Does FRP return every dollar?",
-      "answer": "No. Current terms describe reimbursement of amounts paid minus the FRP fee and other nonrefundable fees. Ashley is confirming the exact group-billed implementation before offering it."
+      "answer": "No. Current terms describe reimbursement of amounts paid minus the FRP fee and other nonrefundable fees. Mr. Parker and the Boosters are confirming the exact group-billed implementation with WorldStrides before offering it."
     },
     {
       "question": "What if the family responsibility exceeds $2,000?",
-      "answer": "Families receive a new decision point. Tonight's acknowledgement does not authorize Ashley to ask a family for more than $2,000."
+      "answer": "Families receive a new decision point. Tonight's acknowledgement does not authorize Ashley Bands to ask - or the Boosters to collect - more than $2,000 from a family."
     },
     {
       "question": "Who receives and tracks the money?",
@@ -146,14 +164,14 @@
     },
     {
       "question": "When is the final agreement?",
-      "answer": "After Ashley knows the performance path and pays the applicable vendor deposit, and before the next major family payment. It will contain the final price, payment schedule, withdrawal rules, cancellation terms, and FRP decision."
+      "answer": "The band program will issue it after Mr. Parker confirms the performance path, required school approvals are in place, and the Boosters pay the applicable vendor deposit - and before the next major family payment opens. It will contain the final price, payment schedule, withdrawal rules, cancellation terms, and FRP decision."
     }
   ],
   "sources": [
     "WorldStrides K12 Group Performing Arts Festivals & Bowl Games/Parades Group Terms and Conditions, revised September 2025",
     "WorldStrides 2026-27 group-billed payment schedule",
-    "Ashley Concert Band and Wind Ensemble acceptance letters, August 24, 2026",
-    "Ashley in-progress Letter of Understanding and preliminary estimate",
+    "Ashley High School Concert Band and Wind Ensemble acceptance letters, August 24, 2026",
+    "Ashley Bands in-progress Letter of Understanding and preliminary estimate",
     "Ashley Bands Carnegie Hall 2027 project record, reconciled through September 1, 2026"
   ]
 }
