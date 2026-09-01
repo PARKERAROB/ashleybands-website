@@ -70,7 +70,8 @@
     "A serious yes gives Mr. Parker and the Boosters a reliable count for the performance-path and vendor-deposit decisions.",
     "A family is agreeing that it intends to participate if its total responsibility is no more than $2,000.",
     "If the eventual family responsibility would exceed $2,000, the band program must return to families for a new decision. Tonight's acknowledgement does not authorize the Boosters to collect a higher amount.",
-    "The band program will issue the final participation agreement after the performance-path and vendor-deposit decisions and before the Boosters open the next major family payment."
+    "Once the Boosters pay the WorldStrides group deposit, the trip moves forward and the $50 becomes nonrefundable. An individual student is not yet a confirmed traveler at that point.",
+    "A student becomes individually confirmed only after completing the WorldStrides portal registration, required paperwork, and the next $225 payment described in the final agreement."
   ],
   "paymentSchedule": [
     { "date": "September 4", "amount": "$50", "meaning": "Conditional deposit" },
@@ -79,19 +80,38 @@
     { "date": "November 15", "amount": "up to $500", "meaning": "Working third payment" },
     { "date": "December 15", "amount": "up to $500", "meaning": "Working final payment" }
   ],
-  "paymentScheduleNote": "Only the $50 is open now. The later amounts are a maximum working model and do not become active until the band program issues the final family agreement and the Boosters issue payment instructions. Confirmed outside support can reduce them.",
+  "paymentScheduleNote": "Only the $50 is open now. The later amounts are a maximum working model and do not become active until the band program issues the final family agreement and the Boosters issue payment instructions. The $225 WorldStrides registration payment will be part of this $2,000 maximum, not an added charge above it. Confirmed outside support can reduce later collections.",
+  "registrationStages": [
+    {
+      "stage": "$50 family commitment",
+      "answer": "This gives Mr. Parker and the Boosters the count needed for the group decision. It remains refundable until the required performer threshold is reached and the Boosters pay the WorldStrides group deposit."
+    },
+    {
+      "stage": "Booster group deposit",
+      "answer": "The trip is activated and moves forward. The $50 becomes nonrefundable and stays credited to the student's balance, but the student is not yet individually registered with WorldStrides."
+    },
+    {
+      "stage": "Individual WorldStrides registration",
+      "answer": "The student completes the WorldStrides portal and required paperwork. The family makes the next $225 payment within the $2,000 ceiling, and the student is then confirmed as an individual traveler."
+    }
+  ],
+  "vendorMilestones": [
+    { "date": "Within 30 days of the group deposit", "meaning": "All FRP units must be purchased. No new FRP can be added after this window." },
+    { "date": "October 24, 2026", "meaning": "One-third of the trip cost is due from the Boosters to WorldStrides." },
+    { "date": "January 7, 2027", "meaning": "The final trip balance is due from the Boosters to WorldStrides." }
+  ],
   "withdrawalStages": [
     {
       "stage": "Before the WorldStrides group deposit is paid",
       "answer": "The conditional $50 is refundable. If the required performer threshold is not reached or the trip does not proceed, the Boosters issue the refund under Hannah Hales's authorization."
     },
     {
-      "stage": "After the Boosters pay the group deposit",
-      "answer": "The $50 becomes nonrefundable and remains credited to the student's trip balance. No later family payment should be collected until the final agreement and written withdrawal rules are issued."
+      "stage": "After the group deposit, before individual registration",
+      "answer": "The trip is moving forward and the $50 is nonrefundable. The student is not yet confirmed in the WorldStrides portal; the final agreement and registration instructions come next."
     },
     {
-      "stage": "After final registration",
-      "answer": "The final family agreement, WorldStrides cancellation bands, and the group's FRP election control the remaining financial result."
+      "stage": "After individual WorldStrides registration",
+      "answer": "Without FRP, the first $225 of the student's trip payments covers the current early-withdrawal cost and is nonrefundable if the student pulls out. Later cancellation bands may increase the amount at risk."
     }
   ],
   "standardCancellation": [
@@ -103,40 +123,41 @@
   "standardCancellationNote": "These are the current WorldStrides group-billed individual-cancellation bands when FRP has not been elected. WorldStrides sends group-billed refunds to the Program Leader; the Ashley High School Band Boosters then distribute and reconcile family refunds.",
   "frp": {
     "title": "Full Refund Program (FRP)",
-    "summary": "Under the current terms, FRP can protect amounts paid when cancellation happens at least one day before departure, minus the FRP enrollment fee and other nonrefundable fees.",
+    "summary": "FRP may be elected for an individual traveler. It can protect covered trip payments when cancellation happens at least one day before departure, minus the FRP enrollment fee and other nonrefundable fees.",
     "known": [
-      "The preliminary estimate is $279 per covered traveler.",
-      "The FRP fee becomes nonrefundable after 24 hours.",
-      "FRP is not a promise that every dollar, fee, or outside travel arrangement will be returned."
+      "The preliminary estimate is $279 per covered traveler; the final amount will be stated before families elect it.",
+      "The Boosters must purchase every FRP unit within 30 days after the WorldStrides group deposit. No new units can be added after that window.",
+      "An already-purchased FRP unit may be reassigned from one traveler to another within the group. The receiving family pays the final FRP amount to the Boosters, and the Boosters refund that amount to the original family.",
+      "The FRP fee becomes nonrefundable after 24 hours, and FRP does not promise that every fee or outside travel arrangement will be returned."
     ],
     "open": [
-      "Final family price and FRP election deadline",
-      "Whether group billing requires the entire group or permits individual travelers to elect",
-      "Exactly which payments collected by the Boosters and which nonrefundable amounts are protected",
-      "When the charge must be paid on group 150783"
+      "The final FRP price and exact family election/payment deadline once the group-deposit date is known",
+      "The written Booster procedure for documenting an FRP reassignment and the corresponding family payment and refund",
+      "Exactly which nonrefundable fees remain outside FRP protection"
     ]
   },
   "funding": {
-    "summary": "Moving the family total toward $500 will require a significant shared campaign beginning tonight. No gift, grant, scholarship, media placement, or lower family total is guaranteed yet.",
+    "summary": "Families should plan for a $2,000 responsibility until shared fundraising lowers it. Sponsorships, grants, major gifts, and group campaigns reduce the total trip cost for everyone; they are not credited only to the student whose family opened the door. Moving the family total toward $500 will require broad participation, and no lower total is guaranteed yet.",
     "actions": [
       "Introduce Mr. Parker to an employer, business, corporate partner, foundation, civic group, arts supporter, or major donor.",
       "Open a door to local media or a community leader who can help tell the Carnegie and seven-year rebuilding story.",
       "Help with outreach, events, campaign communications, and donor follow-up.",
       "Respond promptly to deadlines even if your family cannot add volunteer capacity."
     ],
-    "boundary": "Carnegie deposits, payments, and sponsorships stay separate from Marching Band funding goals and program needs."
+    "boundary": "Family trip payments are credited to the individual student's balance. Capital sponsorships, grants, major gifts, and shared Carnegie fundraising reduce the group's cost. Carnegie funding remains separate from Marching Band funding goals and program needs."
   },
   "openBeforeFinalAgreement": [
     "Corrected itemized quote, adult pricing, final inclusions, and any ensemble surcharge",
     "Final family price and payment instructions within the $2,000 ceiling",
-    "FRP price, election mechanics, deadline, and protected amounts",
+    "Final FRP price, the exact 30-day family deadline, and protected amounts",
     "Written withdrawal, cancellation, and refund-distribution rules",
+    "Written procedure for a possible approved-student replacement; this option is still under investigation and is not promised",
     "School approval, authorized signer, chaperone plan, and economic-access process"
   ],
   "faq": [
     {
       "question": "Is the trip definitely happening?",
-      "answer": "Both Ashley High School ensembles have been selected, and Mr. Parker is actively planning. The performer threshold, Ashley High School and NHCS approvals, final agreement, and Booster-funded WorldStrides deposit still have to close."
+      "answer": "Both Ashley High School ensembles have been selected, and Mr. Parker is actively planning. Once the performer threshold and approvals close and the Boosters pay the WorldStrides group deposit, the group trip is on. An individual student is confirmed only after completing the WorldStrides portal registration and required paperwork."
     },
     {
       "question": "Why commit before the final price?",
@@ -144,11 +165,11 @@
     },
     {
       "question": "What if I need to withdraw?",
-      "answer": "Before the Boosters pay the WorldStrides group deposit, the $50 is refundable. After that it is nonrefundable. Later payments follow the final agreement and FRP decision."
+      "answer": "Before the Boosters pay the WorldStrides group deposit, the $50 is refundable. After that it is nonrefundable. Once a student registers in the WorldStrides portal, a traveler without FRP has at least the current $225 early-withdrawal cost at risk, with higher cancellation bands later."
     },
     {
-      "question": "Does FRP return every dollar?",
-      "answer": "No. Current terms describe reimbursement of amounts paid minus the FRP fee and other nonrefundable fees. Mr. Parker and the Boosters are confirming the exact group-billed implementation with WorldStrides before offering it."
+      "question": "How does individual FRP work?",
+      "answer": "A family may elect FRP for one traveler. All FRP units must be purchased within 30 days after the group deposit; no new units can be added later. An unused unit may be reassigned within the group, with the receiving family paying the Boosters and the original family receiving that amount back. FRP still excludes its own fee and other nonrefundable amounts."
     },
     {
       "question": "What if the family responsibility exceeds $2,000?",
@@ -160,16 +181,21 @@
     },
     {
       "question": "Can fundraising guarantee a $500 family total?",
-      "answer": "No. It is the campaign goal, not a promised price. It requires substantial outside support and broad family participation."
+      "answer": "No. Families should plan for $2,000 until shared fundraising reduces the amount. Capital sponsorships, grants, major gifts, and group campaigns lower the trip cost for everyone rather than creating a private credit for one student."
     },
     {
-      "question": "When is the final agreement?",
-      "answer": "The band program will issue it after Mr. Parker confirms the performance path, required school approvals are in place, and the Boosters pay the applicable vendor deposit - and before the next major family payment opens. It will contain the final price, payment schedule, withdrawal rules, cancellation terms, and FRP decision."
+      "question": "When is an individual student confirmed?",
+      "answer": "The group trip moves forward when the Boosters pay the WorldStrides deposit, but a student is not individually confirmed until the final agreement is issued and the student completes the WorldStrides portal registration, required paperwork, and the next $225 payment within the $2,000 ceiling."
+    },
+    {
+      "question": "Can one registered student be replaced by another?",
+      "answer": "That process is still under investigation. A replacement would require another student approved by Mr. Parker, a confirmed WorldStrides transfer process, and Booster handling of the replacement family's payment and the withdrawing family's refund. Families should not rely on a swap until that procedure is confirmed in writing."
     }
   ],
   "sources": [
     "WorldStrides K12 Group Performing Arts Festivals & Bowl Games/Parades Group Terms and Conditions, revised September 2025",
     "WorldStrides 2026-27 group-billed payment schedule",
+    "WorldStrides individual FRP and group-transfer clarification confirmed September 1, 2026",
     "Ashley High School Concert Band and Wind Ensemble acceptance letters, August 24, 2026",
     "Ashley Bands in-progress Letter of Understanding and preliminary estimate",
     "Ashley Bands Carnegie Hall 2027 project record, reconciled through September 1, 2026"

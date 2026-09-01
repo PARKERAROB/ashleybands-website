@@ -126,6 +126,16 @@ def build():
     payment.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, 0), DARK), ("TEXTCOLOR", (0, 0), (-1, 0), colors.white), ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#D8CBBB")), ("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 8), ("RIGHTPADDING", (0, 0), (-1, -1), 8), ("TOPPADDING", (0, 0), (-1, -1), 6), ("BOTTOMPADDING", (0, 0), (-1, -1), 3)]))
     story.extend([Spacer(1, 10), payment, Spacer(1, 8), Paragraph(esc(data["paymentScheduleNote"]), styles["Smallx"]), PageBreak()])
 
+    section(story, styles, "What happens after the $50", "The trip can be active before an individual student is registered")
+    for index, row in enumerate(data["registrationStages"], 1):
+        stage = Table([[Paragraph(str(index), styles["NumberLabel"]), [Paragraph(esc(row["stage"]), styles["H3x"]), Paragraph(esc(row["answer"]), styles["Bodyx"])]]], colWidths=[0.55 * inch, doc.width - 0.55 * inch])
+        stage.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), PALE), ("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 10), ("RIGHTPADDING", (0, 0), (-1, -1), 10), ("TOPPADDING", (0, 0), (-1, -1), 9), ("BOTTOMPADDING", (0, 0), (-1, -1), 5)]))
+        story.extend([stage, Spacer(1, 7)])
+    milestone_rows = [[Paragraph("DATE", styles["TableHead"]), Paragraph("WHAT HAPPENS", styles["TableHead"])]] + [[Paragraph(esc(row["date"]), styles["Bodyx"]), Paragraph(esc(row["meaning"]), styles["Bodyx"])] for row in data["vendorMilestones"]]
+    milestones = Table(milestone_rows, colWidths=[2.4 * inch, doc.width - 2.4 * inch], repeatRows=1)
+    milestones.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, 0), DARK), ("TEXTCOLOR", (0, 0), (-1, 0), colors.white), ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#D8CBBB")), ("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 8), ("RIGHTPADDING", (0, 0), (-1, -1), 8), ("TOPPADDING", (0, 0), (-1, -1), 6), ("BOTTOMPADDING", (0, 0), (-1, -1), 3)]))
+    story.extend([Paragraph("WorldStrides deadlines that drive the group plan", styles["H2x"]), milestones, PageBreak()])
+
     section(story, styles, "If plans change", "What happens when an individual student withdraws")
     for index, row in enumerate(data["withdrawalStages"], 1):
         stage = Table([[Paragraph(str(index), styles["NumberLabel"]), [Paragraph(esc(row["stage"]), styles["H3x"]), Paragraph(esc(row["answer"]), styles["Bodyx"])]]], colWidths=[0.55 * inch, doc.width - 0.55 * inch])
@@ -135,7 +145,7 @@ def build():
 
     section(story, styles, "Optional protection", data["frp"]["title"])
     story.append(Paragraph(esc(data["frp"]["summary"]), styles["Bodyx"]))
-    frp_cols = Table([[[Paragraph("WHAT IS KNOWN", styles["H3x"]), *bullets(data["frp"]["known"], styles)], [Paragraph("WHAT MR. PARKER AND THE BOOSTERS ARE CONFIRMING", styles["H3x"]), *bullets(data["frp"]["open"], styles)]]], colWidths=[doc.width / 2] * 2)
+    frp_cols = Table([[[Paragraph("WHAT IS CONFIRMED", styles["H3x"]), *bullets(data["frp"]["known"], styles)], [Paragraph("WHAT THE FINAL AGREEMENT STILL HAS TO STATE", styles["H3x"]), *bullets(data["frp"]["open"], styles)]]], colWidths=[doc.width / 2] * 2)
     frp_cols.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), PAPER), ("BOX", (0, 0), (-1, -1), 0.7, colors.HexColor("#D8CBBB")), ("INNERGRID", (0, 0), (-1, -1), 0.7, colors.HexColor("#D8CBBB")), ("VALIGN", (0, 0), (-1, -1), "TOP"), ("LEFTPADDING", (0, 0), (-1, -1), 14), ("RIGHTPADDING", (0, 0), (-1, -1), 14), ("TOPPADDING", (0, 0), (-1, -1), 14), ("BOTTOMPADDING", (0, 0), (-1, -1), 8)]))
     story.extend([Spacer(1, 8), frp_cols, Spacer(1, 18)])
     section(story, styles, "The shared campaign", "Moving the family total toward $500 starts tonight")
@@ -143,7 +153,7 @@ def build():
     story.extend(bullets(data["funding"]["actions"], styles))
     story.extend([Paragraph(esc(data["funding"]["boundary"]), styles["Smallx"]), PageBreak()])
 
-    section(story, styles, "Before the final agreement", "These details still require written answers")
+    section(story, styles, "Before individual registration", "These details still require written answers")
     story.extend(bullets(data["openBeforeFinalAgreement"], styles))
     story.extend([Spacer(1, 12), Paragraph("PARENT QUESTIONS", styles["Eyebrow"]), Paragraph("Frequently asked questions", styles["H1x"])])
     def faq_table(items):

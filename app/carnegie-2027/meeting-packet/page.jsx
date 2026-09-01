@@ -57,6 +57,12 @@ export default function CarnegieMeetingPacketPage() {
           <p className={styles.note}>{packet.paymentScheduleNote}</p>
         </Section>
 
+        <Section eyebrow="What happens after the $50" title="The trip can be active before an individual student is registered">
+          <div className={styles.stageList}>{packet.registrationStages.map((row, index) => <article key={row.stage}><span>{index + 1}</span><div><h3>{row.stage}</h3><p>{row.answer}</p></div></article>)}</div>
+          <h3 className={styles.subheading}>WorldStrides deadlines that drive the group plan</h3>
+          <div className={styles.tableWrap}><table><thead><tr><th>Date</th><th>What happens</th></tr></thead><tbody>{packet.vendorMilestones.map((row) => <tr key={row.date}><td>{row.date}</td><td>{row.meaning}</td></tr>)}</tbody></table></div>
+        </Section>
+
         <Section eyebrow="If plans change" title="What happens when an individual student withdraws">
           <div className={styles.stageList}>{packet.withdrawalStages.map((row, index) => <article key={row.stage}><span>{index + 1}</span><div><h3>{row.stage}</h3><p>{row.answer}</p></div></article>)}</div>
           <h3 className={styles.subheading}>Current standard cancellation bands without FRP</h3>
@@ -66,7 +72,7 @@ export default function CarnegieMeetingPacketPage() {
 
         <Section eyebrow="Optional protection" title={packet.frp.title}>
           <p className={styles.lede}>{packet.frp.summary}</p>
-          <div className={styles.twoColumn}><div><h3>What is known</h3><ul>{packet.frp.known.map((item) => <li key={item}>{item}</li>)}</ul></div><div><h3>What Mr. Parker and the Boosters are confirming</h3><ul>{packet.frp.open.map((item) => <li key={item}>{item}</li>)}</ul></div></div>
+          <div className={styles.twoColumn}><div><h3>What is confirmed</h3><ul>{packet.frp.known.map((item) => <li key={item}>{item}</li>)}</ul></div><div><h3>What the final agreement still has to state</h3><ul>{packet.frp.open.map((item) => <li key={item}>{item}</li>)}</ul></div></div>
         </Section>
 
         <Section eyebrow="The shared campaign" title="Moving the family total toward $500 starts tonight">
@@ -75,7 +81,7 @@ export default function CarnegieMeetingPacketPage() {
           <p className={styles.note}>{packet.funding.boundary}</p>
         </Section>
 
-        <Section eyebrow="Before the final agreement" title="These details still require written answers">
+        <Section eyebrow="Before individual registration" title="These details still require written answers">
           <ul>{packet.openBeforeFinalAgreement.map((item) => <li key={item}>{item}</li>)}</ul>
         </Section>
 

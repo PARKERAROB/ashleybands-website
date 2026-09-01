@@ -222,7 +222,7 @@ export default function CarnegieCommitmentClient({ portalMode = false }) {
 
         <fieldset>
           <legend>Your family&apos;s response</legend>
-          <p>The trip is currently planning around $2,500 per traveler. Ashley Bands will not ask a participating family to pay more than $2,000 under this commitment, and our goal is to reduce that family total substantially through outside support.</p>
+          <p>The trip is currently planning around $2,500 per traveler. Ashley Bands will not ask a participating family to pay more than $2,000 under this commitment. Families should plan for that $2,000 responsibility until shared fundraising lowers it.</p>
           {CARNEGIE_RESPONSE_OPTIONS.map((option) => (
             <label className={`${styles.choice} ${fields.response === option.value ? styles.selected : ""}`} key={option.value}>
               <input type="radio" name="response" value={option.value} checked={fields.response === option.value} onChange={() => update("response", option.value)} />
@@ -236,7 +236,7 @@ export default function CarnegieCommitmentClient({ portalMode = false }) {
 
         <fieldset>
           <legend>Ways your family may be able to help</legend>
-          <p>Optional. Check everything that applies.</p>
+          <p>Optional. Check everything that applies. Capital sponsorships, grants, major gifts, and shared campaigns lower the trip cost for all participating students rather than creating a private credit for one student.</p>
           {CARNEGIE_HELP_OPTIONS.map((option) => <label className={styles.check} key={option.value}><input type="checkbox" checked={fields.helpOptions.includes(option.value)} onChange={() => toggleHelp(option.value)} /><span>{option.label}</span></label>)}
         </fieldset>
 
@@ -257,6 +257,8 @@ export default function CarnegieCommitmentClient({ portalMode = false }) {
             <li>A “yes” means the family seriously intends to participate if its total responsibility is no more than $2,000.</li>
             <li>If the eventual family responsibility would exceed $2,000, the band program must return to families for a new decision; this acknowledgement does not authorize the Boosters to collect a higher amount.</li>
             <li>The deposit is refundable until the participation threshold is confirmed and the Ashley High School Band Boosters pay the WorldStrides group deposit; after that it becomes nonrefundable.</li>
+            <li>The trip moves forward when the Boosters pay the group deposit, but the student is not individually confirmed until the WorldStrides portal registration and required paperwork are complete.</li>
+            <li>The final agreement will include the next $225 payment required for individual registration. It is part of the $2,000 ceiling, and without FRP it covers the current early-withdrawal cost once the student is registered.</li>
             <li>Concert Band participation remains subject to approval. An unapproved Concert Band student&apos;s $50 will be refunded.</li>
             <li>The current trip price is a planning estimate, not a final price.</li>
           </ul>

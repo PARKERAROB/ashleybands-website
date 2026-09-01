@@ -83,8 +83,8 @@ export const meetingSlides = [
       items: [
         "Corrected itemized quote",
         "Below-minimum surcharges",
-        "FRP election mechanics",
-        "October payment and district approvals"
+        "Final FRP price and family deadline",
+        "Individual replacement process and district approvals"
       ]
     }
   },
@@ -132,55 +132,70 @@ export const meetingSlides = [
     kicker: "Our family promise",
     title: "We will not ask a family to pay more than",
     number: "$2,000",
-    body: "This is the ceiling for tonight's commitment, not a bill due now. The trip is currently planning around $2,500 per traveler, so community support must close the gap.",
+    body: "This is the ceiling for tonight's commitment, not a bill due now. Families should plan for $2,000 until shared fundraising lowers the amount.",
     callout: "$50 opens tonight • our goal is to move the family total toward $500"
   },
   {
     id: "two-decisions",
     kind: "split",
     section: "Carnegie Hall",
-    kicker: "Two decision points",
-    title: "Tonight is serious intent—not the final contract",
+    kicker: "Group trip versus individual traveler",
+    title: "The trip can be on before a student is registered",
     left: {
-      label: "Tonight through Friday",
+      label: "Group commitment",
       items: [
-        "Sign the initial intent acknowledgement",
-        "Pay the conditional $50 deposit",
-        "Refundable until the Boosters pay the WorldStrides group deposit"
+        "Families submit the initial intent and $50",
+        "The Boosters pay the WorldStrides group deposit",
+        "The trip moves forward and the $50 becomes nonrefundable"
       ]
     },
     right: {
-      label: "Before the next major payment",
+      label: "Individual registration",
       items: [
         "Receive the final family price and agreement",
-        "See withdrawal and cancellation rules in writing",
-        "Make the FRP election with exact terms"
+        "Make the next $225 payment within the $2,000 ceiling",
+        "Complete the WorldStrides portal and required paperwork"
       ]
     }
+  },
+  {
+    id: "trip-deadlines",
+    kind: "schedule",
+    section: "Carnegie Hall",
+    kicker: "What locks in, and when",
+    title: "Five steps move the group and each student forward",
+    entries: [
+      ["SEP 4", "$50", "Conditional family deposit"],
+      ["GROUP DEPOSIT", "TRIP ON", "$50 becomes nonrefundable"],
+      ["PORTAL", "$225", "Next payment and individual registration"],
+      ["OCT 24", "1/3", "Trip cost due to WorldStrides"],
+      ["JAN 7", "FINAL", "Remaining balance due to WorldStrides"]
+    ],
+    note: "The $225 registration payment is part of the $2,000 family ceiling. Without FRP, it covers the current early-withdrawal cost once a student is registered."
   },
   {
     id: "frp",
     kind: "split",
     section: "Carnegie Hall",
-    kicker: "Optional protection",
-    title: "FRP is planned protection—not a promise yet",
+    kicker: "Optional individual protection",
+    title: "FRP can move within the group, but the total cannot grow later",
     left: {
-      label: "What the current terms say",
+      label: "What families can choose",
       items: [
-        "Cancel at least one day before departure",
-        "Receive amounts paid minus the FRP fee and other nonrefundable fees",
-        "FRP itself becomes nonrefundable after 24 hours"
+        "Elect FRP for an individual traveler",
+        "Current estimate: $279; final price comes before election",
+        "All FRP units must be purchased within 30 days of the group deposit"
       ]
     },
     right: {
-      label: "What must be confirmed",
+      label: "What happens after 30 days",
       items: [
-        "Final price and election deadline",
-        "Whether the group or individual travelers elect",
-        "Which payments collected by the Boosters are protected"
+        "No new FRP units can be added",
+        "An unused unit may be reassigned to another traveler",
+        "The receiving family pays the Boosters; the original family is refunded"
       ]
     },
-    source: "WorldStrides group-billed terms and Ashley Bands' in-progress Letter of Understanding."
+    source: "WorldStrides group-billed terms and September 1 FRP clarification. FRP still excludes its own fee and other nonrefundable amounts."
   },
   {
     id: "family-goal",
@@ -190,7 +205,7 @@ export const meetingSlides = [
     title: "Can we bring the family total toward",
     number: "$500",
     subtitle: "Ambitious • possible only if we work together",
-    body: "This is a goal, not a promise. Reaching it will require families, businesses, civic groups, media partners, foundations, and major donors to begin opening doors tonight."
+    body: "This is a goal, not a promise. Capital sponsorships, grants, major gifts, and group campaigns lower the trip cost for everyone rather than creating a private credit for one student."
   },
   {
     id: "open-doors",
@@ -204,7 +219,7 @@ export const meetingSlides = [
       ["3", "Story", "Open a door to local media or an arts supporter."],
       ["4", "Campaign", "Help with outreach, events, and donor follow-up."]
     ],
-    note: "Ashley Bands will pursue WorldStrides and SYTA assistance, local and corporate partners, foundations, civic groups, media, and major donors. No award or lower family total is guaranteed yet."
+    note: "Families should plan for $2,000 until shared fundraising lowers the amount. No award or lower family total is guaranteed yet."
   },
   {
     id: "family-action",
@@ -215,7 +230,7 @@ export const meetingSlides = [
     actions: [
       ["1", "Answer honestly", "Could your family participate with a total responsibility up to $2,000?"],
       ["2", "Confirm", "Sign and pay the $50 tonight, or complete it by September 4."],
-      ["3", "Open one door", "Connect us with a business, foundation, media contact, organization, or major donor."],
+      ["3", "Join the shared campaign", "Help lower the trip cost for every participating student."],
       ["4", "Read the packet", "Review the price, cancellation, FRP, and next-step details in writing."]
     ],
     note: "Families may scan and complete the connected $50 commitment now, or return to it from ashleybands.com or the Family Portal by Friday."

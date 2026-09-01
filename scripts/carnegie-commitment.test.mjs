@@ -79,6 +79,21 @@ test("family materials assign each Carnegie action to a named actor", () => {
   assert.match(form, /Ashley High School Band Boosters pay the WorldStrides group deposit/);
 });
 
+test("family materials explain registration, FRP transfer, and shared fundraising", () => {
+  const slides = read("app/meetings/2026-09-01/slides.js");
+  const packet = JSON.parse(read("content/carnegie-2027-meeting-packet.json"));
+  const form = read("app/carnegie-2027/commit/CarnegieCommitmentClient.jsx");
+  assert.match(slides, /id: "trip-deadlines"[\s\S]*\["OCT 24", "1\/3"[\s\S]*\["JAN 7", "FINAL"/);
+  assert.match(slides, /No new FRP units can be added/);
+  assert.match(slides, /unused unit may be reassigned/);
+  assert.match(packet.frp.summary, /individual traveler/);
+  assert.match(packet.frp.known.join(" "), /within 30 days[\s\S]*reassigned/);
+  assert.match(packet.funding.summary, /reduce the total trip cost for everyone/);
+  assert.match(packet.openBeforeFinalAgreement.join(" "), /replacement[\s\S]*under investigation/);
+  assert.match(form, /WorldStrides portal registration and required paperwork/);
+  assert.match(form, /next \$225 payment[\s\S]*part of the \$2,000 ceiling/);
+});
+
 test("public family packet and downloadable PDF carry the same decision anchors", () => {
   const packet = JSON.parse(read("content/carnegie-2027-meeting-packet.json"));
   const page = read("app/carnegie-2027/meeting-packet/page.jsx");
