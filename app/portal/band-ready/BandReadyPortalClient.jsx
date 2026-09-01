@@ -87,7 +87,7 @@ function stillNeededItems(data) {
     dayOne.instrumentStatus === "help" ? "Talk with Mr. Parker about the student’s instrument." : null,
     !data?.readiness?.complete?.["how-band-works"] ? "Review how band works and confirm the family understands." : null,
     !data?.readiness?.complete?.clothing ? "Review the Open House clothing collection." : null,
-    data?.progress?.clothing?.status === "return_later" ? "Return to the clothing collection by Friday, August 28." : null,
+    data?.progress?.clothing?.status === "return_later" ? "Return to the clothing collection by Tuesday, September 1 at 8:00 p.m." : null,
     !data?.readiness?.complete?.boosters ? "Review the Band Booster and Level 2 volunteer information." : null,
     data?.progress?.boosters?.status === "plan_later" ? "Complete the annual NHCS volunteer training and Level 2 background check." : null,
     data?.progress?.boosters?.status === "need_help" ? "Check in with the Band Boosters for help with Level 2 volunteering." : null,
@@ -439,7 +439,7 @@ function ClothingStep({ data, save, busy, href, navigate, studentId }) {
   return (
     <StepShell eyebrow="Step 06" title="Confirm the required red band shirt." intro="Every band student needs the official red band shirt. Start there, then review any optional clothing your student or family would like." backHref={href("/portal/band-ready")} navigate={navigate}>
       <div className={`${styles.statusPanel} ${styles.statusNeeds}`}><span>!</span><div><h2>Required for every band student</h2><p>The official red band shirt is worn for pep rallies, community performances, parades, and informal band events.</p></div></div>
-      <div className={styles.deadline}><span>Order deadline</span><strong>Friday, August 28</strong><p>Payment is completed in the Family Portal.</p></div>
+      <div className={styles.deadline}><span>Final order deadline</span><strong>Tuesday, September 1 at 8:00 p.m.</strong><p>Payment is completed in the Family Portal.</p></div>
       {paid ? <div className={`${styles.statusPanel} ${styles.statusGood}`}><span>✓</span><div><h2>Paid and ordered</h2><p>The order is already connected to this student. Items will be distributed through the band after the bulk order arrives.</p></div></div> : (
         <>
           <div className={styles.actionLinks}><Link className={styles.primaryButton} href={`/portal/clothing?studentId=${encodeURIComponent(studentId)}`}>Open the clothing order</Link></div>

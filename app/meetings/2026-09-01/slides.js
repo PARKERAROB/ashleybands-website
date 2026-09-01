@@ -19,6 +19,7 @@ export const meetingSlides = [
       ["6:30", "Marching rehearsal ends • Booster welcome and family arrival"],
       ["6:45", "Carnegie Hall trip plan and commitment"],
       ["7:15", "CFS Mattress Fundraiser with Clint Stovall"],
+      ["7:25", "Final clothing-order call • online ordering closes at 8:00 p.m."],
       ["7:30", "Main meeting ends • individual questions follow"]
     ]
   },
@@ -374,6 +375,20 @@ export const meetingSlides = [
     fallback: "https://vimeo.com/806462880",
     buttonLabel: "Open the 1:07 CFS family video",
     note: "Clint Stovall • clint.stovall@cfsbeds.com • (919) 215-9796"
+  },
+  {
+    id: "clothing-final-call",
+    kind: "list",
+    section: "Current Fundraising",
+    kicker: "Final call",
+    title: "We place the clothing order tonight",
+    lead: "This is the moment for families who want the new Ascend show merch to make sure their order is included.",
+    bullets: [
+      "Official red band shirts remain required for every band student",
+      "New Ascend show shirts are available in navy",
+      "Online ordering closes at 8:00 p.m. tonight",
+      "See Mr. Parker or a Booster officer tonight if you need help confirming an order"
+    ]
   },
   {
     id: "popcorn",

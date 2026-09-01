@@ -112,7 +112,7 @@ export default function ClothingOrderClient() {
             <h1>Open House Clothing Order</h1>
             <p className="portal-copy">Choose the color, size, and quantity before adding each item. Your order stays visible while you shop.</p>
           </div>
-          <div className={styles.deadline}><span>Order by</span><strong>Friday, August 28</strong><small>No individual shipping charge</small></div>
+          <div className={styles.deadline}><span>Final order deadline</span><strong>Tuesday, September 1 at 8:00 p.m.</strong><small>No individual shipping charge</small></div>
         </header>
 
         <div className={styles.studentConnection}>
