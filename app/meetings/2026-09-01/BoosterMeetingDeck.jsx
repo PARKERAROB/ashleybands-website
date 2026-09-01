@@ -134,6 +134,18 @@ function SlideContent({ slide }) {
     );
   }
 
+  if (slide.kind === "promise") {
+    return (
+      <div className="meeting-promise-slide">
+        <p className="meeting-kicker">{slide.kicker}</p>
+        <h2>{slide.title}</h2>
+        <strong>{slide.number}</strong>
+        <p className="meeting-promise-body">{slide.body}</p>
+        <p className="meeting-promise-callout">{slide.callout}</p>
+      </div>
+    );
+  }
+
   if (slide.kind === "schedule") {
     return (
       <div className="meeting-frame">

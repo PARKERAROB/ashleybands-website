@@ -197,7 +197,7 @@ export default function CarnegieCommitmentClient({ portalMode = false }) {
         <p className={styles.eyebrow}>Ashley Bands · Carnegie Hall 2027</p>
         <h1>Family commitment</h1>
         <p>Submit one response per student by Friday, September 4. A serious “yes” creates the connected $50 conditional-deposit charge and lets you pay it immediately.</p>
-        {!portalMode ? <p className={styles.portalOption}>Already use the Family Portal? <Link href="/portal/carnegie-2027">Open the connected version</Link>.</p> : null}
+        <p className={styles.portalOption}><Link href="/carnegie-2027/meeting-packet">Read the complete family meeting packet</Link>{!portalMode ? <> or <Link href="/portal/carnegie-2027">open the connected Family Portal version</Link></> : null}.</p>
       </header>
 
       <form className={styles.form} onSubmit={submit}>
@@ -222,7 +222,7 @@ export default function CarnegieCommitmentClient({ portalMode = false }) {
 
         <fieldset>
           <legend>Your family&apos;s response</legend>
-          <p>The projected trip price is about $2,500. For planning, Ashley Bands is testing whether enough families can responsibly participate even in a $2,000 family-cost scenario.</p>
+          <p>The trip is currently planning around $2,500 per traveler. Ashley Bands will not ask a participating family to pay more than $2,000 under this commitment, and our goal is to reduce that family total substantially through outside support.</p>
           {CARNEGIE_RESPONSE_OPTIONS.map((option) => (
             <label className={`${styles.choice} ${fields.response === option.value ? styles.selected : ""}`} key={option.value}>
               <input type="radio" name="response" value={option.value} checked={fields.response === option.value} onChange={() => update("response", option.value)} />
@@ -254,6 +254,8 @@ export default function CarnegieCommitmentClient({ portalMode = false }) {
           <ul>
             <li>This is an initial family intent response, not the final trip contract.</li>
             <li>A “yes” includes a $50 conditional deposit credited toward the student&apos;s trip account.</li>
+            <li>A “yes” means the family seriously intends to participate if its total responsibility is no more than $2,000.</li>
+            <li>If the eventual family responsibility would exceed $2,000, Ashley must return to families for a new decision; this acknowledgement does not authorize a higher family obligation.</li>
             <li>The deposit is refundable until the participation threshold is confirmed and Ashley Bands pays the WorldStrides group deposit; after that it becomes nonrefundable.</li>
             <li>Concert Band participation remains subject to approval. An unapproved Concert Band student&apos;s $50 will be refunded.</li>
             <li>The current trip price is a planning estimate, not a final price.</li>

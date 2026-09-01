@@ -21,6 +21,7 @@ export default function SitemapPage() {
     { title: "Band Boosters", href: "/boosters" },
     { title: "Family Profile", href: "/portal" },
     { title: "Carnegie Hall 2027 Family Commitment", href: "/carnegie-2027/commit" },
+    { title: "Carnegie Hall 2027 Family Meeting Packet", href: "/carnegie-2027/meeting-packet" },
     { title: "Request Profile Access", href: "/portal/request" },
     { title: "Performed Repertoire", href: "/repertoire" },
     { title: "Program Archive", href: "/programs" },

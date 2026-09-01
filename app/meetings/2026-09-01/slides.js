@@ -60,8 +60,8 @@ export const meetingSlides = [
       items: [
         "Both ensemble selections",
         "March 23-26 travel dates",
-        "$2,000 deposit per performance spot",
-        "January 7 final vendor deadline"
+        "A serious family commitment process",
+        "A Booster-owned payment and refund ledger"
       ]
     },
     right: {
@@ -100,236 +100,97 @@ export const meetingSlides = [
     }
   },
   {
-    id: "both-ensembles",
-    kind: "stats",
-    section: "Carnegie Hall",
-    kicker: "Path one",
-    title: "Both ensembles require strong participation from both groups",
-    stats: [
-      ["40", "Wind Ensemble"],
-      ["40", "Concert Band"],
-      ["80", "total confirmations"]
-    ],
-    note: "WorldStrides states a 50-performer minimum for each group. A group below 50 receives a surcharge, so the final amount must be added to the trip budget.",
-    source: "Concert Band and Wind Ensemble acceptance letters, August 24, 2026."
-  },
-  {
-    id: "wind-ensemble-only",
-    kind: "list",
-    section: "Carnegie Hall",
-    kicker: "Path two",
-    title: "Wind Ensemble only requires 50 approved performers",
-    lead: "Current Wind Ensemble performers are preapproved.",
-    bullets: [
-      "Concert Band students may request consideration",
-      "Approval depends on instrumentation needs",
-      "Students must demonstrate the readiness to prepare Wind Ensemble literature",
-      "Interest or a $50 deposit does not guarantee approval",
-      "An unapproved Concert Band student's deposit will be refunded"
-    ]
-  },
-  {
     id: "friday-deadline",
     kind: "hero-number",
     section: "Carnegie Hall",
     kicker: "First family deadline",
     title: "Confirmation and conditional deposit",
     number: "$50",
-    subtitle: "Due Friday, September 4",
+    subtitle: "Opens tonight • due Friday, September 4",
     body: "Scan now to submit the family commitment and pay. The deposit remains refundable until Ashley confirms the applicable performer threshold and pays the WorldStrides group deposit. It then becomes nonrefundable and credits the student's trip balance.",
     url: "https://ashleybands.com/carnegie-2027/commit",
     urlLabel: "ashleybands.com/carnegie-2027/commit"
   },
   {
-    id: "deposit-math",
+    id: "cost-frame",
+    kind: "promise",
+    section: "Carnegie Hall",
+    kicker: "Our family promise",
+    title: "We will not ask a family to pay more than",
+    number: "$2,000",
+    body: "This is the ceiling for tonight's commitment, not a bill due now. The trip is currently planning around $2,500 per traveler, so community support must close the gap.",
+    callout: "$50 opens tonight • our goal is to move the family total toward $500"
+  },
+  {
+    id: "two-decisions",
     kind: "split",
     section: "Carnegie Hall",
-    kicker: "Why $50 works",
-    title: "The family deposits fund the ensemble decision",
+    kicker: "Two decision points",
+    title: "Tonight is serious intent—not the final contract",
     left: {
-      label: "Both ensembles",
-      number: "$4,000",
-      items: ["80 confirmations × $50", "Covers both $2,000 performance deposits"]
+      label: "Tonight through Friday",
+      items: [
+        "Sign the initial intent acknowledgement",
+        "Pay the conditional $50 deposit",
+        "Refundable until Ashley pays the WorldStrides group deposit"
+      ]
     },
     right: {
-      label: "Wind Ensemble only",
-      number: "$2,500",
-      items: ["50 confirmations × $50", "$2,000 deposit + $500 trip credit"]
+      label: "Before the next major payment",
+      items: [
+        "Receive the final family price and agreement",
+        "See withdrawal and cancellation rules in writing",
+        "Make the FRP election with exact terms"
+      ]
     }
-  },
-  {
-    id: "cost-frame",
-    kind: "stats",
-    section: "Carnegie Hall",
-    kicker: "Cost, honestly",
-    title: "The $2,000 question is our fallback, not our goal",
-    stats: [
-      ["$2,500", "all-in planning figure"],
-      ["$2,000", "worst-case family test"],
-      ["$500", "dream family total"]
-    ],
-    note: "We need to know whether a family could still make the trip work if fundraising disappoints. We are not issuing a $2,000 bill tonight, and we do not want $2,000 to be the final family cost."
-  },
-  {
-    id: "payment-schedule",
-    kind: "schedule",
-    section: "Carnegie Hall",
-    kicker: "Fallback family schedule",
-    title: "Only the $50 commitment is due now",
-    entries: [
-      ["SEP 4", "$50", "Conditional deposit"],
-      ["SEP 15", "≤ $450", "Fallback first payment"],
-      ["OCT 15", "≤ $500", "Fallback second payment"],
-      ["NOV 15", "≤ $500", "Fallback third payment"],
-      ["DEC 15", "≤ $500", "Fallback final payment"]
-    ],
-    note: "The later amounts are the maximum working path if the trip is activated and sponsorship falls short. Committed outside funding can reduce later family payments."
   },
   {
     id: "frp",
-    kind: "hero-number",
+    kind: "split",
     section: "Carnegie Hall",
     kicker: "Optional protection",
-    title: "The planned FRP family option",
-    number: "$300",
-    subtitle: "$279 current estimate • remainder credits the trip",
-    body: "WorldStrides says FRP must be elected within 30 days of initial group registration. The fee is added to the group account when purchased and becomes nonrefundable after 24 hours. The exact Ashley deadline and traveler-by-traveler election process still need written confirmation.",
+    title: "FRP is planned protection—not a promise yet",
+    left: {
+      label: "What the current terms say",
+      items: [
+        "Cancel at least one day before departure",
+        "Receive amounts paid minus the FRP fee and other nonrefundable fees",
+        "FRP itself becomes nonrefundable after 24 hours"
+      ]
+    },
+    right: {
+      label: "What Ashley is confirming",
+      items: [
+        "Final price and election deadline",
+        "Whether the group or individual travelers elect",
+        "Exactly which Ashley payments are protected"
+      ]
+    },
     source: "WorldStrides group-billed terms and Ashley's in-progress Letter of Understanding."
   },
   {
-    id: "funding-gap",
-    kind: "stats",
+    id: "family-goal",
+    kind: "hero-number",
     section: "Carnegie Hall",
-    kicker: "The dream",
-    title: "Can we make this a $500 trip for students?",
-    stats: [
-      ["$2,500", "planning cost per student"],
-      ["$500", "dream family total"],
-      ["$2,000", "outside support per student"]
-    ],
-    note: "That is an ambitious outside-funding target of about $100,000 for 50 students or $160,000 for 80, before unresolved adult costs. It is a goal, not a promise."
-  },
-  {
-    id: "sponsorship-push",
-    kind: "stats",
-    section: "Carnegie Hall",
-    kicker: "Now through October 15",
-    title: "Let's ask for the gifts that can change this trip",
-    stats: [
-      ["$2,000", "a local supporter"],
-      ["$5,000", "a business or organization"],
-      ["$10,000", "a foundation grant or lead gift"]
-    ],
-    note: "We will keep asking through December and into January. The more support committed by October 15, the sooner we can lower the remaining family burden."
-  },
-  {
-    id: "funding-stack",
-    kind: "split",
-    section: "Carnegie Hall",
-    kicker: "September 1 funding research",
-    title: "Different funding tools solve different problems",
-    left: {
-      label: "NYC direct support",
-      items: [
-        "WorldStrides FLAG and Helping Hands for qualifying families",
-        "SYTA Road Scholarship opens September 21, with up to $5,000 for a group",
-        "Landfall prior-grantee inquiry plus local relationship and major-donor gifts"
-      ]
-    },
-    right: {
-      label: "Instrument access",
-      items: [
-        "Target due September 4: $1,000-$15,000",
-        "Endowment due September 8: proceed only if the education-access case and documents pass",
-        "Walmart open through November 30: up to $5,000"
-      ]
-    },
-    source: "Official program pages verified September 1, 2026. No application or award is being announced tonight."
-  },
-  {
-    id: "funding-board-action",
-    kind: "action",
-    section: "Carnegie Hall",
-    kicker: "Booster assignments",
-    title: "Move the deadlines without promising awards",
-    actions: [
-      ["1", "Target", "Approve a quote-backed instrument packet for Mr. Parker's review by September 3."],
-      ["2", "Endowment", "Authorize an honest go or no-go after the purpose and document tests."],
-      ["3", "NYC aid", "Confirm WorldStrides eligibility and prepare SYTA answers offline before September 21."],
-      ["4", "Documents", "Name one Booster officer to own organization records, approvals, receipts, and reports."]
-    ],
-    note: "Research and drafting can move now. Contact, submission, signing, spending, and promises still require the proper approval."
+    kicker: "The goal",
+    title: "Can we bring the family total toward",
+    number: "$500",
+    subtitle: "Ambitious • possible only if we work together",
+    body: "This is a goal, not a promise. Reaching it will require families, businesses, civic groups, media partners, foundations, and major donors to begin opening doors tonight."
   },
   {
     id: "open-doors",
-    kind: "list",
+    kind: "action",
     section: "Carnegie Hall",
-    kicker: "Tell the story • open the door",
-    title: "One introduction can change this trip",
-    lead: "Ashley students were selected for a national festival at Carnegie Hall, with a master class, Broadway, landmark study, and possible academic credit.",
-    bullets: [
-      "Seek WECT and local newspaper coverage",
-      "Prepare WorldStrides and SYTA assistance for qualifying students",
-      "Use the prior Landfall relationship for a candid off-cycle route inquiry",
-      "Ask local businesses, civic groups, corporate relationships, organizations, and major donors",
-      "Tell the seven-year rebuilding story and Ashley's planned 2027 return to Carmina Burana",
-      "Connect Mr. Parker with the person who can say yes to a meaningful gift"
-    ]
-  },
-  {
-    id: "funding-boundaries",
-    kind: "split",
-    section: "Carnegie Hall",
-    kicker: "Keep the purposes clear",
-    title: "Carnegie and Marching Band remain separate",
-    left: {
-      label: "Marching Band",
-      items: [
-        "Current marching funding goals still apply",
-        "Marching needs cannot subsidize the trip",
-        "The mattress fundraiser currently supports the active marching goal"
-      ]
-    },
-    right: {
-      label: "Carnegie",
-      items: [
-        "Trip deposits and payments stay in a separate ledger",
-        "Trip sponsorship must be approved and documented",
-        "No family cost reduction is promised before funding is secured"
-      ]
-    }
-  },
-  {
-    id: "chaperones",
-    kind: "list",
-    section: "Carnegie Hall",
-    kicker: "Travel supervision",
-    title: "The working model keeps students supervised and the main coach efficient",
-    lead: "Main coach: up to 54 students plus Mr. Parker",
-    bullets: [
-      "Use seven approved adults for 54 students as the conservative working minimum",
-      "Mr. Parker is attending and an administrator will be requested",
-      "Additional approved chaperones are welcome when travel, lodging, and supervision work",
-      "Some chaperones may travel separately",
-      "The final district ratio and approval route remain pending"
+    kicker: "Work together starting tonight",
+    title: "Every family can open one door",
+    actions: [
+      ["1", "Employer", "Introduce a business or corporate partner."],
+      ["2", "Community", "Connect a civic group, foundation, or major donor."],
+      ["3", "Story", "Open a door to local media or an arts supporter."],
+      ["4", "Campaign", "Help with outreach, events, and donor follow-up."]
     ],
-    source: "Current NHCS policy review and the still-public 2018 overnight-trip procedure."
-  },
-  {
-    id: "open-items",
-    kind: "list",
-    section: "Carnegie Hall",
-    kicker: "Before final registration",
-    title: "These questions still require written answers",
-    bullets: [
-      "Final itemized quote and adult pricing",
-      "Surcharge for an ensemble below 50 performers",
-      "FRP deadline, group election, and payment timing",
-      "Negotiated October installment amount",
-      "WorldStrides financial-aid and academic-credit eligibility for group 150783",
-      "School approval, signer, chaperone plan, and economic-access process"
-    ],
-    lead: "An open question is not a reason to guess. It is a reason to label the plan correctly."
+    note: "Ashley will pursue WorldStrides and SYTA assistance, local and corporate partners, foundations, civic groups, media, and major donors. No award or lower family total is guaranteed yet."
   },
   {
     id: "family-action",
@@ -338,10 +199,10 @@ export const meetingSlides = [
     kicker: "What families need to do",
     title: "Give Ashley an honest answer by Friday",
     actions: [
-      ["1", "Answer the fallback", "Could your family still make the trip work if its responsibility reaches $2,000?"],
-      ["2", "Confirm", "Return the trip commitment and $50 conditional deposit by September 4."],
+      ["1", "Answer honestly", "Could your family participate with a total responsibility up to $2,000?"],
+      ["2", "Confirm", "Sign and pay the $50 tonight, or complete it by September 4."],
       ["3", "Open one door", "Connect us with a business, foundation, media contact, organization, or major donor."],
-      ["4", "Help tell the story", "Carnegie Hall, the national festival, seven years of rebuilding, and what this means."]
+      ["4", "Read the packet", "Review the price, cancellation, FRP, and next-step details in writing."]
     ],
     note: "Families may scan and complete the connected $50 commitment now, or return to it from ashleybands.com or the Family Portal by Friday."
   },
@@ -473,7 +334,7 @@ export const meetingSlides = [
     entries: [
       ["SEP 4", "$50", "Carnegie confirmation deadline"],
       ["SEP 9", "ONLINE", "Perry's Popcorn closes"],
-      ["SEP 15", "$450", "Carnegie balance payment if activated"],
+      ["SEP 15", "WORKING", "Possible Carnegie payment only after the final agreement"],
       ["SEP 26", "10-4", "CFS Mattress Fundraiser"]
     ]
   },
