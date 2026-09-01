@@ -38,17 +38,16 @@ export const meetingSlides = [
     kind: "list",
     section: "Carnegie Hall",
     kicker: "Working trip",
-    title: "Four days in New York built around performance",
-    lead: "March 23-26, 2027 • Carnegie performances Thursday, March 25",
+    title: "New York beyond the stage",
+    lead: "Four days of performance and learning • March 23-26, 2027",
     bullets: [
-      "Round-trip charter transportation and three hotel nights",
       "Carnegie Hall performance and AIM master class",
-      "Broadway production",
-      "Statue of Liberty and Ellis Island",
-      "Empire State Building or another structured activity",
-      "Three dinners, two lunches, and breakfasts on your own"
+      "Broadway production and a close look at professional live theater",
+      "Statue of Liberty, Ellis Island, and the Empire State Building",
+      "Optional WorldStrides high-school credit after travel and online coursework, pending confirmation",
+      "Charter travel, three hotel nights, three dinners, and two lunches"
     ],
-    source: "Working itinerary from the preliminary WorldStrides proposal; final itemization remains open."
+    source: "Preliminary WorldStrides itinerary and current academic-credit guidance; final itemization and this trip's credit menu remain open."
   },
   {
     id: "real-not-final",
@@ -224,16 +223,55 @@ export const meetingSlides = [
     note: "We will keep asking through December and into January. The more support committed by October 15, the sooner we can lower the remaining family burden."
   },
   {
+    id: "funding-stack",
+    kind: "split",
+    section: "Carnegie Hall",
+    kicker: "September 1 funding research",
+    title: "Different funding tools solve different problems",
+    left: {
+      label: "NYC direct support",
+      items: [
+        "WorldStrides FLAG and Helping Hands for qualifying families",
+        "SYTA Road Scholarship opens September 21, with up to $5,000 for a group",
+        "Landfall prior-grantee inquiry plus local relationship and major-donor gifts"
+      ]
+    },
+    right: {
+      label: "Instrument access",
+      items: [
+        "Target due September 4: $1,000-$15,000",
+        "Endowment due September 8: proceed only if the education-access case and documents pass",
+        "Walmart open through November 30: up to $5,000"
+      ]
+    },
+    source: "Official program pages verified September 1, 2026. No application or award is being announced tonight."
+  },
+  {
+    id: "funding-board-action",
+    kind: "action",
+    section: "Carnegie Hall",
+    kicker: "Booster assignments",
+    title: "Move the deadlines without promising awards",
+    actions: [
+      ["1", "Target", "Approve a quote-backed instrument packet for Mr. Parker's review by September 3."],
+      ["2", "Endowment", "Authorize an honest go or no-go after the purpose and document tests."],
+      ["3", "NYC aid", "Confirm WorldStrides eligibility and prepare SYTA answers offline before September 21."],
+      ["4", "Documents", "Name one Booster officer to own organization records, approvals, receipts, and reports."]
+    ],
+    note: "Research and drafting can move now. Contact, submission, signing, spending, and promises still require the proper approval."
+  },
+  {
     id: "open-doors",
     kind: "list",
     section: "Carnegie Hall",
     kicker: "Tell the story • open the door",
     title: "One introduction can change this trip",
-    lead: "Ashley students were selected for the National Band & Orchestra Festival at Carnegie Hall. That is a rare high-school opportunity worth investing in.",
+    lead: "Ashley students were selected for a national festival at Carnegie Hall, with a master class, Broadway, landmark study, and possible academic credit.",
     bullets: [
       "Seek WECT and local newspaper coverage",
-      "Pursue Landfall, endowment funds, arts funders, and community foundations",
-      "Ask local businesses, civic groups, organizations, and major donors",
+      "Prepare WorldStrides and SYTA assistance for qualifying students",
+      "Use the prior Landfall relationship for a candid off-cycle route inquiry",
+      "Ask local businesses, civic groups, corporate relationships, organizations, and major donors",
       "Tell the seven-year rebuilding story and Ashley's planned 2027 return to Carmina Burana",
       "Connect Mr. Parker with the person who can say yes to a meaningful gift"
     ]
@@ -288,6 +326,7 @@ export const meetingSlides = [
       "Surcharge for an ensemble below 50 performers",
       "FRP deadline, group election, and payment timing",
       "Negotiated October installment amount",
+      "WorldStrides financial-aid and academic-credit eligibility for group 150783",
       "School approval, signer, chaperone plan, and economic-access process"
     ],
     lead: "An open question is not a reason to guess. It is a reason to label the plan correctly."
