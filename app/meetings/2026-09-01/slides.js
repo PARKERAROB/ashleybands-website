@@ -391,6 +391,16 @@ export const meetingSlides = [
     ]
   },
   {
+    id: "clothing-order-qr",
+    kind: "qr",
+    section: "Current Fundraising",
+    kicker: "Order by 8:00 p.m. tonight",
+    title: "Scan to order clothing and show merch",
+    body: "Open the Family Portal clothing order, choose your items and sizes, and complete payment before the bulk order is placed tonight.",
+    url: "https://ashleybands.com/portal/clothing",
+    urlLabel: "ashleybands.com/portal/clothing"
+  },
+  {
     id: "popcorn",
     kind: "list",
     section: "Current Fundraising",
@@ -404,6 +414,16 @@ export const meetingSlides = [
       "Ashley Bands receives 40% of online orders"
     ],
     source: "Current AshleyBands fundraiser page."
+  },
+  {
+    id: "popcorn-qr",
+    kind: "qr",
+    section: "Current Fundraising",
+    kicker: "Open through September 9",
+    title: "Scan to shop Perry's Popcorn",
+    body: "Choose Ashley HS Band at checkout and enter the student's full name in the optional seller note so the student receives credit.",
+    url: "https://ashleybands.com/fundraising/popcorn",
+    urlLabel: "ashleybands.com/fundraising/popcorn"
   },
   {
     id: "dates",
