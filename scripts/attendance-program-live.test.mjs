@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const migration = readFileSync("supabase/migrations/202608300005_attendance_program_backbone.sql", "utf8");
+const sharedPinMigration = readFileSync("supabase/migrations/202609010001_shared_pin_attendance_preparation.sql", "utf8");
 const attendance = readFileSync("lib/attendance.js", "utf8");
 const events = readFileSync("lib/attendanceEvents.mjs", "utf8");
 const page = readFileSync("app/attendance/page.jsx", "utf8");
@@ -32,6 +33,13 @@ test("attendance writes lock the expected roster and reject students outside it"
   assert.match(attendanceRoute, /body\.prepare/);
   assert.match(attendance, /materializeConfiguredEvents\(\{ write: false \}/);
   assert.match(attendance, /resolveEvent\(occurrenceKey, now, \{ materialize: true \}\)/);
+});
+
+test("shared-PIN preparation records its certification source without inventing a staff actor", () => {
+  assert.match(sharedPinMigration, /roster_certification_source/);
+  assert.match(sharedPinMigration, /'shared_pin'/);
+  assert.match(sharedPinMigration, /roster_certified_by_staff_id is null/);
+  assert.match(sharedPinMigration, /before insert or update of roster_certification_state/);
 });
 
 test("historical evidence stays visibly incomplete instead of borrowing today's roster", () => {
