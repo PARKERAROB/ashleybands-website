@@ -1,5 +1,12 @@
 # band-website — ashleybands.com (LIVE site)
 
+## Mandatory project workflow
+
+Before doing any repository work, read `PROJECT_WORKFLOW.md` in full. It is the canonical Jira-grade
+intake, execution, verification, and closure workflow for this project. Every meaningful repository
+change must be tied to a sanitized GitHub issue before implementation begins. Rob's plain-language
+request guide is `docs/HOW_TO_REQUEST_A_CHANGE.md`.
+
 Public execution surface for the private AshleyBands Area at `~/Atlas/BandsofAHS`.
 Next.js + Vercel + Supabase. BandsofAHS owns private program facts; this repository contains only
 sanitized public projections, website-owned content, and application code.

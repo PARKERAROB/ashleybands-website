@@ -1,0 +1,81 @@
+name: Website change
+description: Request any bounded AshleyBands website change using the Jira-grade workflow.
+title: "[Change]: "
+labels:
+  - "status: inbox"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Keep this public issue sanitized. Do not include student or family identities, contact details, credentials, payments, attendance, measurements, or other private program facts.
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Observable outcome
+      description: What should be observably different when this is complete?
+      placeholder: Families can...
+    validations:
+      required: true
+  - type: textarea
+    id: reason
+    attributes:
+      label: Reason
+      description: What problem does this solve or what value does it add? Keep private facts out.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope and boundaries
+      description: What is included, and what must remain unchanged?
+      placeholder: Include... Preserve... Do not...
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Canonical source
+      description: Which file, data contract, or private Area record owns the truth? The implementing agent may complete this.
+      placeholder: Agent to determine from INDEX.md if not already known.
+    validations:
+      required: true
+  - type: dropdown
+    id: risk
+    attributes:
+      label: Highest known risk
+      options:
+        - Public content or presentation only
+        - Private or person data
+        - Authentication or authorization
+        - Database migration
+        - Payment or billing
+        - Human communication or audience
+        - Destructive or difficult-to-reverse action
+        - Unknown - agent must assess
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance checks
+      description: What observable evidence will prove the outcome? The implementing agent may refine this before marking Ready.
+      placeholder: The route shows... Unauthorized requests fail... The final public alias returns...
+    validations:
+      required: true
+  - type: dropdown
+    id: release
+    attributes:
+      label: Release instruction
+      options:
+        - Complete and deploy when the live site must change
+        - Prepare and verify locally, but do not deploy
+        - Investigate only; make no changes
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Public-record check
+      options:
+        - label: This issue contains no private student, family, credential, payment, attendance, measurement, or other protected information.
+          required: true
