@@ -100,7 +100,8 @@ test("prototype storage is private and dashboard reads are authorized and audite
   assert.match(dashboardRoute, /\.is\("removed_at", null\)/);
   assert.doesNotMatch(dashboardRoute, /participant_token_hash/);
   assert.doesNotMatch(dashboardClient, /status\[0\]\.toUpperCase/);
-  assert.match(dashboardClient, /className="sr-only">\{LABELS\[status\]/);
+  assert.doesNotMatch(dashboardClient, /className="sr-only">\{LABELS\[status\]/);
+  assert.match(dashboardClient, /aria-label=\{LABELS\[status\] \|\| "Unmarked"\}/);
   assert.match(managementMigration, /security definer/i);
   assert.match(managementMigration, /insert into (?:public\.)?audit_log/i);
   assert.match(managementMigration, /removed_at/i);

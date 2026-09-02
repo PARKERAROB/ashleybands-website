@@ -161,9 +161,13 @@ function Dashboard({ session, signOut }) {
           <td className={styles.instrumentCol}>{submission.instrument}</td>
           {ranges.map((range) => {
             const status = submission.marks?.[range.start] || "unmarked";
-            return <td data-status={status} data-large-change={range.largeChange || undefined} title={`${submission.display_name}: measures ${range.start}–${range.end}, ${LABELS[status] || "Unmarked"}`} key={range.start}>
-              <span className="sr-only">{LABELS[status] || "Unmarked"}</span>
-            </td>;
+            return <td
+              aria-label={LABELS[status] || "Unmarked"}
+              data-status={status}
+              data-large-change={range.largeChange || undefined}
+              title={`${submission.display_name}: measures ${range.start}–${range.end}, ${LABELS[status] || "Unmarked"}`}
+              key={range.start}
+            />;
           })}
         </tr>)}</tbody>
       </table>
