@@ -28,6 +28,10 @@ function Dashboard({ session, signOut }) {
         cache: "no-store",
       });
       const body = await response.json().catch(() => ({}));
+      if (response.status === 401) {
+        await signOut();
+        return;
+      }
       if (!response.ok) throw new Error(body.error || "The dashboard could not be loaded.");
       setSubmissions(body.submissions || []);
     } catch (loadError) {
@@ -35,7 +39,7 @@ function Dashboard({ session, signOut }) {
     } finally {
       setLoading(false);
     }
-  }, [session]);
+  }, [session, signOut]);
 
   useEffect(() => {
     const loadTimer = window.setTimeout(() => void load(), 0);
