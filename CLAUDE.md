@@ -30,7 +30,9 @@ hosted-state contracts, and implementations without duplicating their facts.
 - The checked production command is `npm run deploy:checked`; it refreshes safe local projections,
   runs the production identity/service preflight, integration/privacy checks, lints, builds, and
   invokes the pinned Vercel production CLI. Do not bypass `npm run deploy:preflight`.
-- Production requires a Rob-authored HEAD commit (`parkerarob` / `robert.parker@nhcs.net`). An
+- Production currently requires a Rob-authored HEAD commit using `robert.parker@nhcs.net`, because
+  that remains the verified identity on the Vercel Hobby account. Rob's GitHub login is
+  `parker-a-rob`; the repository owner is the `PARKERAROB` organization. An
   Atlas-authored HEAD is rejected by Vercel as an `UNKNOWN` deployment with a zero-millisecond build.
   The identity rail applies to GitHub issues and comments, not commit authorship in this repository.
   Workdesk's standing publication approval covers the narrow Rob-authored authorization commit after

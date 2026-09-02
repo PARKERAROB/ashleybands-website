@@ -4,7 +4,7 @@ This is the canonical work-management procedure for `ashleybands.com`. It provid
 discipline using GitHub Issues, repository checks, and the existing checked deployment process. Jira
 is not required. — Rob, 2026-09-02, #24
 
-Visual board: [AshleyBands Website Project](https://github.com/users/parkerarob/projects/4). `Backlog`
+Visual board: [AshleyBands Website Project](https://github.com/users/parker-a-rob/projects/4). `Backlog`
 on the board corresponds to the `status: inbox` issue label. The issue and its labels remain the
 durable record when the board and issue temporarily disagree.
 
