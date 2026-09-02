@@ -3,7 +3,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { StaffGate } from "@/components/StaffGate";
 import { staffAuthHeaders } from "@/lib/staffSession";
-import { bernsteinRanges } from "@/lib/practiceLoop.mjs";
+import {
+  aggregatePracticeRanges,
+  bernsteinRanges,
+  rankPracticeRanges,
+} from "@/lib/practiceLoop.mjs";
 import styles from "./practice-loop-dashboard.module.css";
 
 const LABELS = { red: "Not yet", yellow: "Working", green: "Ready" };
@@ -80,6 +84,15 @@ function Dashboard({ session, signOut }) {
   }, [load]);
 
   const markCount = submissions.reduce((sum, submission) => sum + Object.keys(submission.marks || {}).length, 0);
+  const aggregateRanges = aggregatePracticeRanges(submissions);
+  const rankedRanges = rankPracticeRanges(aggregateRanges);
+
+  const heatBand = (range) => {
+    if (range.concernPercent == null) return "unassessed";
+    if (range.concernPercent >= 67) return "high";
+    if (range.concernPercent >= 34) return "medium";
+    return "low";
+  };
 
   return <main className={styles.page}>
     <header className={styles.appBar}>
@@ -98,6 +111,35 @@ function Dashboard({ session, signOut }) {
     <div className={styles.legend}><span data-status="red">Not yet</span><span data-status="yellow">Working</span><span data-status="green">Ready</span><span>— Unmarked</span></div>
     {error ? <p className={styles.error} role="alert">{error}</p> : null}
     {!loading && !error && !submissions.length ? <section className={styles.empty}><h2>No student marks yet</h2><p>Keep this page open and refresh after students begin using the prototype.</p></section> : null}
+    {!loading && !error && submissions.length ? <section className={styles.aggregate} aria-labelledby="ensemble-snapshot-heading">
+      <div className={styles.aggregateHeading}>
+        <div><p>Ensemble aggregate</p><h2 id="ensemble-snapshot-heading">Reported rehearsal needs</h2></div>
+        <p>Concern = Not yet weighted twice plus Working, divided by marked responses. Unmarked responses are shown but not scored.</p>
+      </div>
+      <div className={styles.aggregateLayout}>
+        <div>
+          <h3>Priority order</h3>
+          <ol className={styles.priorityList}>
+            {rankedRanges.map((range) => <li key={range.start} data-unassessed={range.concernPercent == null || undefined}>
+              <span className={styles.rankRange}>mm. {range.start}–{range.end}</span>
+              <strong>{range.concernPercent == null ? "Unassessed" : `${range.concernPercent}% concern`}</strong>
+              <span>{range.responseCount} marked · {range.unmarked} unmarked</span>
+            </li>)}
+          </ol>
+        </div>
+        <div>
+          <h3>All ranges in musical order</h3>
+          <div className={styles.heatMap}>
+            {aggregateRanges.map((range) => <article key={range.start} data-heat={heatBand(range)} data-large-change={range.largeChange || undefined} title={`Measures ${range.start}–${range.end}: ${range.red} Not yet, ${range.yellow} Working, ${range.green} Ready, ${range.unmarked} unmarked`}>
+              <span>mm. {range.start}–{range.end}</span>
+              <strong>{range.concernPercent == null ? "—" : `${range.concernPercent}%`}</strong>
+              <small>{range.red}R · {range.yellow}W · {range.green} ready</small>
+              <small>{range.responseCount} marked · {range.unmarked} unmarked</small>
+            </article>)}
+          </div>
+        </div>
+      </div>
+    </section> : null}
     {submissions.length ? <section className={styles.tableWrap} aria-label="All current student marks">
       <table>
         <thead><tr><th className={styles.nameCol}>Student</th><th className={styles.instrumentCol}>Instrument</th>{ranges.map((range) => <th data-large-change={range.largeChange || undefined} title={`Measures ${range.start}–${range.end}`} key={range.start}>{range.start}</th>)}</tr></thead>
@@ -120,7 +162,6 @@ function Dashboard({ session, signOut }) {
           {ranges.map((range) => {
             const status = submission.marks?.[range.start] || "unmarked";
             return <td data-status={status} data-large-change={range.largeChange || undefined} title={`${submission.display_name}: measures ${range.start}–${range.end}, ${LABELS[status] || "Unmarked"}`} key={range.start}>
-              <span aria-hidden="true">{status === "unmarked" ? "" : status[0].toUpperCase()}</span>
               <span className="sr-only">{LABELS[status] || "Unmarked"}</span>
             </td>;
           })}
