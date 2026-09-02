@@ -32,6 +32,12 @@
 thead .nameCol { z-index: 5; background: #eee8df !important; }
 .nameCol strong, .nameCol span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .nameCol span { margin-top: 2px; color: #7b6d70; font-size: .64rem; font-weight: 500; }
+.studentActions { display: flex; gap: 8px; margin-top: 6px; }
+.studentActions button, .renameForm button { padding: 0; border: 0; background: transparent; color: #7b1829; font: inherit; font-size: .68rem; font-weight: 800; text-decoration: underline; cursor: pointer; }
+.studentActions .removeButton { color: #8f2734; }
+.studentActions button:disabled, .renameForm button:disabled { opacity: .55; cursor: wait; }
+.renameForm input { box-sizing: border-box; width: 100%; padding: 6px 7px; border: 1px solid #9f8e91; border-radius: 6px; font: inherit; }
+.renameForm div { display: flex; gap: 9px; margin-top: 6px; }
 .instrumentCol { position: sticky; left: 170px; z-index: 2; width: 120px; min-width: 120px !important; max-width: 120px; padding: 7px 9px !important; background: #faf8f5 !important; text-align: left !important; }
 thead .instrumentCol { z-index: 5; background: #eee8df !important; }
 .empty, .error { padding: 28px; border-radius: 14px; background: #fff; border: 1px solid #ddd2c5; }

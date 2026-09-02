@@ -6,6 +6,7 @@ import {
   BERNSTEIN_LARGE_CHANGES,
   BERNSTEIN_REHEARSAL_STARTS,
   bernsteinRanges,
+  normalizePracticeDisplayName,
   normalizePracticeSubmission,
 } from "../lib/practiceLoop.mjs";
 
@@ -16,6 +17,11 @@ test("rehearsal ranges preserve the supplied boundaries through measure 312", ()
   ranges.slice(0, -1).forEach((range, index) => {
     assert.equal(range.end + 1, ranges[index + 1].start);
   });
+});
+
+test("staff rename normalization uses the same student-name rules", () => {
+  assert.equal(normalizePracticeDisplayName("  Student   Example "), "Student Example");
+  assert.throws(() => normalizePracticeDisplayName("A"), /student name/i);
 });
 
 test("only the director-identified large musical changes are dividers", () => {
@@ -50,6 +56,7 @@ test("prototype storage is private and dashboard reads are authorized and audite
   const migration = await readFile(new URL("../supabase/migrations/202609020001_practice_loop_prototype.sql", import.meta.url), "utf8");
   const studentRoute = await readFile(new URL("../app/api/practice-loop/bernstein-tribute/route.js", import.meta.url), "utf8");
   const dashboardRoute = await readFile(new URL("../app/api/admin/practice-loop/route.js", import.meta.url), "utf8");
+  const managementMigration = await readFile(new URL("../supabase/migrations/202609020002_practice_loop_student_management.sql", import.meta.url), "utf8");
 
   assert.match(migration, /enable row level security/i);
   assert.match(migration, /revoke all[^;]+anon, authenticated/i);
@@ -57,5 +64,12 @@ test("prototype storage is private and dashboard reads are authorized and audite
   assert.match(studentRoute, /failOpen:\s*false/);
   assert.match(dashboardRoute, /SYSTEM_OVERSIGHT_READ/);
   assert.match(dashboardRoute, /logAuditRequired/);
+  assert.match(dashboardRoute, /PRACTICE_LOOP_MANAGE/);
+  assert.match(dashboardRoute, /manage_practice_loop_submission_with_audit/);
+  assert.match(dashboardRoute, /\.is\("removed_at", null\)/);
   assert.doesNotMatch(dashboardRoute, /participant_token_hash/);
+  assert.match(managementMigration, /security definer/i);
+  assert.match(managementMigration, /insert into (?:public\.)?audit_log/i);
+  assert.match(managementMigration, /removed_at/i);
+  assert.match(managementMigration, /revoke all on function[^;]+public, anon, authenticated/is);
 });

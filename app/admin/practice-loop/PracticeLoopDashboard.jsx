@@ -18,6 +18,9 @@ function Dashboard({ session, signOut }) {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [editingId, setEditingId] = useState("");
+  const [editingName, setEditingName] = useState("");
+  const [savingId, setSavingId] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -40,6 +43,36 @@ function Dashboard({ session, signOut }) {
       setLoading(false);
     }
   }, [session, signOut]);
+
+  const changeStudent = async (submission, action) => {
+    if (action === "remove" && !window.confirm(`Remove ${submission.display_name} from this dashboard?`)) return;
+    setSavingId(submission.id);
+    setError("");
+    try {
+      const response = await fetch("/api/admin/practice-loop", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", ...staffAuthHeaders(session) },
+        body: JSON.stringify({
+          action,
+          submissionId: submission.id,
+          displayName: action === "rename" ? editingName : undefined,
+        }),
+      });
+      const body = await response.json().catch(() => ({}));
+      if (response.status === 401) {
+        await signOut();
+        return;
+      }
+      if (!response.ok) throw new Error(body.error || "That student change could not be completed.");
+      setEditingId("");
+      setEditingName("");
+      await load();
+    } catch (changeError) {
+      setError(changeError.message);
+    } finally {
+      setSavingId("");
+    }
+  };
 
   useEffect(() => {
     const loadTimer = window.setTimeout(() => void load(), 0);
@@ -69,7 +102,20 @@ function Dashboard({ session, signOut }) {
       <table>
         <thead><tr><th className={styles.nameCol}>Student</th><th className={styles.instrumentCol}>Instrument</th>{ranges.map((range) => <th data-large-change={range.largeChange || undefined} title={`Measures ${range.start}–${range.end}`} key={range.start}>{range.start}</th>)}</tr></thead>
         <tbody>{submissions.map((submission) => <tr key={submission.id}>
-          <th className={styles.nameCol} scope="row"><strong>{submission.display_name}</strong><span>{new Date(submission.updated_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span></th>
+          <th className={styles.nameCol} scope="row">
+            {editingId === submission.id ? <form className={styles.renameForm} onSubmit={(event) => { event.preventDefault(); void changeStudent(submission, "rename"); }}>
+              <label className="sr-only" htmlFor={`student-name-${submission.id}`}>Student name</label>
+              <input id={`student-name-${submission.id}`} value={editingName} onChange={(event) => setEditingName(event.target.value)} minLength={2} maxLength={80} autoFocus />
+              <div><button type="submit" disabled={savingId === submission.id}>Save</button><button type="button" onClick={() => setEditingId("")} disabled={savingId === submission.id}>Cancel</button></div>
+            </form> : <>
+              <strong>{submission.display_name}</strong>
+              <span>{new Date(submission.updated_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span>
+              <div className={styles.studentActions}>
+                <button type="button" onClick={() => { setEditingId(submission.id); setEditingName(submission.display_name); }}>Rename</button>
+                <button type="button" className={styles.removeButton} onClick={() => void changeStudent(submission, "remove")} disabled={savingId === submission.id}>{savingId === submission.id ? "Working…" : "Remove"}</button>
+              </div>
+            </>}
+          </th>
           <td className={styles.instrumentCol}>{submission.instrument}</td>
           {ranges.map((range) => {
             const status = submission.marks?.[range.start] || "unmarked";
