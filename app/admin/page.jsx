@@ -38,6 +38,7 @@ const SUPPORTING = [
       { capability: STAFF_CAPABILITIES.COMMUNICATIONS_READ, href: "/admin/newsletter", label: "AshleyBands Weekly" },
       { capability: STAFF_CAPABILITIES.FUNDING_READ, href: "/admin/marching-band/funding", label: "Marching roster & funding" },
       { capability: STAFF_CAPABILITIES.MEMBERSHIPS_READ, href: "/admin/marching-band", label: "Marching status" },
+      { capability: STAFF_CAPABILITIES.SYSTEM_OVERSIGHT_READ, href: "/admin/practice-loop", label: "Practice Loop prototype" },
     ],
   },
   {

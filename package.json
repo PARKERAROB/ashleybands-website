@@ -38,6 +38,7 @@
     "test:sponsorship": "node --test scripts/sponsorship-security.test.mjs",
     "test:newsletter": "node --test scripts/newsletter.test.mjs",
     "test:carnegie": "node --test scripts/carnegie-commitment.test.mjs",
+    "test:practice-loop": "node --test scripts/practice-loop-prototype.test.mjs",
     "test:security": "npm run test:workflow && node --test scripts/security-boundary.test.mjs",
     "test:security:live": "SECURITY_LIVE=1 node --env-file=.env.local --test scripts/security-boundary.test.mjs",
     "test:workflow": "node --test scripts/project-workflow.test.mjs",
@@ -45,7 +46,7 @@
     "integration:doctor:online": "node scripts/integration.mjs doctor --online",
     "integration:sync": "node scripts/integration.mjs sync",
     "deploy:preflight": "node scripts/deploy-preflight.mjs",
-    "deploy:checked": "npm run test:workflow && npm run deploy:preflight && node scripts/integration.mjs sync --deploy && npm run lint:integration && npm run lint:provenance && npm run lint:operations && npm run lint:carnegie && npm run test:audience && npm run test:sponsorship && npm run test:newsletter && npm run test:carnegie && npm run test:onboarding-live && npm run test:memberships-live && npm run test:attendance && npm run test:attendance-program-live && npm run test:attendance-school-live && npm run test:assets-inventory-prototype && npm run test:operations-completion && npm run test:security:live && npm run lint:sponsorship && npm run lint:newsletter && npm run build && npx --yes vercel@59.1.4 --prod --yes --scope robs-projects-9eb69de7",
+    "deploy:checked": "npm run test:workflow && npm run deploy:preflight && node scripts/integration.mjs sync --deploy && npm run lint:integration && npm run lint:provenance && npm run lint:operations && npm run lint:carnegie && npm run test:audience && npm run test:sponsorship && npm run test:newsletter && npm run test:carnegie && npm run test:practice-loop && npm run test:onboarding-live && npm run test:memberships-live && npm run test:attendance && npm run test:attendance-program-live && npm run test:attendance-school-live && npm run test:assets-inventory-prototype && npm run test:operations-completion && npm run test:security:live && npm run lint:sponsorship && npm run lint:newsletter && npm run build && npx --yes vercel@59.1.4 --prod --yes --scope robs-projects-9eb69de7",
     "supabase:production": "node scripts/supabase-production.mjs"
   },
   "dependencies": {

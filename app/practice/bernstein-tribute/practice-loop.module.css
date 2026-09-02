@@ -1,0 +1,52 @@
+.page { min-height: 100vh; padding: 28px 16px 72px; background: #f5f0e8; color: #241b1d; }
+.page > * { width: min(760px, 100%); margin-left: auto; margin-right: auto; }
+.hero { padding: 22px 0 18px; }
+.eyebrow, .step { margin: 0 0 8px; color: #7b1829; font-size: .76rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.hero h1 { margin: 0; font-family: Georgia, serif; font-size: clamp(2.1rem, 9vw, 4rem); line-height: .98; }
+.credit { margin: 14px 0 0; font-size: .92rem; color: #65575a; }
+.lede { margin: 18px 0 0; font-size: 1.08rem; line-height: 1.5; }
+.profileCard { display: grid; gap: 16px; padding: 24px; background: #fff; border: 1px solid #ded3c6; border-radius: 20px; box-shadow: 0 12px 30px rgba(54, 32, 36, .08); }
+.profileCard h2 { margin: 0; font-family: Georgia, serif; font-size: 1.75rem; }
+.profileCard label { display: grid; gap: 7px; font-weight: 800; }
+.profileCard input, .profileCard select { width: 100%; min-height: 50px; padding: 10px 12px; border: 1px solid #ad9f9f; border-radius: 10px; background: #fff; color: #241b1d; font: inherit; }
+.primary { min-height: 52px; border: 0; border-radius: 999px; background: #7b1829; color: #fff; font: inherit; font-weight: 800; cursor: pointer; }
+.privacy { margin: 0; color: #65575a; font-size: .82rem; line-height: 1.45; }
+.error { margin: 0; color: #9f1728; font-weight: 700; }
+.identityBar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 8px; padding: 13px 16px; border-radius: 14px; background: #fff; border: 1px solid #ded3c6; }
+.identityBar div { display: grid; gap: 2px; }
+.identityBar span { color: #65575a; font-size: .85rem; }
+.identityBar button { border: 0; background: transparent; color: #7b1829; font: inherit; font-weight: 800; cursor: pointer; }
+.summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+.summary > div { display: grid; gap: 3px; min-width: 0; padding: 12px 8px; border-radius: 12px; background: #fff; text-align: center; border: 1px solid #ded3c6; }
+.summary strong { font-size: 1.25rem; }
+.summary span { color: #65575a; font-size: .7rem; }
+.summary [data-status="red"] { border-top: 4px solid #bd2637; }
+.summary [data-status="yellow"] { border-top: 4px solid #d79a16; }
+.summary [data-status="green"] { border-top: 4px solid #2f7b52; }
+.saveLine { min-height: 34px; padding: 9px 2px 4px; color: #65575a; font-size: .82rem; font-weight: 700; text-align: right; }
+.map { display: grid; gap: 10px; }
+.rangeCard { position: relative; overflow: hidden; padding: 16px; border: 1px solid #ded3c6; border-radius: 16px; background: #fff; }
+.rangeCard[data-large-change] { margin-top: 20px; border-top: 5px solid #7b1829; }
+.changeLabel { margin: -4px 0 12px; color: #7b1829; font-size: .72rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+.rangeHeading { display: flex; align-items: end; justify-content: space-between; gap: 16px; }
+.rangeHeading div { display: grid; grid-template-columns: auto auto; align-items: baseline; gap: 8px; }
+.rangeHeading span { color: #65575a; font-size: .75rem; font-weight: 700; }
+.rangeHeading strong { font-family: Georgia, serif; font-size: 2rem; line-height: 1; }
+.rangeHeading p { margin: 0; color: #65575a; font-size: .82rem; }
+.markButtons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 15px; }
+.markButtons button { min-height: 44px; border: 1px solid #cbbfc0; border-radius: 10px; background: #fff; color: #3d3234; font: inherit; font-size: .86rem; font-weight: 800; cursor: pointer; }
+.markButtons button[data-status="red"][aria-pressed="true"] { border-color: #9f1728; background: #bd2637; color: #fff; }
+.markButtons button[data-status="yellow"][aria-pressed="true"] { border-color: #9b6800; background: #f2be4c; color: #3c2900; }
+.markButtons button[data-status="green"][aria-pressed="true"] { border-color: #245f40; background: #2f7b52; color: #fff; }
+.markButtons button:focus-visible, .primary:focus-visible, .identityBar button:focus-visible, .profileCard input:focus-visible, .profileCard select:focus-visible { outline: 3px solid #2563eb; outline-offset: 2px; }
+@media (max-width: 520px) {
+  .page { padding-top: 14px; }
+  .summary { grid-template-columns: repeat(2, 1fr); }
+  .rangeHeading { align-items: start; }
+  .rangeHeading div { grid-template-columns: 1fr; gap: 2px; }
+  .markButtons { gap: 5px; }
+  .markButtons button { padding: 8px 4px; font-size: .78rem; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .markButtons button { transition: background-color .15s ease, color .15s ease, border-color .15s ease; }
+}

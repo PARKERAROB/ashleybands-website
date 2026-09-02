@@ -1,0 +1,47 @@
+.page { min-height: 100vh; padding-bottom: 48px; background: #f4f1eb; color: #241b1d; }
+.appBar { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 14px 22px; background: #241b1d; color: #fff; }
+.appBar > div { display: flex; align-items: center; gap: 12px; }
+.appBar span { color: #d9cfd1; font-size: .78rem; }
+.appBar button, .heading button { border: 1px solid currentColor; border-radius: 999px; padding: 8px 13px; background: transparent; color: inherit; font: inherit; font-weight: 800; cursor: pointer; }
+.heading, .metrics, .legend, .tableWrap, .empty, .error, .note { width: min(1500px, calc(100% - 32px)); margin-left: auto; margin-right: auto; }
+.heading { display: flex; align-items: end; justify-content: space-between; gap: 20px; padding: 32px 0 18px; }
+.heading p { margin: 0 0 6px; color: #7b1829; font-size: .75rem; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+.heading h1 { margin: 0; font-family: Georgia, serif; font-size: clamp(2rem, 5vw, 3.5rem); }
+.heading span { color: #65575a; }
+.heading button { color: #7b1829; background: #fff; }
+.metrics { display: flex; gap: 10px; margin-bottom: 12px; }
+.metrics div { display: flex; align-items: baseline; gap: 7px; padding: 11px 15px; border: 1px solid #ddd2c5; border-radius: 12px; background: #fff; }
+.metrics strong { font-size: 1.4rem; }
+.metrics span { color: #65575a; font-size: .8rem; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; padding: 8px 2px 14px; font-size: .78rem; font-weight: 800; }
+.legend span::before { display: inline-block; width: 11px; height: 11px; margin-right: 5px; border: 1px solid #cfc7bf; border-radius: 3px; background: #fff; content: ""; vertical-align: -1px; }
+.legend [data-status="red"]::before { background: #bd2637; border-color: #bd2637; }
+.legend [data-status="yellow"]::before { background: #f2be4c; border-color: #9b6800; }
+.legend [data-status="green"]::before { background: #2f7b52; border-color: #2f7b52; }
+.tableWrap { overflow: auto; max-height: calc(100vh - 270px); border: 1px solid #cfc5ba; border-radius: 14px; background: #fff; box-shadow: 0 10px 30px rgba(36, 27, 29, .08); }
+.tableWrap table { border-collapse: separate; border-spacing: 0; width: max-content; min-width: 100%; font-size: .76rem; }
+.tableWrap th, .tableWrap td { min-width: 30px; height: 34px; padding: 0; border-right: 1px solid #e7e1da; border-bottom: 1px solid #e7e1da; text-align: center; }
+.tableWrap thead th { position: sticky; top: 0; z-index: 3; height: 40px; background: #eee8df; font-weight: 900; }
+.tableWrap [data-large-change] { border-left: 4px solid #7b1829; }
+.tableWrap td[data-status="red"] { background: #bd2637; }
+.tableWrap td[data-status="yellow"] { background: #f2be4c; }
+.tableWrap td[data-status="green"] { background: #2f7b52; }
+.tableWrap td[data-status="red"], .tableWrap td[data-status="green"] { color: #fff; font-weight: 900; }
+.tableWrap td[data-status="yellow"] { color: #3c2900; font-weight: 900; }
+.nameCol { position: sticky; left: 0; z-index: 2; width: 170px; min-width: 170px !important; max-width: 170px; padding: 7px 10px !important; background: #fff !important; text-align: left !important; }
+thead .nameCol { z-index: 5; background: #eee8df !important; }
+.nameCol strong, .nameCol span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nameCol span { margin-top: 2px; color: #7b6d70; font-size: .64rem; font-weight: 500; }
+.instrumentCol { position: sticky; left: 170px; z-index: 2; width: 120px; min-width: 120px !important; max-width: 120px; padding: 7px 9px !important; background: #faf8f5 !important; text-align: left !important; }
+thead .instrumentCol { z-index: 5; background: #eee8df !important; }
+.empty, .error { padding: 28px; border-radius: 14px; background: #fff; border: 1px solid #ddd2c5; }
+.empty h2 { margin-top: 0; }
+.error { color: #9f1728; font-weight: 800; }
+.note { margin-top: 14px; color: #65575a; font-size: .78rem; }
+@media (max-width: 680px) {
+  .appBar, .heading { align-items: flex-start; }
+  .appBar > div, .heading { flex-direction: column; }
+  .metrics { overflow-x: auto; }
+  .nameCol { width: 130px; min-width: 130px !important; max-width: 130px; }
+  .instrumentCol { left: 130px; width: 100px; min-width: 100px !important; max-width: 100px; }
+}
