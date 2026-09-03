@@ -64,6 +64,19 @@ test("the Forms list shows the latest Carnegie answer separately from completion
   assert.match(formsWorkspace, /row\.stateLabel/);
 });
 
+test("the Forms requirement filter distinguishes each Carnegie ensemble", () => {
+  for (const [code, prefix] of [
+    ["concert-band-2026-27", "CB"],
+    ["percussion-ensemble-2026-27", "PE"],
+    ["wind-ensemble-2026-27", "WE"],
+  ]) {
+    assert.match(forms, new RegExp(`"${code}": "${prefix}"`));
+  }
+  assert.match(forms, /supabaseAdmin\.from\("program_groups"\)[\s\S]*\.select\("id,code"\)/);
+  assert.match(forms, /title: carnegiePrefix \? `\$\{carnegiePrefix\} - Carnegie Commitment` : definition\.title/);
+  assert.match(formsWorkspace, /\{item\.title\}<\/option>/);
+});
+
 test("student-scoped billing uses student totals and removes program-wide actions", () => {
   assert.match(billing, /const totalRows = useMemo\(\(\) => studentScope \? roster\.filter/);
   assert.match(billing, /\{studentScope \? "Student totals" : "Program totals"\}/);
