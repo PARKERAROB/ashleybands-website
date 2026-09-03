@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import {
+  CARNEGIE_AGREEMENT_VERSION,
   CARNEGIE_AMOUNT_BANDS,
   CARNEGIE_HELP_OPTIONS,
   CARNEGIE_RESPONSE_OPTIONS,
@@ -41,7 +42,7 @@ const initialFields = {
   guardianName: "",
   guardianEmail: "",
   guardianPhone: "",
-  response: "serious_yes",
+  response: "",
   maximumFamilyAmountBand: "",
   helpOptions: [],
   guardianSignature: "",
@@ -193,13 +194,13 @@ export default function CarnegieCommitmentClient({ portalMode = false }) {
   }
 
   const selectedStudent = portalData?.students?.find((student) => student.id === studentId);
-  const responseLabel = result ? carnegieResponseLabel(result.response) : "";
+  const responseLabel = result ? carnegieResponseLabel(result.response, result.agreementVersion) : "";
 
   if (loading) return <main className={styles.page}><section className={styles.card}><p>Opening the Carnegie commitment…</p></section></main>;
 
   if (portalMode && error && !portalData) return <main className={styles.page}><section className={styles.card}><p className={styles.eyebrow}>Ashley Bands Family Portal</p><h1>Sign in to continue.</h1><p>{error} You can sign in and return here, or use the public commitment form without signing in.</p><div className={styles.actions}><Link href="/portal?next=%2Fportal%2Fcarnegie-2027">Sign in to Family Portal</Link><Link href="/carnegie-2027/commit">Use the public form</Link></div></section></main>;
 
-  if (portalMode && result?.source === "staff_verbal") return <main className={styles.page}><section className={styles.card}><p className={styles.eyebrow}>Carnegie Hall 2027</p><h1>A verbal response is on file.</h1><p>Staff recorded this as an unsigned fallback for {selectedStudent?.displayName || "this student"}. Complete the acknowledgement and typed signatures now; then a serious “yes” can continue to the connected $50 payment.</p><div className={styles.actions}><button className={styles.primaryButton} type="button" onClick={() => { setFields((current) => ({ ...current, response: result.response, maximumFamilyAmountBand: result.maximumFamilyAmountBand || "" })); setResult(null); }}>Complete and sign this response</button><Link href="/portal/review">Return to Family Portal</Link></div></section></main>;
+  if (portalMode && result?.source === "staff_verbal") return <main className={styles.page}><section className={styles.card}><p className={styles.eyebrow}>Carnegie Hall 2027</p><h1>A verbal response is on file.</h1><p>Staff recorded this as an unsigned fallback for {selectedStudent?.displayName || "this student"}. Review the current choices and complete the acknowledgement and typed signatures now. Only the up-to-$2,000 response continues to the connected $50 payment.</p><div className={styles.actions}><button className={styles.primaryButton} type="button" onClick={() => { const currentVersion = result.agreementVersion === CARNEGIE_AGREEMENT_VERSION; setFields((current) => ({ ...current, response: currentVersion ? result.response : "", maximumFamilyAmountBand: currentVersion ? result.maximumFamilyAmountBand || "" : "" })); setResult(null); }}>Complete and sign this response</button><Link href="/portal/review">Return to Family Portal</Link></div></section></main>;
 
   if (result) {
     return (
@@ -221,6 +222,8 @@ export default function CarnegieCommitmentClient({ portalMode = false }) {
                 <p className={styles.resume}>Need to finish later? Return through the <Link href="/portal/carnegie-2027">Family Portal Carnegie page</Link>. If you do not use the portal, reopen this public form with the same exact student details and submit the response again to restore the payment step.</p>
               </div>
             )
+          ) : result.paid ? (
+            <p className={styles.notice}>Your earlier $50 payment remains recorded. Updating the family response does not automatically issue a refund. Staff will review the payment under the current conditional-deposit terms.</p>
           ) : (
             <p className={styles.notice}>No payment is due for this response. Thank you for giving the band program clear planning information.</p>
           )}
@@ -238,7 +241,7 @@ export default function CarnegieCommitmentClient({ portalMode = false }) {
       <header className={styles.hero}>
         <p className={styles.eyebrow}>Ashley Bands · Carnegie Hall 2027</p>
         <h1>Family commitment</h1>
-        <p>Submit one response per student by Friday, September 4. A serious “yes” creates the connected $50 conditional-deposit charge and lets you pay it immediately.</p>
+        <p>Submit one response per student by Friday, September 4. Tell us whether the student would participate and the highest family responsibility that would make participation realistic. Only the up-to-$2,000 response creates the connected $50 conditional-deposit charge.</p>
         <p className={styles.portalOption}><Link href="/carnegie-2027/meeting-packet">Read the complete family meeting packet</Link>{!portalMode ? <> or <Link href="/portal/carnegie-2027">open the connected Family Portal version</Link></> : null}.</p>
       </header>
 
@@ -264,21 +267,22 @@ export default function CarnegieCommitmentClient({ portalMode = false }) {
 
         <fieldset>
           <legend>Your family&apos;s response</legend>
-          <p>The trip is currently planning around $2,500 per traveler. Ashley Bands will not ask a participating family to pay more than $2,000 under this commitment. Families should plan for that $2,000 responsibility until shared fundraising lowers it.</p>
+          <p>The trip is currently planning around $2,500 per traveler. Ashley Bands is working to lower the cost for every student, but no amount of outside funding and no lower family total is guaranteed yet.</p>
+          <p>Cost should not turn a “yes, if funded” into a no. Choose no only if the student cannot participate regardless of financial assistance.</p>
           {CARNEGIE_RESPONSE_OPTIONS.map((option) => (
             <label className={`${styles.choice} ${fields.response === option.value ? styles.selected : ""}`} key={option.value}>
-              <input type="radio" name="response" value={option.value} checked={fields.response === option.value} onChange={() => update("response", option.value)} />
+              <input type="radio" name="response" value={option.value} checked={fields.response === option.value} onChange={() => update("response", option.value)} required />
               <span>{option.label}</span>
             </label>
           ))}
           {fields.response === "interested_limited" ? (
-            <label className={styles.field}>Highest family amount we can responsibly plan for<select value={fields.maximumFamilyAmountBand} onChange={(event) => update("maximumFamilyAmountBand", event.target.value)} required><option value="">Choose a range</option>{CARNEGIE_AMOUNT_BANDS.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}</select></label>
+            <label className={styles.field}>Highest total family responsibility that would make participation realistic<select value={fields.maximumFamilyAmountBand} onChange={(event) => update("maximumFamilyAmountBand", event.target.value)} required><option value="">Choose a range</option>{CARNEGIE_AMOUNT_BANDS.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}</select></label>
           ) : null}
         </fieldset>
 
         <fieldset>
           <legend>Ways your family may be able to help</legend>
-          <p>Optional. Check everything that applies. Capital sponsorships, grants, major gifts, and shared campaigns lower the trip cost for all participating students rather than creating a private credit for one student.</p>
+          <p>Optional. Check everything that applies. These choices do not affect the student&apos;s eligibility or promise financial assistance. Capital sponsorships, grants, major gifts, and shared campaigns lower the trip cost for all participating students rather than creating a private credit for one student.</p>
           {CARNEGIE_HELP_OPTIONS.map((option) => <label className={styles.check} key={option.value}><input type="checkbox" checked={fields.helpOptions.includes(option.value)} onChange={() => toggleHelp(option.value)} /><span>{option.label}</span></label>)}
         </fieldset>
 
@@ -295,12 +299,15 @@ export default function CarnegieCommitmentClient({ portalMode = false }) {
           <legend>Acknowledgement and signatures</legend>
           <ul>
             <li>This is an initial family intent response, not the final trip contract.</li>
-            <li>A “yes” includes a $50 conditional deposit credited toward the student&apos;s trip account.</li>
-            <li>A “yes” means the family seriously intends to participate if its total responsibility is no more than $2,000.</li>
-            <li>If the eventual family responsibility would exceed $2,000, the band program must return to families for a new decision; this acknowledgement does not authorize the Boosters to collect a higher amount.</li>
+            <li>This response records whether the student is available and intends to participate separately from the family&apos;s financial capacity.</li>
+            <li>The up-to-$2,000 response includes a $50 conditional deposit credited toward the student&apos;s trip account. It means the family seriously intends to participate if its total responsibility is no more than $2,000.</li>
+            <li>An assistance-needed response creates no new charge and does not guarantee financial assistance or a fully funded trip. It tells Ashley Bands what would need to be true financially for the student to participate.</li>
+            <li>If outside support cannot bring the final family responsibility within the amount selected, the band program must return to the family for a new decision before final registration.</li>
+            <li>A no response means the student cannot participate regardless of financial assistance.</li>
             <li>The deposit is refundable until the participation threshold is confirmed and the Ashley High School Band Boosters pay the WorldStrides group deposit; after that it becomes nonrefundable.</li>
             <li>The trip moves forward when the Boosters pay the group deposit, but the student is not individually confirmed until the WorldStrides portal registration and required paperwork are complete.</li>
-            <li>The final agreement will include the next $225 payment required for individual registration. It is part of the $2,000 ceiling, and without FRP it covers the current early-withdrawal cost once the student is registered.</li>
+            <li>Any later WorldStrides registration payment will be part of, not added to, the family&apos;s final approved responsibility. It will not begin until the final agreement and payment instructions are issued.</li>
+            <li>Changing this response does not automatically refund a completed payment.</li>
             <li>Concert Band participation remains subject to approval. An unapproved Concert Band student&apos;s $50 will be refunded.</li>
             <li>The current trip price is a planning estimate, not a final price.</li>
           </ul>
@@ -312,7 +319,7 @@ export default function CarnegieCommitmentClient({ portalMode = false }) {
         </fieldset>
 
         {error ? <p className={styles.error} role="alert">{error}</p> : null}
-        <button className={styles.submit} type="submit" disabled={busy || (portalMode && !studentId)}>{busy ? "Saving…" : fields.response === "serious_yes" ? "Save commitment and continue to $50 payment" : "Save family response"}</button>
+        <button className={styles.submit} type="submit" disabled={busy || (portalMode && !studentId)}>{busy ? "Saving…" : fields.response === "serious_yes" ? "Save up-to-$2,000 commitment and continue to $50 payment" : "Save family response"}</button>
         <p className={styles.fallback}>Cannot use this form tonight? Tell a staff member. Staff can record the verbal commitment, mark login help for follow-up, and the $50 remains clearly labeled unpaid until payment is actually received.</p>
       </form>
     </main>

@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import test from "node:test";
+import {
+  CARNEGIE_AGREEMENT_VERSION,
+  CARNEGIE_AMOUNT_BANDS,
+  carnegieAmountBandLabel,
+  carnegieResponseLabel,
+} from "../lib/carnegieTripConstants.js";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
@@ -10,6 +16,32 @@ test("serious family intent creates the fixed charge in the existing ledger", ()
   assert.match(migration, /'carnegie_2027_conditional_deposit'.*'Carnegie Hall conditional deposit'/s);
   assert.match(migration, /5000, 'active'/);
   assert.match(migration, /p_response = 'serious_yes'/);
+});
+
+test("v2 separates travel intent from family financial capacity without rewriting v1 labels", () => {
+  const migration = read("supabase/migrations/202609030001_carnegie_commitment_v2.sql");
+  const form = read("app/carnegie-2027/commit/CarnegieCommitmentClient.jsx");
+  const route = read("app/api/carnegie-2027/commitment/route.js");
+  const model = read("lib/carnegieTrip.js");
+
+  assert.equal(CARNEGIE_AGREEMENT_VERSION, "2026-09-03-v2");
+  assert.equal(carnegieResponseLabel("no", "2026-09-01-v1"), "No - not planning to participate");
+  assert.equal(carnegieResponseLabel("no", CARNEGIE_AGREEMENT_VERSION), "No - my student cannot participate regardless of financial assistance");
+  assert.equal(carnegieAmountBandLabel("500_or_less", "2026-09-01-v1"), "$500 or less");
+  assert.ok(CARNEGIE_AMOUNT_BANDS.some((option) => option.value === "full_assistance_required"));
+  assert.ok(CARNEGIE_AMOUNT_BANDS.some((option) => option.value === "up_to_500"));
+  assert.doesNotMatch(JSON.stringify(CARNEGIE_AMOUNT_BANDS), /500_or_less/);
+
+  assert.match(migration, /'2026-09-01-v1','2026-09-03-v2'/);
+  assert.match(migration, /'full_assistance_required','up_to_500'/);
+  assert.match(migration, /if p_response = 'serious_yes' and v_charge_id is null then/);
+  assert.match(migration, /elsif p_response <> 'serious_yes'/);
+  assert.match(form, /response: ""/);
+  assert.match(form, /Cost should not turn a “yes, if funded” into a no/);
+  assert.match(form, /does not guarantee financial assistance or a fully funded trip/);
+  assert.match(form, /does not automatically issue a refund/);
+  assert.match(route, /maximum_family_amount_band,agreement_version,guardian_email/);
+  assert.match(model, /agreementVersion: submission\.agreement_version/);
 });
 
 test("public intake matches exact student identity without returning the roster", () => {
@@ -100,7 +132,7 @@ test("family materials explain registration, FRP transfer, and shared fundraisin
   assert.match(packet.funding.summary, /reduce the total trip cost for everyone/);
   assert.match(packet.openBeforeFinalAgreement.join(" "), /replacement[\s\S]*under investigation/);
   assert.match(form, /WorldStrides portal registration and required paperwork/);
-  assert.match(form, /next \$225 payment[\s\S]*part of the \$2,000 ceiling/);
+  assert.match(form, /Any later WorldStrides registration payment[\s\S]*family&apos;s final approved responsibility/);
 });
 
 test("public family packet and downloadable PDF carry the same decision anchors", () => {
