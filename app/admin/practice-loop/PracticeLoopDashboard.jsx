@@ -93,8 +93,8 @@ function Dashboard({ session, signOut }) {
   const aggregateRanges = aggregatePracticeRanges(submissions, ranges);
   const rankedRanges = rankPracticeRanges(aggregateRanges);
   const movementAware = piece.movements.length > 1;
-  const rangeLabel = (range) => `${movementAware ? `${range.movementNumber} · ` : ""}mm. ${range.start}–${range.end}`;
-  const rangeTitle = (range) => `${movementAware ? `${range.movementNumber}. ${range.movementTitle}, ` : ""}measures ${range.start}–${range.end}`;
+  const rangeLabel = (range) => `${movementAware ? `${range.rangePrefix} · ` : ""}mm. ${range.start}–${range.end}`;
+  const rangeTitle = (range) => `${movementAware ? `${piece.sectionLabel || "Movement"} ${range.movementNumber}. ${range.movementTitle}, ` : ""}measures ${range.start}–${range.end}`;
   const movementStartsHere = (range) => movementAware && range.movementIndex > 0
     && range.start === piece.movements[range.movementIndex].rehearsalStarts[0];
 
@@ -162,7 +162,7 @@ function Dashboard({ session, signOut }) {
     </section> : null}
     {submissions.length ? <section className={styles.tableWrap} aria-label="All current student marks">
       <table>
-        <thead><tr><th className={styles.nameCol}>Student</th><th className={styles.instrumentCol}>Instrument</th>{ranges.map((range) => <th data-large-change={range.largeChange || undefined} data-movement-start={movementStartsHere(range) || undefined} title={rangeTitle(range)} key={range.id}>{movementAware ? `${range.movementNumber}.` : ""}{range.start}</th>)}</tr></thead>
+        <thead><tr><th className={styles.nameCol}>Student</th><th className={styles.instrumentCol}>Instrument</th>{ranges.map((range) => <th data-large-change={range.largeChange || undefined} data-movement-start={movementStartsHere(range) || undefined} title={rangeTitle(range)} key={range.id}>{movementAware ? `${range.rangePrefix}·` : ""}{range.start}</th>)}</tr></thead>
         <tbody>{submissions.map((submission) => <tr key={submission.id}>
           <th className={styles.nameCol} scope="row">
             {editingId === submission.id ? <form className={styles.renameForm} onSubmit={(event) => { event.preventDefault(); void changeStudent(submission, "rename"); }}>

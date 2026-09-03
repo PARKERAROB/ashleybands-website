@@ -96,6 +96,25 @@ test("Legends and Heroes preserves all three movement resets and supplied ending
   }
 });
 
+test("Percussion Ensemble preserves both supplied selection boundaries", () => {
+  const piece = getPracticePiece("percussion-ensemble");
+  const ranges = practiceRanges(piece);
+  const selectionRanges = piece.movements.map((selection) => (
+    ranges.filter((range) => range.movementKey === selection.key)
+  ));
+
+  assert.equal(piece.title, "Percussion Ensemble");
+  assert.equal(piece.sectionLabel, "Selection");
+  assert.deepEqual(selectionRanges.map((selection) => selection.length), [9, 4]);
+  assert.deepEqual(selectionRanges.map((selection) => selection.at(-1).end), [76, 34]);
+  assert.deepEqual(selectionRanges[0].map(({ start }) => start), [1, 9, 17, 25, 33, 49, 53, 69, 73]);
+  assert.deepEqual(selectionRanges[1].map(({ start }) => start), [1, 11, 19, 27]);
+  assert.equal(new Set(ranges.map(({ id }) => id)).size, 13);
+  assert.ok(ranges.some(({ id, rangePrefix }) => id === "g-force:1" && rangePrefix === "G"));
+  assert.ok(ranges.some(({ id, rangePrefix }) => id === "ensemble-uno:1" && rangePrefix === "EU"));
+  assert.ok(ranges.every(({ largeChange }) => !largeChange));
+});
+
 test("submission normalization keeps only recognized marks", () => {
   const result = normalizePracticeSubmission({
     participantToken: "123e4567-e89b-42d3-a456-426614174000",
@@ -128,6 +147,25 @@ test("Legends and Heroes normalization keeps movement-qualified marks distinct",
   });
 });
 
+test("Percussion Ensemble normalization keeps selection-qualified marks distinct", () => {
+  const result = normalizePracticeSubmission({
+    participantToken: "123e4567-e89b-42d3-a456-426614174000",
+    displayName: "Student Example",
+    instrument: "Percussion",
+    marks: {
+      "g-force:1": "yellow",
+      "ensemble-uno:1": "green",
+      1: "red",
+      "g-force:77": "red",
+    },
+  }, "percussion-ensemble");
+
+  assert.deepEqual(result.marks, {
+    "g-force:1": "yellow",
+    "ensemble-uno:1": "green",
+  });
+});
+
 test("submission normalization rejects missing identity and invalid browser keys", () => {
   assert.throws(() => normalizePracticeSubmission({}), /practice key/i);
   assert.throws(() => normalizePracticeSubmission({
@@ -143,6 +181,7 @@ test("prototype storage is private and dashboard reads are authorized and audite
   const dashboardRoute = await readFile(new URL("../app/api/admin/practice-loop/route.js", import.meta.url), "utf8");
   const dashboardClient = await readFile(new URL("../app/admin/practice-loop/PracticeLoopDashboard.jsx", import.meta.url), "utf8");
   const legendsPage = await readFile(new URL("../app/practice/legends-and-heroes/page.jsx", import.meta.url), "utf8");
+  const percussionPage = await readFile(new URL("../app/practice/percussion-ensemble/page.jsx", import.meta.url), "utf8");
   const managementMigration = await readFile(new URL("../supabase/migrations/202609020002_practice_loop_student_management.sql", import.meta.url), "utf8");
 
   assert.match(migration, /enable row level security/i);
@@ -151,6 +190,7 @@ test("prototype storage is private and dashboard reads are authorized and audite
   assert.match(studentRoute, /failOpen:\s*false/);
   assert.match(studentRoute, /getPracticePiece\(pieceSlug\)/);
   assert.match(legendsPage, /pieceSlug="legends-and-heroes"/);
+  assert.match(percussionPage, /pieceSlug="percussion-ensemble"/);
   assert.match(dashboardRoute, /SYSTEM_OVERSIGHT_READ/);
   assert.match(dashboardRoute, /logAuditRequired/);
   assert.match(dashboardRoute, /PRACTICE_LOOP_MANAGE/);

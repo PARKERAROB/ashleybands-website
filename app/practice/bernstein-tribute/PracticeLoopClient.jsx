@@ -154,8 +154,9 @@ export default function PracticeLoopClient({ pieceSlug = "bernstein-tribute" }) 
       <section className={styles.map} aria-label="Rehearsal ranges">
         {piece.movements.map((movement) => <section className={styles.movement} key={movement.key}>
           {piece.movements.length > 1 ? <header className={styles.movementHeading}>
-            <p>Movement {movement.number}</p>
+            <p>{piece.sectionLabel || "Movement"} {movement.number}</p>
             <h2>{movement.title}</h2>
+            {movement.credit ? <span className={styles.movementCredit}>{movement.credit}</span> : null}
           </header> : null}
           <div className={styles.movementMap}>
             {ranges.filter((range) => range.movementKey === movement.key).map((range) => <article className={styles.rangeCard} data-large-change={range.largeChange || undefined} key={range.id}>
