@@ -16,6 +16,7 @@ import {
   updateAttendanceObservation,
   updateStaffAttendance
 } from "@/lib/attendance";
+import { shouldAutoPrepareAttendanceOccurrence } from "@/lib/attendanceEvents.mjs";
 
 export const runtime = "nodejs";
 
@@ -86,7 +87,36 @@ export async function GET(request) {
   if (access.response) return access.response;
 
   try {
-    const sheet = await getAttendanceSheet({ occurrenceKey, session: access.session });
+    const now = new Date();
+    let sheet = await getAttendanceSheet({ occurrenceKey, session: access.session, now });
+    if (shouldAutoPrepareAttendanceOccurrence({
+      access: access.session.access,
+      canPrepare: sheet.canPrepare,
+      event: sheet.event,
+      now
+    })) {
+      const prepared = await prepareAttendanceEvent({
+        occurrenceKey: sheet.event.occurrenceKey,
+        actorStaffId: access.authorization.staff?.id || null,
+        now
+      });
+      await logAudit({
+        actor: access.session.actor,
+        action: "attendance.event.prepared",
+        table: "attendance_events,attendance_event_roster,attendance_event_roster_groups",
+        changes: {
+          occurrence_key: sheet.event.occurrenceKey,
+          roster_count: prepared?.rosterCount || 0,
+          preparation: "automatic_current_session"
+        },
+        route: "/api/attendance"
+      });
+      sheet = await getAttendanceSheet({
+        occurrenceKey: sheet.event.occurrenceKey,
+        session: access.session,
+        now
+      });
+    }
     if (occurrenceKey && access.authorization.staff && staffUsesAssignedScopes(access.authorization.staff)) {
       sheet.occurrences = sheet.occurrences.filter((event) => event.occurrenceKey === occurrenceKey);
     }

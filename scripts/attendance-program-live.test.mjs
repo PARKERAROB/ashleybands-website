@@ -40,6 +40,8 @@ test("shared-PIN preparation records its certification source without inventing 
   assert.match(sharedPinMigration, /'shared_pin'/);
   assert.match(sharedPinMigration, /roster_certified_by_staff_id is null/);
   assert.match(sharedPinMigration, /before insert or update of roster_certification_state/);
+  assert.match(attendanceRoute, /shouldAutoPrepareAttendanceOccurrence/);
+  assert.match(attendanceRoute, /automatic_current_session/);
 });
 
 test("historical evidence stays visibly incomplete instead of borrowing today's roster", () => {

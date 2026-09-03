@@ -11,7 +11,8 @@ import {
   configuredAttendanceOccurrences,
   groupAttendanceOccurrencesByWeek,
   localEventTimeToIso,
-  selectAttendanceOccurrence
+  selectAttendanceOccurrence,
+  shouldAutoPrepareAttendanceOccurrence
 } from "../lib/attendanceEvents.mjs";
 
 const projectedCalendar = JSON.parse(readFileSync(
@@ -97,6 +98,35 @@ test("an explicit occurrence key overrides today's default", () => {
     now: new Date("2026-08-03T15:00:00.000Z")
   });
   assert.equal(selected.occurrenceKey, "evt-0007:2026-08-04");
+});
+
+test("shared-PIN access automatically prepares only today's eligible occurrence", () => {
+  const event = { localDate: "2026-09-03" };
+  const now = new Date("2026-09-03T20:00:00.000Z");
+  assert.equal(shouldAutoPrepareAttendanceOccurrence({
+    access: "shared_pin",
+    canPrepare: true,
+    event,
+    now
+  }), true);
+  assert.equal(shouldAutoPrepareAttendanceOccurrence({
+    access: "staff",
+    canPrepare: true,
+    event,
+    now
+  }), false);
+  assert.equal(shouldAutoPrepareAttendanceOccurrence({
+    access: "shared_pin",
+    canPrepare: false,
+    event,
+    now
+  }), false);
+  assert.equal(shouldAutoPrepareAttendanceOccurrence({
+    access: "shared_pin",
+    canPrepare: true,
+    event: { localDate: "2026-09-04" },
+    now
+  }), false);
 });
 
 test("shared-PIN leaders cannot approve planned exceptions", () => {
