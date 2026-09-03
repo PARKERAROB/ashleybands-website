@@ -54,6 +54,16 @@ test("school instrument acknowledgement completion stays separate from fulfillme
   assert.match(instrumentPortal, /final county checkout language is confirmed/i);
 });
 
+test("the Forms list shows the latest Carnegie answer separately from completion", () => {
+  assert.match(forms, /\.order\("created_at", \{ ascending: false \}\)/);
+  assert.match(forms, /if \(!carnegieByStudent\.has\(row\.student_id\)\) carnegieByStudent\.set/);
+  assert.match(forms, /recordedResponse: definition\.code === "carnegie-2027-initial-intent"/);
+  assert.match(formsWorkspace, /Recorded answer/);
+  assert.match(formsWorkspace, /carnegieResponseLabel\(row\.recordedResponse\)/);
+  assert.match(formsWorkspace, /data-answer=\{row\.recordedResponse \|\| "missing"\}/);
+  assert.match(formsWorkspace, /row\.stateLabel/);
+});
+
 test("student-scoped billing uses student totals and removes program-wide actions", () => {
   assert.match(billing, /const totalRows = useMemo\(\(\) => studentScope \? roster\.filter/);
   assert.match(billing, /\{studentScope \? "Student totals" : "Program totals"\}/);
