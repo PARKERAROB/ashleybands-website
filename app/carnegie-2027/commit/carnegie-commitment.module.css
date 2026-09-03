@@ -32,6 +32,9 @@
 .paymentPanel .primaryButton { width:100%; background:#fff; color:var(--red); }
 .paypal { min-height:1px; }
 .message { background:#f5f1e8!important; color:var(--ink)!important; }
+.paymentError { margin:0; border:1px solid #d59198; background:#fff1f2; color:#7d1723!important; }
+.resume { padding-top:.85rem; border-top:1px solid rgba(255,255,255,.22); font-size:.94rem; }
+.resume a { color:#fff; font-weight:900; text-decoration:underline; text-underline-offset:2px; }
 .success { display:grid; gap:.35rem; margin:1.5rem 0; padding:1.2rem; border:1px solid #8bb79f; border-radius:12px; background:#f2fff6; }
 .success strong { color:#2f6d4c; font-size:1.4rem; }
 .notice { background:#f5f1e8; color:var(--ink)!important; }

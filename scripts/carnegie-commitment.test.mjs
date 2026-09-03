@@ -30,6 +30,15 @@ test("capture settlement verifies the fixed amount and uses the shared audit led
   assert.match(route, /payment\.category !== CARNEGIE_DEPOSIT_CATEGORY/);
 });
 
+test("unpaid commitments load payment options directly and provide a safe resume path", () => {
+  const form = read("app/carnegie-2027/commit/CarnegieCommitmentClient.jsx");
+  assert.match(form, /Loading secure PayPal and card options/);
+  assert.match(form, /Try loading payment options again/);
+  assert.match(form, /href="\/portal\/carnegie-2027"/);
+  assert.match(form, /paypalSdkPromise = null/);
+  assert.doesNotMatch(form, /Pay the \$50 deposit now/);
+});
+
 test("staff verbal fallback remains unsigned, unpaid, and queued for login help", () => {
   const migration = read("supabase/migrations/202608310001_carnegie_commitment.sql");
   const workspace = read("app/admin/carnegie-2027/CarnegieTripWorkspace.jsx");

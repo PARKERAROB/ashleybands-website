@@ -17,8 +17,18 @@ function loadPaypalSdk(clientId) {
   paypalSdkPromise = new Promise((resolve, reject) => {
     const script = document.createElement("script");
     script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=USD`;
-    script.onload = () => resolve(window.paypal);
-    script.onerror = () => reject(new Error("Could not load PayPal."));
+    script.onload = () => {
+      if (window.paypal) resolve(window.paypal);
+      else {
+        paypalSdkPromise = null;
+        reject(new Error("PayPal loaded without payment options."));
+      }
+    };
+    script.onerror = () => {
+      paypalSdkPromise = null;
+      script.remove();
+      reject(new Error("Could not load PayPal."));
+    };
     document.body.appendChild(script);
   });
   return paypalSdkPromise;
@@ -48,6 +58,8 @@ export default function CarnegieCommitmentClient({ portalMode = false }) {
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
   const [paymentMessage, setPaymentMessage] = useState("");
+  const [paymentStatus, setPaymentStatus] = useState("idle");
+  const [paymentAttempt, setPaymentAttempt] = useState(0);
   const submissionKey = useRef("");
   const paypalRef = useRef(null);
 
@@ -70,6 +82,79 @@ export default function CarnegieCommitmentClient({ portalMode = false }) {
       .finally(() => !cancelled && setLoading(false));
     return () => { cancelled = true; };
   }, [portalMode]);
+
+  useEffect(() => {
+    if (result?.response !== "serious_yes" || result?.paid || !result?.checkoutToken || !paypalRef.current) return;
+    let cancelled = false;
+    const paypalContainer = paypalRef.current;
+    const checkoutToken = result.checkoutToken;
+    const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
+
+    async function renderPaymentButtons() {
+      if (!clientId) {
+        setPaymentStatus("error");
+        setPaymentMessage("Online payment is not available right now. Your commitment and $50 ledger charge are saved; staff can help you finish payment.");
+        return;
+      }
+      setPaymentStatus("loading");
+      setPaymentMessage("Loading secure PayPal and card options…");
+      try {
+        const paypal = await loadPaypalSdk(clientId);
+        if (cancelled) return;
+        paypalContainer.innerHTML = "";
+        await paypal.Buttons({
+          style: { layout: "vertical", shape: "rect", label: "pay" },
+          createOrder: async () => {
+            const response = await fetch("/api/carnegie-2027/payment/create", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ checkoutToken }),
+            });
+            const body = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(body.error || "Could not start payment.");
+            return body.orderId;
+          },
+          onApprove: async (data) => {
+            setPaymentStatus("loading");
+            setPaymentMessage("Confirming the payment in the AshleyBands ledger…");
+            const response = await fetch("/api/carnegie-2027/payment/capture", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ orderId: data.orderID, checkoutToken }),
+            });
+            const body = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(body.error || "Payment could not be confirmed.");
+            setResult((current) => ({ ...current, paid: true, checkoutToken: "", invoiceId: body.invoiceId }));
+            setPaymentStatus("complete");
+            setPaymentMessage("Payment received. The $50 deposit is now visible in the family and staff financial records.");
+          },
+          onCancel: () => {
+            setPaymentStatus("ready");
+            setPaymentMessage("Payment was cancelled. Your commitment is saved and the $50 balance remains available below.");
+          },
+          onError: (caught) => {
+            setPaymentStatus("error");
+            setPaymentMessage(caught?.message || "PayPal could not complete the payment. Your commitment is still saved.");
+          },
+        }).render(paypalContainer);
+        if (!cancelled) {
+          setPaymentStatus("ready");
+          setPaymentMessage("Choose a secure PayPal or card option below to finish the $50 deposit.");
+        }
+      } catch (caught) {
+        if (!cancelled) {
+          setPaymentStatus("error");
+          setPaymentMessage(caught.message || "Could not open PayPal. Your commitment is still saved.");
+        }
+      }
+    }
+
+    renderPaymentButtons();
+    return () => {
+      cancelled = true;
+      paypalContainer.innerHTML = "";
+    };
+  }, [paymentAttempt, result?.checkoutToken, result?.paid, result?.response]);
 
   function update(field, value) {
     setFields((current) => ({ ...current, [field]: value }));
@@ -107,50 +192,6 @@ export default function CarnegieCommitmentClient({ portalMode = false }) {
     }
   }
 
-  async function showPayment() {
-    const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
-    if (!clientId || !result?.checkoutToken) {
-      setPaymentMessage("Online payment is not available right now. Your commitment and $50 ledger charge are saved; staff can help you finish payment.");
-      return;
-    }
-    setPaymentMessage("Opening secure payment…");
-    try {
-      const paypal = await loadPaypalSdk(clientId);
-      paypalRef.current.innerHTML = "";
-      await paypal.Buttons({
-        style: { layout: "vertical", shape: "rect", label: "pay" },
-        createOrder: async () => {
-          const response = await fetch("/api/carnegie-2027/payment/create", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ checkoutToken: result.checkoutToken }),
-          });
-          const body = await response.json().catch(() => ({}));
-          if (!response.ok) throw new Error(body.error || "Could not start payment.");
-          return body.orderId;
-        },
-        onApprove: async (data) => {
-          setPaymentMessage("Confirming the payment in the AshleyBands ledger…");
-          const response = await fetch("/api/carnegie-2027/payment/capture", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ orderId: data.orderID, checkoutToken: result.checkoutToken }),
-          });
-          const body = await response.json().catch(() => ({}));
-          if (!response.ok) throw new Error(body.error || "Payment could not be confirmed.");
-          setResult((current) => ({ ...current, paid: true, checkoutToken: "", invoiceId: body.invoiceId }));
-          setPaymentMessage("Payment received. The $50 deposit is now visible in the family and staff financial records.");
-          paypalRef.current.innerHTML = "";
-        },
-        onCancel: () => setPaymentMessage("Payment was cancelled. Your commitment is saved and the $50 balance remains available in the Family Portal."),
-        onError: (caught) => setPaymentMessage(caught?.message || "PayPal could not complete the payment. Your commitment is still saved."),
-      }).render(paypalRef.current);
-      setPaymentMessage("");
-    } catch (caught) {
-      setPaymentMessage(caught.message || "Could not open PayPal. Your commitment is still saved.");
-    }
-  }
-
   const selectedStudent = portalData?.students?.find((student) => student.id === studentId);
   const responseLabel = result ? carnegieResponseLabel(result.response) : "";
 
@@ -174,9 +215,10 @@ export default function CarnegieCommitmentClient({ portalMode = false }) {
               <div className={styles.paymentPanel}>
                 <span>Conditional deposit</span><strong>$50</strong>
                 <p>Refundable until the participation threshold is confirmed and the Ashley High School Band Boosters pay the WorldStrides group deposit. If an unapproved Concert Band student pays, the $50 will be refunded.</p>
-                <button className={styles.primaryButton} type="button" onClick={showPayment}>Pay the $50 deposit now</button>
-                <div className={styles.paypal} ref={paypalRef} />
-                {paymentMessage ? <p className={styles.message} role="status">{paymentMessage}</p> : null}
+                {paymentMessage ? <p className={paymentStatus === "error" ? styles.paymentError : styles.message} role={paymentStatus === "error" ? "alert" : "status"}>{paymentMessage}</p> : null}
+                <div className={styles.paypal} ref={paypalRef} aria-label="Secure PayPal and card payment options" />
+                {paymentStatus === "error" ? <button className={styles.primaryButton} type="button" onClick={() => setPaymentAttempt((current) => current + 1)}>Try loading payment options again</button> : null}
+                <p className={styles.resume}>Need to finish later? Return through the <Link href="/portal/carnegie-2027">Family Portal Carnegie page</Link>. If you do not use the portal, reopen this public form with the same exact student details and submit the response again to restore the payment step.</p>
               </div>
             )
           ) : (
@@ -184,7 +226,7 @@ export default function CarnegieCommitmentClient({ portalMode = false }) {
           )}
           <div className={styles.actions}>
             {portalMode ? <Link href="/portal/review">Return to Family Portal</Link> : <Link href="/portal">Open Family Portal</Link>}
-            <button type="button" className={styles.textButton} onClick={() => { setResult(null); setPaymentMessage(""); }}>Update this response</button>
+            <button type="button" className={styles.textButton} onClick={() => { setResult(null); setPaymentMessage(""); setPaymentStatus("idle"); }}>Update this response</button>
           </div>
         </section>
       </main>
