@@ -3,7 +3,8 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
 import { logAuditRequired, staffActor } from "@/lib/auditLog";
 import {
-  BERNSTEIN_PIECE_KEY,
+  DEFAULT_PRACTICE_PIECE_SLUG,
+  getPracticePiece,
   normalizePracticeDisplayName,
 } from "@/lib/practiceLoop.mjs";
 
@@ -20,10 +21,15 @@ export async function GET(request) {
   if (!authorization.ok) return json({ error: authorization.error }, authorization.status);
 
   try {
+    const piece = getPracticePiece(
+      request.nextUrl.searchParams.get("piece") || DEFAULT_PRACTICE_PIECE_SLUG,
+    );
+    if (!piece) return json({ error: "Choose a valid practice piece." }, 400);
+
     const { data, error } = await supabaseAdmin
       .from("practice_loop_prototype_submissions")
       .select("id,display_name,instrument,marks,created_at,updated_at")
-      .eq("piece_key", BERNSTEIN_PIECE_KEY)
+      .eq("piece_key", piece.key)
       .is("removed_at", null)
       .order("display_name", { ascending: true });
     if (error) throw error;
@@ -32,12 +38,12 @@ export async function GET(request) {
       actor: staffActor(authorization.staff),
       action: "practice_loop.prototype.view",
       table: "practice_loop_prototype_submissions",
-      recordId: BERNSTEIN_PIECE_KEY,
+      recordId: piece.key,
       changes: { participant_count: (data || []).length },
       route: "/api/admin/practice-loop",
     });
 
-    return json({ submissions: data || [] });
+    return json({ pieceSlug: piece.slug, submissions: data || [] });
   } catch (error) {
     console.error("[practice-loop] dashboard load failed:", error?.message || error);
     return json({ error: "The practice dashboard could not be loaded or durably attributed." }, 503);
@@ -55,6 +61,8 @@ export async function PATCH(request) {
     const body = await request.json().catch(() => ({}));
     const submissionId = String(body.submissionId || "").trim();
     const action = String(body.action || "").trim();
+    const piece = getPracticePiece(body.pieceSlug || DEFAULT_PRACTICE_PIECE_SLUG);
+    if (!piece) return json({ error: "Choose a valid practice piece." }, 400);
     if (!submissionId || !["rename", "remove"].includes(action)) {
       return json({ error: "Choose a valid student and action." }, 400);
     }
@@ -63,7 +71,7 @@ export async function PATCH(request) {
       : null;
     const { error } = await supabaseAdmin.rpc("manage_practice_loop_submission_with_audit", {
       p_submission_id: submissionId,
-      p_piece_key: BERNSTEIN_PIECE_KEY,
+      p_piece_key: piece.key,
       p_action: action,
       p_display_name: displayName,
       p_actor_staff_id: authorization.staff.id,

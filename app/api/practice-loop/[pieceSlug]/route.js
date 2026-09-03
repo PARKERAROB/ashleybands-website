@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { checkRateLimit, clientIp } from "@/lib/rateLimit";
 import {
-  BERNSTEIN_PIECE_KEY,
+  getPracticePiece,
   normalizePracticeSubmission,
 } from "@/lib/practiceLoop.mjs";
 
@@ -12,23 +12,27 @@ export const runtime = "nodejs";
 const PRIVATE_HEADERS = { "Cache-Control": "private, no-store" };
 const json = (body, status = 200) => NextResponse.json(body, { status, headers: PRIVATE_HEADERS });
 
-export async function POST(request) {
+export async function POST(request, { params }) {
   try {
+    const { pieceSlug } = await params;
+    const piece = getPracticePiece(pieceSlug);
+    if (!piece) return json({ error: "Choose a valid practice piece." }, 404);
+
     const contentLength = Number(request.headers.get("content-length") || 0);
     if (contentLength > 16_384) return json({ error: "That practice update is too large." }, 413);
-    const submission = normalizePracticeSubmission(await request.json());
+    const submission = normalizePracticeSubmission(await request.json(), piece);
     const participantTokenHash = createHash("sha256")
       .update(submission.participantToken)
       .digest("hex");
     const [participantRate, networkRate] = await Promise.all([
       checkRateLimit({
-        key: `practice-loop:participant:${participantTokenHash}`,
+        key: `practice-loop:${piece.key}:participant:${participantTokenHash}`,
         limit: 180,
         windowMs: 10 * 60 * 1000,
         failOpen: false,
       }),
       checkRateLimit({
-        key: `practice-loop:network:${clientIp(request)}`,
+        key: `practice-loop:${piece.key}:network:${clientIp(request)}`,
         limit: 10_000,
         windowMs: 10 * 60 * 1000,
         failOpen: false,
@@ -41,7 +45,7 @@ export async function POST(request) {
     const { error } = await supabaseAdmin
       .from("practice_loop_prototype_submissions")
       .upsert({
-        piece_key: BERNSTEIN_PIECE_KEY,
+        piece_key: piece.key,
         participant_token_hash: participantTokenHash,
         display_name: submission.displayName,
         instrument: submission.instrument,

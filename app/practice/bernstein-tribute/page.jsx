@@ -7,5 +7,5 @@ export const metadata = {
 };
 
 export default function BernsteinTributePracticePage() {
-  return <PracticeLoopClient />;
+  return <PracticeLoopClient pieceSlug="bernstein-tribute" />;
 }

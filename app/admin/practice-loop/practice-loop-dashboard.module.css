@@ -9,6 +9,9 @@
 .heading h1 { margin: 0; font-family: Georgia, serif; font-size: clamp(2rem, 5vw, 3.5rem); }
 .heading span { color: #65575a; }
 .heading button { color: #7b1829; background: #fff; }
+.headingActions { display: flex; align-items: end; gap: 10px; }
+.headingActions label { display: grid; gap: 4px; color: #65575a; font-size: .7rem; font-weight: 900; letter-spacing: .05em; text-transform: uppercase; }
+.headingActions select { min-width: 230px; min-height: 38px; padding: 7px 34px 7px 10px; border: 1px solid #ad9f9f; border-radius: 9px; background: #fff; color: #241b1d; font: inherit; font-size: .82rem; font-weight: 800; letter-spacing: 0; text-transform: none; }
 .metrics { display: flex; gap: 10px; margin-bottom: 12px; }
 .metrics div { display: flex; align-items: baseline; gap: 7px; padding: 11px 15px; border: 1px solid #ddd2c5; border-radius: 12px; background: #fff; }
 .metrics strong { font-size: 1.4rem; }
@@ -40,6 +43,7 @@
 .heatMap article[data-heat="low"] { border-color: #4d8b68; background: #d8eadf; }
 .heatMap article[data-heat="unassessed"] { border-color: #d9d1c8; background: #f2efeb; color: #74686a; }
 .heatMap article[data-large-change] { box-shadow: inset 4px 0 #7b1829; }
+.heatMap article[data-movement-start] { box-shadow: inset 5px 0 #7b1829; }
 .heatMap article > span, .heatMap article > small { display: block; }
 .heatMap article > span { font-size: .68rem; font-weight: 800; }
 .heatMap article > strong { display: block; margin: 3px 0; font-size: 1.05rem; }
@@ -49,6 +53,7 @@
 .tableWrap th, .tableWrap td { min-width: 30px; height: 34px; padding: 0; border-right: 1px solid #e7e1da; border-bottom: 1px solid #e7e1da; text-align: center; }
 .tableWrap thead th { position: sticky; top: 0; z-index: 3; height: 40px; background: #eee8df; font-weight: 900; }
 .tableWrap [data-large-change] { border-left: 4px solid #7b1829; }
+.tableWrap [data-movement-start] { border-left: 5px solid #7b1829; }
 .tableWrap td[data-status="red"] { background: #bd2637; }
 .tableWrap td[data-status="yellow"] { background: #f2be4c; }
 .tableWrap td[data-status="green"] { background: #2f7b52; }
@@ -73,6 +78,9 @@ thead .instrumentCol { z-index: 5; background: #eee8df !important; }
 @media (max-width: 680px) {
   .appBar, .heading { align-items: flex-start; }
   .appBar > div, .heading { flex-direction: column; }
+  .headingActions { width: 100%; align-items: stretch; }
+  .headingActions label { flex: 1; }
+  .headingActions select { min-width: 0; width: 100%; }
   .metrics { overflow-x: auto; }
   .nameCol { width: 130px; min-width: 130px !important; max-width: 130px; }
   .instrumentCol { left: 130px; width: 100px; min-width: 100px !important; max-width: 100px; }

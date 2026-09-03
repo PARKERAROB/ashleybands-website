@@ -7,8 +7,10 @@ import {
   BERNSTEIN_REHEARSAL_STARTS,
   aggregatePracticeRanges,
   bernsteinRanges,
+  getPracticePiece,
   normalizePracticeDisplayName,
   normalizePracticeSubmission,
+  practiceRanges,
   rankPracticeRanges,
 } from "../lib/practiceLoop.mjs";
 
@@ -62,6 +64,38 @@ test("only the director-identified large musical changes are dividers", () => {
   assert.equal(bernsteinRanges().find(({ start }) => start === 243).largeChange, false);
 });
 
+test("Legends and Heroes preserves all three movement resets and supplied endings", () => {
+  const piece = getPracticePiece("legends-and-heroes");
+  const ranges = practiceRanges(piece);
+  const movementRanges = piece.movements.map((movement) => (
+    ranges.filter((range) => range.movementKey === movement.key)
+  ));
+
+  assert.equal(piece.title, "Legends and Heroes");
+  assert.deepEqual(movementRanges.map((movement) => movement.length), [20, 15, 17]);
+  assert.deepEqual(movementRanges.map((movement) => movement.at(-1).end), [145, 119, 119]);
+  assert.deepEqual(movementRanges[0].map(({ start }) => start), [
+    1, 7, 13, 21, 29, 38, 46, 53, 59, 67, 75, 79, 87, 92, 100, 108, 116,
+    126, 133, 136,
+  ]);
+  assert.deepEqual(movementRanges[1].map(({ start }) => start), [
+    1, 9, 14, 22, 30, 38, 46, 54, 62, 70, 78, 86, 94, 102, 112,
+  ]);
+  assert.deepEqual(movementRanges[2].map(({ start }) => start), [
+    1, 9, 15, 23, 29, 37, 45, 53, 60, 71, 75, 82, 88, 96, 104, 111, 115,
+  ]);
+  assert.equal(new Set(ranges.map(({ id }) => id)).size, 52);
+  assert.ok(ranges.some(({ id }) => id === "patrick-on-the-railway:1"));
+  assert.ok(ranges.some(({ id }) => id === "sweet-betsy:1"));
+  assert.ok(ranges.some(({ id }) => id === "little-david-play-on:1"));
+
+  for (const movement of movementRanges) {
+    movement.slice(0, -1).forEach((range, index) => {
+      assert.equal(range.end + 1, movement[index + 1].start);
+    });
+  }
+});
+
 test("submission normalization keeps only recognized marks", () => {
   const result = normalizePracticeSubmission({
     participantToken: "123e4567-e89b-42d3-a456-426614174000",
@@ -71,6 +105,27 @@ test("submission normalization keeps only recognized marks", () => {
   });
   assert.equal(result.displayName, "Student Example");
   assert.deepEqual(result.marks, { 1: "green", 8: "yellow" });
+});
+
+test("Legends and Heroes normalization keeps movement-qualified marks distinct", () => {
+  const result = normalizePracticeSubmission({
+    participantToken: "123e4567-e89b-42d3-a456-426614174000",
+    displayName: "Student Example",
+    instrument: "Clarinet",
+    marks: {
+      "patrick-on-the-railway:1": "red",
+      "sweet-betsy:1": "yellow",
+      "little-david-play-on:1": "green",
+      1: "red",
+      "sweet-betsy:111": "red",
+    },
+  }, "legends-and-heroes");
+
+  assert.deepEqual(result.marks, {
+    "patrick-on-the-railway:1": "red",
+    "sweet-betsy:1": "yellow",
+    "little-david-play-on:1": "green",
+  });
 });
 
 test("submission normalization rejects missing identity and invalid browser keys", () => {
@@ -84,15 +139,18 @@ test("submission normalization rejects missing identity and invalid browser keys
 
 test("prototype storage is private and dashboard reads are authorized and audited", async () => {
   const migration = await readFile(new URL("../supabase/migrations/202609020001_practice_loop_prototype.sql", import.meta.url), "utf8");
-  const studentRoute = await readFile(new URL("../app/api/practice-loop/bernstein-tribute/route.js", import.meta.url), "utf8");
+  const studentRoute = await readFile(new URL("../app/api/practice-loop/[pieceSlug]/route.js", import.meta.url), "utf8");
   const dashboardRoute = await readFile(new URL("../app/api/admin/practice-loop/route.js", import.meta.url), "utf8");
   const dashboardClient = await readFile(new URL("../app/admin/practice-loop/PracticeLoopDashboard.jsx", import.meta.url), "utf8");
+  const legendsPage = await readFile(new URL("../app/practice/legends-and-heroes/page.jsx", import.meta.url), "utf8");
   const managementMigration = await readFile(new URL("../supabase/migrations/202609020002_practice_loop_student_management.sql", import.meta.url), "utf8");
 
   assert.match(migration, /enable row level security/i);
   assert.match(migration, /revoke all[^;]+anon, authenticated/i);
   assert.doesNotMatch(studentRoute, /export async function GET/);
   assert.match(studentRoute, /failOpen:\s*false/);
+  assert.match(studentRoute, /getPracticePiece\(pieceSlug\)/);
+  assert.match(legendsPage, /pieceSlug="legends-and-heroes"/);
   assert.match(dashboardRoute, /SYSTEM_OVERSIGHT_READ/);
   assert.match(dashboardRoute, /logAuditRequired/);
   assert.match(dashboardRoute, /PRACTICE_LOOP_MANAGE/);
@@ -102,6 +160,8 @@ test("prototype storage is private and dashboard reads are authorized and audite
   assert.doesNotMatch(dashboardClient, /status\[0\]\.toUpperCase/);
   assert.doesNotMatch(dashboardClient, /className="sr-only">\{LABELS\[status\]/);
   assert.match(dashboardClient, /aria-label=\{LABELS\[status\] \|\| "Unmarked"\}/);
+  assert.match(dashboardClient, /PRACTICE_PIECE_LIST/);
+  assert.match(dashboardClient, /pieceSlug,/);
   assert.match(managementMigration, /security definer/i);
   assert.match(managementMigration, /insert into (?:public\.)?audit_log/i);
   assert.match(managementMigration, /removed_at/i);
