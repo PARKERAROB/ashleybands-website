@@ -59,7 +59,10 @@ test("the Forms list shows the latest Carnegie answer separately from completion
   assert.match(forms, /if \(!carnegieByStudent\.has\(row\.student_id\)\) carnegieByStudent\.set/);
   assert.match(forms, /recordedResponse: definition\.code === "carnegie-2027-initial-intent"/);
   assert.match(formsWorkspace, /Recorded answer/);
-  assert.match(formsWorkspace, /carnegieResponseLabel\(row\.recordedResponse\)/);
+  assert.match(
+    formsWorkspace,
+    /carnegieResponseLabel\(row\.recordedResponse, row\.recordedAgreementVersion\)/,
+  );
   assert.match(formsWorkspace, /data-answer=\{row\.recordedResponse \|\| "missing"\}/);
   assert.match(formsWorkspace, /row\.stateLabel/);
 });
