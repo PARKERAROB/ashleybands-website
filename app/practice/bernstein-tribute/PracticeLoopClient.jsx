@@ -162,7 +162,7 @@ export default function PracticeLoopClient({ pieceSlug = "bernstein-tribute" }) 
             {ranges.filter((range) => range.movementKey === movement.key).map((range) => <article className={styles.rangeCard} data-large-change={range.largeChange || undefined} key={range.id}>
               {range.largeChange ? <p className={styles.changeLabel}>Large musical change</p> : null}
               <div className={styles.rangeHeading}>
-                <div><span>Rehearsal number</span><strong>{range.start}</strong></div>
+                <div><span>{range.rehearsalLabel ? "Rehearsal mark" : "Rehearsal number"}</span><strong>{range.rehearsalLabel || range.start}</strong></div>
                 <p>Measures {range.start}–{range.end}</p>
               </div>
               <div className={styles.markButtons} aria-label={`Mark ${movement.title}, measures ${range.start} through ${range.end}`}>

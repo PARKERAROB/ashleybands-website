@@ -2,6 +2,9 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { readFile } from "node:fs/promises";
 import {
+  ASCEND_LAST_MEASURE,
+  ASCEND_REHEARSAL_LABELS,
+  ASCEND_REHEARSAL_STARTS,
   BERNSTEIN_LAST_MEASURE,
   BERNSTEIN_LARGE_CHANGES,
   BERNSTEIN_REHEARSAL_STARTS,
@@ -115,6 +118,26 @@ test("Percussion Ensemble preserves both supplied selection boundaries", () => {
   assert.ok(ranges.every(({ largeChange }) => !largeChange));
 });
 
+test("Ascend preserves its named rehearsal map through measure 275", () => {
+  const piece = getPracticePiece("ascend");
+  const ranges = practiceRanges(piece);
+
+  assert.equal(piece.title, "Ascend");
+  assert.equal(piece.shortCredit, "Michael J. Miller");
+  assert.equal(ranges.length, 29);
+  assert.deepEqual(ranges.map(({ start }) => start), ASCEND_REHEARSAL_STARTS);
+  assert.deepEqual(ranges.map(({ rehearsalLabel }) => rehearsalLabel), ASCEND_REHEARSAL_LABELS);
+  assert.deepEqual(
+    { id: ranges[0].id, label: ranges[0].rehearsalLabel, start: ranges[0].start, end: ranges[0].end },
+    { id: "full-show:1", label: "A1", start: 1, end: 8 },
+  );
+  assert.deepEqual(
+    { id: ranges.at(-1).id, label: ranges.at(-1).rehearsalLabel, start: ranges.at(-1).start, end: ranges.at(-1).end },
+    { id: "full-show:267", label: "W", start: 267, end: ASCEND_LAST_MEASURE },
+  );
+  assert.ok(ranges.every(({ largeChange }) => !largeChange));
+});
+
 test("submission normalization keeps only recognized marks", () => {
   const result = normalizePracticeSubmission({
     participantToken: "123e4567-e89b-42d3-a456-426614174000",
@@ -166,6 +189,25 @@ test("Percussion Ensemble normalization keeps selection-qualified marks distinct
   });
 });
 
+test("Ascend normalization keeps only measure-qualified rehearsal marks", () => {
+  const result = normalizePracticeSubmission({
+    participantToken: "123e4567-e89b-42d3-a456-426614174000",
+    displayName: "Student Example",
+    instrument: "Trumpet",
+    marks: {
+      "full-show:1": "yellow",
+      "full-show:267": "green",
+      A1: "red",
+      "full-show:276": "red",
+    },
+  }, "ascend");
+
+  assert.deepEqual(result.marks, {
+    "full-show:1": "yellow",
+    "full-show:267": "green",
+  });
+});
+
 test("submission normalization rejects missing identity and invalid browser keys", () => {
   assert.throws(() => normalizePracticeSubmission({}), /practice key/i);
   assert.throws(() => normalizePracticeSubmission({
@@ -182,6 +224,7 @@ test("prototype storage is private and dashboard reads are authorized and audite
   const dashboardClient = await readFile(new URL("../app/admin/practice-loop/PracticeLoopDashboard.jsx", import.meta.url), "utf8");
   const legendsPage = await readFile(new URL("../app/practice/legends-and-heroes/page.jsx", import.meta.url), "utf8");
   const percussionPage = await readFile(new URL("../app/practice/percussion-ensemble/page.jsx", import.meta.url), "utf8");
+  const ascendPage = await readFile(new URL("../app/practice/ascend/page.jsx", import.meta.url), "utf8");
   const managementMigration = await readFile(new URL("../supabase/migrations/202609020002_practice_loop_student_management.sql", import.meta.url), "utf8");
 
   assert.match(migration, /enable row level security/i);
@@ -191,6 +234,7 @@ test("prototype storage is private and dashboard reads are authorized and audite
   assert.match(studentRoute, /getPracticePiece\(pieceSlug\)/);
   assert.match(legendsPage, /pieceSlug="legends-and-heroes"/);
   assert.match(percussionPage, /pieceSlug="percussion-ensemble"/);
+  assert.match(ascendPage, /pieceSlug="ascend"/);
   assert.match(dashboardRoute, /SYSTEM_OVERSIGHT_READ/);
   assert.match(dashboardRoute, /logAuditRequired/);
   assert.match(dashboardRoute, /PRACTICE_LOOP_MANAGE/);
