@@ -5,14 +5,16 @@ import { useEffect, useMemo, useState } from "react";
 import { StaffGate } from "@/components/StaffGate";
 import {
   CARNEGIE_AMOUNT_BANDS,
+  CARNEGIE_DEPOSIT_CHOICES,
   CARNEGIE_HELP_OPTIONS,
   CARNEGIE_RESPONSE_OPTIONS,
   carnegieAmountBandLabel,
+  carnegieDepositChoiceLabel,
   carnegieResponseLabel,
 } from "@/lib/carnegieTripConstants";
 import styles from "./carnegie-workspace.module.css";
 
-const depositLabels = { received: "Received", payment_pending: "Payment pending", refunded: "Refunded", not_requested: "Not requested" };
+const depositLabels = { received: "Received", payment_pending: "Payment pending", unable_now: "Cannot pay at this time", refunded: "Refunded", not_requested: "Not requested" };
 const sourceLabels = { public: "Public form", portal: "Family Portal", staff_verbal: "Staff verbal" };
 const followUpLabels = { none: "No follow-up set", login_help: "Login help", contact_needed: "Contact needed", complete: "Complete" };
 const eligibilityLabels = { not_reviewed: "Not reviewed", preapproved: "Preapproved", approved: "Approved", needs_review: "Needs review", not_approved: "Not approved" };
@@ -71,6 +73,7 @@ function CarnegieTripWorkspaceContent() {
     return {
       yes: all.filter((row) => row.submission?.response === "serious_yes").length,
       paid: all.filter((row) => row.depositStatus === "received").length,
+      unableNow: all.filter((row) => row.depositStatus === "unable_now").length,
       collected: all.filter((row) => row.depositStatus === "received").reduce((sum, row) => sum + Number(row.completedPayment?.amount_cents || 0), 0),
       interested: all.filter((row) => row.submission?.response === "interested_limited").length,
       no: all.filter((row) => row.submission?.response === "no").length,
@@ -80,12 +83,12 @@ function CarnegieTripWorkspaceContent() {
   }, [data]);
 
   function downloadCsv() {
-    const columns = ["Student","Ensemble","Response","Agreement version","Source","Submitted","Guardian","Email","Phone","Maximum amount","Help offered","Deposit","Follow-up","Eligibility","Staff note"];
+    const columns = ["Student","Ensemble","Response","Agreement version","Source","Submitted","Guardian","Email","Phone","Maximum amount","Deposit choice","Help offered","Deposit","Follow-up","Eligibility","Staff note"];
     const quote = (input) => `"${String(input ?? "").replaceAll('"','""')}"`;
     const lines = rows.map((row) => [
       row.student.display_name, row.student.ensemble_2026, carnegieResponseLabel(row.submission?.response, row.submission?.agreement_version), row.submission?.agreement_version || "", sourceLabels[row.submission?.source] || "",
       row.submission?.created_at || "", row.contact.name, row.contact.email, row.contact.phone,
-      carnegieAmountBandLabel(row.submission?.maximum_family_amount_band, row.submission?.agreement_version), (row.submission?.help_options || []).map((value) => CARNEGIE_HELP_OPTIONS.find((item) => item.value === value)?.label || value).join("; "),
+      carnegieAmountBandLabel(row.submission?.maximum_family_amount_band, row.submission?.agreement_version), carnegieDepositChoiceLabel(row.submission?.deposit_choice, row.submission?.agreement_version, row.submission?.response), (row.submission?.help_options || []).map((value) => CARNEGIE_HELP_OPTIONS.find((item) => item.value === value)?.label || value).join("; "),
       depositLabels[row.depositStatus], followUpLabels[row.tracking.follow_up_status], eligibilityLabels[row.tracking.eligibility_status], row.tracking.staff_note,
     ].map(quote).join(","));
     const blob = new Blob([[columns.map(quote).join(","), ...lines].join("\n")], { type: "text/csv;charset=utf-8" });
@@ -105,13 +108,14 @@ function CarnegieTripWorkspaceContent() {
       <section className={styles.metrics} aria-label="Commitment summary">
         <Metric label="Serious yes" value={metrics.yes} />
         <Metric label="$50 received" value={metrics.paid} note={money(metrics.collected)} />
+        <Metric label="Cannot pay $50 now" value={metrics.unableNow} />
         <Metric label="Interested" value={metrics.interested} />
         <Metric label="No" value={metrics.no} />
         <Metric label="No response" value={metrics.missing} />
         <Metric label="Follow-up" value={metrics.followUp} />
       </section>
 
-      {showVerbal ? <VerbalForm rows={data.rows} onSaved={async () => { setShowVerbal(false); setMessage("Verbal commitment saved; the ledger charge and login-help follow-up are now visible."); await load(); }} /> : null}
+      {showVerbal ? <VerbalForm rows={data.rows} onSaved={async () => { setShowVerbal(false); setMessage("Verbal response and $50 deposit choice saved; login-help follow-up is now visible."); await load(); }} /> : null}
       {message ? <p className={styles.message} role="status">{message}</p> : null}
       {error ? <p className={styles.error} role="alert">{error}</p> : null}
 
@@ -165,7 +169,7 @@ function TripRow({ row, onChanged, setMessage }) {
     <td><strong>{row.student.display_name}</strong><span>{row.student.ensemble_2026 || "No ensemble"} · Grade {row.student.grade_fall26 || "—"}</span><Link href={`/admin/billing?studentId=${encodeURIComponent(row.student.id)}`}>Open full ledger</Link></td>
     <td>{row.submission ? <><strong>{carnegieResponseLabel(row.submission.response, row.submission.agreement_version)}</strong><span>{sourceLabels[row.submission.source]} · {displayDate(row.submission.created_at)}</span>{row.submission.source === "staff_verbal" ? <em>Unsigned verbal record</em> : <em>Signed family response</em>}</> : <em>No response</em>}</td>
     <td><strong className={`${styles.status} ${styles[row.depositStatus]}`}>{depositLabels[row.depositStatus]}</strong>{row.completedPayment ? <><span>{money(row.completedPayment.amount_cents)} · {row.completedPayment.method}</span><span>{displayDate(row.completedPayment.received_at || row.completedPayment.created_at)}</span><button type="button" className={styles.danger} disabled={busy} onClick={refund}>Refund through PayPal</button></> : row.charge ? <span>{money(row.charge.amount_cents)} active ledger charge</span> : null}</td>
-    <td><strong>{row.contact.name || "No guardian listed"}</strong><span>{row.contact.email || "No email"}</span><span>{row.contact.phone || "No phone"}</span>{row.submission ? <details><summary>All form inputs</summary><p><b>Agreement:</b> {row.submission.agreement_version}</p><p><b>Maximum:</b> {carnegieAmountBandLabel(row.submission.maximum_family_amount_band, row.submission.agreement_version) || "Not applicable"}</p><p><b>Help:</b> {help.join("; ") || "None selected"}</p><p><b>Guardian signature:</b> {row.submission.guardian_signature || "Verbal - not signed"}</p><p><b>Student signature:</b> {row.submission.student_signature || "Verbal - not signed"}</p>{row.submission.note ? <p><b>Submission note:</b> {row.submission.note}</p> : null}</details> : null}</td>
+    <td><strong>{row.contact.name || "No guardian listed"}</strong><span>{row.contact.email || "No email"}</span><span>{row.contact.phone || "No phone"}</span>{row.submission ? <details><summary>All form inputs</summary><p><b>Agreement:</b> {row.submission.agreement_version}</p><p><b>Maximum:</b> {carnegieAmountBandLabel(row.submission.maximum_family_amount_band, row.submission.agreement_version) || "Not applicable"}</p><p><b>Deposit choice:</b> {carnegieDepositChoiceLabel(row.submission.deposit_choice, row.submission.agreement_version, row.submission.response)}</p><p><b>Help:</b> {help.join("; ") || "None selected"}</p><p><b>Guardian signature:</b> {row.submission.guardian_signature || "Verbal - not signed"}</p><p><b>Student signature:</b> {row.submission.student_signature || "Verbal - not signed"}</p>{row.submission.note ? <p><b>Submission note:</b> {row.submission.note}</p> : null}</details> : null}</td>
     <td><label>Eligibility<select value={eligibilityStatus} onChange={(event) => setEligibilityStatus(event.target.value)}>{Object.entries(eligibilityLabels).map(([value,label]) => <option value={value} key={value}>{label}</option>)}</select></label><label>Follow-up<select value={followUpStatus} onChange={(event) => setFollowUpStatus(event.target.value)}>{Object.entries(followUpLabels).map(([value,label]) => <option value={value} key={value}>{label}</option>)}</select></label><label>Staff note<textarea value={staffNote} onChange={(event) => setStaffNote(event.target.value)} rows="2" /></label><button type="button" disabled={busy} onClick={saveTracking}>{busy ? "Saving…" : "Save follow-up"}</button>{error ? <small className={styles.inlineError}>{error}</small> : null}</td>
   </tr>;
 }
@@ -177,6 +181,7 @@ function VerbalForm({ rows, onSaved }) {
   const [guardianPhone, setGuardianPhone] = useState("");
   const [response, setResponse] = useState("");
   const [maximumFamilyAmountBand, setMaximumFamilyAmountBand] = useState("");
+  const [depositChoice, setDepositChoice] = useState("");
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -187,10 +192,10 @@ function VerbalForm({ rows, onSaved }) {
   }
   async function submit(event) {
     event.preventDefault(); setBusy(true); setError("");
-    const request = await fetch("/api/admin/carnegie-2027", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ action:"verbal", studentId, guardianName, guardianEmail, guardianPhone, response, maximumFamilyAmountBand, note, helpOptions:[], submissionKey:window.crypto.randomUUID() }) });
+    const request = await fetch("/api/admin/carnegie-2027", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ action:"verbal", studentId, guardianName, guardianEmail, guardianPhone, response, maximumFamilyAmountBand, depositChoice, note, helpOptions:[], submissionKey:window.crypto.randomUUID() }) });
     const body = await request.json().catch(() => ({})); setBusy(false);
     if (!request.ok) { setError(body.error || "Could not save the verbal commitment."); return; }
     onSaved();
   }
-  return <form className={styles.verbal} onSubmit={submit}><div><p className={styles.eyebrow}>Fallback intake</p><h2>Record a verbal family response</h2><p>Only the up-to-$2,000 response creates the normal $50 charge, and it does not mark payment received. Assistance-needed responses create no charge. This record stays unsigned and is automatically queued for login help.</p></div><label>Student<select value={studentId} onChange={(event) => selectStudent(event.target.value)} required><option value="">Choose student</option>{rows.map((row) => <option key={row.student.id} value={row.student.id}>{row.student.display_name} · {row.student.ensemble_2026}</option>)}</select></label><label>Guardian name<input value={guardianName} onChange={(event) => setGuardianName(event.target.value)} required /></label><label>Guardian email<input type="email" value={guardianEmail} onChange={(event) => setGuardianEmail(event.target.value)} /></label><label>Guardian phone<input value={guardianPhone} onChange={(event) => setGuardianPhone(event.target.value)} /></label><label>Response<select value={response} onChange={(event) => setResponse(event.target.value)} required><option value="">Choose a response</option>{CARNEGIE_RESPONSE_OPTIONS.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}</select></label>{response === "interested_limited" ? <label>Maximum family amount<select value={maximumFamilyAmountBand} onChange={(event) => setMaximumFamilyAmountBand(event.target.value)} required><option value="">Choose</option>{CARNEGIE_AMOUNT_BANDS.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}</select></label> : null}<label className={styles.wide}>Staff note<textarea value={note} onChange={(event) => setNote(event.target.value)} rows="2" placeholder="How the commitment was received and best follow-up details" /></label>{error ? <p className={`${styles.error} ${styles.wide}`}>{error}</p> : null}<button className={styles.primary} type="submit" disabled={busy}>{busy ? "Saving…" : "Save verbal response"}</button></form>;
+  return <form className={styles.verbal} onSubmit={submit}><div><p className={styles.eyebrow}>Fallback intake</p><h2>Record a verbal family response</h2><p>Every yes response includes a separate $50 conditional-deposit choice. Pay now creates the normal charge without marking it received; cannot pay now keeps the yes response and creates no charge. This record stays unsigned and is automatically queued for login help.</p></div><label>Student<select value={studentId} onChange={(event) => selectStudent(event.target.value)} required><option value="">Choose student</option>{rows.map((row) => <option key={row.student.id} value={row.student.id}>{row.student.display_name} · {row.student.ensemble_2026}</option>)}</select></label><label>Guardian name<input value={guardianName} onChange={(event) => setGuardianName(event.target.value)} required /></label><label>Guardian email<input type="email" value={guardianEmail} onChange={(event) => setGuardianEmail(event.target.value)} /></label><label>Guardian phone<input value={guardianPhone} onChange={(event) => setGuardianPhone(event.target.value)} /></label><label>Response<select value={response} onChange={(event) => { const next = event.target.value; setResponse(next); if (next !== "interested_limited") setMaximumFamilyAmountBand(""); if (next === "no") setDepositChoice(""); }} required><option value="">Choose a response</option>{CARNEGIE_RESPONSE_OPTIONS.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}</select></label>{response === "interested_limited" ? <label>Maximum family amount<select value={maximumFamilyAmountBand} onChange={(event) => setMaximumFamilyAmountBand(event.target.value)} required><option value="">Choose</option>{CARNEGIE_AMOUNT_BANDS.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}</select></label> : null}{response && response !== "no" ? <label>$50 deposit choice<select value={depositChoice} onChange={(event) => setDepositChoice(event.target.value)} required><option value="">Choose</option>{CARNEGIE_DEPOSIT_CHOICES.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}</select></label> : null}<label className={styles.wide}>Staff note<textarea value={note} onChange={(event) => setNote(event.target.value)} rows="2" placeholder="How the commitment was received and best follow-up details" /></label>{error ? <p className={`${styles.error} ${styles.wide}`}>{error}</p> : null}<button className={styles.primary} type="submit" disabled={busy}>{busy ? "Saving…" : "Save verbal response"}</button></form>;
 }

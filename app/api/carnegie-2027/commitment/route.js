@@ -79,7 +79,7 @@ export async function POST(request) {
       route: "/api/carnegie-2027/commitment",
     });
     const { data: submission, error } = await supabaseAdmin.from("carnegie_trip_submissions")
-      .select("id,student_id,source,response,maximum_family_amount_band,agreement_version,guardian_email,signed_at,created_at")
+      .select("id,student_id,source,response,maximum_family_amount_band,deposit_choice,agreement_version,guardian_email,signed_at,created_at")
       .eq("id", result.submissionId).maybeSingle();
     if (error || !submission) throw new Error("Submission could not be reloaded.");
     const status = await carnegieSubmissionStatus(submission);

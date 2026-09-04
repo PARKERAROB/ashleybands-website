@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { amountToCents, captureOrder, centsToAmount, extractCapture } from "@/lib/paypal";
 import { readCarnegieCheckoutToken } from "@/lib/carnegieTrip";
-import { CARNEGIE_DEPOSIT_CATEGORY, CARNEGIE_DEPOSIT_CENTS } from "@/lib/carnegieTripConstants";
+import { CARNEGIE_DEPOSIT_CATEGORY, CARNEGIE_DEPOSIT_CENTS, carnegieSubmissionRequestsDeposit } from "@/lib/carnegieTripConstants";
 import { sendFeePaymentReceiptEmail } from "@/lib/portalEmail";
 
 export const runtime = "nodejs";
@@ -21,10 +21,10 @@ export async function POST(request) {
   if (payment.status === "completed") return NextResponse.json({ status: "completed", invoiceId: payment.invoice_id });
   if (payment.status !== "pending") return NextResponse.json({ error: "This payment session is no longer active." }, { status: 409 });
   const [{ data: latestSubmission }, { data: activeCharge }] = await Promise.all([
-    supabaseAdmin.from("carnegie_trip_submissions").select("id,response").eq("student_id", payment.student_id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+    supabaseAdmin.from("carnegie_trip_submissions").select("id,response,deposit_choice,agreement_version").eq("student_id", payment.student_id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
     supabaseAdmin.from("fee_charges").select("id,amount_cents").eq("student_id", payment.student_id).eq("category", CARNEGIE_DEPOSIT_CATEGORY).eq("status", "active").maybeSingle(),
   ]);
-  if (latestSubmission?.response !== "serious_yes" || !activeCharge || Number(activeCharge.amount_cents) !== CARNEGIE_DEPOSIT_CENTS) {
+  if (!carnegieSubmissionRequestsDeposit(latestSubmission) || !activeCharge || Number(activeCharge.amount_cents) !== CARNEGIE_DEPOSIT_CENTS) {
     return NextResponse.json({ error: "The latest family response no longer has an active conditional deposit." }, { status: 409 });
   }
 

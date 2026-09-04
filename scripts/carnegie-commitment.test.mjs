@@ -4,6 +4,8 @@ import test from "node:test";
 import {
   CARNEGIE_AGREEMENT_VERSION,
   CARNEGIE_AMOUNT_BANDS,
+  CARNEGIE_DEPOSIT_CHOICES,
+  CARNEGIE_V2_AGREEMENT_VERSION,
   carnegieAmountBandLabel,
   carnegieResponseLabel,
 } from "../lib/carnegieTripConstants.js";
@@ -20,11 +22,9 @@ test("serious family intent creates the fixed charge in the existing ledger", ()
 
 test("v2 separates travel intent from family financial capacity without rewriting v1 labels", () => {
   const migration = read("supabase/migrations/202609030001_carnegie_commitment_v2.sql");
-  const form = read("app/carnegie-2027/commit/CarnegieCommitmentClient.jsx");
-  const route = read("app/api/carnegie-2027/commitment/route.js");
-  const model = read("lib/carnegieTrip.js");
 
-  assert.equal(CARNEGIE_AGREEMENT_VERSION, "2026-09-03-v2");
+  assert.equal(CARNEGIE_V2_AGREEMENT_VERSION, "2026-09-03-v2");
+  assert.equal(CARNEGIE_AGREEMENT_VERSION, "2026-09-03-v3");
   assert.equal(carnegieResponseLabel("no", "2026-09-01-v1"), "No - not planning to participate");
   assert.equal(carnegieResponseLabel("no", CARNEGIE_AGREEMENT_VERSION), "No - my student cannot participate regardless of financial assistance");
   assert.equal(carnegieAmountBandLabel("500_or_less", "2026-09-01-v1"), "$500 or less");
@@ -36,11 +36,36 @@ test("v2 separates travel intent from family financial capacity without rewritin
   assert.match(migration, /'full_assistance_required','up_to_500'/);
   assert.match(migration, /if p_response = 'serious_yes' and v_charge_id is null then/);
   assert.match(migration, /elsif p_response <> 'serious_yes'/);
+});
+
+test("v3 gives every yes family a separate $50 deposit choice", () => {
+  const migration = read("supabase/migrations/202609030002_carnegie_deposit_choice.sql");
+  const form = read("app/carnegie-2027/commit/CarnegieCommitmentClient.jsx");
+  const route = read("app/api/carnegie-2027/commitment/route.js");
+  const model = read("lib/carnegieTrip.js");
+  const workspace = read("app/admin/carnegie-2027/CarnegieTripWorkspace.jsx");
+
+  assert.deepEqual(CARNEGIE_DEPOSIT_CHOICES.map((option) => option.value), ["pay_now", "cannot_pay_now"]);
+  assert.deepEqual(CARNEGIE_DEPOSIT_CHOICES.map((option) => option.label), [
+    "Pay the $50 conditional deposit now",
+    "Cannot pay the $50 conditional deposit at this time",
+  ]);
+  assert.match(migration, /add column if not exists deposit_choice/);
+  assert.match(migration, /p_response <> 'no' and v_deposit_choice = 'pay_now'/);
+  assert.match(migration, /Choosing|deposit choice required/);
+  assert.match(migration, /not v_deposit_requested and v_charge_id is not null and v_completed_cents = 0/);
+  assert.match(migration, /'deposit_choice', v_deposit_choice/);
   assert.match(form, /response: ""/);
+  assert.match(form, /depositChoice: ""/);
   assert.match(form, /Cost should not turn a “yes, if funded” into a no/);
+  assert.match(form, /Every yes response includes the same deposit choice/);
+  assert.match(form, /CARNEGIE_DEPOSIT_CHOICES\.map/);
   assert.match(form, /does not guarantee financial assistance or a fully funded trip/);
   assert.match(form, /does not automatically issue a refund/);
-  assert.match(route, /maximum_family_amount_band,agreement_version,guardian_email/);
+  assert.match(route, /maximum_family_amount_band,deposit_choice,agreement_version,guardian_email/);
+  assert.match(model, /p_deposit_choice: fields\.depositChoice/);
+  assert.match(model, /depositRequested && !payment/);
+  assert.match(workspace, /Cannot pay \$50 now/);
   assert.match(model, /agreementVersion: submission\.agreement_version/);
 });
 
@@ -57,26 +82,29 @@ test("public intake matches exact student identity without returning the roster"
 test("capture settlement verifies the fixed amount and uses the shared audit ledger RPC", () => {
   const route = read("app/api/carnegie-2027/payment/capture/route.js");
   assert.match(route, /CARNEGIE_DEPOSIT_CENTS/);
+  assert.match(route, /carnegieSubmissionRequestsDeposit\(latestSubmission\)/);
   assert.match(route, /detail\.currencyCode !== "USD"/);
   assert.match(route, /settle_online_fee_payment_with_audit/);
   assert.match(route, /payment\.category !== CARNEGIE_DEPOSIT_CATEGORY/);
 });
 
-test("unpaid commitments load payment options directly and provide a safe resume path", () => {
+test("pay-now commitments load payment options directly and provide a safe resume path", () => {
   const form = read("app/carnegie-2027/commit/CarnegieCommitmentClient.jsx");
   assert.match(form, /Loading secure PayPal and card options/);
   assert.match(form, /Try loading payment options again/);
   assert.match(form, /href="\/portal\/carnegie-2027"/);
   assert.match(form, /paypalSdkPromise = null/);
-  assert.doesNotMatch(form, /Pay the \$50 deposit now/);
+  assert.match(form, /CARNEGIE_DEPOSIT_CHOICES\.map/);
 });
 
 test("staff verbal fallback remains unsigned, unpaid, and queued for login help", () => {
-  const migration = read("supabase/migrations/202608310001_carnegie_commitment.sql");
+  const migration = read("supabase/migrations/202609030002_carnegie_deposit_choice.sql");
   const workspace = read("app/admin/carnegie-2027/CarnegieTripWorkspace.jsx");
   assert.match(migration, /p_source = 'staff_verbal' then null/);
   assert.match(migration, /p_source = 'staff_verbal' then 'login_help'/);
-  assert.match(workspace, /does not mark payment received/);
+  assert.match(workspace, /without marking it received/);
+  assert.match(workspace, /cannot pay now keeps the yes response and creates no charge/);
+  assert.match(workspace, /CARNEGIE_DEPOSIT_CHOICES\.map/);
   assert.match(workspace, /Unsigned verbal record/);
 });
 
