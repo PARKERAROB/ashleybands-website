@@ -43,3 +43,18 @@ test("workflow preserves the public-repository privacy boundary", async () => {
     assert.match(template, /Keep this public issue sanitized/);
   }
 });
+
+test("the repository exposes the shared validation and checked-release contract", async () => {
+  const packageJson = JSON.parse(await read("package.json"));
+  const releaseScript = await read("scripts/release-checked.sh");
+  const liveScript = await read("scripts/verify-live.mjs");
+
+  for (const command of ["verify:change", "verify:release", "verify:live", "release:checked"]) {
+    assert.ok(packageJson.scripts[command], `missing npm run ${command}`);
+  }
+  assert.equal(packageJson.scripts["deploy:checked"], "npm run release:checked");
+  assert.match(releaseScript, /--meta "validationCommit=\$released_sha"/);
+  assert.match(releaseScript, /verify:live -- --expected-commit/);
+  assert.match(liveScript, /deployment\.meta\?\.validationCommit !== expectedCommit/);
+  assert.match(liveScript, /<title>Bands of AHS<\/title>/);
+});

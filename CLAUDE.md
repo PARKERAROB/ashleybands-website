@@ -29,7 +29,10 @@ hosted-state contracts, and implementations without duplicating their facts.
 - `/deploy-website` only. Never deploy spring-concert-2026.vercel.app.
 - The checked production command is `npm run deploy:checked`; it refreshes safe local projections,
   runs the production identity/service preflight, integration/privacy checks, lints, builds, and
-  invokes the pinned Vercel production CLI. Do not bypass `npm run deploy:preflight`.
+  invokes the pinned Vercel production CLI. It is an alias of the shared `release:checked` entry
+  point, stamps the exact Git commit into deployment metadata, and reads `ashleybands.com` back before
+  success. The other shared entry points are `verify:change`, `verify:release`, and `verify:live`.
+  Do not bypass `npm run deploy:preflight`.
 - Production currently requires a Rob-authored HEAD commit using `robert.parker@nhcs.net`, because
   that remains the verified identity on the Vercel Hobby account. Rob's GitHub login is
   `parker-a-rob`; the repository owner is the `PARKERAROB` organization. An
