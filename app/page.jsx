@@ -45,38 +45,64 @@ export default function HomePage() {
 
   return (
     <main className="home">
-      <section className="home-hero" aria-labelledby="home-hero-title">
-        <div className="home-hero-copy">
-          <h1 id="home-hero-title" className="home-wordmark">
-            <span className="home-wordmark-the">The Bands of</span>
-            <span className="home-wordmark-name">Ashley High School</span>
-          </h1>
-          <p className="home-hero-ensembles">
-            Concert Bands · Marching Band · Percussion · Jazz · Colorguard · Pep Band
+      <section className="home-campaign-hero" aria-labelledby="home-hero-title">
+        <div className="home-campaign-copy">
+          <p className="home-campaign-kicker">Ashley High School Bands · North Carolina</p>
+          <h1 id="home-hero-title">From Wilmington<br />to <em>Carnegie Hall.</em></h1>
+          <p className="home-campaign-lede">
+            A community of young musicians. A North Carolina Program of Distinction.
+            Now, our Concert Band and Wind Ensemble have been selected to perform at Carnegie Hall.
           </p>
-          <p className="home-hero-place">Wilmington, North Carolina</p>
-          <div className="home-hero-actions">
-            <Link className="home-btn home-btn-primary" href="/portal">Open Family Portal</Link>
-            <Link className="home-btn home-btn-secondary" href="/calendar">Band Calendar</Link>
+          <p className="home-campaign-date">New York City <span aria-hidden="true">/</span> March 25, 2027</p>
+          <div className="home-campaign-actions">
+            <Link className="home-btn home-btn-primary" href="/info/carnegie-2027">Explore the Carnegie Hall journey <span aria-hidden="true">↗</span></Link>
+            <a className="home-campaign-story-link" href="#our-story">Meet the band <span aria-hidden="true">↓</span></a>
           </div>
-          <p className="home-hero-note">
-            Families review contacts, student details, forms, and payment records in the portal.
-          </p>
+          <a className="home-recognition" href="#program-of-distinction">
+            <Image src="/images/home/program-of-distinction.png" alt="Official NCBA Program of Distinction badge, 2025–2026" width={144} height={144} priority />
+            <span><span className="home-recognition-label">Recognized statewide</span><strong>Program of Distinction</strong><span>Inaugural class · 2025–2026<br />North Carolina Bandmasters Association</span></span>
+          </a>
         </div>
-        <figure className="home-hero-photo">
-          <Image
-            src="/656637421_1325880026241163_8640066925134763727_n.jpg"
-            alt="Ashley High School Wind Ensemble on stage"
-            fill
-            sizes="(max-width: 900px) 100vw, 55vw"
-            style={{ objectFit: "cover", objectPosition: "center 40%" }}
-            priority
-          />
-          <figcaption>
-            <span>Ashley High School Wind Ensemble</span>
-            <span>Robert A. Parker, Director</span>
-          </figcaption>
+        <figure className="home-campaign-art">
+          <Image src="/images/home/carnegie-journey.webp" alt="Illustration of a grand concert hall viewed from the stage, with curved balconies and garnet seats" fill sizes="(max-width: 900px) 100vw, 48vw" priority style={{ objectFit: "cover" }} />
+          <div className="home-campaign-art-title" aria-hidden="true"><span>The next chapter</span><strong>Carnegie<br />2027</strong></div>
+          <figcaption>Concert-hall illustration · Our journey to Carnegie Hall</figcaption>
         </figure>
+      </section>
+
+      <nav className="home-family-bar" aria-label="Student and family shortcuts">
+        <span>Already part of the band?</span>
+        <Link href="/portal">Family Portal <span aria-hidden="true">↗</span></Link>
+        <Link href="/calendar">Band Calendar <span aria-hidden="true">↗</span></Link>
+        <Link href="/carnegie-2027/commit">Carnegie family response <span aria-hidden="true">↗</span></Link>
+      </nav>
+
+      <section className="home-program-story" id="our-story" aria-labelledby="our-story-title">
+        <div className="home-container home-program-grid">
+          <figure className="home-program-photo">
+            <Image src="/656637421_1325880026241163_8640066925134763727_n.jpg" alt="Ashley High School Wind Ensemble performing on stage" fill sizes="(max-width: 900px) 100vw, 50vw" style={{ objectFit: "cover", objectPosition: "center 40%" }} />
+            <figcaption>Our students. Our sound. Ashley Bands.</figcaption>
+          </figure>
+          <div className="home-program-copy" id="program-of-distinction">
+            <p className="eyebrow">Rooted here. Reaching further.</p>
+            <h2 id="our-story-title">Built in the band room.<br />Ready for a bigger stage.</h2>
+            <p>At Ashley High School in Wilmington, students grow through concert bands, marching band, percussion, jazz, colorguard, and pep band. The music brings us together. The work helps us grow.</p>
+            <p>Both Concert Band and Wind Ensemble earned Superior ratings at the 2026 Concert MPA. Ashley joined the inaugural class of NCBA Programs of Distinction, recognizing musical excellence, performance, community outreach, and advocacy.</p>
+            <p>Selection for Carnegie Hall marks the next chapter in that story: a chance for our students to represent their school and community on a world-renowned stage.</p>
+            <div className="home-links"><Link href="/programs">Explore our concert programs</Link><Link href="/info/marching-band-2026">Meet the Screaming Eagle Regiment</Link></div>
+          </div>
+        </div>
+      </section>
+
+      <section className="home-campaign-future" aria-labelledby="home-campaign-future-title">
+        <div className="home-container home-campaign-future-grid">
+          <div><p className="eyebrow">The road to Carnegie Hall</p><h2 id="home-campaign-future-title">A big stage.<br />A whole community behind it.</h2></div>
+          <div><p>Help make this opportunity possible for Ashley’s young musicians. We’re preparing a campaign to bring families, alumni, businesses, and friends of the band into the journey.</p>
+            <p className="home-campaign-coming">Sponsorship campaign coming soon</p>
+            <Link className="home-btn home-btn-secondary" href="/info/carnegie-2027">Read current trip information <span aria-hidden="true">↗</span></Link>
+            <p className="home-campaign-planning">Travel plans, final participation, price, approvals, and funding remain subject to confirmation.</p>
+          </div>
+        </div>
       </section>
 
       <section className="home-now" aria-labelledby="home-now-title">
@@ -88,7 +114,7 @@ export default function HomePage() {
             </div>
             <ul className="home-now-list">
               <li className="home-now-item">
-                <p className="home-now-tag">Requested by September 4</p>
+                <p className="home-now-tag">For participating families</p>
                 <h3>Carnegie Hall 2027</h3>
                 <p>
                   Share your family’s response and deposit choice. Already completed the $50 deposit?
