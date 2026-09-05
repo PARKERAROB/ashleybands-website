@@ -64,9 +64,9 @@ export default function HomePage() {
           </a>
         </div>
         <figure className="home-campaign-art">
-          <Image src="/images/home/carnegie-journey.webp" alt="Illustration of a grand concert hall viewed from the stage, with curved balconies and garnet seats" fill sizes="(max-width: 900px) 100vw, 48vw" priority style={{ objectFit: "cover" }} />
+          <Image src="/images/home/perlman-stage.avif" alt="View from the Perlman Stage at Carnegie Hall, with a grand piano and the auditorium beyond" fill sizes="(max-width: 900px) 100vw, 48vw" priority style={{ objectFit: "cover" }} />
           <div className="home-campaign-art-title" aria-hidden="true"><span>The next chapter</span><strong>Carnegie<br />2027</strong></div>
-          <figcaption>Concert-hall illustration · Our journey to Carnegie Hall</figcaption>
+          <figcaption>Carnegie Hall · View from the Perlman Stage</figcaption>
         </figure>
       </section>
 
