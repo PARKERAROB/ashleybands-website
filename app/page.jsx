@@ -56,7 +56,7 @@ export default function HomePage() {
           <p className="home-campaign-date">New York City <span aria-hidden="true">/</span> March 25, 2027</p>
           <div className="home-campaign-actions">
             <Link className="home-btn home-btn-primary" href="/info/carnegie-2027">Explore the Carnegie Hall journey <span aria-hidden="true">↗</span></Link>
-            <a className="home-campaign-story-link" href="#our-story">Meet the band <span aria-hidden="true">↓</span></a>
+            <Link className="home-campaign-story-link" href="/our-story">Read our story <span aria-hidden="true">→</span></Link>
           </div>
           <a className="home-recognition" href="#program-of-distinction">
             <Image src="/images/home/program-of-distinction.png" alt="Official NCBA Program of Distinction badge, 2025–2026" width={144} height={144} priority />
@@ -89,7 +89,7 @@ export default function HomePage() {
             <p>At Ashley High School in Wilmington, students grow through concert bands, marching band, percussion, jazz, colorguard, and pep band. The music brings us together. The work helps us grow.</p>
             <p>Both Concert Band and Wind Ensemble earned Superior ratings at the 2026 Concert MPA. Ashley joined the inaugural class of NCBA Programs of Distinction, recognizing musical excellence, performance, community outreach, and advocacy.</p>
             <p>Selection for Carnegie Hall marks the next chapter in that story: a chance for our students to represent their school and community on a world-renowned stage.</p>
-            <div className="home-links"><Link href="/programs">Explore our concert programs</Link><Link href="/info/marching-band-2026">Meet the Screaming Eagle Regiment</Link></div>
+            <div className="home-links"><Link href="/our-story">Read our full story</Link><Link href="/programs">Explore our concert programs</Link><Link href="/info/marching-band-2026">Meet the Screaming Eagle Regiment</Link></div>
           </div>
         </div>
       </section>

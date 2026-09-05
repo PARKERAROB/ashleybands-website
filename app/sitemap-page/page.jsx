@@ -17,6 +17,7 @@ export default function SitemapPage() {
 
   const mainPages = [
     { title: "Home", href: "/" },
+    { title: "Our Story", href: "/our-story" },
     { title: "Band Calendar", href: "/calendar" },
     { title: "AshleyBands Weekly", href: "/newsletter" },
     { title: "Band Boosters", href: "/boosters" },
