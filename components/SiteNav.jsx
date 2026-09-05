@@ -12,6 +12,7 @@ const NAV_LINKS = [
   { href: "/calendar", label: "Calendar" },
   { href: "/newsletter", label: "Weekly" },
   { href: "/portal", label: "Family Portal", profile: true },
+  { href: "/fundraising", label: "Fundraisers" },
   { href: "/sponsors", label: "Support" },
   { href: "/info/the-band-folder", label: "Resources" },
   { href: "/assistant", label: "Ask" }
@@ -24,6 +25,7 @@ export default function SiteNav() {
   // Staff identity is a SEPARATE login from the family/portal session above.
   // When a staff session exists, surface a Manage door to the /admin hub.
   const [isStaff, setIsStaff] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -61,7 +63,10 @@ export default function SiteNav() {
         <Image src="/bandsofahslogo.png" alt="" width={42} height={42} />
         <span>Bands of AHS</span>
       </Link>
-      <nav aria-label="Main navigation">
+      <button className="nav-toggle" type="button" aria-controls="main-navigation" aria-expanded={menuOpen} onClick={() => setMenuOpen((open) => !open)}>
+        {menuOpen ? "Close menu" : "Menu"}
+      </button>
+      <nav id="main-navigation" className={menuOpen ? "is-open" : ""} aria-label="Main navigation" onClick={(event) => { if (event.target.closest("a")) setMenuOpen(false); }}>
         {NAV_LINKS.map((link) => {
           const href = link.profile ? profileHref : link.href;
           const active = pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));

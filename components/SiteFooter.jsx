@@ -22,11 +22,10 @@ const COLUMNS = [
   {
     heading: "For Families",
     links: [
-      { href: "/portal", label: "My Band (Family Portal)" },
+      { href: "/portal", label: "Family Portal" },
       { href: "/portal/request", label: "Request Portal Access" },
       { href: "/info/required-items", label: "Required Items" },
       { href: "/info/the-band-folder", label: "The Band Folder" },
-      { href: "/portal", label: "Family Portal" },
       { href: "https://ashleybandshirts.printify.me/", label: "Band Shirts Store", external: true }
     ]
   },
@@ -35,7 +34,7 @@ const COLUMNS = [
     links: [
       { href: "/sponsors", label: "Become a Sponsor" },
       { href: "/info/marching-band-funding", label: "Marching Band Funding" },
-      { href: "/info/instaraise-fundraiser", label: "InstaRaise Fundraiser" },
+      { href: "/fundraising", label: "Current Fundraisers" },
       { href: "/boosters", label: "Band Boosters" }
     ]
   },

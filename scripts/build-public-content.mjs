@@ -15,17 +15,20 @@ const pkaRoot = process.env.PKA_ROOT
 
 const sources = {
   facts: "facts/bandsofahs-facts.md",
+  carnegie: "content/sources/carnegie-2027.md",
+  boosters: "content/sources/boosters.md",
+  assistantOverview: "content/sources/assistant-overview.md",
   requiredItems: "knowledge/student-required-items.md",
   // 2026-2027-band-information now lives in this repo (content/sources), not PKA
   nextYear: "content/sources/2026-2027-band-information.md",
-  springTrip: "projects/parent-meeting/google-site-page-spring-trip.md",
+  springTrip: "content/sources/archive/spring-trip-2026.md",
   // marching-band-2026 now lives in this repo (content/sources), not PKA — see readRepoSource
   marchingBand: "content/sources/marching-band-2026.md",
   // marching-band-funding now lives in this repo (content/sources), not PKA — see readRepoSource
   marchingFunding: "content/sources/marching-band-funding.md",
   popcornFundraiser: "content/sources/fundraising/popcorn.md",
   mattressFundraiser: "content/sources/fundraising/mattress.md",
-  instaraise: "projects/parent-meeting/google-site-page-instaraise.md",
+  instaraise: "content/sources/archive/instaraise-2026.md",
   bandFolder: "projects/band-website/public-pages/the-band-folder.md",
   corporateSponsorship: "projects/band-website/public-pages/corporate-sponsorship.md",
   familySponsorship: "projects/band-website/public-pages/family-sponsorship.md"
@@ -69,6 +72,15 @@ const requiredItems = readSource(sources.requiredItems);
 
 const pages = [
   {
+    slug: "carnegie-2027",
+    title: "Carnegie Hall 2027",
+    summary: "Family response, conditional deposit, and current trip-planning information.",
+    audience: "Families",
+    source: sources.carnegie,
+    category: "Current information",
+    body: readRepoSource(sources.carnegie).trim()
+  },
+  {
     slug: "2026-2027-band-information",
     title: "2026-2027 Band Information",
     summary: "Major dates, communication channels, materials, attire, and parent involvement.",
@@ -79,12 +91,13 @@ const pages = [
   },
   {
     slug: "spring-trip",
-    title: "Spring Trip",
-    summary: "Williamsburg / Busch Gardens trip details, cost, itinerary, rooming, and behavior expectations.",
+    title: "Spring Trip 2026 (Archive)",
+    summary: "Historical information for May 15-16, 2026. These are not current travel or payment instructions.",
     audience: "Families",
     source: sources.springTrip,
-    category: "Current information",
-    body: cleanGoogleSiteDraft(readSource(sources.springTrip))
+    category: "Archive",
+    archived: true,
+    body: cleanGoogleSiteDraft(readRepoSource(sources.springTrip))
   },
   {
     slug: "marching-band-2026",
@@ -106,12 +119,13 @@ const pages = [
   },
   {
     slug: "instaraise-fundraiser",
-    title: "InstaRaise Fundraiser",
-    summary: "Campaign dates, sharing guidance, suggested message, and fundraiser purpose.",
+    title: "InstaRaise 2026 (Archive)",
+    summary: "Historical information for the campaign ending May 14, 2026. Visit Current Fundraisers for active campaigns.",
     audience: "Families",
     source: sources.instaraise,
-    category: "Support the band",
-    body: cleanGoogleSiteDraft(readSource(sources.instaraise))
+    category: "Archive",
+    archived: true,
+    body: cleanGoogleSiteDraft(readRepoSource(sources.instaraise))
   },
   {
     slug: "required-items",
@@ -226,14 +240,15 @@ const siteDataBody = {
       href: "https://ashleybands.com/portal"
     },
     {
-      label: "InstaRaise campaign",
-      href: "https://instaraise.com/ashleyhighschoolband/support1?a=17&at=1777304529877&as=k"
+      label: "Current Fundraisers",
+      href: "https://ashleybands.com/fundraising"
     },
     {
       label: "Band Shirts Store",
       href: "https://ashleybandshirts.printify.me/"
     }
   ],
+  boosters: readRepoSource(sources.boosters).trim(),
   fundraisers,
   pages,
 };
@@ -264,15 +279,12 @@ const chatbotKnowledge = [
   "",
   "The band calendar at ashleybands.com/calendar is the official source of truth for dates and times. Families subscribe to it once and updates appear automatically. If a date conflicts with another source, tell families to use the calendar or contact Mr. Parker.",
   "",
-  siteData.program.overview,
-  siteData.program.staff,
-  siteData.program.boosters,
-  siteData.program.calendar,
-  siteData.program.communication,
-  siteData.program.attire,
-  siteData.program.sponsorships,
-  siteData.program.sponsors,
-  ...pages.map((page) => `\n\n${page.title.toUpperCase()}\n${page.body}`),
+  readRepoSource(sources.assistantOverview).trim(),
+  siteData.boosters,
+  // Only current family-facing pages belong in answers. Legacy sponsorship
+  // sheets redirect to /sponsors and must not compete with that live offer.
+  ...pages.filter((page) => !page.archived && !["corporate-sponsorship", "family-sponsorship"].includes(page.slug))
+    .map((page) => `\n\n${page.title.toUpperCase()}\nSource: https://ashleybands.com/info/${page.slug}\n${page.body}`),
   ...fundraisers.map((fundraiser) => `\n\n${fundraiser.title.toUpperCase()}\n${fundraiser.body}`)
 ].join("\n").replace(/\n{3,}/g, "\n\n");
 

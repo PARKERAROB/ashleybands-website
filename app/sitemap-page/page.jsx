@@ -11,7 +11,8 @@ export default function SitemapPage() {
   const sections = [
     { label: "Current Information", category: "Current information" },
     { label: "Everyday Resources", category: "Everyday resources" },
-    { label: "Support the Band", category: "Support the band" }
+    { label: "Support the Band", category: "Support the band" },
+    { label: "Archive (past activities)", category: "Archive" }
   ];
 
   const mainPages = [
@@ -19,10 +20,12 @@ export default function SitemapPage() {
     { title: "Band Calendar", href: "/calendar" },
     { title: "AshleyBands Weekly", href: "/newsletter" },
     { title: "Band Boosters", href: "/boosters" },
-    { title: "Family Profile", href: "/portal" },
+    { title: "Current Fundraisers", href: "/fundraising" },
+    ...data.fundraisers.map((fundraiser) => ({ title: fundraiser.title, href: `/fundraising/${fundraiser.slug}` })),
+    { title: "Family Portal", href: "/portal" },
     { title: "Carnegie Hall 2027 Family Commitment", href: "/carnegie-2027/commit" },
     { title: "Carnegie Hall 2027 Family Meeting Packet", href: "/carnegie-2027/meeting-packet" },
-    { title: "Request Profile Access", href: "/portal/request" },
+    { title: "Request Portal Access", href: "/portal/request" },
     { title: "Performed Repertoire", href: "/repertoire" },
     { title: "Program Archive", href: "/programs" },
     { title: "Spring Concert 2026 Program", href: "/programs/spring-concert-2026" },
