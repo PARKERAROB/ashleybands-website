@@ -74,3 +74,9 @@
   .article .fine { font-size: 12px; }
 }
 @media (max-width: 380px) { .award { flex-direction: column; align-items: flex-start; } .hero h1 { font-size: 45px; } }
+
+.fullCircleTitle { font-family: 'DM Serif Display', Georgia, serif; color: #64283a; font-size: 28px; font-weight: 400; line-height: 1.2; margin: 28px 0 18px; }
+.historicalPhoto { margin: 30px 0; }
+.historicalPhoto img { display: block; width: 100%; height: auto; }
+.historicalPhoto figcaption { margin-top: 12px; color: #756650; font-size: 12px; line-height: 1.7; }
+.historicalPhoto figcaption a { display: inline-block; }

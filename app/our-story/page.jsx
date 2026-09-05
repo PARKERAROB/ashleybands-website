@@ -104,6 +104,15 @@ export default function OurStoryPage() {
           <section id="carnegie">
             <p className={styles.kicker}>06 / 2027 and beyond</p>
             <h2>The next chapter<br />belongs to the students.</h2>
+            <h3 className={styles.fullCircleTitle}>Once a student on that stage.</h3>
+            <p>For Mr. Parker, Carnegie Hall is also part of his own story as a student. During his freshman year at Mount Tabor High School, he performed there with his band. The photograph below preserves that moment in his musical life.</p>
+            <figure className={styles.historicalPhoto}>
+              <a href="/images/story/mount-tabor-carnegie-original.jpeg" target="_blank" rel="noreferrer" aria-label="Open the original Mount Tabor Carnegie Hall photograph at full size">
+                <Image src="/images/story/mount-tabor-carnegie-original.jpeg" alt="Mount Tabor High School band on the Carnegie Hall stage during Mr. Parker’s freshman-year visit" width={1290} height={1034} sizes="(max-width: 850px) 100vw, 800px" unoptimized />
+              </a>
+              <figcaption>Mount Tabor High School at Carnegie Hall, during Mr. Parker’s freshman year. Original photograph from his personal collection. <a href="/images/story/mount-tabor-carnegie-original.jpeg" target="_blank" rel="noreferrer">View full-size photo ↗</a></figcaption>
+            </figure>
+            <p>Now, the opportunity to return with Ashley brings that experience full circle: a student who once stood on this stage has become a teacher preparing to bring his own students there. They will arrive with their own music, their own friendships, and their own sense of what might be possible. This time, the experience will belong to them.</p>
             <p>Both the Ashley Concert Band and Wind Ensemble have been selected for the National Band &amp; Orchestra Festival at Carnegie Hall on <strong>March 25, 2027</strong>. The planned New York trip runs March 23–26.</p>
             <p>Mr. Parker’s musical plan includes returning to <em>Carmina Burana</em> for MPA and Carnegie Hall. A work that helped mark the first decade of his time at Ashley could now become part of another generation’s story. The performance program remains a plan as preparation continues.</p>
             <p>The educational aim reaches beyond entering a famous building: prepare demanding music, learn from clinicians, perform with purpose, and bring those experiences back to the classroom. The invitation is a milestone in that work, and an opportunity to imagine what the next ten years could hold.</p>

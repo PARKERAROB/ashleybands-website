@@ -22,3 +22,7 @@ Public narrative home: `app/our-story/page.jsx`. Created September 5, 2026 for #
 - Local filename search of program records, Desktop, and OneDrive archive found an NCMEA 2016 application cover letter, not the standalone performance program. Neither missing concert program is presented as recovered.
 
 No campaign payment flow, donor-benefit promise, or newsletter send is created by this page.
+
+## Personal Carnegie connection, September 5 addition (#51)
+
+Director identifies the original Mount Tabor photograph as his freshman-year Carnegie Hall performance and explicitly authorizes adding it to the story as a full-circle connection. `public/images/story/mount-tabor-carnegie-original.jpeg` is a byte-identical copy of his supplied Photos render preserved in Pictures. The rejected AI restoration is not used. No performance year or pictured individual location is inferred. The full original frame and a direct full-size link are retained; `unoptimized` delivers the unchanged file rather than a recompressed derivative. The narrative distinguishes the historic performance from the planned Ashley return.
