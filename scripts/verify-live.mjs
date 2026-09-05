@@ -53,6 +53,23 @@ try {
   fail(`could not parse Vercel inspection: ${error.message}`);
 }
 
+// inspect --json is a CLI summary and does not include deployment metadata.
+// Read the same deployment through the API to verify the release commit.
+if (expectedCommit) {
+  if (!/^dpl_[a-zA-Z0-9]+$/.test(deployment.id || "")) fail("inspection returned no valid deployment id");
+  let fullDeployment;
+  try {
+    fullDeployment = JSON.parse(run(vercelCommand, [
+      ...vercelPrefix, "api", `/v13/deployments/${deployment.id}`,
+      "--scope", TEAM, "--raw",
+    ]));
+  } catch (error) {
+    fail(`could not read deployment metadata: ${error.message}`);
+  }
+  if (fullDeployment.id !== deployment.id) fail("deployment metadata came from a different deployment");
+  deployment.meta = fullDeployment.meta;
+}
+
 if (deployment.name !== PROJECT) fail(`production alias points to ${deployment.name || "an unknown project"}, not ${PROJECT}`);
 if (deployment.target !== "production") fail(`production alias resolved to target ${deployment.target || "unknown"}`);
 if (deployment.readyState !== "READY") fail(`deployment ${deployment.id || "unknown"} is ${deployment.readyState || "unknown"}`);

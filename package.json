@@ -42,7 +42,7 @@
     "test:practice-loop": "node --test scripts/practice-loop-prototype.test.mjs",
     "test:security": "npm run test:workflow && node --test scripts/security-boundary.test.mjs",
     "test:security:live": "SECURITY_LIVE=1 node --env-file=.env.local --test scripts/security-boundary.test.mjs",
-    "test:workflow": "node --test scripts/project-workflow.test.mjs",
+    "test:workflow": "node --test scripts/project-workflow.test.mjs scripts/verify-live.test.mjs",
     "integration:doctor": "node scripts/integration.mjs doctor",
     "integration:doctor:online": "node scripts/integration.mjs doctor --online",
     "integration:sync": "node scripts/integration.mjs sync",
