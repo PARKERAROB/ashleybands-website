@@ -45,8 +45,8 @@ export default function FundraisingPage() {
 
       <section className="fundraising-note">
         <div>
-          <p className="eyebrow">A simpler weekly newsletter</p>
-          <h2>The newsletter gives the nudge. These pages keep the details.</h2>
+          <p className="eyebrow">Newsletter and fundraiser pages</p>
+          <h2>Each fundraiser has one page, and the newsletter points to it.</h2>
         </div>
         <p>
           Save or share the fundraiser page itself. If a detail changes, families will still have

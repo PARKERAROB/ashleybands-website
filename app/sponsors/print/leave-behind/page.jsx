@@ -33,7 +33,7 @@ export default function PrintLeaveBehindPage() {
 
         <h2 className="print-h2">Two ways to give</h2>
 
-        <h3 className="print-h3">Tier Sponsorship — annual, supports operations</h3>
+        <h3 className="print-h3">Tier Sponsorship: annual, supports operations</h3>
         <table className="print-table print-table-compact">
           <thead>
             <tr>
@@ -57,7 +57,7 @@ export default function PrintLeaveBehindPage() {
         </table>
         <p className="print-small">3-year commitment: 10% off.</p>
 
-        <h3 className="print-h3">Adopt-an-Instrument — capital, toward the 2036 vision</h3>
+        <h3 className="print-h3">Adopt-an-Instrument: capital, toward the 2036 goal</h3>
         <p>
           Gifts of $2,500 or more enter the year's instrument capital fund. Fund a complete
           instrument package and receive a brass plaque on the case with your name for the life
@@ -89,7 +89,7 @@ export default function PrintLeaveBehindPage() {
           matrix. You can also reach the director directly:
         </p>
         <p className="print-contact">
-          <strong>{SPONSOR_CONTACT.director}</strong> — {SPONSOR_CONTACT.title}
+          <strong>{SPONSOR_CONTACT.director}</strong>, {SPONSOR_CONTACT.title}
           <br />
           {SPONSOR_CONTACT.school} · {SPONSOR_CONTACT.email}
           <br />

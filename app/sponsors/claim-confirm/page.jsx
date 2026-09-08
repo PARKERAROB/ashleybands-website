@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import ClaimConfirmClient from "./ClaimConfirmClient";
 
 export const metadata = {
-  title: "Confirm — Ashley Bands Sponsorship",
+  title: "Confirm Ashley Bands Sponsorship",
   robots: { index: false }
 };
 

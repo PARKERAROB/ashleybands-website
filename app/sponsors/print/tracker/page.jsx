@@ -16,7 +16,7 @@ export default function PrintTrackerPage() {
       <article className="print-doc">
         <header className="print-letterhead">
           <p className="print-org">The Bands of Ashley High School</p>
-          <p className="print-eyebrow">Family Outreach Sheet — 2026-2027</p>
+          <p className="print-eyebrow">Family Outreach Sheet, 2026-2027</p>
         </header>
 
         <h1 className="print-h1">My 5-Business Outreach List</h1>
@@ -79,16 +79,16 @@ export default function PrintTrackerPage() {
 
         <h2 className="print-h2">Status legend</h2>
         <ul className="print-ul-tight">
-          <li><strong>Pending</strong> — packet delivered, waiting on decision.</li>
-          <li><strong>Yes</strong> — committed. Form sent to {SPONSOR_LEAD.name} at {SPONSOR_LEAD.email}.</li>
-          <li><strong>No</strong> — not this year. Mark "ask again later" if they invited a future ask.</li>
-          <li><strong>Ask again later</strong> — note the month they suggested.</li>
+          <li><strong>Pending</strong>: packet delivered, waiting on decision.</li>
+          <li><strong>Yes</strong>: committed. Form sent to {SPONSOR_LEAD.name} at {SPONSOR_LEAD.email}.</li>
+          <li><strong>No</strong>: not this year. Mark "ask again later" if they invited a future ask.</li>
+          <li><strong>Ask again later</strong>: note the month they suggested.</li>
         </ul>
 
         <h2 className="print-h2">When you hit a yes</h2>
         <ol className="print-ol-tight">
           <li>Get the signed sponsorship form (paper or online confirmation).</li>
-          <li>Email it to <strong>{SPONSOR_LEAD.email}</strong> with subject: <em>Sponsor commit — [Business Name] — [Your Family Name]</em></li>
+          <li>Email it to <strong>{SPONSOR_LEAD.email}</strong> with subject: <em>Sponsor commit - [Business Name] - [Your Family Name]</em></li>
           <li>{SPONSOR_LEAD.name} takes it from there: thank-you call, recognition setup, intake.</li>
           <li>Update this sheet (Status: Yes, Amount, Sent to {SPONSOR_LEAD.name}: ✓).</li>
         </ol>

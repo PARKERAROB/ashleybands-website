@@ -156,7 +156,7 @@ function ConfirmInner() {
   // success
   if (action === "out") {
     return (
-      <StatusPanel title="Got it — thanks!">
+      <StatusPanel title="Got it, thanks!">
         <p>Recorded that {friendlyName} won&rsquo;t be in band at Ashley next year. No further follow-up needed.</p>
         <p>The door stays open. If anything changes mid-summer, just send Mr. Parker a note.</p>
         <ForwardedEmailFallback studentId={studentId} action={action} studentName={studentName} parentName={parentName} />
@@ -169,7 +169,7 @@ function ConfirmInner() {
 
   if (action === "band_only") {
     return (
-      <StatusPanel title="Got it — thanks!">
+      <StatusPanel title="Got it, thanks!">
         <p>Recorded that {friendlyName} is planning to take band class, but not marching band.</p>
         <p>Mr. Parker is looking forward to having {friendlyName} in band class next semester.</p>
         <ForwardedEmailFallback studentId={studentId} action={action} studentName={studentName} parentName={parentName} />
@@ -182,7 +182,7 @@ function ConfirmInner() {
 
   if (action === "mb_info") {
     return (
-      <StatusPanel title="Thanks — Mr. Parker will send more information">
+      <StatusPanel title="Thanks. Mr. Parker will send more information">
         <p>Recorded that you would like more specific marching band information for {friendlyName} before deciding.</p>
         <p>Mr. Parker will send the sign-up information and next steps.</p>
         <ForwardedEmailFallback studentId={studentId} action={action} studentName={studentName} parentName={parentName} />
@@ -195,7 +195,7 @@ function ConfirmInner() {
   }
 
   return (
-    <StatusPanel title="Thanks — Mr. Parker will reach out">
+    <StatusPanel title="Thanks. Mr. Parker will contact you">
       <p>Recorded that you&rsquo;d like to talk before deciding on band for {friendlyName}.</p>
       <p>Mr. Parker will be in touch within a few days to find a time that works.</p>
       <ForwardedEmailFallback studentId={studentId} action={action} studentName={studentName} parentName={parentName} />

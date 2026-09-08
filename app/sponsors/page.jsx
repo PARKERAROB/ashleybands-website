@@ -156,7 +156,7 @@ export default async function SponsorsHubPage() {
         {ADOPT_BANDS.map((band) => (
           <div key={band.name} className="adopt-band">
             <h4>
-              {band.name} — {band.range}
+              {band.name}: {band.range}
             </h4>
             <p className="adopt-band-typical">{band.typical}</p>
             <table className="adopt-table">
@@ -210,7 +210,7 @@ export default async function SponsorsHubPage() {
           instrument-by-instrument package menu:
         </p>
         <p className="sponsors-contact-block">
-          <strong>{SPONSOR_CONTACT.director}</strong> — {SPONSOR_CONTACT.title}
+          <strong>{SPONSOR_CONTACT.director}</strong>, {SPONSOR_CONTACT.title}
           <br />
           {SPONSOR_CONTACT.school}
           <br />

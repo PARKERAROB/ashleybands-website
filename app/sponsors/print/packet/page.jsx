@@ -90,7 +90,7 @@ export default function PrintPacketPage() {
         <h1 className="print-h1">Sponsorship Levels &amp; Benefits</h1>
 
         <section className="print-section">
-          <h2 className="print-h2">Path 1 — Tier Sponsorship</h2>
+          <h2 className="print-h2">Path 1: Tier Sponsorship</h2>
           <p>
             Annual operations + student scholarships. A $2,000 sponsorship can put four students
             on the field who otherwise would not be there.
@@ -130,7 +130,7 @@ export default function PrintPacketPage() {
         <div className="print-pagebreak" />
 
         <section className="print-section">
-          <h2 className="print-h2">Path 2 — Adopt-an-Instrument</h2>
+          <h2 className="print-h2">Path 2: Adopt-an-Instrument</h2>
           <p>
             By 2036, our goal is for every student in the Ashley band program to have the option
             of using a quality Yamaha instrument. Gifts of $2,500 or more enter the year's
@@ -155,7 +155,7 @@ export default function PrintPacketPage() {
           {ADOPT_BANDS.map((band) => (
             <div key={band.name} className="print-adopt-band">
               <h4 className="print-h4">
-                {band.name} — {band.range} · {band.typical}
+                {band.name}: {band.range} · {band.typical}
               </h4>
               <table className="print-table print-table-compact">
                 <thead>
@@ -185,7 +185,7 @@ export default function PrintPacketPage() {
 
         <div className="print-pagebreak" />
 
-        <h1 className="print-h1">Sponsorship Form — 2026-2027</h1>
+        <h1 className="print-h1">Sponsorship Form, 2026-2027</h1>
         <p>
           <strong>{SPONSOR_CONTACT.boosterOrg}</strong> is a registered 501(c)(3) organization.
           Federal Tax ID: {SPONSOR_CONTACT.ein}.
@@ -208,20 +208,20 @@ export default function PrintPacketPage() {
         <h2 className="print-h2">Choose your sponsorship path</h2>
         <p><em>Select one. You may sponsor both paths in the same year by completing two forms.</em></p>
 
-        <h3 className="print-h3">Path 1 — Tier Sponsorship</h3>
+        <h3 className="print-h3">Path 1: Tier Sponsorship</h3>
         <ul className="print-checklist">
-          <li>☐ Friend — $250</li>
-          <li>☐ Patron — $750</li>
-          <li>☐ Premier — $1,500 ⭐ best value</li>
-          <li>☐ Legacy — $3,000+ (specify amount: $__________)</li>
+          <li>☐ Friend - $250</li>
+          <li>☐ Patron - $750</li>
+          <li>☐ Premier - $1,500 ⭐ best value</li>
+          <li>☐ Legacy - $3,000+ (specify amount: $__________)</li>
         </ul>
         <p>☐ Yes, I'd like to commit for 3 years at this tier (10% multi-year discount).</p>
 
-        <h3 className="print-h3">Path 2 — Adopt-an-Instrument</h3>
+        <h3 className="print-h3">Path 2: Adopt-an-Instrument</h3>
         <ul className="print-checklist">
-          <li>☐ Band 1 — $2,500 to $4,999 (specify: $__________)</li>
-          <li>☐ Band 2 — $5,000 to $9,999 (specify: $__________)</li>
-          <li>☐ Band 3 — $10,000+ (specify: $__________)</li>
+          <li>☐ Band 1 - $2,500 to $4,999 (specify: $__________)</li>
+          <li>☐ Band 2 - $5,000 to $9,999 (specify: $__________)</li>
+          <li>☐ Band 3 - $10,000+ (specify: $__________)</li>
         </ul>
         <p>Designation (optional): _______________________________________________</p>
         <p>
@@ -263,7 +263,7 @@ export default function PrintPacketPage() {
         <p className="print-return">
           <strong>Return to:</strong>
           <br />
-          {SPONSOR_CONTACT.boosterOrg} — Sponsorship
+          {SPONSOR_CONTACT.boosterOrg}, Sponsorship
           <br />
           Attn: {SPONSOR_CONTACT.director}, {SPONSOR_CONTACT.title}
           <br />

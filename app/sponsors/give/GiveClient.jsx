@@ -130,7 +130,7 @@ export default function GiveClient() {
 
         {checkResult ? (
           <div className="give-result" role="status" aria-live="polite">
-            <h2>Almost there — mail your check</h2>
+            <h2>Almost there. Mail your check</h2>
             <ul>
               <li>Make payable to: <strong>{checkResult.payable_to}</strong></li>
               <li>Mail to: {checkResult.mail_to}</li>
@@ -222,7 +222,7 @@ export default function GiveClient() {
                 onDone={setOnlineResult}
               />
             ) : (
-              <p className="give-muted">Enter your name and an amount of at least $5 to give online — or choose Pay by check.</p>
+              <p className="give-muted">Enter your name and an amount of at least $5 to give online, or choose Pay by check.</p>
             )}
           </>
         )}

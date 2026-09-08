@@ -11,7 +11,7 @@ export default function BoostersPage() {
     <main className="narrow-page">
       <p className="eyebrow">Support Ashley Bands</p>
       <h1>Band Boosters</h1>
-      <p className="lede">A place for every family to help.</p>
+      <p className="lede">Every parent and guardian in the program is a member.</p>
       <MarkdownBlock markdown={getSiteData().boosters} />
     </main>
   );

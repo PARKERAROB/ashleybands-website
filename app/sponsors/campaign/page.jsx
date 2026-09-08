@@ -43,8 +43,8 @@ export default function CampaignPage() {
             follow-up week, thank them. 90 seconds, not a sales pitch.
           </li>
           <li>
-            <strong>Follow up.</strong> Most yeses come on the second contact. Don&apos;t take a no
-            personally — it&apos;s usually a budget cycle, not a rejection.
+            <strong>Follow up.</strong> Most yeses come on the second contact. Most nos are about
+            timing. Mark them to ask again later.
           </li>
           <li>
             <strong>Share the giving link.</strong> The sponsor can give without signing in.
@@ -116,7 +116,7 @@ export default function CampaignPage() {
           <li>Share your student link or the business payment link from your Family Sponsorship dashboard. No donor login is required.</li>
           <li>
             For a paper sponsorship form, special arrangement, or follow-up request, email <a href={`mailto:${SPONSOR_CONTACT.email}`}>{SPONSOR_CONTACT.email}</a> with
-            subject: <em>Sponsor commit — [Business Name] — [Your Student Name]</em>
+            subject: <em>Sponsor commit - [Business Name] - [Your Student Name]</em>
           </li>
           <li>Mark “I contacted them” in your Family Sponsorship dashboard.</li>
           <li>

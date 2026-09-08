@@ -1,4 +1,4 @@
-## Families make the program possible
+## What the Boosters do
 
 All Ashley Bands parents and guardians are part of the Band Boosters. Families help with concerts, fundraising, hospitality, equipment, trips, and other band events.
 

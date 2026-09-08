@@ -67,7 +67,7 @@ export default function ClaimConfirmClient() {
   if (state === "done") {
     return (
       <main style={wrap}>
-        <h1>{result?.action === "went" ? "Got it — it stays yours" : "Released to the pool"}</h1>
+        <h1>{result?.action === "went" ? "Got it. It stays yours" : "Released to the pool"}</h1>
         <p>
           {result?.action === "went"
             ? "Thanks for following up. This business is still on your list."
