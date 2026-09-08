@@ -3,24 +3,24 @@ import Link from "next/link";
 import styles from "./story.module.css";
 
 export const metadata = {
-  title: "Our Story: From Struggle to Distinction | Ashley Bands",
-  description: "Two decades of Ashley Bands: the 2016 NCMEA performance, rebuilding after COVID, a return to Superior performances, and the journey to Carnegie Hall in 2027.",
+  title: "Our Story | Ashley Bands",
+  description: "Ashley Bands from 2006 to the 2027 Carnegie Hall invitation: the 2016 NCMEA performance, the drop to about 52 students after COVID, Superior ratings in 2026, and what is planned next.",
   alternates: { canonical: "https://ashleybands.com/our-story" },
   openGraph: {
-    title: "From struggle to distinction. The Ashley Bands story.",
-    description: "Built by generations of students, families, and educators. From Wilmington to Carnegie Hall.",
+    title: "The Ashley Bands story, 2006 to 2027.",
+    description: "How a Wilmington high school band program got an invitation to Carnegie Hall.",
     url: "https://ashleybands.com/our-story",
     images: [{ url: "/656637421_1325880026241163_8640066925134763727_n.jpg", alt: "Ashley High School Wind Ensemble on stage" }]
   }
 };
 
 const chapters = [
-  ["beginnings", "2006", "A first job. A shared beginning."],
-  ["ncmea", "2016", "A stage earned together."],
-  ["rebuilding", "2020 onward", "When the music was interrupted."],
-  ["return", "2026", "The music comes full circle."],
-  ["distinction", "2025–2026", "A Program of Distinction."],
-  ["carnegie", "2027 and beyond", "The next chapter belongs to the students."]
+  ["beginnings", "2006", "Mr. Parker's first job"],
+  ["ncmea", "2016", "The NCMEA conference"],
+  ["rebuilding", "2020 onward", "COVID and the rebuild"],
+  ["return", "2026", "The 2020 program, finally played"],
+  ["distinction", "2025–2026", "Program of Distinction"],
+  ["carnegie", "2027 and beyond", "Carnegie Hall, March 25, 2027"]
 ];
 
 export default function OurStoryPage() {
@@ -30,10 +30,10 @@ export default function OurStoryPage() {
         <div className={styles.heroCopy}>
           <Link href="/" className={styles.back}>← Ashley Bands</Link>
           <p className={styles.kicker}>Our story · Wilmington, North Carolina</p>
-          <h1>From struggle<br />to <em>distinction.</em></h1>
-          <p className={styles.lede}>A band program grows through people. Through the years when everything comes together, and the years when simply keeping the music going takes everything they have.</p>
-          <p>This is the story behind Ashley’s journey to Carnegie Hall.</p>
-          <a href="#beginnings" className={styles.read}>Read our story ↓</a>
+          <h1>How we<br />got <em>here.</em></h1>
+          <p className={styles.lede}>Ashley Bands has been invited to play Carnegie Hall in March 2027. Six years ago the program was down to about 52 students and rehearsing outside in masks.</p>
+          <p>This page is how one turned into the other.</p>
+          <a href="#beginnings" className={styles.read}>Start at 2006 ↓</a>
         </div>
         <figure className={styles.heroPhoto}>
           <Image src="/656637421_1325880026241163_8640066925134763727_n.jpg" alt="Ashley High School Wind Ensemble performing on stage in 2026" fill priority sizes="(max-width: 850px) 100vw, 48vw" style={{ objectFit: "cover", objectPosition: "center 40%" }} />
@@ -43,89 +43,86 @@ export default function OurStoryPage() {
 
       <div className={styles.layout}>
         <nav className={styles.chapters} aria-label="Story chapters">
-          <p className={styles.kicker}>Two decades. Still growing.</p>
+          <p className={styles.kicker}>2006 to now</p>
           {chapters.map(([id, year, title]) => <a key={id} href={`#${id}`}><span>{year}</span>{title}</a>)}
           <a href="#record"><span>The archive</span>Programs &amp; historical notes</a>
         </nav>
+
         <article className={styles.article}>
           <section id="beginnings">
             <p className={styles.kicker}>01 / 2006</p>
-            <h2>A first job.<br />A shared beginning.</h2>
-            <p>Mr. Parker came to Ashley High School in 2006, fresh out of college and beginning his first teaching job. Looking back, he describes those early years with honesty: there was a great deal to learn, and plenty of mistakes along the way.</p>
-            <p>The program grew through daily rehearsal, student commitment, and the support of families and educators. Concert and marching bands were part of a wider musical home that also made room for percussion, jazz, small ensembles, and students finding their place in music.</p>
-            <p>Mr. Parker remembers enrollment reaching roughly 120 students around 2008. The number is a recollection, but the larger story is clear: a community was taking shape. Each class of students helped establish expectations and traditions that the next class could build on.</p>
+            <h2>Mr. Parker’s<br />first job.</h2>
+            <p>Mr. Parker came to Ashley in 2006, straight out of college. It was his first teaching job, and by his own account he made plenty of mistakes in those first years.</p>
+            <p>The program grew anyway. Concert band and marching band were the core, with percussion, jazz, and small ensembles around them.</p>
+            <p>By about 2008 enrollment was somewhere around 120 students. That number is from memory, not a roster, but it was a full band room.</p>
           </section>
 
           <section id="ncmea">
             <p className={styles.kicker}>02 / 2016</p>
-            <h2>A stage earned together.</h2>
-            <p>A decade into that work, the Ashley Wind Ensemble earned the opportunity to perform at the North Carolina Music Educators Association’s professional development conference. It was a meaningful statewide recognition of what students and their community had built.</p>
-            <p>The original conference publication lists Ashley’s performance for <strong>Tuesday, November 8, 2016, at 11 a.m.</strong> in Winston-Salem. Its profile describes a program active in concert, marching, chamber, and community music, with a history of Superior ratings.</p>
+            <h2>The NCMEA conference.</h2>
+            <p>Ten years in, the Wind Ensemble was selected to perform at the North Carolina Music Educators Association conference in Winston-Salem.</p>
+            <p>The conference program lists the performance for <strong>Tuesday, November 8, 2016, at 11 a.m.</strong> The entry describes a program active in concert, marching, chamber, and community music, with a history of Superior ratings. The page is linked below.</p>
             <a className={styles.sourceLink} href="https://www.ncmea.net/wp-content/uploads/2020/02/NCMEA-Conference-2016web.pdf#page=26" target="_blank" rel="noreferrer">Open Ashley’s entry in the 2016 NCMEA publication ↗ <span>Printed page 24 · PDF page 26</span></a>
-            <p>After the conference came another musical milestone: a performance of <em>Carmina Burana</em> at Music Performance Adjudication, or MPA. Mr. Parker remembers it as an especially ambitious and personally meaningful undertaking. That music would become a point of connection between the program’s first decade and its next chapter.</p>
+            <p>After the conference, the band took <em>Carmina Burana</em> to Music Performance Adjudication, or MPA. It is an ambitious piece for a high school band. Keep it in mind. It comes back at the end.</p>
           </section>
 
           <section id="rebuilding">
             <p className={styles.kicker}>03 / 2020 onward</p>
-            <h2>When the music<br />was interrupted.</h2>
-            <p>COVID disrupted the routines that make an ensemble possible. For band and choir, where making music depends on breath and on people listening and performing together, distancing and masking changed the experience of rehearsal itself.</p>
-            <p>At Ashley, the effects were profound. Mr. Parker recalls the program falling to about 52 students at one point. He remembers rehearsing outdoors with masks, struggling to retain students, and wondering whether the marching program and the larger musical life of the school could fully return.</p>
-            <p>Those students were still making music. But the continuity between classes, the confidence of a full ensemble, and the shared habits built over years had been interrupted. Reopening a room could not immediately restore all of that.</p>
-            <div className={styles.callout}><p>Rebuilding would take seven years.</p><span>Mr. Parker’s recollection of a conversation with his Lieutenant Colonel colleague during the disruption.</span></div>
-            <p>That was a long view of what recovery would require: successive classes of students learning, staying, and helping the next group find its way. The students who persevered through the difficult years made today’s opportunities possible, even when they would graduate before seeing the result.</p>
-            <p>The rebuilding also depended on families, teachers, school administrators, district leadership, and arts educators continuing to believe that the program was worth supporting. The 2026–2027 season approaches the seven-year mark from the shutdown in spring 2020. For Mr. Parker, the return has been a sustained process, not a single successful concert.</p>
+            <h2>COVID.</h2>
+            <p>Band depends on breath and on people in a room together. COVID took both away.</p>
+            <p>The program dropped to about 52 students at the low point. Rehearsals moved outside, in masks. Students left and did not come back. Mr. Parker was not sure the marching band would come back.</p>
+            <p>The students who stayed kept playing. What was gone was everything a band passes down from seniors to freshmen, and reopening the room did not bring it back.</p>
+            <div className={styles.callout}><p>Rebuilding would take seven years.</p><span>A colleague, a Lieutenant Colonel, said this to Mr. Parker during the shutdown.</span></div>
+            <p>He was right. It took class after class of students learning the program, staying in it, and teaching the next group. Most of the students who did that work graduated before the Carnegie Hall invitation came.</p>
+            <p>The 2026–2027 season is the seventh since the shutdown in spring 2020.</p>
           </section>
 
           <section id="return">
             <p className={styles.kicker}>04 / March 19, 2026</p>
-            <h2>The music comes<br />full circle.</h2>
-            <p>In 2026, both Ashley concert ensembles earned <strong>Superior ratings at MPA</strong>: the Wind Ensemble performing at Grade VI and the Concert Band at Grade IV. Those grades describe the repertoire level, not the students’ school grades.</p>
-            <p>For the Wind Ensemble, the repertoire carried a history of its own. Vincent Persichetti’s <em>Divertimento for Band, Op. 42</em> and Clifton Williams’s <em>Symphonic Dance No. 3, “Fiesta”</em> were the works Mr. Parker recalls preparing for the MPA that was canceled as COVID arrived in 2020. Returning to them in 2026 meant finally bringing that unfinished musical work to the adjudication stage with a new generation of students.</p>
+            <h2>The 2020 program,<br />finally played.</h2>
+            <p>On March 19, 2026, both concert ensembles earned <strong>Superior ratings at MPA</strong>. The Wind Ensemble played at Grade VI and the Concert Band at Grade IV. The grade is the difficulty of the music, not a school grade.</p>
+            <p>Two of the Wind Ensemble pieces had been waiting six years. Vincent Persichetti’s <em>Divertimento for Band, Op. 42</em> and Clifton Williams’s <em>Symphonic Dance No. 3, “Fiesta”</em> were on the program for the 2020 MPA that COVID canceled. None of the 2026 students had been in the band then.</p>
             <div className={styles.repertoire}>
               <div><span>Wind Ensemble · Grade VI · Superior</span><h3>The 2026 program</h3><ul><li><em>Xerxes</em><small>John Mackey</small></li><li><em>Divertimento for Band, Op. 42</em><small>Vincent Persichetti</small></li><li><em>Symphonic Dance No. 3, “Fiesta”</em><small>Clifton Williams</small></li></ul></div>
-              <div><span>Concert Band · Grade IV · Superior</span><h3>A shared return</h3><ul><li><em>Bonds of Unity</em><small>Karl King / arr. James Swearingen</small></li><li><em>Southern Hymn</em><small>Samuel Hazo</small></li><li><em>Dimensions of Seven</em><small>James Curnow</small></li></ul></div>
+              <div><span>Concert Band · Grade IV · Superior</span><h3>The 2026 program</h3><ul><li><em>Bonds of Unity</em><small>Karl King / arr. James Swearingen</small></li><li><em>Southern Hymn</em><small>Samuel Hazo</small></li><li><em>Dimensions of Seven</em><small>James Curnow</small></li></ul></div>
             </div>
-            <p>The march was the one change from the intended 2020 Wind Ensemble program. Mr. Parker had planned to pair the Persichetti and Williams works with his favorite march, <em>Nobles of the Mystic Shrine</em>. In 2026, the students were drawn to John Mackey’s <em>Xerxes</em>, and he chose to follow their enthusiasm.</p>
-            <p><em>Xerxes</em> already held a place in Ashley’s musical history. Mr. Parker recalls Ashley being among the early ensembles he knew to bring its unconventional character to MPA. Returning to it connected the students’ own musical interests with the program’s past. The choice made the performance theirs.</p>
-            <p>The Persichetti masterwork, the exuberance of <em>Fiesta</em>, and the distinctive voice of <em>Xerxes</em> made the program more than a list of demanding pieces. For Mr. Parker, hearing students meet that challenge was evidence of a musical return years in the making.</p>
-            <p>The year’s work extended beyond MPA. In May, the Wind Ensemble performed all five movements of Johan de Meij’s <em>Symphony No. 1, “The Lord of the Rings.”</em> The Concert Band, percussion students, and other ensembles contributed their own performances to a season of renewed ambition.</p>
+            <p>The march was the one change. The 2020 plan was <em>Nobles of the Mystic Shrine</em>, Mr. Parker’s favorite. The 2026 students wanted John Mackey’s <em>Xerxes</em>, so that is what they played.</p>
+            <p>Ashley had taken <em>Xerxes</em> to MPA years before, early enough that Mr. Parker remembers it being an unusual choice at the time.</p>
+            <p>In May the Wind Ensemble played all five movements of Johan de Meij’s <em>Symphony No. 1, “The Lord of the Rings.”</em> The spring concert program is linked below.</p>
             <div className={styles.links}><a href="/distinction/docs/mpa-program-south-site.pdf">2026 MPA program ↗</a><a href="/distinction/docs/mpa-results-statewide.pdf">2026 MPA results ↗</a><Link href="/programs/spring-concert-2026">Spring concert program →</Link></div>
           </section>
 
           <section id="distinction">
             <div className={styles.award}><Image src="/images/home/program-of-distinction.png" alt="Official North Carolina Bandmasters Association Program of Distinction badge" width={176} height={176} /><div><p className={styles.kicker}>05 / Inaugural class · 2025–2026</p><h2>A Program<br />of Distinction.</h2></div></div>
-            <p>The North Carolina Bandmasters Association named Ashley to its inaugural class of Programs of Distinction. The designation recognizes musical excellence, performance, community outreach, and advocacy.</p>
-            <p>The record behind that recognition reaches beyond one ensemble or one concert: Superior performances by both concert bands; students participating in honor bands; jazz and chamber music; marching and other school-spirit ensembles; community performances; and collaboration with younger musicians. Ten Ashley students were selected by audition for the 2026 Eastern District All-District Band.</p>
-            <p>The September 1, 2026 Board of Education recognition offered a moment to reflect on the people behind the award. In preparing his remarks, Mr. Parker returned to a simple responsibility: celebrate programs that are succeeding, and keep supporting programs that are struggling.</p>
-            <div className={styles.callout}><p>Today’s Program of Distinction was once a program struggling to find its way back.</p><span>Achievement does not erase the difficult years. It shows why support during those years matters.</span></div>
-            <p>This recognition belongs to generations of students and to the families, educators, administrators, and community members who stayed with them. No one director, class, or concert built it alone.</p>
+            <p>The North Carolina Bandmasters Association named Ashley to its first class of Programs of Distinction. NCBA’s criteria are musical excellence, performance, community outreach, and advocacy.</p>
+            <p>The record includes Superior ratings from both concert bands, students in honor bands, jazz and chamber groups, the marching band and pep band, community performances, and work with younger musicians. Ten students made the 2026 Eastern District All-District Band by audition.</p>
+            <p>The Board of Education recognized the program on September 1, 2026. Mr. Parker’s remarks that night made one point: celebrate the programs that are doing well, and keep supporting the ones that are struggling.</p>
+            <div className={styles.callout}><p>Today’s Program of Distinction was a 52-student program six years ago.</p><span>The point of the September 1 remarks.</span></div>
           </section>
 
           <section id="carnegie">
             <p className={styles.kicker}>06 / 2027 and beyond</p>
-            <h2>The next chapter<br />belongs to the students.</h2>
-            <h3 className={styles.fullCircleTitle}>Once a student on that stage.</h3>
-            <p>For Mr. Parker, Carnegie Hall is also part of his own story as a student. During his freshman year at Mount Tabor High School, he performed there with his band. The photograph below preserves that moment in his musical life.</p>
+            <h2>Carnegie Hall,<br />March 25, 2027.</h2>
+            <h3 className={styles.fullCircleTitle}>Mr. Parker has played there.</h3>
+            <p>As a freshman at Mount Tabor High School, Mr. Parker played Carnegie Hall with his own band. The photo below is from that trip.</p>
             <figure className={styles.historicalPhoto}>
               <a href="/images/story/mount-tabor-carnegie-original.jpeg" target="_blank" rel="noreferrer" aria-label="Open the original Mount Tabor Carnegie Hall photograph at full size">
-                <Image src="/images/story/mount-tabor-carnegie-original.jpeg" alt="Mount Tabor High School band on the Carnegie Hall stage during Mr. Parker’s freshman-year visit" width={1290} height={1034} sizes="(max-width: 850px) 100vw, 800px" unoptimized />
+                <Image src="/images/story/mount-tabor-carnegie-original.jpeg" alt="Mount Tabor High School band on the Carnegie Hall stage during Mr. Parker's freshman-year visit" width={1290} height={1034} sizes="(max-width: 850px) 100vw, 800px" unoptimized />
               </a>
               <figcaption>Mount Tabor High School at Carnegie Hall, during Mr. Parker’s freshman year. Original photograph from his personal collection. <a href="/images/story/mount-tabor-carnegie-original.jpeg" target="_blank" rel="noreferrer">View full-size photo ↗</a></figcaption>
             </figure>
-            <p>Now, the opportunity to return with Ashley brings that experience full circle: a student who once stood on this stage has become a teacher preparing to bring his own students there. They will arrive with their own music, their own friendships, and their own sense of what might be possible. This time, the experience will belong to them.</p>
-            <p>Both the Ashley Concert Band and Wind Ensemble have been selected for the National Band &amp; Orchestra Festival at Carnegie Hall on <strong>March 25, 2027</strong>. The planned New York trip runs March 23–26.</p>
-            <p>Mr. Parker’s musical plan includes returning to <em>Carmina Burana</em> for MPA and Carnegie Hall. A work that helped mark the first decade of his time at Ashley could now become part of another generation’s story. The performance program remains a plan as preparation continues.</p>
-            <p>The educational aim reaches beyond entering a famous building: prepare demanding music, learn from clinicians, perform with purpose, and bring those experiences back to the classroom. The invitation is a milestone in that work, and an opportunity to imagine what the next ten years could hold.</p>
-            <p>As the 2026–2027 year begins, Mr. Parker describes enrollment as the second highest of his time at Ashley. Today’s students have different demands on their attention and more ways to spend their time than the students he first taught in 2006. They are still choosing band. Families are still finding value in the community it creates.</p>
-            <p>The next chapter is about continuing to earn that trust: expanding what students can experience, deepening what they learn each day, and helping them carry music into their lives beyond graduation. In his board-meeting preparation, Mr. Parker recalled alumni traveling back from as far away as Portland, Oregon, and New York to perform with the program again. That kind of return speaks to a connection that lasts long after a student’s final school concert.</p>
-            <p>Music education gives students repeated opportunities to listen, contribute, persist through difficulty, and make something meaningful with other people. Carnegie Hall can be one extraordinary part of that education. The lasting story is what students take with them, and what they make possible for those who follow.</p>
-            <div className={styles.next}><p className={styles.kicker}>From Wilmington to Carnegie Hall</p><h3>Be part of the next chapter.</h3><p>A community sponsorship campaign is being prepared to help make this opportunity possible. Campaign details are coming soon.</p><Link href="/info/carnegie-2027">Explore current Carnegie Hall information →</Link><p className={styles.fine}>Final participation, price, approvals, funding, and travel arrangements remain subject to confirmation.</p></div>
+            <p>In March 2027 he goes back with his own students.</p>
+            <p>Both the Ashley Concert Band and Wind Ensemble have been selected for the National Band &amp; Orchestra Festival at Carnegie Hall on <strong>March 25, 2027</strong>. The New York trip is planned for March 23–26.</p>
+            <p>The plan is to bring <em>Carmina Burana</em> back, for MPA and then for Carnegie Hall. It is the same piece the band took to MPA after the 2016 conference. The performance program is not final yet.</p>
+            <p>Enrollment this fall is the second highest in Mr. Parker’s twenty years at Ashley. Students in 2026 have more competing for their time than the students of 2006 did. They are still choosing band.</p>
+            <p>Alumni have come back from as far as Portland, Oregon, and New York to play with the band again.</p>
+            <div className={styles.next}><p className={styles.kicker}>From Wilmington to Carnegie Hall</p><h3>Help get the band there.</h3><p>Fundraisers are open now, and a sponsorship campaign for the trip is being put together.</p><Link href="/info/carnegie-2027">Current Carnegie Hall information →</Link><p className={styles.fine}>Final participation, price, approvals, funding, and travel arrangements remain subject to confirmation.</p></div>
           </section>
 
           <section id="record" className={styles.record}>
             <p className={styles.kicker}>Programs &amp; historical notes</p>
-            <h2>Keeping the story connected to its record.</h2>
-            <p>This account brings together public performance records and Mr. Parker’s recollections, including his September 2026 board-recognition preparation. Approximate enrollment figures and the seven-year conversation are identified as recollections. They are not an audited enrollment history.</p>
+            <h2>Sources.</h2>
+            <p>This page combines public performance records with Mr. Parker’s recollections, including his notes for the September 2026 board recognition. The enrollment numbers and the seven-year conversation are from memory, not an audited history.</p>
             <ul>
               <li><a href="https://www.ncmea.net/wp-content/uploads/2020/02/NCMEA-Conference-2016web.pdf#page=26" target="_blank" rel="noreferrer">2016 NCMEA conference publication</a>: Ashley’s profile and scheduled performance appear on printed page 24 (PDF page 26). This is the conference entry, not the ensemble’s complete concert program.</li>
               <li><a href="https://www.ncbaeastern.com/past-programs.html" target="_blank" rel="noreferrer">NCBA Eastern District program archive</a>: the source for earlier MPA programs. The exact year and program for Ashley’s first <em>Carmina Burana</em> performance are still being located.</li>
