@@ -59,13 +59,13 @@ export default function HomePage() {
           <p className="home-campaign-kicker">Ashley High School Bands · North Carolina</p>
           <h1 id="home-hero-title">From Wilmington<br />to <em>Carnegie Hall.</em></h1>
           <p className="home-campaign-lede">
-            A community of young musicians. A North Carolina Program of Distinction.
-            Now, our Concert Band and Wind Ensemble have been selected to perform at Carnegie Hall.
+            Both the Concert Band and the Wind Ensemble have been selected for the National Band &amp; Orchestra
+            Festival at Carnegie Hall. Twenty years of Ashley students built the program that earned the invitation.
           </p>
           <p className="home-campaign-date">New York City <span aria-hidden="true">/</span> March 25, 2027</p>
           <div className="home-campaign-actions">
-            <Link className="home-btn home-btn-primary" href="/info/carnegie-2027">Explore the Carnegie Hall journey <span aria-hidden="true">↗</span></Link>
-            <Link className="home-campaign-story-link" href="/our-story">Read our story <span aria-hidden="true">→</span></Link>
+            <Link className="home-btn home-btn-primary" href="/info/carnegie-2027">About the Carnegie Hall trip <span aria-hidden="true">↗</span></Link>
+            <Link className="home-campaign-story-link" href="/our-story">How we got here <span aria-hidden="true">→</span></Link>
           </div>
           <a className="home-recognition" href="#program-of-distinction">
             <Image src="/images/home/program-of-distinction.png" alt="Official NCBA Program of Distinction badge, 2025–2026" width={144} height={144} priority />
@@ -74,7 +74,7 @@ export default function HomePage() {
         </div>
         <figure className="home-campaign-art">
           <Image src="/images/home/perlman-stage.avif" alt="View from the Perlman Stage at Carnegie Hall, with a grand piano and the auditorium beyond" fill sizes="(max-width: 900px) 100vw, 48vw" priority style={{ objectFit: "cover" }} />
-          <div className="home-campaign-art-title" aria-hidden="true"><span>The next chapter</span><strong>Carnegie<br />2027</strong></div>
+          <div className="home-campaign-art-title" aria-hidden="true"><span>New York City</span><strong>Carnegie<br />2027</strong></div>
           <figcaption>Carnegie Hall · View from the Perlman Stage</figcaption>
         </figure>
       </section>
@@ -83,26 +83,26 @@ export default function HomePage() {
         <div className="home-container home-program-grid">
           <figure className="home-program-photo">
             <Image src="/656637421_1325880026241163_8640066925134763727_n.jpg" alt="Ashley High School Wind Ensemble performing on stage" fill sizes="(max-width: 900px) 100vw, 50vw" style={{ objectFit: "cover", objectPosition: "center 40%" }} />
-            <figcaption>Our students. Our sound. Ashley Bands.</figcaption>
+            <figcaption>Ashley Wind Ensemble · 2026</figcaption>
           </figure>
           <div className="home-program-copy" id="program-of-distinction">
-            <p className="eyebrow">Rooted here. Reaching further.</p>
+            <p className="eyebrow">About the program</p>
             <h2 id="our-story-title">Built in the band room.<br />Ready for a bigger stage.</h2>
-            <p>At Ashley High School in Wilmington, students grow through concert bands, marching band, percussion, jazz, colorguard, and pep band. The music brings us together. The work helps us grow.</p>
-            <p>Both Concert Band and Wind Ensemble earned Superior ratings at the 2026 Concert MPA. Ashley joined the inaugural class of NCBA Programs of Distinction, recognizing musical excellence, performance, community outreach, and advocacy.</p>
-            <p>Selection for Carnegie Hall marks the next chapter in that story: a chance for our students to represent their school and community on a world-renowned stage.</p>
-            <div className="home-links"><Link href="/our-story">Read our full story</Link><Link href="/programs">Explore our concert programs</Link><Link href="/info/marching-band-2026">Meet the Screaming Eagle Regiment</Link></div>
+            <p>Ashley students play in two concert bands, the marching band, percussion, jazz band, colorguard, and pep band. Mr. Parker took the job in 2006, fresh out of college, and has directed the program ever since.</p>
+            <p>In March 2026 the Wind Ensemble earned a Superior rating at Grade VI and the Concert Band earned a Superior at Grade IV. Ten students were selected for the Eastern District All-District Band. The North Carolina Bandmasters Association also named Ashley to its first class of Programs of Distinction.</p>
+            <p>The program fell to about 52 students after COVID. Enrollment this year is the second highest of Mr. Parker’s time at Ashley, and the Carnegie Hall invitation came out of that rebuild. Mr. Parker played there once himself, as a freshman with the Mount Tabor High School band.</p>
+            <div className="home-links"><Link href="/our-story">The full story, 2006 to now</Link><Link href="/programs">Concert programs</Link><Link href="/info/marching-band-2026">The Screaming Eagle Regiment</Link></div>
           </div>
         </div>
       </section>
 
       <section className="home-campaign-future" aria-labelledby="home-campaign-future-title">
         <div className="home-container home-campaign-future-grid">
-          <div><p className="eyebrow">The road to Carnegie Hall</p><h2 id="home-campaign-future-title">A big stage.<br />A whole community behind it.</h2></div>
-          <div><p>Help make this opportunity possible for Ashley’s young musicians. Start with the current fundraisers, or contact Mr. Parker about helping with the Carnegie Hall campaign.</p>
-            <p className="home-campaign-coming">Help with the road to Carnegie Hall</p>
-            <div className="home-links"><Link href="/fundraising">Current fundraisers</Link><a href="mailto:robert.parker@nhcs.net">Ask about Carnegie support</a></div>
-            <Link className="home-btn home-btn-secondary" href="/info/carnegie-2027">Read current trip information <span aria-hidden="true">↗</span></Link>
+          <div><p className="eyebrow">Getting the band to New York</p><h2 id="home-campaign-future-title">Help get the band<br />to New York.</h2></div>
+          <div><p>The fundraisers below are the easiest place to start. Businesses and anyone considering a larger gift can contact Mr. Parker directly.</p>
+            <p className="home-campaign-coming">How to help</p>
+            <div className="home-links"><Link href="/fundraising">Current fundraisers</Link><a href="mailto:robert.parker@nhcs.net">Email Mr. Parker</a></div>
+            <Link className="home-btn home-btn-secondary" href="/info/carnegie-2027">Current trip information <span aria-hidden="true">↗</span></Link>
             <p className="home-campaign-planning">Travel plans, final participation, price, approvals, and funding remain subject to confirmation.</p>
           </div>
         </div>
@@ -239,11 +239,11 @@ export default function HomePage() {
             />
           </div>
           <div className="home-story-copy">
-            <p className="eyebrow">Screaming Eagle Regiment</p>
-            <h2 id="home-story-title">A program that competes and wins.</h2>
+            <p className="eyebrow">Marching band</p>
+            <h2 id="home-story-title">The Screaming Eagle Regiment.</h2>
             <p>
-              Our students invest hundreds of hours each season in rehearsal, performance, and competition.
-              The results show.
+              The Regiment rehearses Tuesdays and Thursdays from 4:00 to 7:00 PM, plus Saturdays on
+              non-competition weeks. Football games, competitions, and parades fill the rest of the fall.
             </p>
             <div className="home-links home-links-light">
               <Link href="/info/marching-band-2026">Marching Band 2026</Link>
@@ -288,11 +288,11 @@ export default function HomePage() {
 
       <section className="home-newsletter" aria-labelledby="home-newsletter-title">
         <div className="home-newsletter-copy">
-          <p className="eyebrow">Sundays from Ashley Bands</p>
-          <h2 id="home-newsletter-title">The week behind us. The week ahead.</h2>
+          <p className="eyebrow">The newsletter</p>
+          <h2 id="home-newsletter-title">One email every Sunday.</h2>
           <p>
-            AshleyBands Weekly shares student accomplishments, upcoming dates, and the few things students and
-            families need to do next.
+            AshleyBands Weekly covers what students did, what is coming up, and anything families need to do
+            before the next week starts.
           </p>
           <Link className="text-link" href="/newsletter">Read AshleyBands Weekly</Link>
         </div>
