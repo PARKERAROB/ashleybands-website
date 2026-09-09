@@ -1,6 +1,8 @@
 const nextConfig = {
   async headers() {
     return [
+      { source: "/carnegie-2027/team/:path*", headers: [{ key: "Cache-Control", value: "private, no-store, max-age=0" }, { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" }] },
+      { source: "/api/carnegie-2027/team/:path*", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" }] },
       {
         source: "/meetings/2026-09-01",
         headers: [
