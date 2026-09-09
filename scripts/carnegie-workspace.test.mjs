@@ -1,6 +1,7 @@
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import assert from "node:assert/strict";
-import { zipSync, strToU8 } from "fflate";
+import { zipSync, strToU8, unzipSync } from "fflate";
 import {
   EMPTY_WORKSPACE,
   applyWorkspaceAction,
@@ -281,4 +282,17 @@ test("XLSX includes named sheets, cell references, cached formula values, and hi
       ),
     /credential/,
   );
+});
+
+test("standard Word and Excel files retain normal metadata and readable content", () => {
+ const docx=extractOffice(readFileSync(new URL("./fixtures/carnegie-workspace/plan.docx",import.meta.url)),"plan.docx");
+ assert.match(docx.sections[0].text,/Synthetic coordination plan/);
+ assert.match(docx.sections[0].text,/Compare source/);
+ const metadataCase=unzipSync(readFileSync(new URL("./fixtures/carnegie-workspace/plan.docx",import.meta.url)));
+ metadataCase["customXml/item1.xml"]=strToU8("<metadata>PIN: 123456</metadata>");
+ assert.throws(()=>extractOffice(zipSync(metadataCase),"plan.docx"),/credential/);
+ const xlsx=extractOffice(readFileSync(new URL("./fixtures/carnegie-workspace/milestones.xlsx",import.meta.url)),"milestones.xlsx");
+ assert.equal(xlsx.sections[0].title,"Milestones");
+ assert.match(xlsx.sections[0].text,/A2: Review source/);
+ assert.match(xlsx.sections[0].text,/cached value only/);
 });

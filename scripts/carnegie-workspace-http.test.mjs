@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 // Synthetic end-to-end proof: isolated HTTP backend, actual Next routes and browser UI.
 // Never connects to production or writes real workspace data.
 import test from "node:test";
@@ -324,11 +325,9 @@ test(
         },
         staff[2],
       );
-      const docBytes = zipSync({
-        "word/document.xml": strToU8(
-          '<w:document xmlns:w="urn:w"><w:body><w:p><w:r><w:t>Sample working plan &lt;script&gt;alert(1)&lt;/script&gt;</w:t></w:r></w:p></w:body></w:document>',
-        ),
-      });
+      const standardDoc = unzipSync(readFileSync(new URL("./fixtures/carnegie-workspace/plan.docx", import.meta.url)));
+      standardDoc["word/document.xml"] = strToU8(strFromU8(standardDoc["word/document.xml"]).replace("Synthetic coordination plan", "Sample working plan &lt;script&gt;alert(1)&lt;/script&gt;"));
+      const docBytes = zipSync(standardDoc);
       const upload = () =>
         fetch(
           base +
