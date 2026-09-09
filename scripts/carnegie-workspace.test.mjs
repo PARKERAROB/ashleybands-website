@@ -160,6 +160,7 @@ test("document receipt cannot alter facts and only owner selects working version
   );
   s = act(s, { action: "document.status", id: "two", status: "current" });
   assert.equal(s.documents.filter((d) => d.status === "current").length, 1);
+  assert.throws(() => act(s, { action: "document.receive", document: { id: "three", owner_id: "owner", series_id: "two" } }), /original document series/);
 });
 test("structured import is atomic, bounded and creates pending proposals only", () => {
   const s = record();
