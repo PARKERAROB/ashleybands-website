@@ -1,3 +1,4 @@
+import bcrypt from "bcryptjs";
 import { readFileSync } from "node:fs";
 // Synthetic end-to-end proof: isolated HTTP backend, actual Next routes and browser UI.
 // Never connects to production or writes real workspace data.
@@ -50,6 +51,11 @@ const members = [
   { staff_id: staff[2].id, domains: ["coordination"] },
   { staff_id: staff[3].id, domains: ["finance"] },
 ];
+// Synthetic credentials exercise the real staff-auth route against this isolated backend.
+for (const [index, person] of staff.entries()) {
+  person.email = `staff-${index}@example.com`;
+  person.pin_hash = bcrypt.hashSync("246810", 4);
+}
 const cookie = (person) => {
   const encoded = Buffer.from(
     JSON.stringify({
@@ -97,14 +103,20 @@ test(
                   : true,
           ),
         );
+      if (u.pathname === "/rest/v1/auth_rate_limits")
+        return send(null, req.method === "GET" ? 200 : 201);
       if (u.pathname === "/rest/v1/staff") {
-        const rows = filter(staff).map(({ session_token, ...s }) =>
-          u.searchParams.get("select")?.includes("session_token")
-            ? { ...s, session_token }
-            : s,
+        const matching = filter(staff);
+        if (req.method === "PATCH")
+          for (const person of matching) Object.assign(person, json());
+        const columns = (u.searchParams.get("select") || "id")
+          .split(",")
+          .map((s) => s.trim());
+        const rows = matching.map((person) =>
+          Object.fromEntries(columns.map((key) => [key, person[key] ?? null])),
         );
         return send(
-          u.searchParams.has("id") && u.searchParams.get("id").startsWith("eq.")
+          String(req.headers.accept).includes("vnd.pgrst.object")
             ? rows[0] || null
             : rows,
         );
@@ -115,7 +127,15 @@ test(
       }
       if (u.pathname === "/rest/v1/carnegie_workspace") return send(current);
       if (u.pathname === "/rest/v1/carnegie_workspace_history")
-        return send(u.searchParams.has("revision") ? history.find(h => String(h.revision) === u.searchParams.get("revision").slice(3)) : [...history].reverse().slice(0, 100));
+        return send(
+          u.searchParams.has("revision")
+            ? history.find(
+                (h) =>
+                  String(h.revision) ===
+                  u.searchParams.get("revision").slice(3),
+              )
+            : [...history].reverse().slice(0, 100),
+        );
       if (u.pathname === "/rest/v1/audit_log") return send(null, 201);
       if (u.pathname === "/rest/v1/rpc/save_carnegie_workspace") {
         const p = json();
@@ -325,8 +345,17 @@ test(
         },
         staff[2],
       );
-      const standardDoc = unzipSync(readFileSync(new URL("./fixtures/carnegie-workspace/plan.docx", import.meta.url)));
-      standardDoc["word/document.xml"] = strToU8(strFromU8(standardDoc["word/document.xml"]).replace("Synthetic coordination plan", "Sample working plan &lt;script&gt;alert(1)&lt;/script&gt;"));
+      const standardDoc = unzipSync(
+        readFileSync(
+          new URL("./fixtures/carnegie-workspace/plan.docx", import.meta.url),
+        ),
+      );
+      standardDoc["word/document.xml"] = strToU8(
+        strFromU8(standardDoc["word/document.xml"]).replace(
+          "Synthetic coordination plan",
+          "Sample working plan &lt;script&gt;alert(1)&lt;/script&gt;",
+        ),
+      );
       const docBytes = zipSync(standardDoc);
       const upload = () =>
         fetch(
@@ -407,6 +436,133 @@ test(
       if (playwrightRoot) {
         const { chromium } = require(playwrightRoot);
         browser = await chromium.launch({ headless: true });
+        const entryContext = await browser.newContext();
+        const entry = await entryContext.newPage();
+        const entryErrors = [];
+        entry.on("pageerror", (error) => entryErrors.push(error.message));
+        await entry.goto(base + "/carnegie-2027/team");
+        await entry
+          .getByRole("heading", { name: "Sign in to the Carnegie workspace" })
+          .waitFor();
+        await entry.getByRole("link", { name: "Sign in", exact: true }).click();
+        await entry.waitForURL(base + "/carnegie-2027/team/sign-in");
+        await entry.getByLabel("Email", { exact: true }).fill(staff[0].email);
+        await entry.getByLabel("PIN", { exact: true }).fill("000000");
+        await entry
+          .getByRole("button", { name: "Sign In", exact: true })
+          .click();
+        await entry
+          .getByText("Email or PIN not recognized", { exact: true })
+          .waitFor();
+        assert.ok(entry.url().endsWith("/sign-in"));
+        await entry.route("**/api/sponsors/staff-auth", (route) =>
+          route.abort(),
+        );
+        await entry
+          .getByRole("button", { name: "Sign In", exact: true })
+          .click();
+        await entry
+          .getByText("Staff sign-in could not connect. Please try again.", {
+            exact: true,
+          })
+          .waitFor();
+        await entry.unroute("**/api/sponsors/staff-auth");
+        await entry.getByLabel("PIN", { exact: true }).fill("246810");
+        await entry
+          .getByRole("button", { name: "Sign In", exact: true })
+          .click();
+        await entry.waitForURL(base + "/carnegie-2027/team");
+        await entry
+          .getByRole("heading", { name: "Carnegie, together." })
+          .waitFor();
+        assert.ok(
+          (await entryContext.cookies()).find(
+            (c) => c.name === "ab_staff_session",
+          )?.httpOnly,
+        );
+        await entry.evaluate(() =>
+          localStorage.removeItem("bdos_staff_session_v1"),
+        );
+        await entry.reload();
+        await entry
+          .getByRole("heading", { name: "Carnegie, together." })
+          .waitFor();
+        await entry.route("**/api/carnegie-2027/team", (route) =>
+          route.fulfill({
+            status: 503,
+            contentType: "application/json",
+            body: JSON.stringify({ error: "Synthetic temporary outage" }),
+          }),
+        );
+        await entry.reload();
+        await entry
+          .getByRole("heading", { name: "Workspace temporarily unavailable" })
+          .waitFor();
+        await entry.unroute("**/api/carnegie-2027/team");
+        await entry
+          .getByRole("button", { name: "Try again", exact: true })
+          .click();
+        await entry
+          .getByRole("heading", { name: "Carnegie, together." })
+          .waitFor();
+        await entryContext.clearCookies();
+        await entry.evaluate(() =>
+          localStorage.setItem(
+            "bdos_staff_session_v1",
+            JSON.stringify({ id: "stale-display", role: "director" }),
+          ),
+        );
+        await entry
+          .getByRole("button", { name: "Refresh", exact: true })
+          .click();
+        await entry
+          .getByRole("heading", { name: "Sign in to the Carnegie workspace" })
+          .waitFor();
+        assert.equal(
+          await entry
+            .getByRole("button", { name: "Try again", exact: true })
+            .count(),
+          0,
+        );
+        await entry.reload();
+        await entry
+          .getByRole("link", { name: "Sign in", exact: true })
+          .waitFor();
+        await entry.screenshot({
+          path: join(output, "expired-session.png"),
+          fullPage: true,
+        });
+        await entryContext.addCookies([
+          {
+            name: "ab_staff_session",
+            value: cookie(staff[1]).split("=")[1],
+            url: base,
+          },
+        ]);
+        await entry.reload();
+        await entry
+          .getByRole("heading", {
+            name: "This account does not have workspace access",
+          })
+          .waitFor();
+        await entry
+          .getByRole("link", {
+            name: "Sign in with another account",
+            exact: true,
+          })
+          .click();
+        await entry.waitForURL(base + "/carnegie-2027/team/sign-in");
+        await entry.getByLabel("Email", { exact: true }).fill(staff[0].email);
+        await entry.getByLabel("PIN", { exact: true }).fill("246810");
+        await entry
+          .getByRole("button", { name: "Sign In", exact: true })
+          .click();
+        await entry.waitForURL(base + "/carnegie-2027/team");
+        await entry
+          .getByRole("heading", { name: "Carnegie, together." })
+          .waitFor();
+        assert.deepEqual(entryErrors, []);
+        await entryContext.close();
         const context = await browser.newContext();
         await context.addCookies([
           {

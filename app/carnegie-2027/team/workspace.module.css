@@ -313,3 +313,19 @@
     width: 100%;
   }
 }
+.signInLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 10px 18px;
+  margin-right: 12px;
+  border-radius: 7px;
+  background: #701d31;
+  color: white;
+  font-weight: 600;
+  text-decoration: none;
+}
+.signInLink:focus-visible {
+  outline: 3px solid #94702c;
+  outline-offset: 3px;
+}

@@ -1,8 +1,23 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
-import { StaffGate } from "@/components/StaffGate";
+import Link from "next/link";
+import { revokeStaffSession } from "@/lib/staffSession";
 import styles from "./workspace.module.css";
 const API = "/api/carnegie-2027/team";
+const SIGN_IN = "/carnegie-2027/team/sign-in";
+async function workspaceResponse(response, accessCheck = false) {
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = new Error(
+      body.error ||
+        "The workspace is temporarily unavailable. Please try again.",
+    );
+    error.status = response.status;
+    error.accessCheck = accessCheck;
+    throw error;
+  }
+  return body;
+}
 const labels = {
   coordination: "Coordination",
   program: "Program / external decisions",
@@ -59,9 +74,10 @@ function Owner({ people, domain }) {
     </label>
   );
 }
-function Workspace({ signOut }) {
+function Workspace() {
   const [data, setData] = useState(null),
     [error, setError] = useState(""),
+    [errorStatus, setErrorStatus] = useState(null),
     [notice, setNotice] = useState(""),
     [busy, setBusy] = useState(false),
     [tab, setTab] = useState("attention"),
@@ -69,16 +85,24 @@ function Workspace({ signOut }) {
     [proposed, setProposed] = useState(null);
   const load = useCallback(async (signal) => {
     const response = await fetch(API, { signal, cache: "no-store" });
-    const body = await response.json();
-    if (!response.ok) throw new Error(body.error);
+    const body = await workspaceResponse(response, true);
     setData(body);
+    setErrorStatus(null);
+  }, []);
+  const handleFailure = useCallback((error) => {
+    setError(
+      error.message || "The workspace could not connect. Please try again.",
+    );
+    setErrorStatus(error.status || 0);
+    if (error.status === 401 || (error.status === 403 && error.accessCheck))
+      setData(null);
   }, []);
   useEffect(() => {
     const c = new AbortController();
     const timer = setTimeout(
       () =>
         load(c.signal).catch((e) => {
-          if (!c.signal.aborted) setError(e.message);
+          if (!c.signal.aborted) handleFailure(e);
         }),
       0,
     );
@@ -86,7 +110,7 @@ function Workspace({ signOut }) {
       clearTimeout(timer);
       c.abort();
     };
-  }, [load]);
+  }, [load, handleFailure]);
   async function run(operation, message) {
     setBusy(true);
     setError("");
@@ -96,7 +120,7 @@ function Workspace({ signOut }) {
       await load();
       setNotice(message);
     } catch (e) {
-      setError(e.message || "This change could not be saved.");
+      handleFailure(e);
     } finally {
       setBusy(false);
     }
@@ -114,9 +138,7 @@ function Workspace({ signOut }) {
           ? JSON.stringify(body)
           : body,
     });
-    const result = await res.json();
-    if (!res.ok) throw new Error(result.error);
-    return result;
+    return workspaceResponse(res);
   }
   function mutate(command) {
     return run(
@@ -129,7 +151,7 @@ function Workspace({ signOut }) {
     setError("");
     try {
       const res = await fetch(url, { cache: "no-store" });
-      if (!res.ok) throw new Error((await res.json()).error);
+      if (!res.ok) await workspaceResponse(res, true);
       const blob = await res.blob();
       const href = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -141,25 +163,73 @@ function Workspace({ signOut }) {
       a.click();
       setTimeout(() => URL.revokeObjectURL(href), 1000);
     } catch (e) {
-      setError(e.message);
+      handleFailure(e);
     } finally {
       setBusy(false);
     }
   }
-  if (!data)
+  async function signOut() {
+    setBusy(true);
+    setError("");
+    try {
+      if (!(await revokeStaffSession()))
+        throw new Error("Sign-out could not connect. Please try again.");
+      window.location.replace(SIGN_IN);
+    } catch (error) {
+      handleFailure(error);
+      setBusy(false);
+    }
+  }
+  if (!data) {
+    const needsSignIn = errorStatus === 401;
+    const denied = errorStatus === 403;
     return (
       <section className={styles.card}>
-        {error ? (
-          <p role="alert">{error}</p>
+        <h1>
+          {needsSignIn
+            ? "Sign in to the Carnegie workspace"
+            : denied
+              ? "This account does not have workspace access"
+              : error
+                ? "Workspace temporarily unavailable"
+                : "Checking workspace access…"}
+        </h1>
+        {needsSignIn || denied ? (
+          <>
+            <p role="alert">
+              {needsSignIn
+                ? "Your session is missing or has expired. Sign in with your existing staff email and PIN to continue."
+                : "You are signed in, but this account has not been granted private coordination access. Campaign research access is separate."}
+            </p>
+            <Link className={styles.signInLink} href={SIGN_IN}>
+              {needsSignIn ? "Sign in" : "Sign in with another account"}
+            </Link>
+            {denied && (
+              <button disabled={busy} onClick={signOut}>
+                Sign out
+              </button>
+            )}
+          </>
+        ) : error ? (
+          <>
+            <p role="alert">{error}</p>
+            <button
+              disabled={busy}
+              onClick={() => run(() => Promise.resolve(), "Refreshed.")}
+            >
+              Try again
+            </button>
+            <p>
+              This did not change your access. If you need to use a different
+              account, <Link href={SIGN_IN}>sign in here</Link>.
+            </p>
+          </>
         ) : (
-          <p>Checking private workspace access…</p>
+          <p role="status">Checking your existing server session.</p>
         )}
-        <button onClick={() => run(() => Promise.resolve(), "Refreshed.")}>
-          Retry
-        </button>
-        <button onClick={signOut}>Sign out</button>
       </section>
     );
+  }
   const { state, actor, people, history } = data;
   const person = (id) =>
     people.find((p) => p.id === id)?.display_name || "Former workspace member";
@@ -593,7 +663,16 @@ function Workspace({ signOut }) {
                     if (
                       p.format !== "carnegie-proposals-v1" ||
                       !Array.isArray(p.proposals) ||
-                      !p.proposals.length || p.proposals.length > 50 || !p.proposals.every(item => item && typeof item.record_id === "string" && typeof item.value === "string" && typeof item.source === "string" && Number.isInteger(item.base_version))
+                      !p.proposals.length ||
+                      p.proposals.length > 50 ||
+                      !p.proposals.every(
+                        (item) =>
+                          item &&
+                          typeof item.record_id === "string" &&
+                          typeof item.value === "string" &&
+                          typeof item.source === "string" &&
+                          Number.isInteger(item.base_version),
+                      )
                     )
                       throw new Error("Choose a filled proposal template.");
                     setProposed(p);
@@ -835,9 +914,7 @@ function Workspace({ signOut }) {
 export default function TeamPage() {
   return (
     <main className={styles.main}>
-      <StaffGate>
-        {(_session, signOut) => <Workspace signOut={signOut} />}
-      </StaffGate>
+      <Workspace />
     </main>
   );
 }

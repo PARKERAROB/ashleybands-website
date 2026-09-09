@@ -39,7 +39,7 @@ export function StaffGate({ children }) {
   return children(session, signOut);
 }
 
-export function StaffLogin({ onAuthed }) {
+export function StaffLogin({ onAuthed, title = "Staff Login", description }) {
   const [form, setForm] = useState({ email: "", pin: "" });
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
@@ -61,6 +61,8 @@ export function StaffLogin({ onAuthed }) {
       }
       saveStaffSession(data);
       onAuthed(data);
+    } catch {
+      setErr("Staff sign-in could not connect. Please try again.");
     } finally {
       setBusy(false);
     }
@@ -68,7 +70,8 @@ export function StaffLogin({ onAuthed }) {
 
   return (
     <form onSubmit={login} style={{ maxWidth: 400, margin: "100px auto", padding: "0 16px", fontFamily: "system-ui, sans-serif" }}>
-      <h2>Staff Login</h2>
+      <h2>{title}</h2>
+      {description && <p>{description}</p>}
       <label htmlFor="staff-email" style={loginLabel}>Email</label>
       <input
         id="staff-email"

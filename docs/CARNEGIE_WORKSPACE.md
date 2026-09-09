@@ -4,6 +4,14 @@ Route: `/carnegie-2027/team`. API: `/api/carnegie-2027/team` and its `files`, `p
 and `import` routes. All data operations require a validated existing staff session. The page
 contains only the sign-in shell until the server authorizes a read. Every response is private/no-store.
 
+Workspace entry checks the server session directly; localStorage is display state, never the entry
+authority. Missing/expired sessions receive a Sign in link to `/carnegie-2027/team/sign-in`, which
+uses the existing staff Email/PIN form and `/api/sponsors/staff-auth`. Successful sign-in performs a
+fixed return to `/carnegie-2027/team`; there is no caller-controlled redirect. An authenticated but
+unassigned account receives separate access guidance and can choose another account. Temporary
+failures offer read-only retry, without an automatic sign-in loop. Sign-in connection failures stay
+on the form with an actionable message.
+
 ## Access and initial activation
 
 The existing director role is broader than the initial coordination audience. Access therefore
