@@ -178,3 +178,20 @@ test("capture settles the stored campaign gift and rejects unsafe production con
   assert.equal(captures, 1);
   assert.equal(sent.length, 1);
 });
+
+test("gift terms follow the checkout version; earlier gifts and retries cannot acquire broader terms", async () => {
+  const db = memoryLedger(); const { createPendingGift } = giftHelpers(db); const sent=[];
+  const { confirmGift } = receiptHelpers(db, sent);
+  const old = await createPendingGift(baseGift);
+  assert.equal(old.gift.gift_terms_version, 'carnegie-2027-v1');
+  assert.equal((await createPendingGift({...baseGift,termsVersion:campaigns.CARNEGIE_TERMS_VERSION})).status,409);
+  await confirmGift(old.gift.id);
+  assert.match(sent[0].text,/boosters will contact you/);
+  const next=await createPendingGift({...baseGift,requestKey:'71fe02d8-66a7-4cbb-adc6-dcaba8f7d7a9',termsVersion:campaigns.CARNEGIE_TERMS_VERSION});
+  await confirmGift(next.gift.id);
+  assert.equal(next.gift.gift_terms_version,'carnegie-2027-v2');
+  assert.match(sent[1].text,/may use those funds for other educational activities/);
+  assert.doesNotMatch(sent[1].text,/boosters will contact you/);
+  assert.equal(campaigns.giftChangeTerms(null),campaigns.CARNEGIE_ORIGINAL_CHANGE_TERMS);
+  assert.throws(()=>campaigns.giftTermsVersion('carnegie-2027','anything'),/reload/);
+});

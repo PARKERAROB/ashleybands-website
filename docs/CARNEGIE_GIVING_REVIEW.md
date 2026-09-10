@@ -1,5 +1,13 @@
 # Carnegie campaign giving review
 
+## September 10 revision — issue #72
+
+Rob approved prospective alternate-use terms: gifts support the Carnegie trip, and if the trip is canceled, cannot proceed as planned, or money remains after expenses, the boosters may use those funds for other educational activities and participation assistance within the Ashley band program. The page states this before payment. Each new checkout transmits `carnegie-2027-v2`; missing versions from older checkouts retain v1. Stored versions govern receipts and staff review; existing gift terms are not rewritten.
+
+The homepage secondary action returns to **Read our story**. The seven-year recollection now correctly identifies Mr. Parker as speaking to Lieutenant Colonel Reeder, corroborating the private official-relations evidence register.
+
+## Original release record (superseded terms retained for earlier gifts)
+
 Prepared September 10, 2026 for issue #71. **Rob approved publication on September 10.**
 The reviewed migration is applied; checked deployment and live verification are recorded in the issue.
 

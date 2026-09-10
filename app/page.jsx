@@ -66,7 +66,7 @@ export default function HomePage() {
           <p className="home-campaign-date">New York City <span aria-hidden="true">/</span> March 25, 2027</p>
           <div className="home-campaign-actions">
             <Link className="home-btn home-btn-primary" href={CARNEGIE_GIVING_PATH}>Support Ashley’s Carnegie Trip <span aria-hidden="true">↗</span></Link>
-            <Link className="home-campaign-story-link" href="/info/carnegie-2027">About the trip <span aria-hidden="true">→</span></Link>
+            <Link className="home-campaign-story-link" href="/our-story">Read our story <span aria-hidden="true">→</span></Link>
           </div>
           <p className="home-giving-trust"><strong>{BOOSTER_NONPROFIT_COPY}</strong></p>
           <a className="home-recognition" href="#program-of-distinction">

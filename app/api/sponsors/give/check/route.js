@@ -42,6 +42,7 @@ export async function POST(req) {
   const result = await createPendingGift({
     campaignCode: purpose.campaignCode,
     giftKind: purpose.giftKind,
+    termsVersion: body.gift_terms_version,
     amountCents: amount.cents,
     method: "check",
     requestKey: input.requestKey,

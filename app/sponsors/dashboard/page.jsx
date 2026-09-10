@@ -1,6 +1,6 @@
 "use client";
 
-import { giftCampaignLabel } from "@/lib/sponsorCampaigns.mjs";
+import { giftCampaignLabel, giftChangeTerms } from "@/lib/sponsorCampaigns.mjs";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import StewardshipPanel from "./StewardshipPanel";
@@ -426,6 +426,7 @@ function GiftsPanel({ session }) {
             <article key={g.id} style={{ borderTop: "1px solid #ecd9ad", padding: "12px 0" }}>
               <strong>{g.business_name} ({fmt(g.amount_cents)})</strong>
               <p className="tracker-sub">{giftCampaignLabel(g.campaign_code)} · {g.gift_kind || "sponsorship"}</p>
+              {g.campaign_code === "carnegie-2027" ? <details><summary>Terms for this gift</summary><p>{giftChangeTerms(g.gift_terms_version)}</p></details> : null}
               <p className="tracker-sub">
                 {g.student?.display_name ? `Student attribution: ${g.student.display_name}. ` : "No student attribution recorded. "}
                 Receipt: {g.recognition_status === "sent" ? "send recorded" : "needs follow-up"}.

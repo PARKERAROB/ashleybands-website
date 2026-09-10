@@ -17,7 +17,7 @@ export async function GET(req) {
   const gifts = [];
   for (let offset = 0; ; offset += 500) {
     const { data, error } = await supabaseAdmin.from("sponsor_gifts")
-      .select("id, campaign_code, gift_kind, business_name, amount_cents, method, status, tier, payer_name, payer_email, fmv_cents, deductible_cents, receipt_number, recognition_status, receipt_sent_at, badge_sent_at, listed_on_site, recorded_by, confirmed_at, created_at, student:portal_students(display_name, preferred_first, legal_first, legal_last)")
+      .select("id, campaign_code, gift_kind, gift_terms_version, business_name, amount_cents, method, status, tier, payer_name, payer_email, fmv_cents, deductible_cents, receipt_number, recognition_status, receipt_sent_at, badge_sent_at, listed_on_site, recorded_by, confirmed_at, created_at, student:portal_students(display_name, preferred_first, legal_first, legal_last)")
       .order("created_at", { ascending: false }).order("id").range(offset, offset + 499);
     if (error) return privateServerError("sponsor-gifts", error, "Sponsor gifts could not be loaded.");
     gifts.push(...(data || []));

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { CARNEGIE_CAMPAIGN } from "@/lib/sponsorCampaigns.mjs";
+import { CARNEGIE_CAMPAIGN, CARNEGIE_TERMS_VERSION, CARNEGIE_CHANGE_TERMS } from "@/lib/sponsorCampaigns.mjs";
 import { sponsorThankYouLine } from "@/lib/sponsorGiftPolicy.mjs";
 
 let paypalSdkPromise = null;
@@ -90,6 +90,7 @@ export default function GiveClient({ campaignCode = "general", embedded = false 
           request_key: checkRequestKey.current,
           campaign_code: campaignCode,
           gift_kind: giftKind,
+          gift_terms_version: carnegie ? CARNEGIE_TERMS_VERSION : undefined,
           attribution_token: attributionToken || undefined,
           business_name: businessName,
           amount_cents: amountCents,
@@ -224,7 +225,7 @@ export default function GiveClient({ campaignCode = "general", embedded = false 
             </div>
 
             {!onlineAvailable ? <p className="give-muted">Online trip giving is temporarily unavailable. You can give by check or contact Mr. Parker.</p> : null}
-            {carnegie ? <p className="give-muted">Your gift supports Ashley’s group trip. Please read <a href="#about-your-gift">what your gift supports and how funds are handled if plans change</a>.</p> : null}
+            {carnegie ? <p className="give-muted">{CARNEGIE_CHANGE_TERMS} Please read <a href="#about-your-gift">what your gift supports and how funds are handled if plans change</a>.</p> : null}
             {error ? <p className="give-error" role="alert">{error}</p> : null}
 
             {method === "check" ? (
@@ -282,6 +283,7 @@ function PayPalGive({ clientId, campaignCode, giftKind, attributionToken, busine
                 request_key: requestKey.current,
                 campaign_code: d.campaignCode,
                 gift_kind: d.giftKind,
+                gift_terms_version: d.campaignCode === CARNEGIE_CAMPAIGN ? CARNEGIE_TERMS_VERSION : undefined,
                 attribution_token: d.attributionToken || undefined,
                 business_name: d.businessName,
                 amount_cents: d.amountCents,
