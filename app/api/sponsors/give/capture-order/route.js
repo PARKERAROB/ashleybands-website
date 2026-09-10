@@ -1,3 +1,4 @@
+import { CARNEGIE_CAMPAIGN, campaignOnlineReady } from "@/lib/sponsorCampaigns.mjs";
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { sponsorOnlineGiveLive } from "@/lib/sponsorFamily";
@@ -37,7 +38,7 @@ export async function POST(req) {
 
   const { data: gift } = await supabaseAdmin
     .from("sponsor_gifts")
-    .select("id, status, amount_cents, business_name, invoice_id, receipt_number, recognition_status")
+    .select("id, campaign_code, status, amount_cents, business_name, invoice_id, receipt_number, recognition_status")
     .eq("paypal_order_id", orderId)
     .maybeSingle();
   if (!gift) return NextResponse.json({ error: "No gift matches that order." }, { status: 404 });
@@ -49,6 +50,10 @@ export async function POST(req) {
       receiptNumber: gift.receipt_number || null,
       recognition: gift.recognition_status || "already"
     });
+  }
+
+  if (gift.campaign_code === CARNEGIE_CAMPAIGN && !campaignOnlineReady(process.env)) {
+    return NextResponse.json({ error: "Online trip giving is temporarily unavailable. Please contact Mr. Parker before retrying." }, { status: 503 });
   }
 
   let capture;

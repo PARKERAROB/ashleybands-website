@@ -1,0 +1,16 @@
+.carnegie-giving { color: #241c17; background: #faf7f0; padding: 56px 24px 80px; }
+.carnegie-giving-intro { max-width: 1080px; margin: 0 auto 42px; }
+.carnegie-giving-intro h1 { font-family: Georgia, serif; font-size: clamp(40px, 6vw, 72px); line-height: 1.06; letter-spacing: -2px; margin: 16px 0; }
+.carnegie-giving-intro > p { max-width: 700px; line-height: 1.65; }
+.carnegie-giving-lede { font-size: 24px; color: #7b1829; font-weight: 700; }
+.carnegie-giving-trust { border-left: 4px solid #7b1829; padding: 12px 18px; background: #fff; font-size: 15px; }
+.carnegie-giving-detail-link { display: inline-block; margin: 16px; }
+.carnegie-giving-layout { max-width: 1080px; margin: auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; align-items: start; }
+.carnegie-giving-layout .give-shell { padding: 0; max-width: none; }
+.carnegie-giving-details { line-height: 1.7; }
+.carnegie-giving-details h2 { font-size: 21px; margin: 0 0 8px; }
+.carnegie-giving-details p { margin: 0 0 26px; }
+.carnegie-giving-details a { color: #7b1829; text-underline-offset: 3px; }
+.carnegie-giving :is(a, button, input):focus-visible { outline: 3px solid #a57519; outline-offset: 4px; }
+#make-a-gift, #about-your-gift { scroll-margin-top: 100px; }
+@media (max-width: 760px) { .carnegie-giving { padding: 32px 18px 56px; } .carnegie-giving-layout { grid-template-columns: minmax(0, 1fr); gap: 36px; } .carnegie-giving-detail-link { margin-left: 0; } }

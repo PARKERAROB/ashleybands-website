@@ -1,3 +1,4 @@
+import { normalizeGiftPurpose, giftCampaignLabel, CARNEGIE_CAMPAIGN, campaignOnlineReady } from "@/lib/sponsorCampaigns.mjs";
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { sponsorOnlineGiveLive } from "@/lib/sponsorFamily";
@@ -25,10 +26,15 @@ export async function POST(req) {
   if (amount.error) return NextResponse.json({ error: amount.error }, { status: 400 });
 
   let input;
+  let purpose;
   try {
     input = normalizePublicGiftInput(body);
+    purpose = normalizeGiftPurpose(body);
   } catch (error) {
     return NextResponse.json({ error: String(error?.message || error) }, { status: 400 });
+  }
+  if (purpose.campaignCode === CARNEGIE_CAMPAIGN && !campaignOnlineReady(process.env)) {
+    return NextResponse.json({ error: "Online trip giving is temporarily unavailable. Please choose check or contact Mr. Parker." }, { status: 503 });
   }
   const rate = await checkRateLimit({
     key: `sponsor-order:${clientIp(req)}`,
@@ -41,6 +47,8 @@ export async function POST(req) {
   }
 
   const result = await createPendingGift({
+    campaignCode: purpose.campaignCode,
+    giftKind: purpose.giftKind,
     amountCents: amount.cents,
     method: "online",
     requestKey: input.requestKey,
@@ -63,7 +71,7 @@ export async function POST(req) {
       amountCents: amount.cents,
       studentId: result.gift.id, // PayPal custom_id — our gift id, for reconciliation
       invoiceId: result.gift.invoice_id,
-      description: `Sponsorship — ${result.gift.business_name}`.slice(0, 127),
+      description: `${giftCampaignLabel(result.gift.campaign_code)} — ${result.gift.business_name}`.slice(0, 127),
       requestId: input.requestKey
     });
     const { error: updateError } = await supabaseAdmin

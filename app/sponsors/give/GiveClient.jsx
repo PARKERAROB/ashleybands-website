@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { CARNEGIE_CAMPAIGN } from "@/lib/sponsorCampaigns.mjs";
 import { sponsorThankYouLine } from "@/lib/sponsorGiftPolicy.mjs";
 
 let paypalSdkPromise = null;
@@ -23,11 +24,16 @@ function loadPaypalSdk(clientId) {
   return paypalSdkPromise;
 }
 
-export default function GiveClient() {
+export default function GiveClient({ campaignCode = "general", embedded = false }) {
+  const carnegie = campaignCode === CARNEGIE_CAMPAIGN;
+  const Shell = embedded ? "div" : "main";
+  const Heading = embedded ? "h2" : "h1";
+  const [giftKind, setGiftKind] = useState(carnegie ? "donation" : "sponsorship");
   const params = useSearchParams();
   const attributionToken = params.get("a") || "";
   const checkRequestKey = useRef("");
 
+  const [onlineAvailable, setOnlineAvailable] = useState(true);
   const [open, setOpen] = useState("loading"); // loading | open | closed
   const [businessName, setBusinessName] = useState("");
   const [studentName, setStudentName] = useState("");
@@ -45,7 +51,8 @@ export default function GiveClient() {
     const url = attributionToken
       ? `/api/sponsors/business-public?token=${encodeURIComponent(attributionToken)}`
       : `/api/sponsors/business-public`;
-    fetch(url)
+    const lookupUrl = carnegie ? `${url}${url.includes("?") ? "&" : "?"}campaign=${CARNEGIE_CAMPAIGN}` : url;
+    fetch(lookupUrl)
       .then((res) => (res.ok ? res.json().then((j) => ({ ok: true, j })) : { ok: false }))
       .then((out) => {
         if (cancelled) return;
@@ -54,6 +61,7 @@ export default function GiveClient() {
           return;
         }
         setOpen("open");
+        if (carnegie && out.j?.online_available === false) { setOnlineAvailable(false); setMethod("check"); }
         if (out.j?.name) setBusinessName(out.j.name);
         if (out.j?.student_name) setStudentName(out.j.student_name);
       })
@@ -61,7 +69,7 @@ export default function GiveClient() {
     return () => {
       cancelled = true;
     };
-  }, [attributionToken]);
+  }, [attributionToken, carnegie]);
 
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
   const amountCents = Math.round(Number(amount) * 100);
@@ -71,6 +79,7 @@ export default function GiveClient() {
     setError("");
     if (!businessName.trim()) return setError("Tell us your name or business name.");
     if (!amountValid) return setError("Enter a gift amount of at least $5.");
+    if (carnegie && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payerEmail.trim())) return setError("Enter your email for the receipt and any trip updates.");
     setSavingCheck(true);
     try {
       if (!checkRequestKey.current) checkRequestKey.current = window.crypto.randomUUID();
@@ -79,6 +88,8 @@ export default function GiveClient() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           request_key: checkRequestKey.current,
+          campaign_code: campaignCode,
+          gift_kind: giftKind,
           attribution_token: attributionToken || undefined,
           business_name: businessName,
           amount_cents: amountCents,
@@ -92,20 +103,22 @@ export default function GiveClient() {
         return;
       }
       setCheckResult(json.instructions);
+    } catch {
+      setError("Could not record your check request. Please try again.");
     } finally {
       setSavingCheck(false);
     }
   }
 
   if (open === "loading") {
-    return <main className="give-shell" />;
+    return <Shell className="give-shell"><p role="status">Loading giving options…</p></Shell>;
   }
 
   if (open === "closed") {
     return (
-      <main className="give-shell">
+      <Shell className="give-shell">
         <div className="give-card">
-          <h1>Sponsor the Bands of Ashley</h1>
+          <Heading>{carnegie ? "Support Ashley’s Carnegie trip" : "Sponsor the Bands of Ashley"}</Heading>
           <p>Online giving isn&apos;t open just yet. To sponsor now, contact the director or mail a check to the
             AHS Band Boosters.</p>
           <p>
@@ -113,16 +126,16 @@ export default function GiveClient() {
           </p>
         </div>
         <Styles />
-      </main>
+      </Shell>
     );
   }
 
   return (
-    <main className="give-shell">
+    <Shell className="give-shell">
       <div className="give-card">
         <p className="give-eyebrow">AHS Band Boosters · 501(c)(3)</p>
-        <h1>{studentName ? `Support ${studentName}'s Ashley Bands sponsorship effort` : "Sponsor the Bands of Ashley"}</h1>
-        {studentName ? (
+        <Heading>{carnegie ? "Make a gift for Ashley’s trip" : studentName ? `Support ${studentName}'s Ashley Bands sponsorship effort` : "Sponsor the Bands of Ashley"}</Heading>
+        {carnegie ? <p className="give-lede">Choose an amount and give online or by check. Your gift is designated for Ashley Bands’ 2027 Carnegie trip.</p> : studentName ? (
           <p className="give-lede">
             Your gift supports the whole Bands of Ashley program and will be credited to {studentName}&apos;s sponsorship total.
           </p>
@@ -145,7 +158,7 @@ export default function GiveClient() {
             <p>
               {onlineResult.pending
                 ? `PayPal received your ${onlineResult.amount} sponsorship. Ashley Bands is reconciling the receipt now.`
-                : `Your ${onlineResult.amount} sponsorship of the Bands of Ashley is confirmed.`}
+                : `Your ${onlineResult.amount} ${carnegie ? "gift for Ashley’s Carnegie trip" : "sponsorship of the Bands of Ashley"} is confirmed.`}
             </p>
             <p className="give-muted">
               {onlineResult.recognition === "sent"
@@ -155,6 +168,11 @@ export default function GiveClient() {
           </div>
         ) : (
           <>
+            {carnegie ? <fieldset className="give-kind">
+              <legend>How would you like to help?</legend>
+              <label><input type="radio" name="gift-kind" value="donation" checked={giftKind === "donation"} onChange={() => setGiftKind("donation")} /> Personal donation</label>
+              <label><input type="radio" name="gift-kind" value="sponsorship" checked={giftKind === "sponsorship"} onChange={() => setGiftKind("sponsorship")} /> Business sponsorship</label>
+            </fieldset> : null}
             <label className="give-label">
               Your name or business name
               <input
@@ -189,6 +207,7 @@ export default function GiveClient() {
               <button
                 type="button"
                 className={`give-tab ${method === "online" ? "on" : ""}`}
+                disabled={!onlineAvailable}
                 aria-pressed={method === "online"}
                 onClick={() => setMethod("online")}
               >
@@ -204,6 +223,8 @@ export default function GiveClient() {
               </button>
             </div>
 
+            {!onlineAvailable ? <p className="give-muted">Online trip giving is temporarily unavailable. You can give by check or contact Mr. Parker.</p> : null}
+            {carnegie ? <p className="give-muted">Your gift supports Ashley’s group trip. Please read <a href="#about-your-gift">what your gift supports and how funds are handled if plans change</a>.</p> : null}
             {error ? <p className="give-error" role="alert">{error}</p> : null}
 
             {method === "check" ? (
@@ -213,6 +234,9 @@ export default function GiveClient() {
             ) : clientId && amountValid && businessName.trim() ? (
               <PayPalGive
                 clientId={clientId}
+                key={`${campaignCode}:${giftKind}`}
+                campaignCode={campaignCode}
+                giftKind={giftKind}
                 attributionToken={attributionToken}
                 businessName={businessName}
                 amountCents={amountCents}
@@ -228,17 +252,17 @@ export default function GiveClient() {
         )}
       </div>
       <Styles />
-    </main>
+    </Shell>
   );
 }
 
-function PayPalGive({ clientId, attributionToken, businessName, amountCents, payerName, payerEmail, onError, onDone }) {
+function PayPalGive({ clientId, campaignCode, giftKind, attributionToken, businessName, amountCents, payerName, payerEmail, onError, onDone }) {
   const ref = useRef(null);
   const requestKey = useRef("");
-  const dataRef = useRef({ attributionToken, businessName, amountCents, payerName, payerEmail });
+  const dataRef = useRef({ campaignCode, giftKind, attributionToken, businessName, amountCents, payerName, payerEmail });
   useEffect(() => {
-    dataRef.current = { attributionToken, businessName, amountCents, payerName, payerEmail };
-  }, [attributionToken, businessName, amountCents, payerName, payerEmail]);
+    dataRef.current = { campaignCode, giftKind, attributionToken, businessName, amountCents, payerName, payerEmail };
+  }, [campaignCode, giftKind, attributionToken, businessName, amountCents, payerName, payerEmail]);
 
   useEffect(() => {
     let cancelled = false;
@@ -256,6 +280,8 @@ function PayPalGive({ clientId, attributionToken, businessName, amountCents, pay
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 request_key: requestKey.current,
+                campaign_code: d.campaignCode,
+                gift_kind: d.giftKind,
                 attribution_token: d.attributionToken || undefined,
                 business_name: d.businessName,
                 amount_cents: d.amountCents,
@@ -318,7 +344,7 @@ function Styles() {
         font-weight: 700;
         margin: 0 0 4px;
       }
-      .give-card h1 {
+      .give-card h1, .give-card h2 {
         margin: 0 0 10px;
         font-size: 26px;
       }
@@ -326,6 +352,9 @@ function Styles() {
         color: #3a2f26;
         line-height: 1.5;
       }
+      .give-kind { border: 0; padding: 0; margin: 18px 0; }
+      .give-kind legend { font-weight: 700; margin-bottom: 8px; }
+      .give-kind label { display: flex; align-items: center; gap: 8px; min-height: 44px; }
       .give-label {
         display: block;
         font-size: 14px;

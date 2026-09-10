@@ -1,5 +1,6 @@
 "use client";
 
+import { giftCampaignLabel } from "@/lib/sponsorCampaigns.mjs";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import StewardshipPanel from "./StewardshipPanel";
@@ -382,10 +383,11 @@ function GiftsPanel({ session }) {
         <li>{data.summary?.badgeFollowUp || 0} published gifts without a recorded badge send.</li>
         <li>{data.summary?.introductionsQueued || 0} family introductions queued; {data.summary?.introductionsFailed || 0} failed. <Link href="/sponsors/dashboard/businesses">Review outreach</Link>.</li>
       </ul>
-      <h4>Sponsor gifts</h4>
+      <h4>Ashley’s Carnegie trip</h4>
+      <p>{fmt(data.carnegieSummary?.confirmedCents)} confirmed ({data.carnegieSummary?.confirmedCount || 0} gifts). {fmt(data.carnegieSummary?.pendingCents)} pending ({data.carnegieSummary?.pendingCount || 0} gifts), excluded from confirmed funds.</p>
+      <h4>All sponsor gifts</h4>
       <p>
-        {fmt(data.confirmedCents)} confirmed · {pending.length} pending. Check gifts are published when staff confirms
-        receipt. Online gifts remain private until staff verifies and publishes the sponsor name.
+        {fmt(data.confirmedCents)} confirmed · {pending.length} pending. Check sponsorships are published when staff confirms receipt. Personal Carnegie donations are not automatically published. Online gifts remain private until staff verifies and publishes the sponsor name.
       </p>
       {pending.length ? (
         <table className="tracker-table" style={{ marginTop: 8 }}>
@@ -395,7 +397,7 @@ function GiftsPanel({ session }) {
           <tbody>
             {pending.map((g) => (
               <tr key={g.id}>
-                <td><strong>{g.business_name}</strong></td>
+                <td><strong>{g.business_name}</strong><div className="tracker-sub">{giftCampaignLabel(g.campaign_code)} · {g.gift_kind || "sponsorship"}</div></td>
                 <td>{fmt(g.amount_cents)}{g.tier ? <div className="tracker-sub">{g.tier}</div> : null}</td>
                 <td>{g.method}</td>
                 <td>{g.payer_name || "—"}{g.payer_email ? <div className="tracker-sub">{g.payer_email}</div> : null}</td>
@@ -423,6 +425,7 @@ function GiftsPanel({ session }) {
           {confirmed.map((g) => (
             <article key={g.id} style={{ borderTop: "1px solid #ecd9ad", padding: "12px 0" }}>
               <strong>{g.business_name} ({fmt(g.amount_cents)})</strong>
+              <p className="tracker-sub">{giftCampaignLabel(g.campaign_code)} · {g.gift_kind || "sponsorship"}</p>
               <p className="tracker-sub">
                 {g.student?.display_name ? `Student attribution: ${g.student.display_name}. ` : "No student attribution recorded. "}
                 Receipt: {g.recognition_status === "sent" ? "send recorded" : "needs follow-up"}.

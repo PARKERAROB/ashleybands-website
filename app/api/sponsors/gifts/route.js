@@ -1,3 +1,4 @@
+import { campaignGiftSummary } from "@/lib/sponsorCampaigns.mjs";
 import { sponsorshipSummary, recognitionDraft } from "@/lib/sponsorOperations.mjs";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
@@ -16,7 +17,7 @@ export async function GET(req) {
   const gifts = [];
   for (let offset = 0; ; offset += 500) {
     const { data, error } = await supabaseAdmin.from("sponsor_gifts")
-      .select("id, business_name, amount_cents, method, status, tier, payer_name, payer_email, fmv_cents, deductible_cents, receipt_number, recognition_status, receipt_sent_at, badge_sent_at, listed_on_site, recorded_by, confirmed_at, created_at, student:portal_students(display_name, preferred_first, legal_first, legal_last)")
+      .select("id, campaign_code, gift_kind, business_name, amount_cents, method, status, tier, payer_name, payer_email, fmv_cents, deductible_cents, receipt_number, recognition_status, receipt_sent_at, badge_sent_at, listed_on_site, recorded_by, confirmed_at, created_at, student:portal_students(display_name, preferred_first, legal_first, legal_last)")
       .order("created_at", { ascending: false }).order("id").range(offset, offset + 499);
     if (error) return privateServerError("sponsor-gifts", error, "Sponsor gifts could not be loaded.");
     gifts.push(...(data || []));
@@ -32,5 +33,5 @@ export async function GET(req) {
   }
   const summary = sponsorshipSummary(gifts, outreach);
   await logAudit({ actor: staffActor(authorization.staff), action: "view", table: "sponsor_gifts,business_outreach", recordId: "gift-history", route: "/api/sponsors/gifts" });
-  return privateJson({ gifts: gifts.map((gift) => ({ ...gift, recognitionDraft: recognitionDraft(gift) })), confirmedCents: summary.confirmedCents, summary });
+  return privateJson({ gifts: gifts.map((gift) => ({ ...gift, recognitionDraft: recognitionDraft(gift) })), confirmedCents: summary.confirmedCents, carnegieSummary: campaignGiftSummary(gifts), summary });
 }

@@ -1,3 +1,4 @@
+import { normalizeGiftPurpose, giftCampaignLabel, CARNEGIE_CAMPAIGN } from "@/lib/sponsorCampaigns.mjs";
 import { NextResponse } from "next/server";
 import { sponsorFunnelLive } from "@/lib/sponsorFamily";
 import { parseGiftAmountCents, createPendingGift } from "@/lib/sponsorGifts";
@@ -20,8 +21,11 @@ export async function POST(req) {
   if (amount.error) return NextResponse.json({ error: amount.error }, { status: 400 });
 
   let input;
+  let purpose;
   try {
     input = normalizePublicGiftInput(body);
+    purpose = normalizeGiftPurpose(body);
+    if (purpose.campaignCode === CARNEGIE_CAMPAIGN && !input.payerEmail) throw new Error("Enter your email for the receipt and any trip updates.");
   } catch (error) {
     return NextResponse.json({ error: String(error?.message || error) }, { status: 400 });
   }
@@ -36,6 +40,8 @@ export async function POST(req) {
   }
 
   const result = await createPendingGift({
+    campaignCode: purpose.campaignCode,
+    giftKind: purpose.giftKind,
     amountCents: amount.cents,
     method: "check",
     requestKey: input.requestKey,
@@ -53,7 +59,7 @@ export async function POST(req) {
     instructions: {
       payable_to: SPONSOR_CONTACT.boosterOrg,
       mail_to: `${SPONSOR_CONTACT.school}, ${SPONSOR_CONTACT.address}, ${SPONSOR_CONTACT.cityStateZip}`,
-      memo: `Sponsorship — ref ${result.gift.invoice_id}`,
+      memo: `${giftCampaignLabel(result.gift.campaign_code)} / ref ${result.gift.invoice_id}`,
       note: "Write the reference on the memo line so we can match your check and send your receipt."
     }
   });

@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import HomeUpcomingEvents from "@/components/HomeUpcomingEvents";
 import NewsletterSignup from "@/components/NewsletterSignup";
+import { BOOSTER_NONPROFIT_COPY, CARNEGIE_GIVING_PATH } from "@/lib/sponsorCampaigns.mjs";
 import { getSiteData } from "@/lib/siteData";
 
 const PROMPTS = [
@@ -64,9 +65,10 @@ export default function HomePage() {
           </p>
           <p className="home-campaign-date">New York City <span aria-hidden="true">/</span> March 25, 2027</p>
           <div className="home-campaign-actions">
-            <Link className="home-btn home-btn-primary" href="/info/carnegie-2027">About the Carnegie Hall trip <span aria-hidden="true">↗</span></Link>
-            <Link className="home-campaign-story-link" href="/our-story">How we got here <span aria-hidden="true">→</span></Link>
+            <Link className="home-btn home-btn-primary" href={CARNEGIE_GIVING_PATH}>Support Ashley’s Carnegie Trip <span aria-hidden="true">↗</span></Link>
+            <Link className="home-campaign-story-link" href="/info/carnegie-2027">About the trip <span aria-hidden="true">→</span></Link>
           </div>
+          <p className="home-giving-trust"><strong>{BOOSTER_NONPROFIT_COPY}</strong></p>
           <a className="home-recognition" href="#program-of-distinction">
             <Image src="/images/home/program-of-distinction.png" alt="Official NCBA Program of Distinction badge, 2025–2026" width={144} height={144} priority />
             <span><span className="home-recognition-label">Recognized statewide</span><strong>Program of Distinction</strong><span>Inaugural class · 2025–2026<br />North Carolina Bandmasters Association</span></span>
@@ -99,10 +101,11 @@ export default function HomePage() {
       <section className="home-campaign-future" aria-labelledby="home-campaign-future-title">
         <div className="home-container home-campaign-future-grid">
           <div><p className="eyebrow">Getting the band to New York</p><h2 id="home-campaign-future-title">Help get the band<br />to New York.</h2></div>
-          <div><p>The fundraisers below are the easiest place to start. Businesses and anyone considering a larger gift can contact Mr. Parker directly.</p>
+          <div><p>Help Ashley students make the trip to New York. Make a personal donation, become a business sponsor, or support a current fundraiser.</p>
             <p className="home-campaign-coming">How to help</p>
-            <div className="home-links"><Link href="/fundraising">Current fundraisers</Link><a href="mailto:robert.parker@nhcs.net">Email Mr. Parker</a></div>
-            <Link className="home-btn home-btn-secondary" href="/info/carnegie-2027">Current trip information <span aria-hidden="true">↗</span></Link>
+            <Link className="home-btn home-btn-primary" href={CARNEGIE_GIVING_PATH}>Support Ashley’s Carnegie Trip <span aria-hidden="true">↗</span></Link>
+            <p className="home-giving-trust"><strong>{BOOSTER_NONPROFIT_COPY}</strong></p>
+            <div className="home-links"><Link href={`${CARNEGIE_GIVING_PATH}#about-your-gift`}>What your gift supports</Link><Link href="/fundraising">Current fundraisers</Link><a href="mailto:robert.parker@nhcs.net">Discuss a larger gift</a></div>
             <p className="home-campaign-planning">Travel plans, final participation, price, approvals, and funding remain subject to confirmation.</p>
           </div>
         </div>
