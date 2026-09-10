@@ -1,6 +1,7 @@
 # Carnegie campaign giving review
 
-Prepared September 10, 2026 for issue #71. **Implemented locally; not published.**
+Prepared September 10, 2026 for issue #71. **Rob approved publication on September 10.**
+The reviewed migration is applied; checked deployment and live verification are recorded in the issue.
 
 The homepage's opening action and How to help section say **Support Ashley’s Carnegie Trip**.
 Both display the booster nonprofit statement beside the action. `/support-carnegie` offers personal
@@ -11,7 +12,7 @@ recipient and trip purpose, and links to fundraisers and larger-gift inquiries.
 
 > Gifts are received by Ashley High School Band Boosters, a registered 501(c)(3) nonprofit organization. Contributions are tax-deductible to the extent allowed by law. EIN: 20-5605218.
 
-Proposed trip-change terms, requiring acceptance as part of pre-publication review:
+Trip-change terms approved with the publication instruction:
 
 > If the trip is canceled or your gift cannot be used for this purpose, the boosters will contact you about a refund or your permission to redirect the gift. Any funds remaining after trip expenses will be handled the same way.
 
@@ -52,12 +53,11 @@ Local verification passed: `verify:change`, all 38 sponsorship tests (including 
 
 The public giving page and public lookup responded successfully. Local payment configuration is
 sandbox; Vercel's production export masks the relevant values. Those reads do **not** establish live
-capture readiness or the merchant recipient. Confirm these through an authorized production
-configuration/processor read at release; do not use an actual charge as a test.
+capture readiness or the merchant recipient. Verify the production campaign availability response after release; it evaluates live mode and matching credentials on the server without exporting secrets. Merchant identity is inherited from the existing shared booster payment configuration; this release does not change that account. Do not use an actual charge as a test.
 
 ## Publication sequence after review
 
-1. Accept the page, receipt language and proposed trip-change terms.
+1. Page, receipt language and trip-change terms accepted by Rob on September 10.
 2. Verify production processor readiness and booster merchant destination without a charge.
 3. Apply only the reviewed forward migration through the production Supabase wrapper; verify columns,
    default general purpose for historical gifts and unchanged RLS. Never blanket-push unrelated migrations.
