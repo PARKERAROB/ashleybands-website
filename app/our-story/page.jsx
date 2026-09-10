@@ -72,7 +72,7 @@ export default function OurStoryPage() {
             <p>Band depends on breath and on people in a room together. COVID took both away.</p>
             <p>The program dropped to about 52 students at the low point. Rehearsals moved outside, in masks. Students left and did not come back. Mr. Parker was not sure the marching band would come back.</p>
             <p>The students who stayed kept playing. What was gone was everything a band passes down from seniors to freshmen, and reopening the room did not bring it back.</p>
-            <div className={styles.callout}><p>Rebuilding would take seven years.</p><span>Mr. Parker told Lieutenant Colonel Reeder this during the shutdown.</span></div>
+            <div className={styles.callout}><p>Rebuilding would take seven years.</p><span>Mr. Parker told Lieutenant Colonel Rehder this during the shutdown.</span></div>
             <p>The rebuild took class after class of students learning the program, staying in it, and teaching the next group. Most of the students who did that work graduated before the Carnegie Hall invitation came.</p>
             <p>The 2026–2027 season is the seventh since the shutdown in spring 2020.</p>
           </section>
