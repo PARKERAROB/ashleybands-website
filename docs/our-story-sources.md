@@ -23,6 +23,10 @@ Public narrative home: `app/our-story/page.jsx`. Created September 5, 2026 for #
 
 No campaign payment flow, donor-benefit promise, or newsletter send is created by this page.
 
+## Carmina Burana student connection, September 11 addition (#79)
+
+Carnegie Hall’s primary event record for February 5, 2012 documents the Carmina Burana Choral Project: 200 high-school and 50 middle-school singers from New York City performed with the Orchestra of St. Luke’s, conducted by David Robertson. Three high-school-aged composers also created new works based on the musical themes of Carmina Burana. Source: https://data.carnegiehall.org/events/50211/about. The public passage uses the combined 250 singers and links directly to this record. It does not claim that Ashley participates in that project, performs the same arrangement, or has finalized its planned repertoire. The director requested this connection on Our Story after reviewing it for a separate newsletter draft; that newsletter remains on hold.
+
 ## Personal Carnegie connection, September 5 addition (#51)
 
 Director identifies the original Mount Tabor photograph as his freshman-year Carnegie Hall performance and explicitly authorizes adding it to the story as a full-circle connection. `public/images/story/mount-tabor-carnegie-original.jpeg` is a byte-identical copy of his supplied Photos render preserved in Pictures. The rejected AI restoration is not used. No performance year or pictured individual location is inferred. The full original frame and a direct full-size link are retained; `unoptimized` delivers the unchanged file rather than a recompressed derivative. The narrative distinguishes the historic performance from the planned Ashley return.

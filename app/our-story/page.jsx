@@ -114,6 +114,10 @@ export default function OurStoryPage() {
             <p>In March 2027 he goes back with his own students.</p>
             <p>Both the Ashley Concert Band and Wind Ensemble have been selected for the National Band &amp; Orchestra Festival at Carnegie Hall on <strong>March 25, 2027</strong>. The New York trip is planned for March 23–26.</p>
             <p>The plan is to bring <em>Carmina Burana</em> back, for MPA and then for Carnegie Hall. It is the same piece the band took to MPA after the 2016 conference. The performance program is not final yet.</p>
+            <h3 className={styles.fullCircleTitle}>Young musicians have made this connection before.</h3>
+            <p><em>Carmina Burana</em> has its own history at Carnegie Hall. In 2012, 250 high-school and middle-school singers performed the work there with the Orchestra of St. Luke’s. Three young composers also wrote new music inspired by the piece.</p>
+            <p>Ashley’s students will be joining a tradition that includes young musicians making extraordinary music on this historic stage.</p>
+            <div className={styles.links}><a href="https://data.carnegiehall.org/events/50211/about" target="_blank" rel="noreferrer">Carnegie Hall’s Carmina Burana Choral Project ↗</a></div>
             <p>Enrollment this fall is the second highest in Mr. Parker’s twenty years at Ashley. Students in 2026 have more competing for their time than the students of 2006 did. They are still choosing band.</p>
             <p>Alumni have come back from as far as Portland, Oregon, and New York to play with the band again.</p>
             <div className={styles.next}><p className={styles.kicker}>From Wilmington to Carnegie Hall</p><h3>Help get the band there.</h3><p>Fundraisers are open now, and a sponsorship campaign for the trip is being put together.</p><Link href="/info/carnegie-2027">Current Carnegie Hall information →</Link><p className={styles.fine}>Final participation, price, approvals, funding, and travel arrangements remain subject to confirmation.</p></div>
