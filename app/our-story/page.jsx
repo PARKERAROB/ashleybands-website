@@ -115,7 +115,8 @@ export default function OurStoryPage() {
             <p>Both the Ashley Concert Band and Wind Ensemble have been selected for the National Band &amp; Orchestra Festival at Carnegie Hall on <strong>March 25, 2027</strong>. The New York trip is planned for March 23–26.</p>
             <p>The plan is to bring <em>Carmina Burana</em> back, for MPA and then for Carnegie Hall. It is the same piece the band took to MPA after the 2016 conference. The performance program is not final yet.</p>
             <h3 className={styles.fullCircleTitle}>Young musicians have made this connection before.</h3>
-            <p><em>Carmina Burana</em> has its own history at Carnegie Hall. In 2012, 250 high-school and middle-school singers performed the work there with the Orchestra of St. Luke’s. Three young composers also wrote new music inspired by the piece.</p>
+            <p><em>Carmina Burana</em> received its first New York performance at Carnegie Hall on <strong>November 21, 1954</strong>, conducted by Leopold Stokowski.</p>
+            <p>In 2012, 250 high-school and middle-school singers performed the work there with the Orchestra of St. Luke’s. Three young composers also wrote new music inspired by the piece.</p>
             <p>Ashley’s students will be joining a tradition that includes young musicians making extraordinary music on this historic stage.</p>
             <div className={styles.links}><a href="https://data.carnegiehall.org/events/50211/about" target="_blank" rel="noreferrer">Carnegie Hall’s Carmina Burana Choral Project ↗</a></div>
             <p>Enrollment this fall is the second highest in Mr. Parker’s twenty years at Ashley. Students in 2026 have more competing for their time than the students of 2006 did. They are still choosing band.</p>

@@ -30,3 +30,7 @@ Carnegie Hall’s primary event record for February 5, 2012 documents the Carmin
 ## Personal Carnegie connection, September 5 addition (#51)
 
 Director identifies the original Mount Tabor photograph as his freshman-year Carnegie Hall performance and explicitly authorizes adding it to the story as a full-circle connection. `public/images/story/mount-tabor-carnegie-original.jpeg` is a byte-identical copy of his supplied Photos render preserved in Pictures. The rejected AI restoration is not used. No performance year or pictured individual location is inferred. The full original frame and a direct full-size link are retained; `unoptimized` delivers the unchanged file rather than a recompressed derivative. The narrative distinguishes the historic performance from the planned Ashley return.
+
+## First New York performance, September 11 addition (#81)
+
+The first New York performance of Carmina Burana took place at Carnegie Hall on November 21, 1954, conducted by Leopold Stokowski. Boston University's November 19, 2012 Symphony Hall program, printed page 8, dates the Boston performance to November 19, 1954 and Carnegie Hall to November 21: https://s3.amazonaws.com/data.instantencore.com/pdf/1016462/2012-11-19%2BSymphony-Hall-Program.pdf. The indexed program text was retrieved; direct PDF retrieval returned 403. Winthrop Sargeant's contemporary review explicitly identifies this as the first New York performance: https://www.newyorker.com/magazine/1954/12/04/1954-12-04-158-tny-cards-000049517. This is not a claim of a world or United States premiere.
