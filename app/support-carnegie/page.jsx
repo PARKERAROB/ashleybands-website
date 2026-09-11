@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import GiveClient from "@/app/sponsors/give/GiveClient";
+import CarnegieFunding from "@/components/CarnegieFunding";
 import { BOOSTER_NONPROFIT_COPY, CARNEGIE_CAMPAIGN, CARNEGIE_PURPOSE, CARNEGIE_CHANGE_TERMS } from "@/lib/sponsorCampaigns.mjs";
 import { SPONSOR_CONTACT } from "@/lib/sponsorshipContent";
 import "./giving.css";
@@ -22,6 +23,7 @@ export default function CarnegieGivingPage() {
         <a href="#make-a-gift" className="home-btn home-btn-primary">Make a gift</a>{" "}
         <Link className="carnegie-giving-detail-link" href="/info/carnegie-2027">Read about the trip →</Link>
       </header>
+      <CarnegieFunding />
       <div className="carnegie-giving-layout">
         <section id="make-a-gift" aria-label="Make a Carnegie campaign gift">
           <Suspense fallback={<p>Loading giving options…</p>}>

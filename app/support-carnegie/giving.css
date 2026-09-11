@@ -5,7 +5,7 @@
 .carnegie-giving-lede { font-size: 24px; color: #7b1829; font-weight: 700; }
 .carnegie-giving-trust { border-left: 4px solid #7b1829; padding: 12px 18px; background: #fff; font-size: 15px; }
 .carnegie-giving-detail-link { display: inline-block; margin: 16px; }
-.carnegie-giving-layout { max-width: 1080px; margin: auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; align-items: start; }
+.carnegie-giving-layout { max-width: 1080px; margin: 42px auto 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; align-items: start; }
 .carnegie-giving-layout .give-shell { padding: 0; max-width: none; }
 .carnegie-giving-details { line-height: 1.7; }
 .carnegie-giving-details h2 { font-size: 21px; margin: 0 0 8px; }

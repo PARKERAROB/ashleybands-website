@@ -1,0 +1,12 @@
+.funding { max-width: 1080px; margin: 0 auto; padding: 32px 24px; background: #fff; color: #241c17; border-top: 4px solid #7b1829; }
+.kicker { margin: 0 0 12px; color: #7b1829; font-size: 1rem; font-weight: 750; }
+.headline { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: baseline; }
+.headline strong { font-family: Georgia, serif; font-size: clamp(1.5rem, 4vw, 2.5rem); line-height: 1.2; }
+.headline span { font-size: 1rem; }
+.track { height: 20px; position: relative; margin: 24px 0 16px; background: #e7e2db; border-radius: 4px; }
+.fill { height: 100%; background: #7b1829; border-radius: 4px; }
+.marker { position: absolute; top: -5px; bottom: -5px; width: 3px; background: #765310; }
+.milestone { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 20px; font-size: 1rem; }
+.note { font-size: .9375rem; line-height: 1.6; margin-bottom: 8px; }
+.updated { font-size: .875rem; color: #62554b; margin-bottom: 0; }
+@media (max-width: 600px) { .funding { padding: 24px 18px; } }

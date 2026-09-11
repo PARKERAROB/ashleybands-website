@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import HomeUpcomingEvents from "@/components/HomeUpcomingEvents";
 import NewsletterSignup from "@/components/NewsletterSignup";
+import CarnegieFunding from "@/components/CarnegieFunding";
 import { BOOSTER_NONPROFIT_COPY, CARNEGIE_GIVING_PATH } from "@/lib/sponsorCampaigns.mjs";
 import { getSiteData } from "@/lib/siteData";
 
@@ -80,6 +81,8 @@ export default function HomePage() {
           <figcaption>Carnegie Hall · View from the Perlman Stage</figcaption>
         </figure>
       </section>
+
+      <CarnegieFunding />
 
       <section className="home-program-story" id="our-story" aria-labelledby="our-story-title">
         <div className="home-container home-program-grid">

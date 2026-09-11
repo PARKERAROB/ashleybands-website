@@ -35,7 +35,7 @@
     "test:onboarding-live": "node --test scripts/onboarding-live.test.mjs",
     "test:memberships-live": "node --test scripts/program-memberships-live.test.mjs",
     "test:uniform-sizing": "node --test scripts/uniform-sizing.test.mjs",
-    "test:sponsorship": "node --test scripts/sponsor-campaign.test.mjs scripts/sponsorship-security.test.mjs scripts/sponsor-stewardship.test.mjs scripts/campaign-research.test.mjs",
+    "test:sponsorship": "node --test scripts/carnegie-funding.test.mjs scripts/sponsor-campaign.test.mjs scripts/sponsorship-security.test.mjs scripts/sponsor-stewardship.test.mjs scripts/campaign-research.test.mjs",
     "test:public-content": "node --test scripts/public-knowledge.test.mjs",
     "test:newsletter": "node --test scripts/newsletter.test.mjs",
     "test:carnegie": "node --test scripts/carnegie-commitment.test.mjs scripts/carnegie-workspace.test.mjs",
