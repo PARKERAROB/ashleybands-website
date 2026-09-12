@@ -374,7 +374,7 @@
 .main .panelHeading button, .main .textLink { border: 0; background: transparent; padding: 4px 0; color: #5143bb; font-size: 12px; font-weight: 500; }
 .main .attentionRow { display: flex; gap: 12px; align-items: center; width: 100%; text-align: left; border: 0; border-top: 1px solid #eef0f5; border-radius: 0; padding: 18px 0; background: transparent; color: #25312d; font-size: 13px; font-weight: 400; }
 .attentionRow > span:nth-child(2) { flex: 1; min-width: 0; }
-.attentionRow strong { display: block; font-weight: 500; line-height: 1.5; }
+.attentionRow strong { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-weight: 500; line-height: 1.5; }
 .attentionRow small { display: block; color: #66716c; margin-top: 5px; }
 .main .attentionRow:hover { background: #f6f5fc; }
 .rowIcon { width: 32px; height: 32px; flex-shrink: 0; display: grid; place-items: center; border-radius: 8px; background: #eeebfc; color: #5143bb; }
