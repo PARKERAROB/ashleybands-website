@@ -5,6 +5,7 @@ import { revokeStaffSession } from "@/lib/staffSession";
 import styles from "./workspace.module.css";
 import CoordinationPanel, { TeamView } from "./CoordinationPanel";
 import AgentAccess from "./AgentAccess";
+import WorkspaceOverview from "./WorkspaceOverview";
 const API = "/api/carnegie-2027/team";
 const SIGN_IN = "/carnegie-2027/team/sign-in";
 async function workspaceResponse(response, accessCheck = false) {
@@ -22,17 +23,17 @@ async function workspaceResponse(response, accessCheck = false) {
 }
 const labels = {
   coordination: "Coordination",
-  program: "Program / external decisions",
-  finance: "Financial facts",
+  program: "Program",
+  finance: "Finance",
   unconfirmed: "Unconfirmed",
   confirmed: "Confirmed",
-  requested: "Requested · not accepted",
-  accepted: "Accepted commitment",
-  waiting: "Waiting · still owned",
+  requested: "Requested",
+  accepted: "Accepted",
+  waiting: "Waiting",
   completed: "Completed",
   declined: "Declined",
-  current: "Current working version",
-  received: "Received · not confirmed",
+  current: "Working version",
+  received: "Received",
   needs_correction: "Needs correction",
   pending: "Pending review",
   rejected: "Rejected",
@@ -53,7 +54,7 @@ function Field({ name, children, ...props }) {
 function Source() {
   return (
     <Field name="source" maxLength={1000}>
-      Evidence or reason (source and location)
+      Source / reason
     </Field>
   );
 }
@@ -63,7 +64,7 @@ function Owner({ people, domain }) {
       Owner
       <select name="owner_id" required defaultValue="">
         <option value="" disabled>
-          Choose an authorized person
+          Choose owner
         </option>
         {people
           .filter((p) => !domain || p.domains.includes(domain))
@@ -82,7 +83,8 @@ function Workspace() {
     [errorStatus, setErrorStatus] = useState(null),
     [notice, setNotice] = useState(""),
     [busy, setBusy] = useState(false),
-    [tab, setTab] = useState("coordination"),
+    [tab, setTab] = useState("overview"),
+    [composer, setComposer] = useState(false),
     [domain, setDomain] = useState("coordination"),
     [proposed, setProposed] = useState(null);
   const load = useCallback(async (signal) => {
@@ -144,10 +146,12 @@ function Workspace() {
     });
     return workspaceResponse(res);
   }
+  function navigate(nextTab) { setTab(nextTab); setNotice(""); }
+  function changeComposer(open) { setComposer(open); if (open) setNotice(""); }
   function mutate(command) {
     return run(
       () => post(API, { ...command, revision: data.revision }),
-      "Saved. The shared view is up to date.",
+      "Saved.",
     );
   }
   async function download(url) {
@@ -235,7 +239,7 @@ function Workspace() {
     );
   }
   const { state, actor, people, history } = data;
-  if (actor.access === "viewer") return <><header className={styles.top}><h1>Carnegie, together.</h1><button onClick={signOut}>Sign out</button><button disabled={busy} onClick={() => run(() => Promise.resolve(), "Refreshed.")}>Refresh</button></header><p>Read-only team access</p>{error && <p role="alert">{error}</p>}<TeamView rows={data.team} /></>;
+  if (actor.access === "viewer") return <div className={styles.viewer}><header className={styles.top}><div><Link href="/">Ashley Bands</Link><h1>Team view</h1></div><div className={styles.actions}><button disabled={busy} onClick={() => run(() => Promise.resolve(), "Refreshed.")}>Refresh</button><button onClick={signOut}>Sign out</button></div></header><p className={styles.muted}>Carnegie 2027 · Read only</p>{error && <p role="alert">{error}</p>}{notice && <p role="status">{notice}</p>}<TeamView rows={data.team} /></div>;
   const person = (id) =>
     people.find((p) => p.id === id)?.display_name || "Former workspace member";
   const pending = state.proposals.filter((p) => p.status === "pending");
@@ -320,100 +324,47 @@ function Workspace() {
   }
   return (
     <>
-      <header className={styles.top}>
-        <div>
-          <span className={styles.eyebrow}>Private team workspace</span>
-          <h1>Carnegie, together.</h1>
-          <p>
-            Current truth, working documents, and the work each person has
-            accepted.
-          </p>
-        </div>
-        <div className={styles.actions}>
-          <button
-            disabled={busy}
-            onClick={() => run(() => Promise.resolve(), "Refreshed.")}
-          >
-            Refresh
-          </button>
-          <button onClick={signOut}>Sign out</button>
-        </div>
-      </header>
-      <div className={styles.status}>
-        <span>
-          {actor.display_name} · Revision {data.revision}
-        </span>
-        <span>Writer access</span>
-      </div>
-      <p className={styles.muted}>Keep current coordination here. Documents are source evidence. Connect your agent for direct updates.</p>
-      {error && (
-        <div className={styles.error} role="alert">
-          {error} Your unsaved entries remain available. Refresh before retrying
-          a stale change.
-        </div>
-      )}
-      {notice && (
-        <p className={styles.notice} role="status">
-          {notice}
-        </p>
-      )}
-      {busy && <p role="status">Working…</p>}
-      <nav className={styles.tabs} aria-label="Workspace sections">
-        {[
-          ["coordination", "Coordination"],
-          ["team", "Team view"],
-          ["attention", "My attention"],
-          ["records", "Source records"],
-          ["documents", "Documents"],
-          ["commitments", "Follow-through"],
-          ["history", "History"],
-          ["agent", "Connect agent"],
-        ].map(([key, title]) => (
-          <button
-            key={key}
-            aria-current={tab === key ? "page" : undefined}
-            onClick={() => setTab(key)}
-          >
-            {title}
-          </button>
-        ))}
-      </nav>
-      {tab === "coordination" && <CoordinationPanel records={state.records} people={people} actor={actor} mutate={mutate} busy={busy} />}
+      <aside className={styles.sidebar}>
+        <Link href="/" className={styles.brand}><span className={styles.mark}>A</span><span>Ashley Bands<small>Carnegie 2027</small></span></Link>
+        <nav className={styles.tabs} aria-label="Workspace sections">
+          {[
+            ["overview", "Overview", "◫"],
+            ["coordination", "Updates", "≡"],
+            ["commitments", "Next actions", "✓"],
+            ["records", "Reference", "▤"],
+            ["documents", "Documents", "▱"],
+            ["history", "History", "↶"],
+            ["team", "Team view", "◎"],
+            ["agent", "Connect agent", "↗"],
+          ].map(([key, title, icon]) => <button key={key} aria-current={tab === key ? "page" : undefined} onClick={() => navigate(key)}><span aria-hidden="true">{icon}</span>{title}</button>)}
+        </nav>
+        <div className={styles.profile}><span className={styles.avatar}>{actor.display_name.split(" ").map(n => n[0]).slice(0,2).join("")}</span><span>{actor.display_name}</span></div>
+        <button className={styles.signOut} disabled={busy} onClick={signOut}>Sign out</button>
+      </aside>
+      <div className={styles.workspaceBody}>
+        <div className={styles.topbar}><span>Carnegie 2027 <span className={styles.privateBadge}>Private</span></span><button disabled={busy} onClick={() => run(() => Promise.resolve(), "Refreshed.")}>Refresh</button></div>
+        <div className={styles.content}>
+          <header className={styles.top}>
+            <h1>{{overview: "Overview", coordination: "Updates", commitments: "Next actions", records: "Reference", documents: "Documents", history: "History", team: "Team view", agent: "Connect agent", attention: "Needs you"}[tab]}</h1>
+            {actor.domains.includes("coordination") && (!composer || tab !== "coordination") && <button disabled={busy} className={styles.primary} onClick={() => { navigate("coordination"); changeComposer(true); }}>{composer ? "Resume update" : "+ Add an update"}</button>}
+          </header>
+          {error && <div className={styles.error} role="alert">{error}</div>}
+          {notice && <p className={styles.notice} role="status">{notice}</p>}
+          {busy && <p role="status">Working…</p>}
+          {tab === "overview" && <WorkspaceOverview state={state} actor={actor} people={people} navigate={navigate} />}
+          <div hidden={tab !== "coordination"}>
+            <CoordinationPanel records={state.records} people={people} actor={actor} mutate={mutate} busy={busy} composer={composer} setComposer={changeComposer} />
+          </div>
       {tab === "team" && <TeamView rows={state.records.filter(r => r.team_visible === true)} />}
       {tab === "agent" && <AgentAccess />}
       {tab === "attention" && (
         <>
-          <div className={styles.metrics}>
-            <article>
-              <strong>{mine.length}</strong>
-              <span>My requests and commitments</span>
-            </article>
-            <article>
-              <strong>
-                {pending.filter(
-                  (p) =>
-                    state.records.find((r) => r.id === p.record_id)
-                      ?.owner_id === actor.id,
-                ).length + decisions.length}
-              </strong>
-              <span>My facts and decisions to review</span>
-            </article>
-            <article>
-              <strong>
-                {
-                  state.documents.filter((d) => d.status === "needs_correction")
-                    .length
-                }
-              </strong>
-              <span>Documents needing correction</span>
-            </article>
-          </div>
           <section>
-            <h2>What belongs with me</h2>
+            <h2>My actions</h2>
             <div className={styles.grid}>{mine.map(commitment)}</div>
             {!mine.length && (
               <p className={styles.empty}>
-                You have no open requests or accepted commitments here.
+                No open actions.
               </p>
             )}
           </section>
@@ -434,37 +385,18 @@ function Workspace() {
                   proposed update
                 </p>
               ))}
-            <button onClick={() => setTab("records")}>
-              Review project truth
+            <button onClick={() => navigate("records")}>
+              Review reference
             </button>
           </section>
-          {!state.records.length && (
-            <aside className={styles.empty}>
-              <h2>A clean starting point</h2>
-              <p>
-                No project records or source files have been imported. Add a
-                sourced record, a reviewed working file, or a request. Existing
-                OneDrive masters remain where they are.
-              </p>
-              <p>
-                Access is limited to the designated director and explicitly
-                granted workspace members. Campaign research access does not
-                grant access here. Financial confirmation becomes available when
-                a financial owner is granted access.
-              </p>
-            </aside>
-          )}
+
         </>
       )}
       {tab === "records" && (
         <>
           <div className={styles.sectionHeading}>
             <div>
-              <h2>Project truth</h2>
-              <p>
-                Each fact, milestone, or decision has an owner. Unconfirmed
-                entries are visible, without being treated as settled.
-              </p>
+
             </div>
           </div>
           <details className={styles.card}>
@@ -580,10 +512,7 @@ function Workspace() {
             ))}
           </div>
           <h2>Proposed updates</h2>
-          <p>
-            Changing a document does not update this view. Compare the evidence
-            here; only the record owner can accept.
-          </p>
+
           {pending.length === 0 && (
             <p className={styles.empty}>No pending proposals.</p>
           )}
@@ -726,12 +655,9 @@ function Workspace() {
       )}
       {tab === "documents" && (
         <>
-          <h2>Working documents</h2>
+
           <button disabled={busy} onClick={() => download(`${API}/package`)}>Download working package</button>
-          <p>
-            Latest received and current working versions are separate. Selecting
-            a working version does not confirm its claims.
-          </p>
+
           <details className={styles.card}>
             <summary>Upload a reviewed DOCX or XLSX</summary>
             <form
@@ -861,11 +787,7 @@ function Workspace() {
       )}
       {tab === "commitments" && (
         <>
-          <h2>Shared follow-through</h2>
-          <p>
-            A request is not a commitment. Only the named person can accept,
-            decline, mark waiting, or complete their work.
-          </p>
+
           <details className={styles.card}>
             <summary>Make a request</summary>
             <form
@@ -893,11 +815,7 @@ function Workspace() {
       )}
       {tab === "history" && (
         <>
-          <h2>Who changed what</h2>
-          <p>
-            Every saved revision has an immutable snapshot and actor record.
-            Showing the latest 100 changes.
-          </p>
+          <p className={styles.muted}>Latest 100 changes</p>
           {history.map((h) => (
             <article key={h.revision} className={styles.history}>
               <strong>
@@ -920,6 +838,8 @@ function Workspace() {
           )}
         </>
       )}
+        </div>
+      </div>
     </>
   );
 }

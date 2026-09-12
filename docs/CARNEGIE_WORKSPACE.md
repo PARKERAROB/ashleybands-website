@@ -2,7 +2,14 @@
 
 ## Direct collaboration trial
 
-Coordination is the default page. Progress, opportunities, assessments, recommendations, decisions
+Overview is the default page: owned actions and pending reviews, recent updates, the latest
+assessment and links to source homes. Updates holds the full coordination record, including
+reported decisions. Entry details and the update form open on demand. Navigation preserves an
+unfinished update until saved or cancelled. The private workspace has its own responsive shell;
+public site navigation and footer remain on other routes. Keep copy essential to understanding
+or acting; do not add agreement reminders or duplicate source facts.
+
+Progress, opportunities, assessments, recommendations, decisions
 already communicated, and volunteer responses are directly editable sourced entries. The server
 requires coordination authority, a current workspace revision and, for edits, the entry version.
 Attributed reports require the actual decision-maker/respondent and a valid date. The recorder is

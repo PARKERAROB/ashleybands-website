@@ -21,12 +21,12 @@ export default function AgentAccess() {
     const link = document.createElement("a"); link.href = url; link.download = "carnegie-agent-config.json"; link.click(); URL.revokeObjectURL(url);
   }
   return <section className={styles.card}><h2>Connect your agent</h2>
-    <p>One setup connects your local agent to these shared records. Updates then go directly to the workspace. Your key works only here and expires after 90 days. Revoking it or removing your writer access stops future requests.</p>
-    <p><a href="/tools/carnegie-agent.mjs" download>Download the agent client</a> · <a href="/tools/carnegie-agent-guide.txt" download>Setup instructions for your agent</a></p>
+    <p>Connect to workspace records. Access expires after 90 days; revoke it anytime.</p>
+    <p><a href="/tools/carnegie-agent.mjs" download>Agent client</a> · <a href="/tools/carnegie-agent-guide.txt" download>Setup instructions</a></p>
     <form onSubmit={e => { e.preventDefault(); change({ action: "create", label: new FormData(e.currentTarget).get("label") }); }}>
       <label className={styles.field}>Agent name<input name="label" maxLength={80} required placeholder="My local agent" /></label><button disabled={busy}>Create my connection</button>
     </form>
-    {token && <div role="status"><p>Your connection is ready to save. Keep the configuration private and outside synced project folders. It will not be shown again after leaving this page.</p><button onClick={downloadConfig}>Save private connection file</button></div>}
+    {token && <div role="status"><p>Save now. Keep this private and outside synced folders; it is shown only once.</p><button onClick={downloadConfig}>Save private connection file</button></div>}
     {error && <p role="alert">{error}</p>}
     {keys.map(k => <p key={k.id}>{k.label} · {k.revoked_at ? "Revoked" : `Expires ${new Date(k.expires_at).toLocaleDateString()}`} {!k.revoked_at && <button disabled={busy} onClick={() => change({ action: "revoke", id: k.id })}>Revoke</button>}</p>)}
   </section>;

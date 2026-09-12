@@ -549,7 +549,7 @@ test(
           .click();
         await entry.waitForURL(base + "/carnegie-2027/team");
         await entry
-          .getByRole("heading", { name: "Carnegie, together." })
+          .getByRole("heading", { name: "Overview", exact: true })
           .waitFor();
         assert.ok(
           (await entryContext.cookies()).find(
@@ -561,7 +561,7 @@ test(
         );
         await entry.reload();
         await entry
-          .getByRole("heading", { name: "Carnegie, together." })
+          .getByRole("heading", { name: "Overview", exact: true })
           .waitFor();
         await entry.route("**/api/carnegie-2027/team", (route) =>
           route.fulfill({
@@ -579,7 +579,7 @@ test(
           .getByRole("button", { name: "Try again", exact: true })
           .click();
         await entry
-          .getByRole("heading", { name: "Carnegie, together." })
+          .getByRole("heading", { name: "Overview", exact: true })
           .waitFor();
         await entryContext.clearCookies();
         await entry.evaluate(() =>
@@ -635,7 +635,7 @@ test(
           .click();
         await entry.waitForURL(base + "/carnegie-2027/team");
         await entry
-          .getByRole("heading", { name: "Carnegie, together." })
+          .getByRole("heading", { name: "Overview", exact: true })
           .waitFor();
         assert.deepEqual(entryErrors, []);
         await entryContext.close();
@@ -665,19 +665,33 @@ test(
         await page.setViewportSize({ width: 1440, height: 1000 });
         await page.goto(base + "/carnegie-2027/team");
         await page
-          .getByRole("heading", { name: "Carnegie, together." })
+          .getByRole("heading", { name: "Overview", exact: true })
           .waitFor();
+        assert.equal(await page.getByLabel("Title", {exact: true}).isVisible(), false);
+        await page.screenshot({path: join(output, "overview-desktop.png"), fullPage: true});
+        await page.getByRole("button", {name: "+ Add an update", exact: true}).click();
         await page.getByLabel("Title", {exact: true}).fill("Browser progress update");
-        await page.getByLabel("Update and next action", {exact: true}).fill("Follow up with the team next week.");
+        await page.getByLabel("Update", {exact: true}).fill("Follow up with the team next week.");
         await page.getByLabel("Source and date", {exact: true}).fill("Synthetic browser test");
-        await page.getByRole("button", {name: "Save coordination entry", exact: true}).click();
+        await page.getByRole("button", {name: "Overview", exact: true}).click();
+        await page.getByRole("button", {name: "Resume update", exact: true}).click();
+        assert.equal(await page.getByLabel("Title", {exact: true}).inputValue(), "Browser progress update");
+        await page.getByRole("button", {name: "Save update", exact: true}).click();
         await page.getByRole("heading", {name: "Browser progress update", exact: true}).waitFor();
+        const updateEntry = page.locator("details").filter({has: page.getByRole("heading", {name: "Browser progress update", exact: true})});
+        await updateEntry.locator("summary").click();
+        await updateEntry.getByRole("button", {name: "Edit update", exact: true}).click();
+        await page.screenshot({path: join(output, "edit-desktop.png"), fullPage: true});
+        await page.getByLabel("Update", {exact: true}).fill("Updated browser progress with source preserved.");
+        assert.equal(await page.getByLabel("Source and date", {exact: true}).inputValue(), "Synthetic browser test");
+        await page.getByRole("button", {name: "Save update", exact: true}).click();
+        await updateEntry.locator("p").filter({hasText: "Updated browser progress with source preserved."}).waitFor();
         await page.getByRole("button", {name: "Connect agent", exact: true}).click();
         await page.getByRole("heading", {name: "Connect your agent"}).waitFor();
         await page.getByLabel("Agent name", {exact: true}).fill("Browser local agent");
         await page.getByRole("button", {name: "Create my connection", exact: true}).click();
         await page.getByRole("button", {name: "Save private connection file"}).waitFor();
-        await page.getByRole("button", {name: "Coordination", exact: true}).click();
+        await page.getByRole("button", {name: "Updates", exact: true}).click();
         await page.screenshot({
           path: join(output, "desktop.png"),
           fullPage: true,
@@ -685,7 +699,7 @@ test(
         await page
           .getByRole("button", { name: "Documents", exact: true })
           .click();
-        await page.getByText(/Latest received · Current working/).click();
+        await page.getByText(/Latest received · Working version/).click();
         await page
           .getByText("Document text and tables", { exact: true })
           .click();
@@ -696,7 +710,7 @@ test(
         });
         await page.setViewportSize({ width: 390, height: 844 });
         await page
-          .getByRole("button", { name: "My attention", exact: true })
+          .getByRole("button", { name: "Overview", exact: true })
           .click();
         await page.evaluate(() => window.scrollTo(0, 0));
         await page.screenshot({
@@ -709,14 +723,21 @@ test(
           ),
           true,
         );
-        await page.getByRole("button", {name: "Coordination", exact: true}).click();
+        await page.getByRole("button", {name: "Updates", exact: true}).click();
         await page.screenshot({path: join(output, "coordination-phone.png"), fullPage: true});
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true);
+        await page.setViewportSize({width: 320, height: 800});
+        await page.getByRole("button", {name: "+ Add an update", exact: true}).click();
+        await page.getByLabel("Type", {exact: true}).selectOption("reported_decision");
+        await page.getByLabel("Reported by", {exact: true}).waitFor();
+        await page.screenshot({path: join(output, "composer-320.png"), fullPage: true});
+        assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true);
+        await page.getByRole("button", {name: "Cancel", exact: true}).click();
         const viewerContext = await browser.newContext({viewport: {width: 390, height: 844}});
         await viewerContext.addCookies([{name: "ab_staff_session", value: cookie(staff[5]).split("=")[1], url: base}]);
         const viewerPage = await viewerContext.newPage();
         await viewerPage.goto(base + "/carnegie-2027/team");
-        await viewerPage.getByText("Read-only team access", {exact: true}).waitFor();
+        await viewerPage.getByText("Carnegie 2027 · Read only", {exact: true}).waitFor();
         await viewerPage.getByRole("heading", {name: "Shared decision report", exact: true}).waitFor();
         assert.equal(await viewerPage.getByRole("button", {name: "Download working package"}).count(), 0);
         assert.equal(await viewerPage.getByRole("heading", {name: "Browser progress update", exact: true}).count(), 0);
