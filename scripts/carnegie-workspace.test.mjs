@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { zipSync, strToU8, unzipSync } from "fflate";
 import {
   EMPTY_WORKSPACE,
+  teamProjection,
   applyWorkspaceAction,
   importProposals,
   proposalConflicts,
@@ -295,4 +296,37 @@ test("standard Word and Excel files retain normal metadata and readable content"
  assert.equal(xlsx.sections[0].title,"Milestones");
  assert.match(xlsx.sections[0].text,/A2: Review source/);
  assert.match(xlsx.sections[0].text,/cached value only/);
+});
+
+test("direct coordination preserves attribution, sources, privacy and concurrent edits", () => {
+  const command = { action: "coordination.save", kind: "reported_decision", title: "Director response", value: "Proceed with the approved preparation", attributed_to: "Sample Director", occurred_on: "2026-09-11", team_visible: true };
+  let s = act(EMPTY_WORKSPACE, command, other);
+  const r = s.records[0];
+  assert.equal(r.status, "reported");
+  assert.equal(r.created_by, other.id);
+  assert.equal(s.commitments.length, 0);
+  assert.throws(() => act(s, {action: "record.confirm", id: r.id}, other), /remain attributed/);
+  assert.throws(() => act(s, {...command, id: r.id, base_version: 0}), /changed/);
+  assert.throws(() => act(s, command, finance), /Coordination access/);
+  assert.throws(() => act(s, command, {...other, access: "viewer"}), /read-only/);
+  assert.throws(() => act(s, {...command, occurred_on: "2026-02-30"}), /valid date/);
+  assert.throws(() => act(s, {...command, attributed_to: ""}), /person who/);
+  const projection = teamProjection(s);
+  assert.equal(projection.length, 1);
+  for (const key of ["source", "created_by", "owner_id", "updated_by", "version"]) assert.equal(key in projection[0], false);
+  s = act(s, {...command, id: r.id, base_version: 1, team_visible: false});
+  assert.equal(s.records[0].version, 2);
+  assert.equal(s.records[0].created_by, other.id);
+  assert.equal(s.records[0].updated_by, owner.id);
+  assert.deepEqual(teamProjection(s), []);
+  const official = record("program");
+  assert.throws(() => act(official, {...command, id: official.records[0].id, base_version: 1}), /source owner's/);
+  assert.throws(() => act(s, {...command, value: "cw_" + "a".repeat(64)}), /credential/);
+});
+test("volunteer acceptance is an attributed report, never another user's commitment", () => {
+  const s = act(EMPTY_WORKSPACE, { action: "coordination.save", kind: "volunteer_response", title: "Setup team", value: "Agreed to help with setup", attributed_to: "Sample Volunteer", occurred_on: "2026-09-11", response: "accepted" }, other);
+  assert.equal(s.records[0].response, "accepted");
+  assert.equal(s.records[0].status, "reported");
+  assert.equal(s.commitments.length, 0);
+  assert.deepEqual(teamProjection(s), []);
 });

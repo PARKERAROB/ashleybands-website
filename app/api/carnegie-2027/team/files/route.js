@@ -10,6 +10,7 @@ import {
 import {
   BUCKET,
   workspaceAuth,
+  requireWriter,
   workspacePeople,
   readWorkspace,
   saveWorkspace,
@@ -87,6 +88,7 @@ export async function POST(req) {
 export async function GET(req) {
   try {
     const actor = await workspaceAuth(req);
+    requireWriter(actor);
     const current = await readWorkspace();
     const doc = current.state.documents.find(
       (d) => d.id === new URL(req.url).searchParams.get("id"),

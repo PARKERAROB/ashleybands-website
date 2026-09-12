@@ -3,6 +3,8 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { revokeStaffSession } from "@/lib/staffSession";
 import styles from "./workspace.module.css";
+import CoordinationPanel, { TeamView } from "./CoordinationPanel";
+import AgentAccess from "./AgentAccess";
 const API = "/api/carnegie-2027/team";
 const SIGN_IN = "/carnegie-2027/team/sign-in";
 async function workspaceResponse(response, accessCheck = false) {
@@ -80,7 +82,7 @@ function Workspace() {
     [errorStatus, setErrorStatus] = useState(null),
     [notice, setNotice] = useState(""),
     [busy, setBusy] = useState(false),
-    [tab, setTab] = useState("attention"),
+    [tab, setTab] = useState("coordination"),
     [domain, setDomain] = useState("coordination"),
     [proposed, setProposed] = useState(null);
   const load = useCallback(async (signal) => {
@@ -119,8 +121,10 @@ function Workspace() {
       await operation();
       await load();
       setNotice(message);
+      return true;
     } catch (e) {
       handleFailure(e);
+      return false;
     } finally {
       setBusy(false);
     }
@@ -231,6 +235,7 @@ function Workspace() {
     );
   }
   const { state, actor, people, history } = data;
+  if (actor.access === "viewer") return <><header className={styles.top}><h1>Carnegie, together.</h1><button onClick={signOut}>Sign out</button><button disabled={busy} onClick={() => run(() => Promise.resolve(), "Refreshed.")}>Refresh</button></header><p>Read-only team access</p>{error && <p role="alert">{error}</p>}<TeamView rows={data.team} /></>;
   const person = (id) =>
     people.find((p) => p.id === id)?.display_name || "Former workspace member";
   const pending = state.proposals.filter((p) => p.status === "pending");
@@ -338,14 +343,9 @@ function Workspace() {
         <span>
           {actor.display_name} · Revision {data.revision}
         </span>
-        <button disabled={busy} onClick={() => download(`${API}/package`)}>
-          Download working package
-        </button>
+        <span>Writer access</span>
       </div>
-      <p className={styles.muted}>
-        Use downloaded private material only with an approved local or AI tool.
-        Uploads propose evidence; they never make a claim true.
-      </p>
+      <p className={styles.muted}>Keep current coordination here. Documents are source evidence. Connect your agent for direct updates.</p>
       {error && (
         <div className={styles.error} role="alert">
           {error} Your unsaved entries remain available. Refresh before retrying
@@ -360,11 +360,14 @@ function Workspace() {
       {busy && <p role="status">Working…</p>}
       <nav className={styles.tabs} aria-label="Workspace sections">
         {[
+          ["coordination", "Coordination"],
+          ["team", "Team view"],
           ["attention", "My attention"],
-          ["records", "Project truth"],
+          ["records", "Source records"],
           ["documents", "Documents"],
           ["commitments", "Follow-through"],
           ["history", "History"],
+          ["agent", "Connect agent"],
         ].map(([key, title]) => (
           <button
             key={key}
@@ -375,6 +378,9 @@ function Workspace() {
           </button>
         ))}
       </nav>
+      {tab === "coordination" && <CoordinationPanel records={state.records} people={people} actor={actor} mutate={mutate} busy={busy} />}
+      {tab === "team" && <TeamView rows={state.records.filter(r => r.team_visible === true)} />}
+      {tab === "agent" && <AgentAccess />}
       {tab === "attention" && (
         <>
           <div className={styles.metrics}>
@@ -503,7 +509,7 @@ function Workspace() {
             </form>
           </details>
           <div className={styles.grid}>
-            {state.records.map((r) => (
+            {state.records.filter(r => ["fact", "milestone", "decision"].includes(r.kind)).map((r) => (
               <article className={styles.card} key={r.id}>
                 <span className={styles.badge}>{label(r.status)}</span>
                 <p className={styles.muted}>
@@ -515,6 +521,11 @@ function Workspace() {
                   Owner: <strong>{person(r.owner_id)}</strong>
                 </p>
                 <p className={styles.muted}>Source: {r.source}</p>
+                {(actor.is_primary || r.owner_id === actor.id) && <details>
+                  <summary>Team visibility: {r.team_visible ? "shared" : "writers only"}</summary>
+                  <p>Review the title, value and status for the whole team before sharing. Source notes and history stay private to writers.</p>
+                  <button disabled={busy} onClick={() => mutate({ action: "record.share", id: r.id, base_version: r.version, team_visible: !r.team_visible, source: "Writer reviewed this current entry for team visibility" })}>{r.team_visible ? "Remove from team view" : "Share reviewed entry with team"}</button>
+                </details>}
                 {r.source_document_id && (
                   <p className={styles.muted}>
                     Accepted from document version {r.source_document_id}
@@ -716,6 +727,7 @@ function Workspace() {
       {tab === "documents" && (
         <>
           <h2>Working documents</h2>
+          <button disabled={busy} onClick={() => download(`${API}/package`)}>Download working package</button>
           <p>
             Latest received and current working versions are separate. Selecting
             a working version does not confirm its claims.

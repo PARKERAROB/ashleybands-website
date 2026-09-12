@@ -2,6 +2,7 @@ import { zipSync, strToU8 } from "fflate";
 import { WorkspaceError } from "@/lib/carnegieWorkspaceModel.mjs";
 import {
   workspaceAuth,
+  requireWriter,
   workspacePeople,
   readWorkspace,
   readDocument,
@@ -13,6 +14,7 @@ export const runtime = "nodejs";
 export async function GET(req) {
   try {
     const actor = await workspaceAuth(req);
+    requireWriter(actor);
     const current = await readWorkspace();
     const people = await workspacePeople();
     const documents = current.state.documents;

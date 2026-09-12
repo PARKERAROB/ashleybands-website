@@ -1,7 +1,58 @@
 # Private Carnegie coordination workspace
 
+## Direct collaboration trial
+
+Coordination is the default page. Progress, opportunities, assessments, recommendations, decisions
+already communicated, and volunteer responses are directly editable sourced entries. The server
+requires coordination authority, a current workspace revision and, for edits, the entry version.
+Attributed reports require the actual decision-maker/respondent and a valid date. The recorder is
+retained separately. Reports cannot be confirmed through the official-fact workflow and do not
+change personal commitments. Program/financial records retain their owner confirmation workflow.
+
+The additive migration preserves existing memberships and adds no people. Only the current writers
+maintain entries during the initial trial. Review after at least one week before expanding writing
+access. There is no automatic expansion or notification schedule.
+
+Membership access is writer or viewer; the primary owner remains a writer. Viewers receive only
+explicitly shared current entries: title, value, type, status, attribution/date, volunteer response
+and update time. Source notes, people lists, documents, proposals, commitments and history are
+excluded. Every mutation endpoint, archive route and agent setting rejects viewers. The SQL save
+function also rejects viewers. No reader account is activated by deployment.
+
+Sharing defaults off, including for all pre-existing entries. Writers review visible text and
+attribution before sharing. A formal proposal replacement clears prior sharing. This is explicit
+audience selection, not automatic privacy classification. Official trip and funding pages remain
+linked source homes; coordination must not become a parallel ledger or participant database.
+Source-package reconciliation and named audience activation remain tracked in #67.
+
+### Local agents
+
+/api/carnegie-2027/team/agent accepts a dedicated bearer credential and exposes structured records,
+proposals and commitments without document previews, archives or general database access. It uses
+the same action model and atomic history as the browser. Every request rechecks active staff,
+writer membership and current domains. Agents cannot upload files or manage credentials. Browser
+sessions alone are not accepted here; agent keys are not staff-session credentials.
+
+Writers issue/revoke their own connection in Connect agent. Keys have 32 random bytes; only SHA-256
+digests are stored in the RLS-protected carnegie_workspace_agent_keys table. Secrets are returned
+once through a private/no-store response and saved in a private local configuration. Listings and
+audit events never include them. Expiry is 90 days. Revocation, disabling the staff account or
+removing writer access blocks subsequent requests. Key management requires authenticated same-origin
+browser writes; a key cannot mint another key.
+
+The dependency-free client is /tools/carnegie-agent.mjs; setup and commands are documented in
+/tools/carnegie-agent-guide.txt. Set CARNEGIE_AGENT_CONFIG to the private configuration path.
+read retrieves current state; write takes JSON through stdin. The client refuses redirects and
+non-HTTPS remote endpoints, never logs credentials, and never retries failed writes. A 409 requires
+reading and comparing again. Tests exercise two separate client identities; installation in another
+person's agent is a separate observed event, not implied by this proof.
+
+Existing document packages remain writer-only evidence and recovery, not a required editing loop.
+Reports and views use current records. Received files are not automatically adopted as project truth.
+
+
 Route: `/carnegie-2027/team`. API: `/api/carnegie-2027/team` and its `files`, `package`,
-and `import` routes. All data operations require a validated existing staff session. The page
+and `import` routes. Browser data operations require a validated existing staff session; the dedicated agent endpoint uses its separately scoped key. The page
 contains only the sign-in shell until the server authorizes a read. Every response is private/no-store.
 
 Workspace entry checks the server session directly; localStorage is display state, never the entry
@@ -28,7 +79,7 @@ Other people's named access and domains require explicit approval before inserti
 There is intentionally no membership-management UI or public grant endpoint in this version.
 
 Before activating another member, verify the exact existing staff identity, approved document
-audience and domain(s): `coordination`, `program`, `finance`. The member can read all workspace
+audience and domain(s): `coordination`, `program`, `finance`. The writer can read all workspace
 material; domains limit ownership/confirmation, not read visibility. Do not put narrower-audience
 financial, student, bank or diligence records here. Revoking membership blocks future API operations;
 already downloaded files cannot be recalled. Disabling the underlying staff account also blocks access.
@@ -39,7 +90,7 @@ already downloaded files cannot be recalled. Disabling the underlying staff acco
   can confirm or accept/reject proposed replacements. Financial confirmation requires a finance owner.
 - Proposals record a base record version, source, optional immutable document ID, proposer and review
   actor. A stale proposal is visible but cannot be accepted; review the new record and propose again.
-- Any authorized member can request work. Only its recipient can accept/decline or transition it.
+- Any authorized writer can request work. Only its recipient can accept/decline or transition it.
   A suggested date is separate from the accepted date. Waiting and completion retain owner,
   acceptance time and acceptance actor. Completion can be reopened only by the owner.
 - Every successful write performs one compare-and-swap over the shared revision and appends an
@@ -81,7 +132,7 @@ edits require human comparison and explicit proposals; no fake change-detection 
 
 ## Storage, limits and recovery
 
-Three RLS-protected tables and one private bucket use only service-role server access. There are no
+Four RLS-protected tables and one private bucket use only service-role server access. There are no
 public object policies or signed/public storage URLs. Downloads resolve a document ID through the
 authorized state, check bucket privacy and verify SHA-256 before returning attachment bytes.
 History cannot be updated/deleted by the service role. A failed concurrent upload can leave an

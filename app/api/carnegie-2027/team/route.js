@@ -3,6 +3,7 @@ import { privateJson } from "@/lib/privateResponse";
 import {
   applyWorkspaceAction,
   WorkspaceError,
+  teamProjection,
 } from "@/lib/carnegieWorkspaceModel.mjs";
 import {
   workspaceAuth,
@@ -20,6 +21,12 @@ export async function GET(req) {
   try {
     const actor = await workspaceAuth(req);
     const requestedRevision = new URL(req.url).searchParams.get("revision");
+    if (actor.access === "viewer") {
+      if (requestedRevision !== null) throw new WorkspaceError("History is available only to writers.", 403);
+      const current = await readWorkspace();
+      await auditWorkspace(actor, "team.view");
+      return privateJson({ revision: current.revision, updated_at: current.updated_at, actor, team: teamProjection(current.state) });
+    }
     if (requestedRevision !== null) {
       const revision = Number(requestedRevision);
       if (!Number.isInteger(revision) || revision < 1)

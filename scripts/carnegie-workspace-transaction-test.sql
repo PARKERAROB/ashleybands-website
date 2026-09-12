@@ -18,6 +18,13 @@ begin
   perform save_carnegie_workspace(n,'{}',outsider,'test.denied','Synthetic out-of-scope director');
   raise exception 'Other director received implicit access';
  exception when insufficient_privilege then null; end;
+ insert into carnegie_workspace_members(staff_id,domains,access,source) values(outsider,'{coordination}','viewer','Synthetic rollback-only viewer');
+ begin
+  perform save_carnegie_workspace(n,'{}',outsider,'test.viewer','Synthetic viewer denial');
+  raise exception 'Viewer write succeeded';
+ exception when insufficient_privilege then null; end;
+ if has_table_privilege('anon','carnegie_workspace_agent_keys','select')
+ or has_table_privilege('authenticated','carnegie_workspace_agent_keys','insert') then raise exception 'Public agent key access'; end if;
  if has_function_privilege('anon','save_carnegie_workspace(integer,jsonb,uuid,text,text)','execute')
  or has_function_privilege('authenticated','save_carnegie_workspace(integer,jsonb,uuid,text,text)','execute') then raise exception 'Public RPC access'; end if;
  if has_table_privilege('anon','carnegie_workspace','select') or has_table_privilege('authenticated','carnegie_workspace_history','select') then raise exception 'Public table access'; end if;
@@ -25,4 +32,4 @@ begin
  if not exists(select 1 from storage.buckets where id='carnegie-workspace' and public=false) then raise exception 'Private bucket missing'; end if;
 end $$;
 rollback;
-select 'PASS workspace atomic history, stale-save, other-director denial, public denial, and private bucket' as result;
+select 'PASS workspace atomic history, stale-save, viewer and other-director denial, private keys, public denial, and private bucket' as result;
