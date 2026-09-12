@@ -142,6 +142,9 @@ function runtimeSourceFilesUnder(directory) {
 }
 
 const SAFE_FILTER_COLUMN = {
+  carnegie_workspace_members: "staff_id",
+  carnegie_workspace: "primary_owner_id",
+  carnegie_workspace_history: "actor_id",
   student_guardians: "student_id",
   project_thoughts: "project_id",
   portal_student_profiles: "student_id",
