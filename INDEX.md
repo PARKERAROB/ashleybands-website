@@ -69,3 +69,11 @@ listed projection contract explicitly brings in a safe subset.
 | Checkout setup, checked release, and recovery | [docs/RELEASING.md](docs/RELEASING.md) | The single operating release recipe and local coordination limits | Update alongside release tooling and regression tests. |
 | Checked production deployment gate | [scripts/deploy-preflight.mjs](scripts/deploy-preflight.mjs) | Production identity, service, integration, privacy, lint, test, and build preconditions before Vercel deployment | Update whenever a new production invariant or required verification is introduced. |
 <!-- /atlas-home-index -->
+
+## Percussion preferences (Fall 2026)
+
+- Student self-service: `app/portal/percussion-preferences/`, `app/api/portal/percussion-preferences/route.js`.
+- Director review and CSV: `app/admin/percussion-preferences/`, `app/api/admin/percussion-preferences/route.js`.
+- Printed-part catalog and validation: `lib/percussionPreferences.mjs`; identity adapter: `lib/percussionPreferencesServer.js`.
+- Private source-tagged storage: `supabase/migrations/202609180001_percussion_preferences.sql`. No licensed music or student data committed.
+- Focused checks: `npm run test:percussion-preferences`. Issue #85.

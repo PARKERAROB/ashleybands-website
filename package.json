@@ -48,14 +48,15 @@
     "integration:sync": "node scripts/integration.mjs sync",
     "deploy:preflight": "node scripts/deploy-preflight.mjs",
     "verify:change": "npm run test:workflow && npm run test:public-content && npm run lint:integration && npm run lint:provenance",
-    "verify:release": "npm run test:workflow && npm run test:public-content && npm run deploy:preflight && node scripts/integration.mjs sync --deploy && npm run lint:integration && npm run lint:provenance && npm run lint:operations && npm run lint:carnegie && npm run test:audience && npm run test:sponsorship && npm run test:newsletter && npm run test:carnegie && npm run test:practice-loop && npm run test:onboarding-live && npm run test:memberships-live && npm run test:attendance && npm run test:attendance-program-live && npm run test:attendance-school-live && npm run test:assets-inventory-prototype && npm run test:operations-completion && npm run test:security:live && npm run lint:sponsorship && npm run lint:newsletter && npm run build",
+    "verify:release": "npm run test:percussion-preferences && npm run test:workflow && npm run test:public-content && npm run deploy:preflight && node scripts/integration.mjs sync --deploy && npm run lint:integration && npm run lint:provenance && npm run lint:operations && npm run lint:carnegie && npm run test:audience && npm run test:sponsorship && npm run test:newsletter && npm run test:carnegie && npm run test:practice-loop && npm run test:onboarding-live && npm run test:memberships-live && npm run test:attendance && npm run test:attendance-program-live && npm run test:attendance-school-live && npm run test:assets-inventory-prototype && npm run test:operations-completion && npm run test:security:live && npm run lint:sponsorship && npm run lint:newsletter && npm run build",
     "verify:live": "node scripts/verify-live.mjs",
     "release:checked": "bash scripts/runtime.sh bash scripts/release-checked.sh",
     "deploy:checked": "npm run release:checked",
     "supabase:production": "node scripts/supabase-production.mjs",
     "setup:checkout": "bash scripts/runtime.sh bash scripts/setup-checkout.sh",
     "test:carnegie-workspace": "node --test scripts/carnegie-workspace.test.mjs",
-    "test:carnegie-workspace:http": "node --test scripts/carnegie-workspace-http.test.mjs"
+    "test:carnegie-workspace:http": "node --test scripts/carnegie-workspace-http.test.mjs",
+    "test:percussion-preferences": "node --test scripts/percussion-preferences.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.105.4",
