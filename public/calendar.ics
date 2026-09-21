@@ -474,4 +474,28 @@ DTSTART;TZID=America/New_York:20260813T130000
 DTEND;TZID=America/New_York:20260813T140000
 LOCATION:Ashley High School
 END:VEVENT
+BEGIN:VEVENT
+UID:evt-0121-program@ashleybands.com
+DTSTAMP:20260610T000000Z
+SUMMARY:UNCW Honor Band Festival
+DTSTART;VALUE=DATE:20261203
+DTEND;VALUE=DATE:20261206
+LOCATION:UNC Wilmington
+DESCRIPTION:December 3–5 festival for selected students. Participation r
+ equires director nomination and recorded audition\; acceptance is not gua
+ ranteed. Official information: https://uncw.edu/academics/colleges/chssa/
+ departments/music/performances-engagement/honor-band-festival/
+END:VEVENT
+BEGIN:VEVENT
+UID:evt-0122-program@ashleybands.com
+DTSTAMP:20260610T000000Z
+SUMMARY:UNCW Honor Band nominations and auditions due
+DTSTART;VALUE=DATE:20261106
+DTEND;VALUE=DATE:20261107
+LOCATION:Online
+DESCRIPTION:Director nominations and student MP3 audition submissions are 
+ due November 6. Complete the director nomination before the student audit
+ ion upload. Official information: https://uncw.edu/academics/colleges/chs
+ sa/departments/music/performances-engagement/honor-band-festival/
+END:VEVENT
 END:VCALENDAR

@@ -630,6 +630,16 @@
   "description": null
  },
  {
+  "id": "evt-0122",
+  "title": "UNCW Honor Band nominations and auditions due",
+  "start": "2026-11-06",
+  "end": null,
+  "all_day": true,
+  "category": "HonorBand",
+  "location": "Online",
+  "description": "Director nominations and student MP3 audition submissions are due November 6. Complete the director nomination before the student audition upload. Official information: https://uncw.edu/academics/colleges/chssa/departments/music/performances-engagement/honor-band-festival/"
+ },
+ {
   "id": "evt-0025",
   "title": "All-County Band Day 1",
   "start": "2026-11-23",
@@ -648,6 +658,16 @@
   "category": "AllCounty",
   "location": "",
   "description": null
+ },
+ {
+  "id": "evt-0121",
+  "title": "UNCW Honor Band Festival",
+  "start": "2026-12-03",
+  "end": "2026-12-05",
+  "all_day": true,
+  "category": "HonorBand",
+  "location": "UNC Wilmington",
+  "description": "December 3–5 festival for selected students. Participation requires director nomination and recorded audition; acceptance is not guaranteed. Official information: https://uncw.edu/academics/colleges/chssa/departments/music/performances-engagement/honor-band-festival/"
  },
  {
   "id": "evt-0027",
