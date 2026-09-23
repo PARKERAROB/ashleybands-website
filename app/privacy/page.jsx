@@ -1,4 +1,5 @@
 // Privacy Notice — approved by Mr. Parker 2026-08-30 (word-by-word, v5).
+// v6: "Who runs this site" section approved by Mr. Parker 2026-09-23 (#99).
 // Source of record: BandsofAHS/projects/placement-authority-2026-27/privacy-notice-DRAFT.md
 // Any wording change goes back through Mr. Parker.
 
@@ -11,11 +12,19 @@ export default function PrivacyNoticePage() {
   return (
     <main className="narrow-page">
       <h1>Privacy Notice</h1>
-      <p className="lede">Effective date: August 30, 2026 · ashleybands.com</p>
+      <p className="lede">Effective date: September 23, 2026 · ashleybands.com</p>
 
       <p>
         This site supports the Ashley High School band program. This notice describes the
         information the site collects, how it is used, and the choices available to families.
+      </p>
+
+      <h2>Who runs this site</h2>
+      <p>
+        ashleybands.com is owned and managed by Mr. Parker, Director of Bands. It is operated in
+        coordination with the Ashley band program and the Ashley High School Band Boosters.
+        Payments made through this site are received by the Ashley High School Band Boosters, a
+        501(c)(3) nonprofit. This is not an official New Hanover County Schools website.
       </p>
 
       <h2>Information we collect</h2>

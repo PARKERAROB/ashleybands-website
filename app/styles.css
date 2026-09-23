@@ -228,6 +228,12 @@ nav a[aria-current="page"] {
   text-align: center;
 }
 
+.site-footer-operator {
+  max-width: 760px;
+  margin: 0 auto 8px;
+  line-height: 1.5;
+}
+
 @media (max-width: 760px) {
   .site-footer-inner {
     grid-template-columns: 1fr;

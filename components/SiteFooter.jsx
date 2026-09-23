@@ -92,6 +92,13 @@ export default function SiteFooter() {
         </nav>
       </div>
       <div className="site-footer-bottom">
+        {/* Operator statement approved by Mr. Parker 2026-09-23 (#99). Wording changes go back through him. */}
+        <p className="site-footer-operator">
+          This site is owned and managed by Mr. Parker and operated in coordination with the Ashley
+          band program and the Ashley High School Band Boosters. Payments are received by the Ashley
+          High School Band Boosters, a 501(c)(3) nonprofit. It is not an official New Hanover County
+          Schools website.
+        </p>
         <span>© {new Date().getFullYear()} Ashley High School Bands · Wilmington, North Carolina</span>
       </div>
     </footer>
