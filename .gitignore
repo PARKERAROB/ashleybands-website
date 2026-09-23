@@ -9,3 +9,6 @@ supabase/.temp
 .env*
 /tmp/
 **/__pycache__/
+
+# Local preview screenshots (#96)
+/.preview-shots/

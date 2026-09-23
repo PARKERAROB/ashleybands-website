@@ -24,5 +24,6 @@ Public Next.js/Vercel/Supabase application for private ~/Atlas/BandsofAHS record
 
 ## Release
 
+- Local visual checks: npm run preview:shots -- /route. npm run dev is write-guarded; ALLOW_LOCAL_WRITES=1 needs task authorization. docs/LOCAL_PREVIEW.md.
 - docs/RELEASING.md owns setup, validation, publication, final-alias proof, and recovery. Use npm run release:checked; deploy:checked is its compatibility alias. Never bypass the wrapper or deploy:preflight.
 - Production Supabase CLI commands use npm run supabase:production -- <command>; it validates the project and clears stale token overrides.

@@ -11,6 +11,10 @@ Use `BANDSOFAHS_DIR` for a non-sibling canonical checkout. The release suite cur
 that ignored file from the trusted local environment; never print, publish, or commit secrets.
 Setup reports the exact link command if `.vercel/project.json` is missing.
 
+To look at changed pages before release, use `npm run preview:shots -- /route` (see
+[LOCAL_PREVIEW.md](LOCAL_PREVIEW.md)). `npm run dev` refuses writes to production services unless
+the shell sets `ALLOW_LOCAL_WRITES=1`.
+
 For ad hoc Node scripts use `bash scripts/runtime.sh node <script>` and the existing
 `scripts/lib/workspace-paths.mjs` environment loader. Inspect `npm run` and `rg --files` before
 inventing commands or paths. Do not import an uninstalled environment helper.

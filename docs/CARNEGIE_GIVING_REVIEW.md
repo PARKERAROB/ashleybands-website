@@ -70,7 +70,8 @@ Receipt and deduction wording follows IRS [substantiation guidance](https://www.
   idempotency, refund/void exclusions and production configuration rejection. No live gift or
   receipt email is created by these tests.
 - Desktop/mobile browser review checks homepage links, campaign rendering, a mocked check submission,
-  overflow, browser errors and preservation of general giving. Local preview blocks writes.
+  overflow, browser errors and preservation of general giving. That review harness aborted browser
+  writes; the app itself had no local write guard. Corrected 2026-09-23: see docs/LOCAL_PREVIEW.md (#96).
 
 Local verification passed: `verify:change`, all 38 sponsorship tests (including nine campaign tests), sponsorship and changed-file lint, production build, and the desktop/mobile walkthrough. The unauthenticated staff gifts route returned 401.
 
