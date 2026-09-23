@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import CarnegieFunding from "@/components/CarnegieFunding";
+import { CARNEGIE_GIVING_PATH } from "@/lib/sponsorCampaigns.mjs";
 import styles from "./story.module.css";
 
 export const metadata = {
@@ -121,7 +123,7 @@ export default function OurStoryPage() {
             <div className={styles.links}><a href="https://data.carnegiehall.org/events/50211/about" target="_blank" rel="noreferrer">Carnegie Hall’s Carmina Burana Choral Project ↗</a></div>
             <p>Enrollment this fall is the second highest in Mr. Parker’s twenty years at Ashley. Students in 2026 have more competing for their time than the students of 2006 did. They are still choosing band.</p>
             <p>Alumni have come back from as far as Portland, Oregon, and New York to play with the band again.</p>
-            <div className={styles.next}><p className={styles.kicker}>From Wilmington to Carnegie Hall</p><h3>Help get the band there.</h3><p>Fundraisers are open now, and a sponsorship campaign for the trip is being put together.</p><Link href="/info/carnegie-2027">Current Carnegie Hall information →</Link><p className={styles.fine}>Final participation, price, approvals, funding, and travel arrangements remain subject to confirmation.</p></div>
+            <div className={styles.next}><p className={styles.kicker}>From Wilmington to Carnegie Hall</p><h3>Help get the band there.</h3><p>The campaign is open now. Every gift goes to the group trip and lowers the cost for every student who goes.</p><CarnegieFunding /><Link href={CARNEGIE_GIVING_PATH}>Help get them there →</Link><Link className={styles.nextSecondary} href="/fundraising">Or support a current fundraiser</Link><p className={styles.fine}>Final participation, price, approvals, funding, and travel arrangements remain subject to confirmation.</p></div>
           </section>
 
           <section id="record" className={styles.record}>

@@ -46,6 +46,7 @@
 .next { margin-top: 36px; padding: 30px; background: #eee2cc; }
 .next h3 { font-family: 'DM Serif Display', Georgia, serif; color: #542235; font-size: 32px; font-weight: 400; margin: 10px 0 20px; }
 .next a { display: inline-block; background: #781c31; color: #fff6e8; padding: 15px 18px; text-decoration: none; font-size: 14px; font-weight: 700; }
+.next a.nextSecondary { display: block; width: fit-content; background: none; color: #652034; padding: 12px 0 0; text-decoration: underline; text-underline-offset: 4px; }
 .article .fine { font-size: 12px; line-height: 1.7; color: #756650; margin-top: 20px; }
 .article .record { margin-bottom: 0; padding-bottom: 0; border-bottom: 0; }
 .record h2 { font-size: 30px; }

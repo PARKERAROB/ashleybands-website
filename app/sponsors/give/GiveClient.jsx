@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { CARNEGIE_CAMPAIGN, CARNEGIE_TERMS_VERSION, CARNEGIE_CHANGE_TERMS } from "@/lib/sponsorCampaigns.mjs";
+import { BOOSTER_NONPROFIT_COPY, CARNEGIE_CAMPAIGN, CARNEGIE_TERMS_VERSION, CARNEGIE_CHANGE_TERMS, CARNEGIE_SUGGESTED_AMOUNTS, carnegieGiftPrefill } from "@/lib/sponsorCampaigns.mjs";
 import { sponsorThankYouLine } from "@/lib/sponsorGiftPolicy.mjs";
 
 let paypalSdkPromise = null;
@@ -28,8 +28,9 @@ export default function GiveClient({ campaignCode = "general", embedded = false 
   const carnegie = campaignCode === CARNEGIE_CAMPAIGN;
   const Shell = embedded ? "div" : "main";
   const Heading = embedded ? "h2" : "h1";
-  const [giftKind, setGiftKind] = useState(carnegie ? "donation" : "sponsorship");
   const params = useSearchParams();
+  const prefill = carnegie ? carnegieGiftPrefill(params.get("kind"), params.get("amount")) : { giftKind: null, amount: "" };
+  const [giftKind, setGiftKind] = useState(prefill.giftKind || (carnegie ? "donation" : "sponsorship"));
   const attributionToken = params.get("a") || "";
   const checkRequestKey = useRef("");
 
@@ -37,7 +38,7 @@ export default function GiveClient({ campaignCode = "general", embedded = false 
   const [open, setOpen] = useState("loading"); // loading | open | closed
   const [businessName, setBusinessName] = useState("");
   const [studentName, setStudentName] = useState("");
-  const [amount, setAmount] = useState("");
+  const [amount, setAmount] = useState(prefill.amount);
   const [payerName, setPayerName] = useState("");
   const [payerEmail, setPayerEmail] = useState("");
   const [method, setMethod] = useState("online");
@@ -174,6 +175,27 @@ export default function GiveClient({ campaignCode = "general", embedded = false 
               <label><input type="radio" name="gift-kind" value="donation" checked={giftKind === "donation"} onChange={() => setGiftKind("donation")} /> Personal donation</label>
               <label><input type="radio" name="gift-kind" value="sponsorship" checked={giftKind === "sponsorship"} onChange={() => setGiftKind("sponsorship")} /> Business sponsorship</label>
             </fieldset> : null}
+            {carnegie ? (
+              <div className="give-amounts" role="group" aria-label="Suggested gift amounts">
+                {CARNEGIE_SUGGESTED_AMOUNTS[giftKind].map((dollars) => (
+                  <button key={dollars} type="button" aria-pressed={amount === String(dollars)} onClick={() => setAmount(String(dollars))}>
+                    ${dollars.toLocaleString("en-US")}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+            <div className="give-grid">
+              <label className="give-label">
+                {carnegie ? "Or enter another amount (USD)" : "Gift amount (USD)"}
+                <input type="number" min="5" step="1" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder={carnegie ? "Any amount, $5 or more" : "500"} />
+              </label>
+              {method === "check" ? (
+                <label className="give-label">
+                  Your name
+                  <input value={payerName} onChange={(e) => setPayerName(e.target.value)} placeholder="Contact name" />
+                </label>
+              ) : null}
+            </div>
             <label className="give-label">
               Your name or business name
               <input
@@ -183,18 +205,6 @@ export default function GiveClient({ campaignCode = "general", embedded = false 
                 readOnly={Boolean(attributionToken) && !studentName}
               />
             </label>
-            <div className="give-grid">
-              <label className="give-label">
-                Gift amount (USD)
-                <input type="number" min="5" step="1" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="500" />
-              </label>
-              {method === "check" ? (
-                <label className="give-label">
-                  Your name
-                  <input value={payerName} onChange={(e) => setPayerName(e.target.value)} placeholder="Contact name" />
-                </label>
-              ) : null}
-            </div>
             {method === "check" ? (
               <label className="give-label">
                 Email (for your receipt)
@@ -225,7 +235,8 @@ export default function GiveClient({ campaignCode = "general", embedded = false 
             </div>
 
             {!onlineAvailable ? <p className="give-muted">Online trip giving is temporarily unavailable. You can give by check or contact Mr. Parker.</p> : null}
-            {carnegie ? <p className="give-muted">{CARNEGIE_CHANGE_TERMS} Please read <a href="#about-your-gift">what your gift supports and how funds are handled if plans change</a>.</p> : null}
+            {carnegie ? <p className="give-muted">{CARNEGIE_CHANGE_TERMS} <a href="#about-your-gift">What your gift supports</a>.</p> : null}
+            {carnegie ? <p className="give-muted">{BOOSTER_NONPROFIT_COPY}</p> : null}
             {error ? <p className="give-error" role="alert">{error}</p> : null}
 
             {method === "check" ? (
@@ -372,6 +383,27 @@ function Styles() {
         border: 1px solid #cabfad;
         border-radius: 8px;
         font-size: 15px;
+      }
+      .give-amounts {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+        gap: 8px;
+        margin-top: 8px;
+      }
+      .give-amounts button {
+        min-height: 48px;
+        border: 1.5px solid #cabfad;
+        background: #fffaf0;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 700;
+        color: #20160f;
+        cursor: pointer;
+      }
+      .give-amounts button[aria-pressed="true"] {
+        border-color: #7b1829;
+        background: #f7e4e7;
+        color: #7b1829;
       }
       .give-grid {
         display: grid;

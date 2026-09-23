@@ -195,3 +195,26 @@ test("gift terms follow the checkout version; earlier gifts and retries cannot a
   assert.equal(campaigns.giftChangeTerms(null),campaigns.CARNEGIE_ORIGINAL_CHANGE_TERMS);
   assert.throws(()=>campaigns.giftTermsVersion('carnegie-2027','anything'),/reload/);
 });
+
+test("giving funnel prefill accepts only a known kind and a whole-dollar amount of at least $5 (#93)", () => {
+  const { carnegieGiftPrefill, CARNEGIE_SUGGESTED_AMOUNTS } = campaigns;
+  assert.deepEqual(CARNEGIE_SUGGESTED_AMOUNTS.donation, [25, 50, 100, 250, 500]);
+  assert.deepEqual(CARNEGIE_SUGGESTED_AMOUNTS.sponsorship, [500, 1000, 2500, 5000, 10000]);
+  assert.deepEqual(carnegieGiftPrefill("personal", "50"), { giftKind: "donation", amount: "50" });
+  assert.deepEqual(carnegieGiftPrefill("business", "2500"), { giftKind: "sponsorship", amount: "2500" });
+  assert.deepEqual(carnegieGiftPrefill(null, null), { giftKind: null, amount: "" });
+  for (const amount of ["4", "0", "-5", "12.50", "1e3", "abc", "9999999", " 50"]) assert.equal(carnegieGiftPrefill("personal", amount).amount, "");
+  for (const kind of ["general", "Business", "", "sponsor"]) assert.equal(carnegieGiftPrefill(kind, "50").giftKind, null);
+});
+
+test("public giving funnel keeps approved terms, drops written recognition offers and routes story readers to giving (#93)", () => {
+  const read = file => readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
+  const home = read("app/page.jsx"), giving = read("app/support-carnegie/page.jsx"), give = read("app/sponsors/give/GiveClient.jsx"), story = read("app/our-story/page.jsx");
+  assert.doesNotMatch(giving + home, /discuss recognition/i);
+  assert.match(give, /CARNEGIE_CHANGE_TERMS/, "trip-change terms stay beside the payment choice");
+  assert.match(give, /BOOSTER_NONPROFIT_COPY/);
+  assert.match(home, /CARNEGIE_GIVING_PATH\}\?kind=/, "homepage amounts carry into the giving form");
+  assert.match(story, /href=\{CARNEGIE_GIVING_PATH\}/);
+  assert.doesNotMatch(story, /being put together/);
+  assert.doesNotMatch(giving, /href="\/info\/carnegie-2027"/, "donor story link no longer lands on family logistics");
+});

@@ -5,7 +5,6 @@
 .headline span { font-size: 1rem; }
 .track { height: 20px; position: relative; margin: 24px 0 16px; background: #e7e2db; border-radius: 4px; }
 .fill { height: 100%; background: #7b1829; border-radius: 4px; }
-.marker { position: absolute; top: -5px; bottom: -5px; width: 3px; background: #765310; }
 .milestone { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 20px; font-size: 1rem; }
 .note { font-size: .9375rem; line-height: 1.6; margin-bottom: 8px; }
 .updated { font-size: .875rem; color: #62554b; margin-bottom: 0; }

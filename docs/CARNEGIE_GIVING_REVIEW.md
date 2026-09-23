@@ -1,5 +1,20 @@
 # Carnegie campaign giving review
 
+## September 23 revision: issue #93
+
+The homepage is now the one link students and families share. It leads with the comeback hook and the
+give action, then shows progress toward the $25,000 first goal and the three-part story, then a give panel
+with the director's settled suggested amounts (personal $25 to $500, business $500 to $10,000, another amount
+always allowed). Choosing an amount opens `/support-carnegie?kind=&amount=` with that amount prefilled; the
+prefill only seeds editable form state and the server validates every gift as before. Family shortcuts
+follow the campaign sections. General sponsorship cards left the homepage; their routes are unchanged.
+
+`/support-carnegie` adds amount buttons (Carnegie form only), links to the story instead of family
+logistics, and states the v2 trip-change terms and the nonprofit statement once beside the payment
+choice. The sentence offering businesses a recognition discussion was removed: no recognition benefits
+are offered in writing. `/our-story` now ends with live progress and a direct giving action.
+Student quotes appear on the homepage only after they are approved for publication; the slot stays hidden while empty.
+
 ## September 10 revision — issue #72
 
 Rob approved prospective alternate-use terms: gifts support the Carnegie trip, and if the trip is canceled, cannot proceed as planned, or money remains after expenses, the boosters may use those funds for other educational activities and participation assistance within the Ashley band program. The page states this before payment. Each new checkout transmits `carnegie-2027-v2`; missing versions from older checkouts retain v1. Stored versions govern receipts and staff review; existing gift terms are not rewritten.

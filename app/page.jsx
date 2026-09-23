@@ -7,7 +7,7 @@ import Link from "next/link";
 import HomeUpcomingEvents from "@/components/HomeUpcomingEvents";
 import NewsletterSignup from "@/components/NewsletterSignup";
 import CarnegieFunding from "@/components/CarnegieFunding";
-import { BOOSTER_NONPROFIT_COPY, CARNEGIE_GIVING_PATH } from "@/lib/sponsorCampaigns.mjs";
+import { BOOSTER_NONPROFIT_COPY, CARNEGIE_GIVING_PATH, CARNEGIE_SUGGESTED_AMOUNTS } from "@/lib/sponsorCampaigns.mjs";
 import { getSiteData } from "@/lib/siteData";
 
 const PROMPTS = [
@@ -15,6 +15,21 @@ const PROMPTS = [
   "What do students need for band?",
   "How do I subscribe to the calendar?",
   "How does the Carnegie conditional deposit work?"
+];
+
+const COMEBACK = [
+  ["2020", "COVID nearly ended the program. About 52 students were left, rehearsing outside in masks. Mr. Parker said rebuilding would take seven years."],
+  ["The rebuild", "Class after class learned the program, stayed, and taught the next group. Most of them graduated before the invitation came."],
+  ["Now", "Superior ratings at MPA. The second highest enrollment in twenty years. This is the seventh season, and both concert bands are going to Carnegie Hall."]
+];
+
+// Add approved student quotes here once the student media volunteer has permission to publish them.
+// Each entry: { quote, name, detail, photo?, photoAlt? }. The section stays hidden while empty.
+const STUDENT_VOICES = [];
+
+const GIVE_KINDS = [
+  { key: "personal", label: "Personal", amounts: CARNEGIE_SUGGESTED_AMOUNTS.donation },
+  { key: "business", label: "Business", amounts: CARNEGIE_SUGGESTED_AMOUNTS.sponsorship }
 ];
 
 const INFO_GROUPS = [
@@ -26,16 +41,15 @@ export default function HomePage() {
   const data = getSiteData();
   const router = useRouter();
   const [query, setQuery] = useState("");
+  const [giveKind, setGiveKind] = useState("personal");
+  const [giveAmount, setGiveAmount] = useState(null);
+  const giveHref = `${CARNEGIE_GIVING_PATH}?kind=${giveKind}${typeof giveAmount === "number" ? `&amount=${giveAmount}` : ""}#make-a-gift`;
 
   const bandShirtsStore = data.quickLinks.find((link) => link.label === "Band Shirts Store");
   const groups = INFO_GROUPS.map((group) => ({
     ...group,
     pages: data.pages.filter((page) => page.category === group.category)
   }));
-  const sponsorshipPages = [
-    { slug: "sponsors", href: "/sponsors", audience: "Businesses and community", title: "Sponsorship opportunities", summary: "Program support, sponsorship levels, and instrument giving." },
-    { slug: "give", href: "/sponsors/give", audience: "Families, alumni, and friends", title: "Make a donation", summary: "Give $5 or more to support Ashley Bands. Individuals and businesses are welcome." }
-  ];
 
   function handleSubmit(event) {
     event.preventDefault();
@@ -50,30 +64,20 @@ export default function HomePage() {
 
   return (
     <main className="home">
-      <nav className="home-family-bar" aria-label="Student and family shortcuts">
-        <span>Already part of the band?</span>
-        <Link href="/portal">Family Portal <span aria-hidden="true">↗</span></Link>
-        <Link href="/calendar">Band Calendar <span aria-hidden="true">↗</span></Link>
-        <Link href="/carnegie-2027/commit">Carnegie family response <span aria-hidden="true">↗</span></Link>
-      </nav>
       <section className="home-campaign-hero" aria-labelledby="home-hero-title">
         <div className="home-campaign-copy">
           <p className="home-campaign-kicker">Ashley High School Bands · North Carolina</p>
           <h1 id="home-hero-title">From Wilmington<br />to <em>Carnegie Hall.</em></h1>
           <p className="home-campaign-lede">
-            Both the Concert Band and the Wind Ensemble have been selected for the National Band &amp; Orchestra
-            Festival at Carnegie Hall. Twenty years of Ashley students built the program that earned the invitation.
+            Six years ago, Ashley Bands was down to about 52 students, rehearsing outside in masks. In March, both
+            concert bands play Carnegie Hall.
           </p>
           <p className="home-campaign-date">New York City <span aria-hidden="true">/</span> March 25, 2027</p>
           <div className="home-campaign-actions">
-            <Link className="home-btn home-btn-primary" href={CARNEGIE_GIVING_PATH}>Support Ashley’s Carnegie Trip <span aria-hidden="true">↗</span></Link>
+            <Link className="home-btn home-btn-primary" href={CARNEGIE_GIVING_PATH}>Help get them there <span aria-hidden="true">→</span></Link>
             <Link className="home-campaign-story-link" href="/our-story">Read our story <span aria-hidden="true">→</span></Link>
           </div>
           <p className="home-giving-trust"><strong>{BOOSTER_NONPROFIT_COPY}</strong></p>
-          <a className="home-recognition" href="#program-of-distinction">
-            <Image src="/images/home/program-of-distinction.png" alt="Official NCBA Program of Distinction badge, 2025–2026" width={144} height={144} priority />
-            <span><span className="home-recognition-label">Recognized statewide</span><strong>Program of Distinction</strong><span>Inaugural class · 2025–2026<br />North Carolina Bandmasters Association</span></span>
-          </a>
         </div>
         <figure className="home-campaign-art">
           <Image src="/images/home/perlman-stage.avif" alt="View from the Perlman Stage at Carnegie Hall, with a grand piano and the auditorium beyond" fill sizes="(max-width: 900px) 100vw, 48vw" priority style={{ objectFit: "cover" }} />
@@ -84,35 +88,71 @@ export default function HomePage() {
 
       <CarnegieFunding />
 
-      <section className="home-program-story" id="our-story" aria-labelledby="our-story-title">
-        <div className="home-container home-program-grid">
-          <figure className="home-program-photo">
-            <Image src="/656637421_1325880026241163_8640066925134763727_n.jpg" alt="Ashley High School Wind Ensemble performing on stage" fill sizes="(max-width: 900px) 100vw, 50vw" style={{ objectFit: "cover", objectPosition: "center 40%" }} />
+      <section className="home-comeback" aria-labelledby="home-comeback-title">
+        <div className="home-container home-comeback-grid">
+          <div>
+            <p className="eyebrow">Our story</p>
+            <h2 id="home-comeback-title">The comeback.</h2>
+            <ol className="home-comeback-beats">
+              {COMEBACK.map(([label, text]) => <li key={label}><strong>{label}</strong><p>{text}</p></li>)}
+            </ol>
+            <Link className="home-comeback-link" href="/our-story">Read the full story, 2006 to now <span aria-hidden="true">→</span></Link>
+          </div>
+          <figure className="home-comeback-photo">
+            <Image src="/656637421_1325880026241163_8640066925134763727_n.jpg" alt="Ashley High School Wind Ensemble performing on stage" fill sizes="(max-width: 900px) 100vw, 45vw" style={{ objectFit: "cover", objectPosition: "center 40%" }} />
             <figcaption>Ashley Wind Ensemble · 2026</figcaption>
           </figure>
-          <div className="home-program-copy" id="program-of-distinction">
-            <p className="eyebrow">About the program</p>
-            <h2 id="our-story-title">Built in the band room.<br />Ready for a bigger stage.</h2>
-            <p>Ashley students play in two concert bands, the marching band, percussion, jazz band, colorguard, and pep band. Mr. Parker took the job in 2006, fresh out of college, and has directed the program ever since.</p>
-            <p>In March 2026 the Wind Ensemble earned a Superior rating at Grade VI and the Concert Band earned a Superior at Grade IV. Ten students were selected for the Eastern District All-District Band. The North Carolina Bandmasters Association also named Ashley to its first class of Programs of Distinction.</p>
-            <p>The program fell to about 52 students after COVID. Enrollment this year is the second highest of Mr. Parker’s time at Ashley, and the Carnegie Hall invitation came out of that rebuild. Mr. Parker played there once himself, as a freshman with the Mount Tabor High School band.</p>
-            <div className="home-links"><Link href="/our-story">The full story, 2006 to now</Link><Link href="/programs">Concert programs</Link><Link href="/info/marching-band-2026">The Screaming Eagle Regiment</Link></div>
-          </div>
         </div>
+        {STUDENT_VOICES.length > 0 && (
+          <div className="home-container home-voices">
+            {STUDENT_VOICES.map((voice) => (
+              <figure className="home-voice" key={voice.name}>
+                {voice.photo && <Image src={voice.photo} alt={voice.photoAlt || ""} width={96} height={96} />}
+                <blockquote>{voice.quote}</blockquote>
+                <figcaption>{voice.name}{voice.detail ? `, ${voice.detail}` : ""}</figcaption>
+              </figure>
+            ))}
+          </div>
+        )}
       </section>
 
-      <section className="home-campaign-future" aria-labelledby="home-campaign-future-title">
-        <div className="home-container home-campaign-future-grid">
-          <div><p className="eyebrow">Getting the band to New York</p><h2 id="home-campaign-future-title">Help get the band<br />to New York.</h2></div>
-          <div><p>Help Ashley students make the trip to New York. Make a personal donation, become a business sponsor, or support a current fundraiser.</p>
-            <p className="home-campaign-coming">How to help</p>
-            <Link className="home-btn home-btn-primary" href={CARNEGIE_GIVING_PATH}>Support Ashley’s Carnegie Trip <span aria-hidden="true">↗</span></Link>
-            <p className="home-giving-trust"><strong>{BOOSTER_NONPROFIT_COPY}</strong></p>
-            <div className="home-links"><Link href={`${CARNEGIE_GIVING_PATH}#about-your-gift`}>What your gift supports</Link><Link href="/fundraising">Current fundraisers</Link><a href="mailto:robert.parker@nhcs.net">Discuss a larger gift</a></div>
+      <section className="home-give" id="give" aria-labelledby="home-give-title">
+        <div className="home-container home-give-grid">
+          <div>
+            <p className="eyebrow">How to help</p>
+            <h2 id="home-give-title">Help get the band<br />to New York.</h2>
+            <p>Gifts go to the group trip, not to one student&apos;s account. Every dollar lowers the cost for everyone.</p>
+          </div>
+          <div className="home-give-panel">
+            <div className="home-give-kinds" role="group" aria-label="Type of gift">
+              {GIVE_KINDS.map((kind) => (
+                <button key={kind.key} type="button" aria-pressed={giveKind === kind.key} onClick={() => { setGiveKind(kind.key); setGiveAmount(null); }}>{kind.label}</button>
+              ))}
+            </div>
+            <div className="home-give-amounts" role="group" aria-label="Suggested gift amounts">
+              {GIVE_KINDS.find((kind) => kind.key === giveKind).amounts.map((dollars) => (
+                <button key={dollars} type="button" aria-pressed={giveAmount === dollars} onClick={() => setGiveAmount(dollars)}>${dollars.toLocaleString("en-US")}</button>
+              ))}
+              <button type="button" aria-pressed={giveAmount === "other"} onClick={() => setGiveAmount("other")}>Other</button>
+            </div>
+            <Link className="home-btn home-btn-primary home-give-go" href={giveHref}>
+              {typeof giveAmount === "number" ? `Give $${giveAmount.toLocaleString("en-US")}` : "Continue to give"} <span aria-hidden="true">→</span>
+            </Link>
+            <p className="home-giving-trust">{BOOSTER_NONPROFIT_COPY}</p>
+            <div className="home-links"><Link href="/fundraising">Current fundraisers</Link><a href="mailto:robert.parker@nhcs.net?subject=Ashley%20Carnegie%20trip%20support">Larger gift or employer match</a></div>
             <p className="home-campaign-planning">Travel plans, final participation, price, approvals, and funding remain subject to confirmation.</p>
           </div>
         </div>
       </section>
+
+      <nav className="home-family-bar" aria-label="Student and family shortcuts">
+        <span>Already part of the band?</span>
+        <Link href="/portal">Family Portal <span aria-hidden="true">↗</span></Link>
+        <Link href="/calendar">Band Calendar <span aria-hidden="true">↗</span></Link>
+        <Link href="/info/carnegie-2027">Carnegie family information <span aria-hidden="true">↗</span></Link>
+      </nav>
+
+
 
       <section className="home-now" aria-labelledby="home-now-title">
         <div className="home-container home-now-grid">
@@ -233,6 +273,24 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="home-program-story" id="about-the-program" aria-labelledby="our-story-title">
+        <div className="home-container home-program-grid">
+          <figure className="home-program-photo">
+            <Image src="/656637421_1325880026241163_8640066925134763727_n.jpg" alt="Ashley High School Wind Ensemble performing on stage" fill sizes="(max-width: 900px) 100vw, 50vw" style={{ objectFit: "cover", objectPosition: "center 40%" }} />
+            <figcaption>Ashley Wind Ensemble · 2026</figcaption>
+          </figure>
+          <div className="home-program-copy" id="program-of-distinction">
+            <Image className="home-program-badge" src="/images/home/program-of-distinction.png" alt="Official NCBA Program of Distinction badge, 2025–2026" width={112} height={112} />
+            <p className="eyebrow">About the program</p>
+            <h2 id="our-story-title">Built in the band room.<br />Ready for a bigger stage.</h2>
+            <p>Ashley students play in two concert bands, the marching band, percussion, jazz band, colorguard, and pep band. Mr. Parker took the job in 2006, fresh out of college, and has directed the program ever since.</p>
+            <p>In March 2026 the Wind Ensemble earned a Superior rating at Grade VI and the Concert Band earned a Superior at Grade IV. Ten students were selected for the Eastern District All-District Band. The North Carolina Bandmasters Association also named Ashley to its first class of Programs of Distinction.</p>
+            <p>The program fell to about 52 students after COVID. Enrollment this year is the second highest of Mr. Parker’s time at Ashley, and the Carnegie Hall invitation came out of that rebuild. Mr. Parker played there once himself, as a freshman with the Mount Tabor High School band.</p>
+            <div className="home-links"><Link href="/our-story">The full story, 2006 to now</Link><Link href="/programs">Concert programs</Link><Link href="/info/marching-band-2026">The Screaming Eagle Regiment</Link></div>
+          </div>
+        </div>
+      </section>
+
       <section className="home-story" aria-labelledby="home-story-title">
         <div className="home-container home-story-grid">
           <div className="home-story-photo">
@@ -262,17 +320,10 @@ export default function HomePage() {
       <section className="home-support" aria-labelledby="home-support-title">
         <div className="home-container">
           <div className="home-heading">
-            <p className="eyebrow">Donations and sponsors</p>
-            <h2 id="home-support-title">Support the band.</h2>
+            <p className="eyebrow">For band families</p>
+            <h2 id="home-support-title">Boosters and spirit wear.</h2>
           </div>
           <div className="home-support-grid">
-            {sponsorshipPages.map((page) => (
-              <Link className="home-support-card" href={page.href} key={page.slug}>
-                <span className="home-info-audience">{page.audience}</span>
-                <strong>{page.title}</strong>
-                <span className="home-info-summary">{page.summary}</span>
-              </Link>
-            ))}
             <Link className="home-support-card" href="/boosters">
               <span className="home-info-audience">Families</span>
               <strong>Band Boosters</strong>

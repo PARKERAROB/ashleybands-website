@@ -2,6 +2,9 @@
 
 The homepage and `/support-carnegie` show net receipts toward the director-approved $250,000
 campaign goal and $25,000 first major milestone (September 11, 2026; issue #80).
+Since issue #93 (September 23, 2026) the display measures progress against the $25,000 first goal
+until it is reached, then against the full goal. The full goal is labeled an estimate until final
+prices are known. The accounting and public aggregate are unchanged.
 This measures money received toward the trip, not the current bank balance or remaining cash after
 trip expenses. Transfers between accounts and vendor payments are not new fundraising receipts.
 
