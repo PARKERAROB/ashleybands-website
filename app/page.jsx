@@ -7,6 +7,7 @@ import Link from "next/link";
 import HomeUpcomingEvents from "@/components/HomeUpcomingEvents";
 import NewsletterSignup from "@/components/NewsletterSignup";
 import CarnegieFunding from "@/components/CarnegieFunding";
+import MattressSaleBanner from "@/components/MattressSaleBanner";
 import { BOOSTER_NONPROFIT_COPY, CARNEGIE_GIVING_PATH, CARNEGIE_SUGGESTED_AMOUNTS } from "@/lib/sponsorCampaigns.mjs";
 import { getSiteData } from "@/lib/siteData";
 
@@ -64,6 +65,8 @@ export default function HomePage() {
 
   return (
     <main className="home">
+      <MattressSaleBanner />
+
       <section className="home-campaign-hero" aria-labelledby="home-hero-title">
         <div className="home-campaign-copy">
           <p className="home-campaign-kicker">Ashley High School Bands · North Carolina</p>
