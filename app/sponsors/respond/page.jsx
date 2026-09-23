@@ -56,11 +56,11 @@ function YesMessage() {
       <section className="sponsors-hero">
         <h1>Thank you.</h1>
         <p className="sponsors-lede">
-          We've noted your business is open to hearing more. An Ashley band family will be in
+          We&apos;ve noted your business is open to hearing more. An Ashley band family will be in
           touch in the coming weeks with the details.
         </p>
         <p>
-          If you'd like to reach out before then, the director is at{" "}
+          If you&apos;d like to reach out before then, the director is at{" "}
           <a href={`mailto:${SPONSOR_CONTACT.email}`}>{SPONSOR_CONTACT.email}</a>.
         </p>
       </section>
@@ -74,7 +74,7 @@ function NoMessage() {
       <section className="sponsors-hero">
         <h1>Got it. No worries.</h1>
         <p className="sponsors-lede">
-          We've removed your business from our outreach list. Thanks for the moment of your time.
+          We&apos;ve removed your business from our outreach list. Thanks for the moment of your time.
         </p>
         <p>
           If you change your mind down the road, the director is at{" "}
@@ -89,7 +89,7 @@ function InvalidLink() {
   return (
     <main className="sponsors-page">
       <section className="sponsors-hero">
-        <h1>Hmm, that link didn't work.</h1>
+        <h1>Hmm, that link didn&apos;t work.</h1>
         <p className="sponsors-lede">
           The response link may have expired or been used already. If you have a question or want
           to talk about sponsorship, email the director at{" "}

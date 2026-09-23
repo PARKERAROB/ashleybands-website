@@ -26,7 +26,7 @@ export default function PrintLeaveBehindPage() {
         <p className="print-lede">
           The county funds the basics. Local business sponsors fund the rest: instructional
           staff, transportation, show production, uniforms, scholarships that keep students on
-          the field, and the instruments we're replacing over the next decade. By 2036, every
+          the field, and the instruments we&apos;re replacing over the next decade. By 2036, every
           student in the Ashley band program will have the option of using a quality Yamaha
           instrument. Your sponsorship is part of that ten-year build.
         </p>
@@ -59,7 +59,7 @@ export default function PrintLeaveBehindPage() {
 
         <h3 className="print-h3">Adopt-an-Instrument: capital, toward the 2036 goal</h3>
         <p>
-          Gifts of $2,500 or more enter the year's instrument capital fund. Fund a complete
+          Gifts of $2,500 or more enter the year&apos;s instrument capital fund. Fund a complete
           instrument package and receive a brass plaque on the case with your name for the life
           of the instrument (typically 15 years), plus named recognition in the program every
           year that instrument is in service.

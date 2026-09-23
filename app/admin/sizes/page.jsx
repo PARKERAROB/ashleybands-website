@@ -28,7 +28,8 @@ function SizesTable({ session }) {
       .finally(() => setLoading(false));
   };
 
-  useEffect(load, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect -- reviewed: fetch once on mount; load() sets its own loading flag.
+  useEffect(load, []);
 
   const setSize = async (row, size) => {
     setSaving(row.studentId);

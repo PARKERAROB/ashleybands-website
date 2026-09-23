@@ -121,6 +121,7 @@ export default function PlayPage({ params }) {
   useEffect(() => {
     if (!raceRow || !sessionRow) return;
     if (raceRow.status === "active" && phase !== "racing" && phase !== "finished") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reviewed: phase follows the realtime race row and starts the first note fetch.
       setPhase("racing");
       fetchNextNote(sessionRow.mode);
     } else if (raceRow.status === "finished" && phase !== "finished") {

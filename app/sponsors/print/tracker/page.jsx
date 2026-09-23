@@ -81,7 +81,7 @@ export default function PrintTrackerPage() {
         <ul className="print-ul-tight">
           <li><strong>Pending</strong>: packet delivered, waiting on decision.</li>
           <li><strong>Yes</strong>: committed. Form sent to {SPONSOR_LEAD.name} at {SPONSOR_LEAD.email}.</li>
-          <li><strong>No</strong>: not this year. Mark "ask again later" if they invited a future ask.</li>
+          <li><strong>No</strong>: not this year. Mark &quot;ask again later&quot; if they invited a future ask.</li>
           <li><strong>Ask again later</strong>: note the month they suggested.</li>
         </ul>
 
@@ -95,9 +95,9 @@ export default function PrintTrackerPage() {
 
         <h2 className="print-h2">When you hit a no</h2>
         <p className="print-small">
-          Mark "No" and move on. A no is not a personal rejection. It's a budget cycle, a partner
+          Mark &quot;No&quot; and move on. A no is not a personal rejection. It&apos;s a budget cycle, a partner
           not on board, or the wrong year for that business. Saying yes to even 1 out of 5 puts
-          a meaningful sponsorship in front of the program. Saying yes to 2 or 3 changes what's
+          a meaningful sponsorship in front of the program. Saying yes to 2 or 3 changes what&apos;s
           possible for your student.
         </p>
       </article>

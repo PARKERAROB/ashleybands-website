@@ -33,11 +33,11 @@ export default function RespondConfirm({ token, action, businessName }) {
       <>
         <h1>Thank you.</h1>
         <p className="sponsors-lede">
-          We've noted that {businessName} is open to hearing more. An Ashley band family will be
+          We&apos;ve noted that {businessName} is open to hearing more. An Ashley band family will be
           in touch in the coming weeks with the details.
         </p>
         <p>
-          If you'd like to reach out before then, the director is at{" "}
+          If you&apos;d like to reach out before then, the director is at{" "}
           <a href={`mailto:${SPONSOR_CONTACT.email}`}>{SPONSOR_CONTACT.email}</a>.
         </p>
       </>
@@ -49,7 +49,7 @@ export default function RespondConfirm({ token, action, businessName }) {
       <>
         <h1>Got it. No worries.</h1>
         <p className="sponsors-lede">
-          We've removed {businessName} from our outreach list. Thanks for the moment of your time.
+          We&apos;ve removed {businessName} from our outreach list. Thanks for the moment of your time.
         </p>
         <p>
           If you change your mind down the road, the director is at{" "}
@@ -64,7 +64,7 @@ export default function RespondConfirm({ token, action, businessName }) {
       <>
         <h1>Something went wrong.</h1>
         <p className="sponsors-lede">
-          We couldn't record that just now. Please try the link again, or email the director at{" "}
+          We couldn&apos;t record that just now. Please try the link again, or email the director at{" "}
           <a href={`mailto:${SPONSOR_CONTACT.email}`}>{SPONSOR_CONTACT.email}</a>.
         </p>
       </>
@@ -84,7 +84,7 @@ export default function RespondConfirm({ token, action, businessName }) {
         ) : (
           <>
             Press the button to remove <strong>{businessName}</strong> from our sponsorship
-            outreach list. You won't hear from us again about this.
+            outreach list. You won&apos;t hear from us again about this.
           </>
         )}
       </p>

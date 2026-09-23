@@ -111,6 +111,7 @@ function MeasurementsAdmin({ session }) {
     // Deep-link support: /admin/measurements?studentId=<id>&name=<display_name>
     const studentId = searchParams.get("studentId");
     if (studentId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reviewed: one-time deep-link selection from the URL on mount.
       setSelected({ id: studentId, display_name: searchParams.get("name") || "" });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -197,6 +198,7 @@ function MeasurementForm({ student, session, onSaved }) {
   const [err, setErr] = useState("");
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reviewed: reset form status before fetching the selected student's record.
     setLoading(true);
     setMsg("");
     setErr("");

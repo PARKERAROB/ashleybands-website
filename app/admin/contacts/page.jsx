@@ -32,6 +32,7 @@ function ContactsAdmin({ session }) {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reviewed: fetch on session change; load() sets its own loading flag.
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session]);
@@ -56,7 +57,7 @@ function ContactsAdmin({ session }) {
         <a href="/admin" style={link}>← Staff home</a>
       </div>
       <p style={{ color: "#6f675a", fontSize: 14 }}>
-        Every guardian and contact-adjacent person, with each contact value's origin visible at a glance.
+        Every guardian and contact-adjacent person, with each contact value&apos;s origin visible at a glance.
       </p>
 
       <div style={{ display: "flex", gap: 8, margin: "12px 0", flexWrap: "wrap", alignItems: "center" }}>

@@ -48,7 +48,7 @@ function DataInventory({ session }) {
             <Row label="Guardians touched" stat={data.touchedByFamily.peopleTouched} tone="good" />
             <Row label="Guardians never touched" stat={data.touchedByFamily.peopleUntouched} tone="warn" />
             <p style={{ fontSize: 12, color: "#6f675a", marginTop: 6 }}>
-              "Touched" = at least one consumed portal login, a submitted update request, or a
+              &quot;Touched&quot; = at least one consumed portal login, a submitted update request, or a
               contact method the family (not the CSV sync) supplied. See migration 0028 for the
               exact rule.
             </p>

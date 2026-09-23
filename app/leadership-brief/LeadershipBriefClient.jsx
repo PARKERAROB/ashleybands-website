@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useState } from "react";
 
 /* ------------------------------------------------------------------ atoms */
@@ -213,9 +214,9 @@ export default function LeadershipBriefClient() {
   return (
     <main className="narrow-page">
       <p className="eyebrow">
-        <a href="/" style={{ color: "inherit", textDecoration: "none" }}>
+        <Link href="/" style={{ color: "inherit", textDecoration: "none" }}>
           Bands of Ashley High School
-        </a>
+        </Link>
         {" · "}
         Screaming Eagle Regiment
         {" · "}

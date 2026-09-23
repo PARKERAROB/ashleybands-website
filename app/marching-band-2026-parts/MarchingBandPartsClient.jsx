@@ -130,6 +130,7 @@ export default function MarchingBandPartsClient({ partsData }) {
 
   useEffect(() => {
     const stored = readAssignments();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reviewed: localStorage is client-only; hydrating after mount avoids a hydration mismatch.
     setSavedAssignments(stored);
     setDraftAssignments(stored);
   }, []);

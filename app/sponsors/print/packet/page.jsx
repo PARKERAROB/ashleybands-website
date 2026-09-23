@@ -133,7 +133,7 @@ export default function PrintPacketPage() {
           <h2 className="print-h2">Path 2: Adopt-an-Instrument</h2>
           <p>
             By 2036, our goal is for every student in the Ashley band program to have the option
-            of using a quality Yamaha instrument. Gifts of $2,500 or more enter the year's
+            of using a quality Yamaha instrument. Gifts of $2,500 or more enter the year&apos;s
             instrument capital fund.
           </p>
 
@@ -194,7 +194,7 @@ export default function PrintPacketPage() {
         <h2 className="print-h2">Sponsor information</h2>
         <table className="print-form-table">
           <tbody>
-            <tr><td>Business or individual name (as you'd like it recognized)</td><td className="print-form-blank" /></tr>
+            <tr><td>Business or individual name (as you&apos;d like it recognized)</td><td className="print-form-blank" /></tr>
             <tr><td>Contact name</td><td className="print-form-blank" /></tr>
             <tr><td>Address</td><td className="print-form-blank" /></tr>
             <tr><td>&nbsp;</td><td className="print-form-blank" /></tr>
@@ -215,7 +215,7 @@ export default function PrintPacketPage() {
           <li>☐ Premier - $1,500 ⭐ best value</li>
           <li>☐ Legacy - $3,000+ (specify amount: $__________)</li>
         </ul>
-        <p>☐ Yes, I'd like to commit for 3 years at this tier (10% multi-year discount).</p>
+        <p>☐ Yes, I&apos;d like to commit for 3 years at this tier (10% multi-year discount).</p>
 
         <h3 className="print-h3">Path 2: Adopt-an-Instrument</h3>
         <ul className="print-checklist">
@@ -229,7 +229,7 @@ export default function PrintPacketPage() {
         </p>
         <ul className="print-checklist">
           <li>☐ I would like to be the sole sponsor of one instrument. (Please contact me with package costs for: ____________________)</li>
-          <li>☐ My gift joins the year's pool. No plaque expected.</li>
+          <li>☐ My gift joins the year&apos;s pool. No plaque expected.</li>
         </ul>
 
         <h2 className="print-h2">Recognition</h2>
@@ -243,7 +243,7 @@ export default function PrintPacketPage() {
         <h2 className="print-h2">Payment</h2>
         <ul className="print-checklist">
           <li>☐ Check enclosed (payable to <strong>{SPONSOR_CONTACT.boosterOrg}</strong>)</li>
-          <li>☐ I'll pay online (link will be sent with confirmation)</li>
+          <li>☐ I&apos;ll pay online (link will be sent with confirmation)</li>
           <li>☐ Please contact me to discuss payment timing</li>
         </ul>
 

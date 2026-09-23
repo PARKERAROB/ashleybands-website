@@ -74,7 +74,7 @@ export default function MusicLibraryPage() {
     <main style={pageStyle}>
       <h1 style={{ margin: "0 0 4px" }}>🎵 Music Library</h1>
       <p style={{ margin: "0 0 20px", color: "#555", fontSize: 14 }}>
-        Catalog a piece of music from the band library. Find the folder, look at the score, and tell us what's there.
+        Catalog a piece of music from the band library. Find the folder, look at the score, and tell us what&apos;s there.
       </p>
 
       {/* QR code for classroom display — scan with phone camera */}

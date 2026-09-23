@@ -21,6 +21,7 @@ export default function Display() {
   const channelRef = useRef(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reviewed: window is client-only; reading it during render would break hydration.
     setVoteUrl(`${window.location.origin}/band-of-heroes/vote`);
     let client;
     try { client = getLiveClient(); } catch { return; }

@@ -22,6 +22,7 @@ export default function Voter() {
     try {
       client = getLiveClient();
     } catch {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reviewed: live client is created client-side; report missing env once on mount.
       setPhase("noenv");
       return;
     }

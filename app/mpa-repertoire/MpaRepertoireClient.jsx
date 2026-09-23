@@ -10,6 +10,48 @@ function rate(a) {
   return a.rn > 0 ? Math.round((100 * (a.su + a.ex)) / a.rn) : null;
 }
 
+function matchesQuery(a, ql) {
+  return !ql || a.t.toLowerCase().includes(ql) || (a.c || "").toLowerCase().includes(ql);
+}
+
+// Filter controls live at module scope so the search input keeps focus while typing.
+function GradeSel({ all, grade, setGrade }) {
+  return (
+    <label className="mpa-filter">Grade
+      <select value={grade} onChange={(e) => setGrade(e.target.value)}>
+        {all ? <option>All</option> : null}
+        {GRADES.map((g) => <option key={g}>{g}</option>)}
+      </select>
+    </label>
+  );
+}
+
+function LevelSel({ level, setLevel }) {
+  return (
+    <label className="mpa-filter">Level
+      <select value={level} onChange={(e) => setLevel(e.target.value)}><option>All</option><option>HS</option><option>MS</option></select>
+    </label>
+  );
+}
+
+function DistrictSel({ district, setDistrict, byDistrict }) {
+  return (
+    <label className="mpa-filter">District
+      <select value={district} onChange={(e) => setDistrict(e.target.value)}>
+        <option>All</option>{Object.keys(byDistrict).map((d) => <option key={d}>{d}</option>)}
+      </select>
+    </label>
+  );
+}
+
+function Search({ ph, q, setQ }) {
+  return (
+    <label className="mpa-filter">Search
+      <input type="search" value={q} placeholder={ph} onChange={(e) => setQ(e.target.value)} />
+    </label>
+  );
+}
+
 export default function MpaRepertoireClient() {
   const [data, setData] = useState(null);
   const [view, setView] = useState("grade");
@@ -37,7 +79,6 @@ export default function MpaRepertoireClient() {
   }, []);
 
   const ql = q.trim().toLowerCase();
-  const matchTC = (a) => !ql || a.t.toLowerCase().includes(ql) || (a.c || "").toLowerCase().includes(ql);
 
   // Play counts (aggregate)
   const counts = useMemo(() => {
@@ -45,7 +86,7 @@ export default function MpaRepertoireClient() {
     let rows = data.agg.filter((a) => {
       if (grade !== "All" && (a.mg || "").split("/")[0] !== grade) return false;
       if (level !== "All" && !(a.lv || "").includes(level)) return false;
-      return matchTC(a);
+      return matchesQuery(a, ql);
     });
     rows = [...rows];
     if (countSort === "plays") rows.sort((x, y) => y.n - x.n);
@@ -58,14 +99,14 @@ export default function MpaRepertoireClient() {
   const byGrade = useMemo(() => {
     if (!data) return [];
     return data.agg
-      .filter((a) => (a.mg || "").split("/")[0] === grade && (level === "All" || (a.lv || "").includes(level)) && matchTC(a))
+      .filter((a) => (a.mg || "").split("/")[0] === grade && (level === "All" || (a.lv || "").includes(level)) && matchesQuery(a, ql))
       .sort((x, y) => y.n - x.n);
   }, [data, grade, level, ql]);
 
   // Ratings (Step 2)
   const ratings = useMemo(() => {
     if (!data) return [];
-    let rows = data.agg.filter((a) => a.rn >= minRated && (grade === "All" || (a.mg || "").split("/")[0] === grade) && (level === "All" || (a.lv || "").includes(level)) && matchTC(a));
+    let rows = data.agg.filter((a) => a.rn >= minRated && (grade === "All" || (a.mg || "").split("/")[0] === grade) && (level === "All" || (a.lv || "").includes(level)) && matchesQuery(a, ql));
     rows = [...rows];
     if (ratingSort === "high") rows.sort((x, y) => (rate(y) - rate(x)) || y.rn - x.rn);
     else if (ratingSort === "low") rows.sort((x, y) => (rate(x) - rate(y)) || y.rn - x.rn);
@@ -94,32 +135,6 @@ export default function MpaRepertoireClient() {
   if (!data) return <main className="mpa-viewer"><section className="mpa-section"><p>Loading repertoire…</p></section></main>;
   if (data.error) return <main className="mpa-viewer"><section className="mpa-section"><p>Could not load data.</p></section></main>;
   const m = data.meta;
-
-  const GradeSel = ({ all }) => (
-    <label className="mpa-filter">Grade
-      <select value={grade} onChange={(e) => setGrade(e.target.value)}>
-        {all ? <option>All</option> : null}
-        {GRADES.map((g) => <option key={g}>{g}</option>)}
-      </select>
-    </label>
-  );
-  const LevelSel = () => (
-    <label className="mpa-filter">Level
-      <select value={level} onChange={(e) => setLevel(e.target.value)}><option>All</option><option>HS</option><option>MS</option></select>
-    </label>
-  );
-  const DistrictSel = () => (
-    <label className="mpa-filter">District
-      <select value={district} onChange={(e) => setDistrict(e.target.value)}>
-        <option>All</option>{Object.keys(m.byDistrict).map((d) => <option key={d}>{d}</option>)}
-      </select>
-    </label>
-  );
-  const Search = ({ ph }) => (
-    <label className="mpa-filter">Search
-      <input type="search" value={q} placeholder={ph} onChange={(e) => setQ(e.target.value)} />
-    </label>
-  );
 
   return (
     <main className="mpa-viewer">
@@ -154,7 +169,7 @@ export default function MpaRepertoireClient() {
         <section className="mpa-section">
           <div className="mpa-section-head">
             <div><h2>Most-Performed Works — Grade {grade}</h2><p>{byGrade.length} works at this grade (current MPA list). Ranked by how often they were performed.</p></div>
-            <div className="mpa-filter-row"><GradeSel /><LevelSel /><Search ph="Title or composer" /></div>
+            <div className="mpa-filter-row"><GradeSel grade={grade} setGrade={setGrade} /><LevelSel level={level} setLevel={setLevel} /><Search ph="Title or composer" q={q} setQ={setQ} /></div>
           </div>
           <div className="mpa-table-wrap">
             <table className="mpa-table"><thead><tr><th>Times played</th><th>Title</th><th>Composer / Arranger</th><th>Level</th><th>Span</th></tr></thead>
@@ -171,7 +186,7 @@ export default function MpaRepertoireClient() {
           <div className="mpa-section-head">
             <div><h2>All Works by Play Count</h2><p>{counts.length.toLocaleString()} works.</p></div>
             <div className="mpa-filter-row">
-              <GradeSel all /><LevelSel /><Search ph="Title or composer" />
+              <GradeSel all grade={grade} setGrade={setGrade} /><LevelSel level={level} setLevel={setLevel} /><Search ph="Title or composer" q={q} setQ={setQ} />
               <label className="mpa-filter">Sort
                 <select value={countSort} onChange={(e) => setCountSort(e.target.value)}><option value="plays">Most played</option><option value="title">Title A–Z</option><option value="recent">Most recent</option></select>
               </label>
@@ -199,7 +214,7 @@ export default function MpaRepertoireClient() {
               <label className="mpa-filter">Min rated
                 <select value={minRated} onChange={(e) => setMinRated(Number(e.target.value))}><option value={1}>1+</option><option value={2}>2+</option><option value={3}>3+</option></select>
               </label>
-              <GradeSel all /><LevelSel /><Search ph="Title or composer" />
+              <GradeSel all grade={grade} setGrade={setGrade} /><LevelSel level={level} setLevel={setLevel} /><Search ph="Title or composer" q={q} setQ={setQ} />
             </div>
           </div>
           <div className="mpa-table-wrap">
@@ -220,9 +235,9 @@ export default function MpaRepertoireClient() {
             <div><h2>Repertoire by Year</h2><p>{yearGroups.length} ensembles in {year}.</p></div>
             <div className="mpa-filter-row">
               <label className="mpa-filter">Year<select value={year || ""} onChange={(e) => setYear(e.target.value)}>{[...m.years].reverse().map((y) => <option key={y}>{y}</option>)}</select></label>
-              <DistrictSel />
+              <DistrictSel district={district} setDistrict={setDistrict} byDistrict={m.byDistrict} />
               <label className="mpa-filter">Site<select value={site} onChange={(e) => setSite(e.target.value)}><option>All</option>{Object.keys(m.bySite).map((s) => <option key={s}>{s}</option>)}</select></label>
-              <LevelSel /><Search ph="School, title, composer" />
+              <LevelSel level={level} setLevel={setLevel} /><Search ph="School, title, composer" q={q} setQ={setQ} />
             </div>
           </div>
           {yearGroups.map((grp) => (
