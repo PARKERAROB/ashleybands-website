@@ -24,9 +24,11 @@ No estimated fee percentages, live charges, or refund mutations are used.
 
 `GET /api/carnegie-2027/funding` exposes only aggregate cents, goals, and check time. The server
 caches the aggregate for 60 seconds and browsers refresh every minute. Revalidation may briefly
-serve the prior timestamp; totals older than five minutes are withheld. Missing processor details,
-duplicates, ledger failures, or ambiguous refunds withhold the entire total, never an understated
-partial sum or a fabricated zero. Existing payment capture and receipt flows remain unchanged.
+serve the prior timestamp. A cached total older than five minutes, such as after idle time, is
+verified again before the response rather than withheld (issue #98); the route still refuses any
+total older than five minutes. Missing processor details, duplicates, ledger failures, or ambiguous
+refunds withhold the entire total, never an understated partial sum or a fabricated zero. Existing
+payment capture and receipt flows remain unchanged.
 
 New campaign gifts and Carnegie family payments update automatically once confirmed. Other
 fundraiser proceeds must first be recorded and designated in the owning ledger; bank transfers and
