@@ -161,7 +161,8 @@ test("real guarded dev server blocks inbound gift writes and outbound writes fro
     NEXT_PUBLIC_SITE_ORIGIN: base,
   };
   delete env.ALLOW_LOCAL_WRITES;
-  delete env.CRON_SECRET;
+  // A known secret overrides any CRON_SECRET in .env.local, so the sweep runs on every checkout.
+  env.CRON_SECRET = "local-write-guard-test";
   const child = spawn(process.execPath, ["scripts/local-dev-server.mjs", "--port", String(port)], {
     env,
     detached: true,
@@ -191,8 +192,8 @@ test("real guarded dev server blocks inbound gift writes and outbound writes fro
     }
     assert.deepEqual(received, [], "gift POSTs never reached route code");
 
-    // This GET route releases expired claims when CRON_SECRET is unset, as in local dev.
-    const sweep = await fetch(base + "/api/sponsors/reclaim-sweep");
+    // This GET route releases expired claims; authorize it with the test secret.
+    const sweep = await fetch(base + "/api/sponsors/reclaim-sweep", { headers: { authorization: "Bearer local-write-guard-test" } });
     assert.equal(sweep.status, 200, log.slice(-2000));
     assert.ok(received.includes("GET /rest/v1/businesses"), "route code ran against the synthetic backend");
     assert.deepEqual(received.filter((r) => !r.startsWith("GET ")), [], "no write reached the backend");
