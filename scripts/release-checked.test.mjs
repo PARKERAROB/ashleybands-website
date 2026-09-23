@@ -99,3 +99,12 @@ test('readiness refuses an authorization commit without a Checked: trailer', () 
   result=run();assert.equal(result.status,0,result.stderr);assert.match(result.stdout,/PASS  checkout readiness/);
  } finally {rmSync(root,{recursive:true,force:true});}
 });
+
+test('runtime wrapper selects the pinned Node even when invoked through npm run (#94)', { skip: !existsSync(path.join(process.env.NVM_DIR || path.join(process.env.HOME, '.nvm'), 'nvm.sh')) }, () => {
+  const required = readFileSync(new URL('../.nvmrc', import.meta.url), 'utf8').trim();
+  const result = spawnSync('bash', [new URL('./runtime.sh', import.meta.url).pathname, 'node', '--version'], {
+    env: { ...process.env, npm_config_prefix: path.join(process.env.HOME, '.local') }, encoding: 'utf8', timeout: 20000
+  });
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(result.stdout.trim(), `v${required}`);
+});
