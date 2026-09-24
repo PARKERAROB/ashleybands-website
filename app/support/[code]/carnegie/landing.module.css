@@ -1,0 +1,17 @@
+.landing { background: #f7f3e8; min-height: 70vh; }
+.hero { background: #4f101c; color: #f7f3e8; padding: 22px 16px 26px; display: flex; flex-direction: column; gap: 10px; }
+.hero > * { max-width: 720px; width: 100%; margin-left: auto; margin-right: auto; }
+.kicker { margin: 0; font-family: Cinzel, serif; font-size: 11px; letter-spacing: 2px; color: #e2c35a; font-weight: 700; text-transform: uppercase; }
+.invite { margin: 0; font-size: 15px; color: #f1e6cc; }
+.heading { margin: 0; font-family: "DM Serif Display", Georgia, serif; font-weight: 400; font-size: 32px; line-height: 1.1; color: #fff; }
+.preview { margin: 0; padding: 8px 12px; border-radius: 8px; background: #fff4d6; color: #5c4300; font-size: 13px; }
+.body { max-width: 720px; margin: 0 auto; padding: 18px 16px 40px; display: flex; flex-direction: column; gap: 16px; }
+.card { background: #fff; border: 1px solid #e3dccb; border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.row { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; }
+.row span { color: #4a4340; }
+.chart { width: 100%; max-width: 460px; height: auto; align-self: center; display: block; }
+.give { scroll-margin-top: 16px; }
+.more { margin: 0; font-size: 14px; }
+.more a { color: #7b1829; font-weight: 600; }
+@media (min-width: 900px) { .heading { font-size: 40px; } .hero { padding: 32px 24px 36px; } }
+.match { margin: -4px 0 0; font-size: 14px; font-weight: 600; color: #4f101c; background: #fff; border: 1px solid #e3dccb; border-left: 4px solid #c5a028; border-radius: 8px; padding: 10px 12px; }

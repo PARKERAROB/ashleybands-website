@@ -46,5 +46,13 @@ sponsorship math counts only `general` gifts. Staff-recorded offline Carnegie gi
 confirmation and receipt path and are never auto-published. Whether student credit may later apply
 to trip costs is undecided.
 
+## Student-reported gifts (issue #106, gated)
+
+A family may report cash or a check a student collected (`carnegie_reported_gifts`). A report is not
+a gift: no total reads that table and no receipt is sent. Staff confirm it through the #103 offline
+path (`createPendingGift` with the report id as the idempotency key, then `confirmGift`), which makes
+exactly one confirmed Carnegie gift credited to the student, or reject it with a reason. The history
+keeps the reported and confirmed amounts. Hidden until `CARNEGIE_LETTERS_MODE` is set.
+
 Check `node --test scripts/carnegie-funding.test.mjs` and the deployed public endpoint after release.
 No live values or donor information belong in test fixtures, issue comments, or this document.
