@@ -19,8 +19,8 @@ export async function POST(req, { params }) {
     if (!body || typeof body !== "object") return privateJson({ error: "Send the action as JSON." }, 400);
     const result = await updateStaffLetter(authorization.staff, letter, body);
     if (result.error) return privateJson({ error: result.error }, result.status);
-    await logAudit({ actor: staffActor(authorization.staff), action: `letter.${String(body.action)}`, table: "carnegie_student_letters", recordId: letter.id, changes: { from: { status: letter.status, version: letter.version }, to: { status: result.letter.status, version: result.letter.version } }, route: "/api/admin/carnegie-letters/[id]" });
-    return privateJson({ letter: result.letter });
+    await logAudit({ actor: staffActor(authorization.staff), action: `letter.${String(body.action)}`, table: "carnegie_student_letters", recordId: letter.id, changes: { from: { status: letter.status, version: letter.version }, to: { status: result.letter.status, version: result.letter.version }, ...(result.correction ? { correction_id: result.correction.id, correction_status: result.correction.status } : {}), ...(body.correction_id ? { correction_id: String(body.correction_id) } : {}) }, route: "/api/admin/carnegie-letters/[id]" });
+    return privateJson({ letter: result.letter, ...(result.correction ? { correction: result.correction } : {}) }, result.status === 201 ? 201 : 200);
   } catch (error) {
     return privateServerError("carnegie-letter-review", error, "The letter could not be updated.");
   }

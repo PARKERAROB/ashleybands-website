@@ -104,6 +104,7 @@ const PRIVATE_OPERATIONAL_TABLES = [
   "carnegie_reported_gift_events",
   "carnegie_expected_gifts",
   "carnegie_expected_gift_events",
+  "carnegie_letter_corrections",
   "backup_runs",
   "restore_verifications",
 ];
@@ -179,6 +180,7 @@ const SAFE_FILTER_COLUMN = {
   carnegie_student_letter_events: "letter_id",
   carnegie_reported_gift_events: "reported_gift_id",
   carnegie_expected_gift_events: "expected_gift_id",
+  carnegie_letter_corrections: "letter_id",
 };
 
 async function assertPermissionDenied(response, label) {

@@ -284,3 +284,72 @@ test("expected gifts stay pending and count nowhere until confirmed; confirm mak
   assert.deepEqual(trail.map((r) => [r.status, r.amount_cents, r.confirmed_amount_cents]), [["expected", 200000, null], ["confirmed", 200000, 199000]]);
   assert.equal(trail[1].actor, `staff:${ids.director}`);
 });
+
+// ---- #108: corrections and the student view --------------------------------------------------
+const studentPerson = crypto.randomUUID();
+test("a signed-in student sees only their own notes and letters, with no money or family data", { skip }, async () => {
+  sql(`
+    insert into portal_people (id, source_person_key, person_type, display_name, source) values (${q(studentPerson)}, ${q(`e2e-student-${run}`)}, 'student', 'Riley Fixture', 'e2e_fixture');
+    insert into portal_student_people (student_id, person_id, relationship_status, assurance_level, source) values (${q(ids.studentA)}, ${q(studentPerson)}, 'trusted', 'high', 'e2e_fixture');
+  `);
+  const STUDENT = cookies(portalCookie(studentPerson), WORKER);
+  const mine = await call("/api/portal/carnegie-notes", { cookie: STUDENT });
+  assert.equal(mine.status, 200);
+  assert.equal(mine.data.viewer, "student");
+  assert.deepEqual(mine.data.students.map((s) => s.id), [ids.studentA]);
+  const me = mine.data.students[0];
+  assert.equal(me.depositPaidCents, null);
+  assert.deepEqual(me.reportedGifts, []);
+  assert.equal(me.pendingCents, 0);
+  assert.ok(me.letters.length > 0, "sees the student's own letters");
+  assert.equal((await call("/api/portal/carnegie-notes/reported-gifts", { method: "POST", cookie: STUDENT, body: { student_id: ids.studentA, donor_name: "X", amount: "5", method: "cash" } })).status, 403);
+  assert.equal((await call("/api/portal/carnegie-notes/letters", { method: "POST", cookie: STUDENT, body: { student_id: ids.studentB, recipient_type: "general_supporter" } })).status, 404);
+  const created = await call("/api/portal/carnegie-notes/letters", { method: "POST", cookie: STUDENT, body: { student_id: ids.studentA, recipient_type: "general_supporter", meaning_text: "band has tought me to lisen", help_text: "i would love you're help" } });
+  assert.equal(created.status, 201);
+  const [row] = await db(`carnegie_student_letters?id=eq.${created.data.letter.id}&select=last_actor_type,created_by_person_id`);
+  assert.deepEqual(row, { last_actor_type: "student", created_by_person_id: studentPerson });
+});
+
+test("Atlas suggests, staff approve the corrected version, the original is kept", { skip }, async () => {
+  const STUDENT = cookies(portalCookie(studentPerson), WORKER);
+  let letter = (await call("/api/portal/carnegie-notes/letters", { method: "POST", cookie: STUDENT, body: { student_id: ids.studentA, recipient_type: "general_supporter", meaning_text: "band has tought me to lisen to the peple around me", help_text: "i would love you're help" } })).data.letter;
+  letter = (await call(`/api/portal/carnegie-notes/letters/${letter.id}`, { method: "PATCH", cookie: STUDENT, body: { action: "submit", version: letter.version, meaning_text: letter.meaning_text, help_text: letter.help_text } })).data.letter;
+  const script = (args, input) => {
+    const file = `/tmp/claude-501/e2e-correction-${run}.json`;
+    if (input) execSync(`cat > ${file}`, { input: JSON.stringify(input) });
+    return execSync(`node scripts/carnegie-letter-corrections.mjs ${args}${input ? ` --file ${file}` : ""} 2>&1; true`, {
+      encoding: "utf8", env: { ...process.env, BAND_WEBSITE_ENV: "/dev/null", NEXT_PUBLIC_SUPABASE_URL: DB, SUPABASE_SECRET_KEY: KEY }
+    });
+  };
+  assert.match(script("list --json"), new RegExp(letter.id));
+  assert.match(script(`suggest --letter ${letter.id} --version ${letter.version}`, { meaning_text: "Band has taught me to hate the people around me.", help_text: "I would love your help." }), /limited to spelling, grammar and punctuation/);
+  const out = script(`suggest --letter ${letter.id} --version ${letter.version}`, { meaning_text: "Band has taught me to listen to the people around me.", help_text: "I would love your help.", note: "Spelling and capitals." });
+  assert.match(out, /A staff reviewer decides/);
+  const [still] = await db(`carnegie_student_letters?id=eq.${letter.id}&select=status,approved_correction_id`);
+  assert.deepEqual(still, { status: "needs_review", approved_correction_id: null }, "a suggestion approves nothing");
+
+  const queue = (await call("/api/admin/carnegie-letters", { cookie: DIRECTOR })).data.letters.find((l) => l.id === letter.id);
+  const suggestion = queue.corrections.find((c) => c.source === "atlas");
+  assert.equal(suggestion.proposed_by, "atlas");
+  assert.equal((await call(`/api/admin/carnegie-letters/${letter.id}`, { method: "POST", cookie: WORKER, body: { action: "approve", version: letter.version, correction_id: suggestion.id } })).status, 403);
+  const approved = await call(`/api/admin/carnegie-letters/${letter.id}`, { method: "POST", cookie: DIRECTOR, body: { action: "approve", version: letter.version, correction_id: suggestion.id } });
+  assert.equal(approved.status, 200);
+  assert.equal(approved.data.letter.approved_correction_id, suggestion.id);
+  assert.equal(approved.data.letter.meaning_text, "band has tought me to lisen to the peple around me", "the original is kept");
+  const packet = (await call(`/portal/carnegie-notes/packet/${letter.id}`, { cookie: STUDENT })).data.replace(/<!-- -->/g, "");
+  assert.match(packet, /Band has taught me to listen to the people around me\./);
+  assert.doesNotMatch(packet, /tought/);
+  const [corr] = await db(`carnegie_letter_corrections?id=eq.${suggestion.id}&select=status,reviewed_by_staff_id`);
+  assert.deepEqual(corr, { status: "accepted", reviewed_by_staff_id: ids.director });
+  const events = await db(`carnegie_student_letter_events?letter_id=eq.${letter.id}&order=id&select=status,actor_type,actor_id`);
+  assert.ok(events.some((e) => e.status === "correction_suggested" && e.actor_type === "atlas" && e.actor_id === "atlas"));
+  assert.ok(events.some((e) => e.status === "correction_accepted" && e.actor_type === "staff" && e.actor_id === ids.director));
+
+  const edited = await call(`/api/portal/carnegie-notes/letters/${letter.id}`, { method: "PATCH", cookie: STUDENT, body: { action: "save", version: approved.data.letter.version, meaning_text: "band has tought me to lisen to everyone", help_text: letter.help_text } });
+  assert.equal(edited.data.letter.status, "needs_review");
+  assert.equal(edited.data.letter.approved_correction_id, null, "an edit voids the approved correction");
+  const staffFix = await call(`/api/admin/carnegie-letters/${letter.id}`, { method: "POST", cookie: DIRECTOR, body: { action: "suggest_correction", version: edited.data.letter.version, meaning_text: "Band has taught me to listen to everyone.", help_text: "I would love your help." } });
+  assert.equal(staffFix.status, 201);
+  const stale = await call(`/api/admin/carnegie-letters/${letter.id}`, { method: "POST", cookie: DIRECTOR, body: { action: "approve", version: edited.data.letter.version, correction_id: suggestion.id } });
+  assert.equal(stale.status, 409, "an old version's correction cannot be approved");
+});

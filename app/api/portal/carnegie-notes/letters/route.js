@@ -1,6 +1,6 @@
 import { privateJson, privateServerError } from "@/lib/privateResponse";
 import { logAudit } from "@/lib/auditLog";
-import { carnegieLettersAccess, createFamilyLetter, familyActor, portalPerson } from "@/lib/carnegieLettersServer";
+import { carnegieLettersAccess, createFamilyLetter, familyActor, portalPerson, portalViewer } from "@/lib/carnegieLettersServer";
 
 export const runtime = "nodejs";
 
@@ -13,9 +13,10 @@ export async function POST(req) {
   const body = await req.json().catch(() => null);
   if (!body || typeof body !== "object") return privateJson({ error: "Send the letter as JSON." }, 400);
   try {
-    const result = await createFamilyLetter(session.personId, body);
+    const viewer = await portalViewer(session.personId);
+    const result = await createFamilyLetter(session.personId, body, viewer);
     if (result.error) return privateJson({ error: result.error }, result.status);
-    await logAudit({ actor: familyActor(session), action: "create", table: "carnegie_student_letters", recordId: result.letter.id, changes: { status: result.letter.status, version: result.letter.version }, route: "/api/portal/carnegie-notes/letters" });
+    await logAudit({ actor: familyActor(session, viewer), action: "create", table: "carnegie_student_letters", recordId: result.letter.id, changes: { status: result.letter.status, version: result.letter.version }, route: "/api/portal/carnegie-notes/letters" });
     return privateJson({ letter: result.letter }, 201);
   } catch (error) {
     return privateServerError("carnegie-letter-create", error, "The letter could not be saved.");

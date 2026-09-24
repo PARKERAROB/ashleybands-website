@@ -12,6 +12,7 @@ import {
   letterIsPrintable,
   recipientTypeLabel
 } from "@/lib/carnegieLetters.mjs";
+import { wordDiff } from "@/lib/carnegieLetterCorrections.mjs";
 import styles from "./review.module.css";
 
 const dollars = (cents) => `$${((Number(cents) || 0) / 100).toLocaleString("en-US", { minimumFractionDigits: (Number(cents) || 0) % 100 ? 2 : 0, maximumFractionDigits: 2 })}`;
@@ -132,9 +133,11 @@ function LetterCard({ letter, reload }) {
         <p className={styles.fixed}>{text.ask} {text.closing}</p>
         <p>{text.signoff} {text.signature}</p>
       </div>
+      {letter.status === "needs_review" ? <Corrections letter={letter} busy={busy} act={act} /> : null}
+      {letter.corrected ? <p className={styles.muted}>Approved with a spelling and grammar correction. The student&apos;s original is kept; the correction prints.</p> : null}
       {letter.status === "needs_review" ? (
         <div className={styles.actions}>
-          <button type="button" className={styles.primary} disabled={busy} onClick={() => act("approve")}>Approve version {letter.version} for print</button>
+          <button type="button" className={styles.primary} disabled={busy} onClick={() => act("approve")}>Approve version {letter.version} as written</button>
           {!returning ? <button type="button" className={styles.secondary} disabled={busy} onClick={() => setReturning(true)}>Send back with a note</button> : null}
         </div>
       ) : null}
@@ -416,5 +419,63 @@ function ExpectedCard({ item, reload }) {
       ) : null}
       {error ? <p className={styles.error} role="alert">{error}</p> : null}
     </article>
+  );
+}
+function Diff({ original, corrected }) {
+  return (
+    <p className={styles.diff}>
+      {wordDiff(original, corrected).map((part, index) => (
+        part.kind === "same" ? <span key={index}>{part.text}</span>
+          : part.kind === "removed" ? <del key={index}>{part.text}</del>
+            : <ins key={index}>{part.text}</ins>
+      ))}
+    </p>
+  );
+}
+
+// Spelling, grammar and punctuation only (#108). Atlas or staff suggest; a reviewer approves the
+// letter with one correction. The student's original stays as written.
+function Corrections({ letter, busy, act }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState({ meaning_text: letter.meaning_text, help_text: letter.help_text, note: "" });
+  const open = (letter.corrections || []).filter((correction) => correction.status === "suggested");
+  return (
+    <div className={styles.corrections}>
+      {open.map((correction) => (
+        <div key={correction.id} className={styles.correction}>
+          <p className={styles.correctionHead}>
+            Suggested correction from {correction.source === "atlas" ? "Atlas" : "staff"}{correction.note ? `: ${correction.note}` : ""}
+          </p>
+          <div className={styles.sideBySide}>
+            <div><p className={styles.ownLabel}>Original</p><p>{letter.meaning_text}</p><p>{letter.help_text}</p></div>
+            <div><p className={styles.ownLabel}>Corrected</p><Diff original={letter.meaning_text} corrected={correction.meaning_text} /><Diff original={letter.help_text} corrected={correction.help_text} /></div>
+          </div>
+          <div className={styles.actions}>
+            <button type="button" className={styles.primary} disabled={busy} onClick={() => act("approve", { correction_id: correction.id })}>Approve version {letter.version} with this correction</button>
+            <button type="button" className={styles.secondary} disabled={busy} onClick={() => act("dismiss_correction", { correction_id: correction.id })}>Dismiss suggestion</button>
+          </div>
+        </div>
+      ))}
+      {!editing ? (
+        <button type="button" className={styles.linkButton} onClick={() => setEditing(true)}>Fix spelling or grammar</button>
+      ) : (
+        <div className={styles.returnBox}>
+          <p className={styles.muted}>Spelling, grammar and punctuation only. Never change what the student means. The original is kept.</p>
+          <label className={styles.field}>First answer
+            <textarea value={draft.meaning_text} maxLength={1500} onChange={(event) => setDraft({ ...draft, meaning_text: event.target.value })} />
+          </label>
+          <label className={styles.field}>Second answer
+            <textarea value={draft.help_text} maxLength={1000} onChange={(event) => setDraft({ ...draft, help_text: event.target.value })} />
+          </label>
+          <label className={styles.field}>What changed (optional)
+            <input value={draft.note} maxLength={500} onChange={(event) => setDraft({ ...draft, note: event.target.value })} />
+          </label>
+          <div className={styles.actions}>
+            <button type="button" className={styles.secondary} disabled={busy} onClick={async () => { await act("suggest_correction", draft); setEditing(false); }}>Save correction for review</button>
+            <button type="button" className={styles.linkButton} onClick={() => setEditing(false)}>Cancel</button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
