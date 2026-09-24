@@ -330,3 +330,10 @@ test("the employer-match line appears on the landing, the packet back and the em
   assert.equal(parts.at(-2), letters.EMPLOYER_MATCH_LINE, "at the end of the email, just before the link");
   assert.match(parts.at(-1), /https:\/\/ashleybands\.com\/support\/abcDEF123456\/carnegie$/);
 });
+
+test("the payee reads Ashley High School Band Boosters everywhere at runtime (#111)", () => {
+  assert.equal(read("lib/sponsorshipContent.js").match(/boosterOrg: "([^"]+)"/)[1], "Ashley High School Band Boosters");
+  assert.equal(letters.CARNEGIE_CHECK_PAYEE, "Ashley High School Band Boosters");
+  const runtime = gitGrepFiles(["AHS Band Boosters"], ["app", "lib", "components", "content", "public"]);
+  assert.deepEqual(runtime, [], "no short payee name left in site source");
+});

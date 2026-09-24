@@ -124,7 +124,7 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
         <div className="give-card">
           <Heading>{carnegie ? "Support Ashley’s Carnegie trip" : "Sponsor the Bands of Ashley"}</Heading>
           <p>Online giving isn&apos;t open just yet. To sponsor now, contact the director or mail a check to the
-            AHS Band Boosters.</p>
+            Ashley High School Band Boosters.</p>
           <p>
             <Link href="/sponsors">See sponsorship levels</Link>
           </p>
@@ -137,7 +137,7 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
   return (
     <Shell className="give-shell">
       <div className="give-card">
-        <p className="give-eyebrow">AHS Band Boosters · 501(c)(3)</p>
+        <p className="give-eyebrow">Ashley High School Band Boosters · 501(c)(3)</p>
         <Heading>{carnegie ? "Make a gift for Ashley’s trip" : studentName ? `Support ${studentName}'s Ashley Bands sponsorship effort` : "Sponsor the Bands of Ashley"}</Heading>
         {carnegie ? <>
           <p className="give-lede">Choose an amount and give online or by check. Your gift is designated for Ashley Bands’ 2027 Carnegie trip.</p>
