@@ -246,10 +246,41 @@ test("with the gate unset, nothing new is reachable and the #103 route is unchan
   for (const path of ["/portal/carnegie-notes", "/portal/carnegie-notes/letter", `/portal/carnegie-notes/packet/${letter?.id || crypto.randomUUID()}`, "/admin/carnegie-letters"]) {
     assert.equal((await call(path, { base: OFF_BASE, cookie: A })).status, 404, `${path} is 404`);
   }
-  for (const [path, method] of [["/api/portal/carnegie-notes", "GET"], ["/api/portal/carnegie-notes/letters", "POST"], ["/api/portal/carnegie-notes/reported-gifts", "POST"], ["/api/admin/carnegie-letters", "GET"], ["/api/admin/carnegie-reported-gifts", "GET"], ["/api/carnegie-notes/og", "GET"]]) {
+  for (const [path, method] of [["/api/portal/carnegie-notes", "GET"], ["/api/portal/carnegie-notes/letters", "POST"], ["/api/portal/carnegie-notes/reported-gifts", "POST"], ["/api/admin/carnegie-letters", "GET"], ["/api/admin/carnegie-reported-gifts", "GET"], ["/api/admin/carnegie-expected-gifts", "GET"], ["/api/admin/carnegie-expected-gifts", "POST"], ["/api/carnegie-notes/og", "GET"]]) {
     assert.equal((await call(path, { base: OFF_BASE, method, cookie: A, body: method === "POST" ? {} : undefined })).status, 404, `${method} ${path} is 404`);
   }
   const landing = await call(`/support/${codeA}/carnegie`, { base: OFF_BASE, cookie: A });
   assert.equal(landing.status, 307);
   assert.match(landing.headers.get("location"), /^\/support-carnegie\?a=[^#]+#make-a-gift$/);
+});
+
+test("expected gifts stay pending and count nowhere until confirmed; confirm makes one gift; cancel makes none (#110)", { skip }, async () => {
+  const before = (await call("/api/portal/carnegie-notes", { cookie: A })).data.students.find((s) => s.id === ids.studentA);
+  const giftsBefore = await db(`sponsor_gifts?portal_student_id=eq.${ids.studentA}&select=id`);
+  assert.equal((await call("/api/admin/carnegie-expected-gifts", { method: "POST", cookie: WORKER, body: {} })).status, 403, "gift-writing staff only");
+  assert.equal((await call("/api/admin/carnegie-expected-gifts", { cookie: A.replace(/; ab_staff_session=.*/, "") })).status, 404, "a family session never reaches it");
+  const make = async (extra) => (await call("/api/admin/carnegie-expected-gifts", { method: "POST", cookie: DIRECTOR, body: { donor_name: "Expected Fixture", amount: "2000", method: "employer_platform", platform: "Giving platform", gift_type: "employee_gift", gift_date: "2026-09-23", student_id: ids.studentA, designation: "Carnegie", ...extra } })).data.item;
+  const one = await make();
+  const two = await make({ donor_name: "Expected Fixture, employer match", gift_type: "employer_match" });
+  assert.equal(one.status, "expected");
+  const waiting = (await call("/api/portal/carnegie-notes", { cookie: A })).data.students.find((s) => s.id === ids.studentA);
+  assert.equal(waiting.notesCents, before.notesCents, "raised through my notes unchanged");
+  assert.equal(waiting.pendingCents, before.pendingCents + 400000, "shown as pending");
+  assert.equal((await db(`sponsor_gifts?portal_student_id=eq.${ids.studentA}&select=id`)).length, giftsBefore.length, "no gift yet");
+
+  const clicks = await Promise.all([1, 2, 3].map(() => call(`/api/admin/carnegie-expected-gifts/${one.id}`, { method: "POST", cookie: DIRECTOR, body: { action: "confirm", amount: "1990" } })));
+  assert.ok(clicks.every((r) => r.status === 200));
+  const created = await db(`sponsor_gifts?portal_student_id=eq.${ids.studentA}&select=id,amount_cents,method,status,campaign_code`);
+  assert.equal(created.length, giftsBefore.length + 1, "exactly one gift from repeated clicks");
+  assert.ok(created.some((g) => g.amount_cents === 199000 && g.method === "other" && g.status === "confirmed" && g.campaign_code === "carnegie-2027"));
+  const cancelled = await call(`/api/admin/carnegie-expected-gifts/${two.id}`, { method: "POST", cookie: DIRECTOR, body: { action: "cancel", reason: "Match declined." } });
+  assert.equal(cancelled.data.item.status, "cancelled");
+  assert.equal((await call(`/api/admin/carnegie-expected-gifts/${two.id}`, { method: "POST", cookie: DIRECTOR, body: { action: "confirm" } })).status, 409);
+  assert.equal((await db(`sponsor_gifts?portal_student_id=eq.${ids.studentA}&select=id`)).length, giftsBefore.length + 1, "cancel made no gift");
+  const after = (await call("/api/portal/carnegie-notes", { cookie: A })).data.students.find((s) => s.id === ids.studentA);
+  assert.equal(after.notesCents, before.notesCents + 199000);
+  assert.equal(after.pendingCents, before.pendingCents);
+  const trail = await db(`carnegie_expected_gift_events?expected_gift_id=eq.${one.id}&order=id&select=status,amount_cents,confirmed_amount_cents,actor`);
+  assert.deepEqual(trail.map((r) => [r.status, r.amount_cents, r.confirmed_amount_cents]), [["expected", 200000, null], ["confirmed", 200000, 199000]]);
+  assert.equal(trail[1].actor, `staff:${ids.director}`);
 });

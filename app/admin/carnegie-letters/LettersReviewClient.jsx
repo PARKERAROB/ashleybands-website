@@ -6,6 +6,8 @@ import {
   LETTER_STATUSES,
   LETTER_STATUS_LABELS,
   REPORTED_GIFT_STATUS_LABELS,
+  EXPECTED_GIFT_METHOD_LABELS,
+  EXPECTED_GIFT_TYPE_LABELS,
   composeCarnegieLetter,
   letterIsPrintable,
   recipientTypeLabel
@@ -20,7 +22,7 @@ export default function LettersReviewClient({ previewMode = false }) {
     <main className={styles.shell}>
       <div className={styles.wrap}>
         <p className={styles.eyebrow}>Staff · Carnegie student campaign</p>
-        <h1 className={styles.title}>Letters and reported gifts</h1>
+        <h1 className={styles.title}>Letters and gifts to confirm</h1>
         {previewMode ? <p className={styles.preview}>Staff preview. Families cannot see the letter campaign yet.</p> : null}
         <StaffGate>{() => <Queues />}</StaffGate>
       </div>
@@ -35,8 +37,9 @@ function Queues() {
       <div className={styles.tabs} role="tablist">
         <button type="button" role="tab" aria-selected={tab === "letters"} className={tab === "letters" ? styles.tabActive : styles.tab} onClick={() => setTab("letters")}>Letters to review</button>
         <button type="button" role="tab" aria-selected={tab === "gifts"} className={tab === "gifts" ? styles.tabActive : styles.tab} onClick={() => setTab("gifts")}>Reported gifts to confirm</button>
+        <button type="button" role="tab" aria-selected={tab === "expected"} className={tab === "expected" ? styles.tabActive : styles.tab} onClick={() => setTab("expected")}>Expected gifts</button>
       </div>
-      {tab === "letters" ? <LetterQueue /> : <ReportedGiftQueue />}
+      {tab === "letters" ? <LetterQueue /> : tab === "gifts" ? <ReportedGiftQueue /> : <ExpectedGiftQueue />}
     </>
   );
 }
@@ -247,6 +250,168 @@ function ReportCard({ report, reload }) {
             <textarea value={reason} maxLength={500} onChange={(event) => setReason(event.target.value)} />
           </label>
           <button type="button" className={styles.secondary} disabled={busy || !reason.trim()} onClick={() => act({ action: "reject", reason })}>Reject this report</button>
+        </div>
+      ) : null}
+      {error ? <p className={styles.error} role="alert">{error}</p> : null}
+    </article>
+  );
+}
+
+// Expected gifts (#110): promises staff record before the money arrives. Counted nowhere until
+// confirmed; confirming records one Carnegie gift through the offline gift path.
+const EMPTY_EXPECTED = { donor_name: "", amount: "", method: "employer_platform", platform: "", gift_type: "donation", gift_date: "", expected_date: "", student_id: "", designation: "", donor_email: "", note: "" };
+
+function ExpectedGiftQueue() {
+  const [state, load] = useQueue("/api/admin/carnegie-expected-gifts", "items");
+  const [adding, setAdding] = useState(false);
+  const waiting = state.items.filter((item) => item.status === "expected");
+  const done = state.items.filter((item) => item.status !== "expected");
+  return (
+    <section className={styles.section} aria-label="Expected gifts">
+      <p className={styles.rule}>An expected gift counts nowhere and sends no receipt until you confirm the money arrived. Confirming records one Carnegie gift through the offline gift path.</p>
+      {!adding ? <button type="button" className={styles.secondary} onClick={() => setAdding(true)}>Record an expected gift</button> : <ExpectedGiftForm onDone={() => { setAdding(false); load(); }} />}
+      {state.status === "loading" ? <p className={styles.muted}>Loading…</p> : null}
+      {state.status === "error" ? <p className={styles.error} role="alert">{state.error}</p> : null}
+      {state.status === "ready" && !waiting.length ? <p className={styles.muted}>No expected gifts are waiting.</p> : null}
+      <div className={styles.list}>{waiting.map((item) => <ExpectedCard key={item.id} item={item} reload={load} />)}</div>
+      {done.length ? (
+        <>
+          <h2 className={styles.subhead}>Confirmed or cancelled</h2>
+          <ul className={styles.history}>
+            {done.map((item) => (
+              <li key={item.id}>
+                <span>{item.donor_name} · expected {dollars(item.amount_cents)}{item.status === "confirmed" ? `, confirmed ${dollars(item.confirmed_amount_cents)}` : ""}{item.student ? ` · ${item.student.displayName}` : ""}</span>
+                <span className={item.status === "confirmed" ? styles.report_confirmed : styles.report_rejected}>{item.status === "confirmed" ? "Confirmed" : `Cancelled: ${item.cancel_reason}`} · {when(item.reviewed_at)}</span>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
+    </section>
+  );
+}
+
+function ExpectedGiftForm({ onDone }) {
+  const [form, setForm] = useState(EMPTY_EXPECTED);
+  const [query, setQuery] = useState("");
+  const [matches, setMatches] = useState([]);
+  const [studentName, setStudentName] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const set = (field) => (event) => setForm({ ...form, [field]: event.target.value });
+
+  async function search(value) {
+    setQuery(value);
+    if (value.trim().length < 2) return setMatches([]);
+    const response = await fetch(`/api/sponsors/gifts/students?q=${encodeURIComponent(value)}`).catch(() => null);
+    const json = await response?.json().catch(() => ({}));
+    setMatches(json?.students || []);
+  }
+
+  async function save() {
+    setBusy(true);
+    setError("");
+    const response = await fetch("/api/admin/carnegie-expected-gifts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) }).catch(() => null);
+    const json = await response?.json().catch(() => ({}));
+    setBusy(false);
+    if (!response?.ok) return setError(json?.error || "That did not save.");
+    onDone();
+  }
+
+  return (
+    <div className={styles.returnBox}>
+      <div className={styles.row}>
+        <label className={styles.field}>Donor<input value={form.donor_name} onChange={set("donor_name")} /></label>
+        <label className={styles.field}>Amount<input value={form.amount} inputMode="decimal" placeholder="$" onChange={set("amount")} /></label>
+      </div>
+      <div className={styles.row}>
+        <label className={styles.field}>Method
+          <select value={form.method} onChange={set("method")}>
+            {Object.entries(EXPECTED_GIFT_METHOD_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+          </select>
+        </label>
+        <label className={styles.field}>Platform (optional)<input value={form.platform} placeholder="YourCause" onChange={set("platform")} /></label>
+        <label className={styles.field}>Kind
+          <select value={form.gift_type} onChange={set("gift_type")}>
+            {Object.entries(EXPECTED_GIFT_TYPE_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+          </select>
+        </label>
+      </div>
+      <div className={styles.row}>
+        <label className={styles.field}>Gift date<input type="date" value={form.gift_date} onChange={set("gift_date")} /></label>
+        <label className={styles.field}>Expected by<input type="date" value={form.expected_date} onChange={set("expected_date")} /></label>
+        <label className={styles.field}>Receipt email (optional)<input type="email" value={form.donor_email} onChange={set("donor_email")} /></label>
+      </div>
+      <label className={styles.field}>Student credit (optional)
+        <input value={studentName || query} onChange={(event) => { setStudentName(""); setForm({ ...form, student_id: "" }); search(event.target.value); }} placeholder="Type a student's name" />
+      </label>
+      {matches.length && !form.student_id ? (
+        <div className={styles.actions}>
+          {matches.map((student) => (
+            <button key={student.id} type="button" className={styles.secondary} onClick={() => { setForm({ ...form, student_id: student.id }); setStudentName(student.name); setMatches([]); }}>{student.name}{student.grade ? ` · ${student.grade}` : ""}</button>
+          ))}
+        </div>
+      ) : null}
+      <label className={styles.field}>Designation (optional)<input value={form.designation} onChange={set("designation")} /></label>
+      <label className={styles.field}>Note (optional)<input value={form.note} onChange={set("note")} /></label>
+      <div className={styles.actions}>
+        <button type="button" className={styles.primary} disabled={busy} onClick={save}>Save as expected</button>
+        <button type="button" className={styles.linkButton} onClick={onDone}>Cancel</button>
+      </div>
+      {error ? <p className={styles.error} role="alert">{error}</p> : null}
+    </div>
+  );
+}
+
+function ExpectedCard({ item, reload }) {
+  const [mode, setMode] = useState("");
+  const [amount, setAmount] = useState(((item.amount_cents || 0) / 100).toFixed(2));
+  const [method, setMethod] = useState(item.method);
+  const [reason, setReason] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  async function act(body) {
+    setBusy(true);
+    setError("");
+    const response = await fetch(`/api/admin/carnegie-expected-gifts/${item.id}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }).catch(() => null);
+    const json = await response?.json().catch(() => ({}));
+    setBusy(false);
+    if (!response?.ok) return setError(json?.error || "That did not save.");
+    reload();
+  }
+  return (
+    <article className={styles.card}>
+      <header className={styles.cardHead}>
+        <div>
+          <p className={styles.cardTitle}>{item.donor_name} · {dollars(item.amount_cents)} · {EXPECTED_GIFT_METHOD_LABELS[item.method]}{item.platform ? ` (${item.platform})` : ""}</p>
+          <p className={styles.muted}>{EXPECTED_GIFT_TYPE_LABELS[item.gift_type]}{item.student ? ` · credit ${item.student.displayName}` : " · no student credit"}{item.gift_date ? ` · gift date ${item.gift_date}` : ""}{item.expected_date ? ` · expected by ${item.expected_date}` : ""}</p>
+          {item.designation ? <p className={styles.muted}>Designation: {item.designation}</p> : null}
+          {item.note ? <p className={styles.muted}>Note: {item.note}</p> : null}
+        </div>
+        <span className={styles.report_reported}>Expected</span>
+      </header>
+      <div className={styles.actions}>
+        <button type="button" className={styles.primary} disabled={busy} onClick={() => act({ action: "confirm" })}>Money arrived: confirm</button>
+        <button type="button" className={styles.secondary} disabled={busy} onClick={() => setMode(mode === "adjust" ? "" : "adjust")}>Adjust, then confirm</button>
+        <button type="button" className={styles.secondary} disabled={busy} onClick={() => setMode(mode === "cancel" ? "" : "cancel")}>Cancel</button>
+      </div>
+      {mode === "adjust" ? (
+        <div className={styles.returnBox}>
+          <div className={styles.row}>
+            <label className={styles.field}>Amount received<input value={amount} inputMode="decimal" onChange={(event) => setAmount(event.target.value)} /></label>
+            <label className={styles.field}>Method
+              <select value={method} onChange={(event) => setMethod(event.target.value)}>
+                {Object.entries(EXPECTED_GIFT_METHOD_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+              </select>
+            </label>
+          </div>
+          <button type="button" className={styles.primary} disabled={busy} onClick={() => act({ action: "confirm", amount, method })}>Confirm ${amount}</button>
+        </div>
+      ) : null}
+      {mode === "cancel" ? (
+        <div className={styles.returnBox}>
+          <label className={styles.field}>Reason<textarea value={reason} maxLength={500} onChange={(event) => setReason(event.target.value)} /></label>
+          <button type="button" className={styles.secondary} disabled={busy || !reason.trim()} onClick={() => act({ action: "cancel", reason })}>Cancel this expected gift</button>
         </div>
       ) : null}
       {error ? <p className={styles.error} role="alert">{error}</p> : null}

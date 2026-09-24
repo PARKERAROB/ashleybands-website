@@ -31,6 +31,7 @@ const NEW_SURFACES = [
   ...filesUnder("app/api/portal/carnegie-notes"),
   ...filesUnder("app/api/admin/carnegie-letters"),
   ...filesUnder("app/api/admin/carnegie-reported-gifts"),
+  ...filesUnder("app/api/admin/carnegie-expected-gifts"),
   ...filesUnder("app/api/carnegie-notes")
 ].filter((file) => /\.(jsx?|mjs)$/.test(file));
 const ENTRY_POINTS = NEW_SURFACES.filter((file) => /(page\.jsx|route\.js)$/.test(file));
@@ -205,7 +206,7 @@ test("family routes scope to trusted students; staff routes need staff capabilit
     assert.match(source, /portalPerson\(req\)/, `${file} requires a portal session`);
     assert.match(source, /Sign in to the Family Portal first\." \}, 401/, `${file} refuses anonymous visitors`);
   }
-  for (const file of [...filesUnder("app/api/admin/carnegie-letters"), ...filesUnder("app/api/admin/carnegie-reported-gifts")]) {
+  for (const file of [...filesUnder("app/api/admin/carnegie-letters"), ...filesUnder("app/api/admin/carnegie-reported-gifts"), ...filesUnder("app/api/admin/carnegie-expected-gifts")]) {
     const source = readFileSync(file, "utf8");
     assert.match(source, /authorizeLetterReviewer\(req\)|authorizeStaffRequest\(req, STAFF_CAPABILITIES\.SPONSORSHIP_GIFTS_WRITE\)/, `${file} requires staff`);
     assert.match(source, /logAudit\(/, `${file} is audited`);
@@ -336,4 +337,29 @@ test("the payee reads Ashley High School Band Boosters everywhere at runtime (#1
   assert.equal(letters.CARNEGIE_CHECK_PAYEE, "Ashley High School Band Boosters");
   const runtime = gitGrepFiles(["AHS Band Boosters"], ["app", "lib", "components", "content", "public"]);
   assert.deepEqual(runtime, [], "no short payee name left in site source");
+});
+
+test("expected gifts are validated, pending only, and never read by a total (#110)", () => {
+  const item = letters.validateExpectedGift({ donor_name: " Donor Example ", amount: "2,000.00", method: "employer_platform", platform: "Giving platform", gift_type: "employer_match", gift_date: "2026-09-23", designation: "Carnegie" });
+  assert.equal(item.amount_cents, 200000);
+  assert.equal(item.donor_name, "Donor Example");
+  assert.equal(item.gift_type, "employer_match");
+  assert.throws(() => letters.validateExpectedGift({ donor_name: "A", amount: "5", method: "venmo" }), /arrive/);
+  assert.throws(() => letters.validateExpectedGift({ donor_name: "A", amount: "5", method: "check", gift_date: "9/23" }), /date/);
+  assert.throws(() => letters.validateExpectedGift({ donor_name: "", amount: "5", method: "check" }), /name/);
+  assert.equal(letters.sponsorGiftMethod("employer_platform"), "other");
+  assert.equal(letters.sponsorGiftMethod("check"), "check");
+  assert.equal(letters.pendingExpectedCents([{ status: "expected", amount_cents: 200000 }, { status: "confirmed", amount_cents: 5 }, { status: "cancelled", amount_cents: 7 }]), 200000);
+  assert.deepEqual(letters.expectedConfirmation({ status: "expected", amount_cents: 200000, method: "employer_platform" }, { amount: "1990", method: "check" }), { amountCents: 199000, method: "check", adjusted: true });
+  assert.throws(() => letters.expectedConfirmation({ status: "cancelled", amount_cents: 1, method: "cash" }, {}), /already/);
+  const readers = gitGrepFiles(["carnegie_expected_gifts"], ["app", "lib", "components", "scripts", "supabase"]);
+  const allowed = new Set(["lib/carnegieLettersServer.js", "supabase/migrations/202609240003_carnegie_expected_gifts.sql", "scripts/carnegie-letters.test.mjs", "scripts/carnegie-letters-e2e.test.mjs", "scripts/security-boundary.test.mjs"]);
+  for (const file of readers) assert.ok(allowed.has(file) || file.startsWith("app/api/admin/carnegie-expected-gifts/"), `${file} must not read expected gifts`);
+  const server = read("lib/carnegieLettersServer.js");
+  assert.match(server, /requestKey: item\.id/, "one expected item maps to one idempotent gift");
+  assert.match(server, /export async function expectedForStudents[\s\S]*\.eq\("status", "expected"\)/, "only waiting items show as pending");
+  const migration = read("supabase/migrations/202609240003_carnegie_expected_gifts.sql");
+  assert.match(migration, /sponsor_gift_id uuid unique references public\.sponsor_gifts\(id\)/);
+  assert.match(migration, /A confirmed or cancelled expected gift is final/);
+  assert.doesNotMatch(migration, /^\s*(alter|drop|update|delete|insert)\s+(table\s+)?public\.(?!carnegie_expected_gift)/im);
 });
