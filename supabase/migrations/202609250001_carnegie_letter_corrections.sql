@@ -1,4 +1,4 @@
--- Carnegie letter corrections and student authors (#108).
+-- Carnegie letter corrections, student authors and student-reported gifts (#108).
 --
 -- Additive and inert until CARNEGIE_LETTERS_MODE is set. A correction is a proposed spelling,
 -- grammar and punctuation fix to one exact letter version. The student's original words stay in
@@ -113,6 +113,30 @@ $$;
 create trigger carnegie_letter_correction_history
 after insert or update on public.carnegie_letter_corrections
 for each row execute function public.carnegie_letter_correction_history();
+
+-- A student signed in with their own school email may report cash or a check they collected
+-- (director, 2026-09-24). The report records who reported it; the rules are unchanged: pending,
+-- in no total, confirmed only by staff through the #103 offline path.
+alter table public.carnegie_reported_gifts
+  add column reported_by_type text not null default 'family' check (reported_by_type in ('family', 'student'));
+
+create or replace function public.carnegie_reported_gift_history()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  insert into public.carnegie_reported_gift_events (reported_gift_id, status, reported_amount_cents, confirmed_amount_cents, confirmed_method, sponsor_gift_id, actor_type, actor_id, source)
+  values (
+    new.id, new.status, new.reported_amount_cents, new.confirmed_amount_cents, new.confirmed_method, new.sponsor_gift_id,
+    case when tg_op = 'INSERT' then new.reported_by_type else 'staff' end,
+    case when tg_op = 'INSERT' then new.reported_by_person_id::text else coalesce(new.reviewed_by_staff_id::text, '') end,
+    new.source
+  );
+  return null;
+end;
+$$;
+revoke all on function public.carnegie_reported_gift_history() from public, anon, authenticated;
 
 -- Approve one exact letter version together with one correction, atomically. Staff only: the
 -- route checks the reviewer before calling it, and only the service role may execute it.

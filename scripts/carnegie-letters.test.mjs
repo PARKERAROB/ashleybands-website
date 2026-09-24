@@ -257,7 +257,7 @@ test("reported gifts are validated, count nowhere, and confirm at the confirmed 
 
   // No total anywhere reads the reported table; only the letters server module does.
   const readers = gitGrepFiles(["carnegie_reported_gifts"], ["app", "lib", "components", "scripts", "supabase"]);
-  const allowed = new Set(["lib/carnegieLettersServer.js", "supabase/migrations/202609240002_carnegie_student_letters.sql", "scripts/carnegie-letters.test.mjs", "scripts/carnegie-letters-e2e.test.mjs", "scripts/security-boundary.test.mjs"]);
+  const allowed = new Set(["lib/carnegieLettersServer.js", "supabase/migrations/202609240002_carnegie_student_letters.sql", "supabase/migrations/202609250001_carnegie_letter_corrections.sql", "scripts/carnegie-letters.test.mjs", "scripts/carnegie-letters-e2e.test.mjs", "scripts/security-boundary.test.mjs"]);
   for (const file of new Set(readers)) assert.ok(allowed.has(file) || file.startsWith("app/api/"), `${file} must not read reported gifts`);
   for (const file of ["lib/sponsorCampaigns.mjs", "lib/carnegieFunding.mjs", "lib/billing.js", "lib/financialOperations.js"]) {
     assert.doesNotMatch(read(file), /carnegie_reported_gifts/);

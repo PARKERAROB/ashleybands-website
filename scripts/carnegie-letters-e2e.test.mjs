@@ -299,10 +299,22 @@ test("a signed-in student sees only their own notes and letters, with no money o
   assert.deepEqual(mine.data.students.map((s) => s.id), [ids.studentA]);
   const me = mine.data.students[0];
   assert.equal(me.depositPaidCents, null);
-  assert.deepEqual(me.reportedGifts, []);
-  assert.equal(me.pendingCents, 0);
+  assert.ok(Array.isArray(me.reportedGifts), "students see their own reports");
   assert.ok(me.letters.length > 0, "sees the student's own letters");
-  assert.equal((await call("/api/portal/carnegie-notes/reported-gifts", { method: "POST", cookie: STUDENT, body: { student_id: ids.studentA, donor_name: "X", amount: "5", method: "cash" } })).status, 403);
+  // A student may report cash or a check they collected; it stays pending like a family report.
+  const pendingBefore = me.pendingCents;
+  const notesBefore = me.notesCents;
+  const report = await call("/api/portal/carnegie-notes/reported-gifts", { method: "POST", cookie: STUDENT, body: { student_id: ids.studentA, donor_name: "Student Collected Fixture", amount: "12", method: "cash" } });
+  assert.equal(report.status, 201);
+  assert.equal(report.data.report.reported_by_type, "student");
+  const afterReport = (await call("/api/portal/carnegie-notes", { cookie: STUDENT })).data.students[0];
+  assert.equal(afterReport.pendingCents, pendingBefore + 1200);
+  assert.equal(afterReport.notesCents, notesBefore, "counts nowhere until staff confirm");
+  const [firstEvent] = await db(`carnegie_reported_gift_events?reported_gift_id=eq.${report.data.report.id}&order=id&select=actor_type,actor_id`);
+  assert.deepEqual(firstEvent, { actor_type: "student", actor_id: studentPerson }, "the trail records a student reporter");
+  assert.equal((await call("/api/portal/carnegie-notes/reported-gifts", { method: "POST", cookie: STUDENT, body: { student_id: ids.studentB, donor_name: "X", amount: "5", method: "cash" } })).status, 404, "not for another student");
+  const confirmed = await call(`/api/admin/carnegie-reported-gifts/${report.data.report.id}`, { method: "POST", cookie: DIRECTOR, body: { action: "confirm" } });
+  assert.equal(confirmed.data.report.status, "confirmed", "same staff confirm path");
   assert.equal((await call("/api/portal/carnegie-notes/letters", { method: "POST", cookie: STUDENT, body: { student_id: ids.studentB, recipient_type: "general_supporter" } })).status, 404);
   const created = await call("/api/portal/carnegie-notes/letters", { method: "POST", cookie: STUDENT, body: { student_id: ids.studentA, recipient_type: "general_supporter", meaning_text: "band has tought me to lisen", help_text: "i would love you're help" } });
   assert.equal(created.status, 201);

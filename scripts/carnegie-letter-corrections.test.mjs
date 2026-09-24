@@ -61,15 +61,15 @@ test("Atlas's script suggests and never approves", () => {
   assert.match(script, /action: "letter\.correction_suggested"/, "audited");
 });
 
-test("a signed-in student sees only their own notes, letters and builder", () => {
+test("a signed-in student sees only their own notes, letters, builder and gift reports", () => {
   const server = read("lib/carnegieLettersServer.js");
   assert.match(server, /isStudent \? new Map\(\) : depositPaidCents\(ids\)/, "no deposit for students");
-  assert.match(server, /isStudent \? \[\] : reportsForStudents\(ids\)/, "no reported gifts for students");
+  assert.match(server, /reported_by_type: reporterType/, "a student's report records that a student reported it");
   assert.match(server, /depositPaidCents: isStudent \? null/);
-  assert.match(server, /if \(await portalViewer\(personId\) === "student"\) return \{ status: 403/, "students cannot report money");
+  assert.match(read("supabase/migrations/202609250001_carnegie_letter_corrections.sql"), /case when tg_op = 'INSERT' then new\.reported_by_type else 'staff' end/, "history records a student reporter");
   assert.match(read("lib/billing.js"), /if \(person\?\.person_type === "student"\) return row\.assurance_level === "high";/, "students reach only their own verified link");
   const client = read("app/portal/carnegie-notes/CarnegieNotesClient.jsx");
-  assert.match(client, /\{viewer === "student" \? null : <ReportGift/);
+  assert.match(client, /<ReportGift student=\{student\}/);
   assert.match(client, /student\.depositPaidCents === null \? null/);
   for (const file of ["app/portal/carnegie-notes/CarnegieNotesClient.jsx", "app/portal/carnegie-notes/letter/LetterBuilderClient.jsx"]) {
     assert.doesNotMatch(read(file), /guardian|contact_methods|\/api\/portal\/me|billing/i, `${file} shows no family contacts or billing`);

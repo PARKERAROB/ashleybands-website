@@ -186,7 +186,7 @@ function StudentNotes({ student, reload, viewer = "family" }) {
       </div>
       {!printable.length ? <p className={styles.hint}>Your packet is ready to print once a letter is approved.</p> : null}
 
-      {viewer === "student" ? null : <ReportGift student={student} reload={reload} />}
+      <ReportGift student={student} reload={reload} />
 
       <section className={styles.card} aria-labelledby="letters-heading">
         <h2 id="letters-heading" className={styles.cardTitle}>My letters</h2>

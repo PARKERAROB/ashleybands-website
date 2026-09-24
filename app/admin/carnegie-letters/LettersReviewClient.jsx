@@ -221,7 +221,7 @@ function ReportCard({ report, reload }) {
       <header className={styles.cardHead}>
         <div>
           <p className={styles.cardTitle}>{report.student.displayName} · {dollars(report.reported_amount_cents)} {report.reported_method}{report.check_number ? ` #${report.check_number}` : ""}</p>
-          <p className={styles.muted}>From {report.donor_name}{report.donor_email ? ` · receipt to ${report.donor_email}` : " · no receipt email"} · reported {when(report.created_at)}</p>
+          <p className={styles.muted}>Reported by the {report.reported_by_type === "student" ? "student" : "family"} · from {report.donor_name}{report.donor_email ? ` · receipt to ${report.donor_email}` : " · no receipt email"} · reported {when(report.created_at)}</p>
           {report.note ? <p className={styles.muted}>Note: {report.note}</p> : null}
         </div>
         <span className={styles.report_reported}>{REPORTED_GIFT_STATUS_LABELS.reported}</span>

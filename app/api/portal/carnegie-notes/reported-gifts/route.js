@@ -16,7 +16,7 @@ export async function POST(req) {
   try {
     const result = await createReportedGift(session.personId, body);
     if (result.error) return privateJson({ error: result.error }, result.status);
-    await logAudit({ actor: familyActor(session), action: "report", table: "carnegie_reported_gifts", recordId: result.report.id, changes: { reported_amount_cents: result.report.reported_amount_cents, reported_method: result.report.reported_method }, route: "/api/portal/carnegie-notes/reported-gifts" });
+    await logAudit({ actor: familyActor(session, result.report.reported_by_type), action: "report", table: "carnegie_reported_gifts", recordId: result.report.id, changes: { reported_amount_cents: result.report.reported_amount_cents, reported_method: result.report.reported_method }, route: "/api/portal/carnegie-notes/reported-gifts" });
     return privateJson({ report: result.report }, 201);
   } catch (error) {
     return privateServerError("carnegie-reported-gift", error, "The gift report could not be saved.");
