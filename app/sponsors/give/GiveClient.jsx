@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { BOOSTER_NONPROFIT_COPY, CARNEGIE_CAMPAIGN, CARNEGIE_TERMS_VERSION, CARNEGIE_CHANGE_TERMS, CARNEGIE_SUGGESTED_AMOUNTS, carnegieGiftPrefill } from "@/lib/sponsorCampaigns.mjs";
+import { BOOSTER_NONPROFIT_COPY, CARNEGIE_CAMPAIGN, CARNEGIE_TERMS_VERSION, CARNEGIE_CHANGE_TERMS, CARNEGIE_SUGGESTED_AMOUNTS, carnegieGiftPrefill, carnegieStudentGiftLine } from "@/lib/sponsorCampaigns.mjs";
 import { sponsorThankYouLine } from "@/lib/sponsorGiftPolicy.mjs";
 
 let paypalSdkPromise = null;
@@ -137,7 +137,10 @@ export default function GiveClient({ campaignCode = "general", embedded = false 
       <div className="give-card">
         <p className="give-eyebrow">AHS Band Boosters · 501(c)(3)</p>
         <Heading>{carnegie ? "Make a gift for Ashley’s trip" : studentName ? `Support ${studentName}'s Ashley Bands sponsorship effort` : "Sponsor the Bands of Ashley"}</Heading>
-        {carnegie ? <p className="give-lede">Choose an amount and give online or by check. Your gift is designated for Ashley Bands’ 2027 Carnegie trip.</p> : studentName ? (
+        {carnegie ? <>
+          <p className="give-lede">Choose an amount and give online or by check. Your gift is designated for Ashley Bands’ 2027 Carnegie trip.</p>
+          {studentName ? <p className="give-lede give-student-credit">{carnegieStudentGiftLine(studentName)}</p> : null}
+        </> : studentName ? (
           <p className="give-lede">
             Your gift supports the whole Bands of Ashley program and will be credited to {studentName}&apos;s sponsorship total.
           </p>

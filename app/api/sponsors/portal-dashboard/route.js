@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveSponsorFamily, sponsorFunnelLive } from "@/lib/sponsorFamily";
 import { signSponsorGiveToken } from "@/lib/sponsorGiveToken.mjs";
+import { MARCHING_STUDENT_CREDIT_CAMPAIGN } from "@/lib/sponsorCampaigns.mjs";
 import {
   ensureSponsorStudentLinks,
   loadAuthorizedSponsorStudents
@@ -53,12 +54,14 @@ export async function GET(req) {
       .from("sponsor_gifts")
       .select("id, portal_student_id, amount_cents")
       .eq("family_id", fam.id)
+      .eq("campaign_code", MARCHING_STUDENT_CREDIT_CAMPAIGN)
       .eq("status", "confirmed"),
     studentIds.length
       ? supabaseAdmin
           .from("sponsor_gifts")
           .select("id, portal_student_id, amount_cents")
           .in("portal_student_id", studentIds)
+          .eq("campaign_code", MARCHING_STUDENT_CREDIT_CAMPAIGN)
           .eq("status", "confirmed")
       : Promise.resolve({ data: [], error: null })
   ]);

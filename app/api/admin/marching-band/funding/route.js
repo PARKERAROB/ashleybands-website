@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
 import { logAudit, staffActor } from "@/lib/auditLog";
 import { chargeKindForCategory, loadStudentLedgers } from "@/lib/billing";
+import { MARCHING_STUDENT_CREDIT_CAMPAIGN } from "@/lib/sponsorCampaigns.mjs";
 
 export const runtime = "nodejs";
 
@@ -46,6 +47,7 @@ export async function GET(request) {
     studentIds.length ? supabaseAdmin.from("sponsor_gifts")
       .select("portal_student_id,amount_cents")
       .in("portal_student_id", studentIds)
+      .eq("campaign_code", MARCHING_STUDENT_CREDIT_CAMPAIGN)
       .eq("status", "confirmed") : Promise.resolve({ data: [], error: null }),
   ]);
   if (giftError) return NextResponse.json({ error: "Could not load campaign funding." }, { status: 500 });

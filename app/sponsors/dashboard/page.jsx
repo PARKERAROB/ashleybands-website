@@ -90,6 +90,91 @@ function StaffLogin({ onAuthed }) {
   );
 }
 
+// Record an offline Carnegie gift already in hand (#103). Staff confirm on save; the existing receipt
+// path runs. Student credit from the check memo is record-keeping only and never a balance.
+function OfflineGiftForm({ session, onSaved }) {
+  const blank = { donor_name: "", payer_name: "", payer_email: "", amount: "", method: "check", gift_kind: "donation", memo: "" };
+  const [form, setForm] = useState(blank);
+  const [studentQuery, setStudentQuery] = useState("");
+  const [students, setStudents] = useState([]);
+  const [student, setStudent] = useState(null);
+  const [requestKey, setRequestKey] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    if (student || studentQuery.trim().length < 2) return undefined;
+    const timer = window.setTimeout(async () => {
+      const res = await fetch(`/api/sponsors/gifts/students?q=${encodeURIComponent(studentQuery.trim())}`, { headers: authHeaders(session) });
+      const json = await res.json().catch(() => ({}));
+      setStudents(res.ok ? json.students || [] : []);
+    }, 250);
+    return () => window.clearTimeout(timer);
+  }, [studentQuery, student, session]);
+
+  const set = (key) => (event) => setForm({ ...form, [key]: event.target.value });
+
+  async function submit(event) {
+    event.preventDefault();
+    const dollars = Number(form.amount);
+    if (!confirm(`Record ${form.donor_name || "this donor"} ($${Number.isFinite(dollars) ? dollars.toLocaleString() : "?"}) as a received Carnegie ${form.method}${student ? `, credited to ${student.name}` : ""}? A receipt is sent if an email is entered.`)) return;
+    const key = requestKey || window.crypto.randomUUID();
+    setRequestKey(key);
+    setBusy(true);
+    setMessage("");
+    try {
+      const res = await fetch("/api/sponsors/gifts", {
+        method: "POST",
+        headers: authHeaders(session),
+        body: JSON.stringify({ ...form, amount: dollars, campaign_code: "carnegie-2027", student_id: student?.id || null, request_key: key })
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error || "The gift could not be recorded.");
+      setForm(blank);
+      setStudent(null);
+      setStudentQuery("");
+      setStudents([]);
+      setRequestKey("");
+      setMessage(json.existing ? "This gift was already recorded." : "Recorded and confirmed.");
+      onSaved();
+    } catch (error) {
+      setMessage(error.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <details style={{ margin: "12px 0" }}>
+      <summary><strong>Record an offline Carnegie gift</strong> (check or cash already received)</summary>
+      <form className="tracker-form" onSubmit={submit} style={{ marginTop: 8 }}>
+        <label className="tracker-field"><span>Donor or business name</span><input required maxLength={160} value={form.donor_name} onChange={set("donor_name")} /></label>
+        <label className="tracker-field"><span>Amount (USD)</span><input required type="number" min="5" step="0.01" inputMode="decimal" value={form.amount} onChange={set("amount")} /></label>
+        <label className="tracker-field"><span>Method</span><select value={form.method} onChange={set("method")}><option value="check">Check</option><option value="cash">Cash</option></select></label>
+        <label className="tracker-field"><span>Kind</span><select value={form.gift_kind} onChange={set("gift_kind")}><option value="donation">Personal donation</option><option value="sponsorship">Business sponsorship</option></select></label>
+        <label className="tracker-field"><span>Payer name (optional)</span><input maxLength={160} value={form.payer_name} onChange={set("payer_name")} /></label>
+        <label className="tracker-field"><span>Receipt email (optional; a receipt is sent if entered)</span><input type="email" maxLength={254} value={form.payer_email} onChange={set("payer_email")} /></label>
+        <label className="tracker-field"><span>Student credit from the memo (optional)</span>
+          {student ? (
+            <span>{student.name} <button type="button" className="tracker-link" onClick={() => { setStudent(null); setStudentQuery(""); }}>change</button></span>
+          ) : (
+            <input value={studentQuery} onChange={(event) => { setStudentQuery(event.target.value); if (event.target.value.trim().length < 2) setStudents([]); }} placeholder="Type a student name" />
+          )}
+        </label>
+        {!student && students.length ? (
+          <ul className="tracker-sub" style={{ listStyle: "none", padding: 0 }}>
+            {students.map((row) => <li key={row.id}><button type="button" className="tracker-link" onClick={() => { setStudent(row); setStudents([]); }}>{row.name}{row.grade ? ` (grade ${row.grade})` : ""}</button></li>)}
+          </ul>
+        ) : null}
+        <label className="tracker-field"><span>Memo or note (optional)</span><input maxLength={500} value={form.memo} onChange={set("memo")} /></label>
+        <p className="tracker-sub">Student credit is record-keeping only. It is not a student balance and does not change what a family owes or any marching band figure. Offline gifts are not published on the website.</p>
+        <button type="submit" className="sponsors-btn sponsors-btn-primary" disabled={busy}>{busy ? "Recording..." : "Record as received"}</button>
+        {message ? <p role="status">{message}</p> : null}
+      </form>
+    </details>
+  );
+}
+
 function Dashboard({ session, onLogout }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
@@ -385,6 +470,7 @@ function GiftsPanel({ session }) {
       </ul>
       <h4>Ashley’s Carnegie trip</h4>
       <p>{fmt(data.carnegieSummary?.confirmedCents)} confirmed ({data.carnegieSummary?.confirmedCount || 0} gifts). {fmt(data.carnegieSummary?.pendingCents)} pending ({data.carnegieSummary?.pendingCount || 0} gifts), excluded from confirmed funds.</p>
+      <OfflineGiftForm session={session} onSaved={load} />
       <h4>All sponsor gifts</h4>
       <p>
         {fmt(data.confirmedCents)} confirmed · {pending.length} pending. Check sponsorships are published when staff confirms receipt. Personal Carnegie donations are not automatically published. Online gifts remain private until staff verifies and publishes the sponsor name.

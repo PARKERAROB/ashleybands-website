@@ -111,6 +111,7 @@ const PRIVATE_OPERATIONAL_VIEWS = [
   "business_touchpoints",
   "student_program_fee_summary",
   "student_campaign_summary",
+  "carnegie_student_credit_totals",
 ];
 
 const migrationDir = path.resolve("supabase", "migrations");

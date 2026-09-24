@@ -35,5 +35,16 @@ fundraiser proceeds must first be recorded and designated in the owning ledger; 
 unrecorded offline receipts cannot be inferred. Future non-cash/check sources need an explicit
 net-cost contract before inclusion. Person data and processor identifiers stay on the server.
 
+## Student credit (issue #103)
+
+A Carnegie gift may carry a student credit (`portal_student_id`) from a Carnegie student link
+(`/support/{code}/carnegie`) or a staff-recorded check memo. It is record-keeping only: the same
+amount counts once in this campaign total and appears as that student's Carnegie credit
+(`carnegie_student_credit_totals`, `carnegieStudentCreditTotals`, staff-only). It is not a balance,
+never reduces what a family owes, and never enters marching figures: per-student marching and
+sponsorship math counts only `general` gifts. Staff-recorded offline Carnegie gifts use the existing
+confirmation and receipt path and are never auto-published. Whether student credit may later apply
+to trip costs is undecided.
+
 Check `node --test scripts/carnegie-funding.test.mjs` and the deployed public endpoint after release.
 No live values or donor information belong in test fixtures, issue comments, or this document.
