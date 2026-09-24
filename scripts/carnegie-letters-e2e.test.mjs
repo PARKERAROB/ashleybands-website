@@ -68,7 +68,8 @@ const ids = {
   guardianA: crypto.randomUUID(), guardianB: crypto.randomUUID(),
   studentA: crypto.randomUUID(), studentB: crypto.randomUUID(),
   director: crypto.randomUUID(), directorToken: crypto.randomUUID(),
-  worker: crypto.randomUUID(), workerToken: crypto.randomUUID()
+  worker: crypto.randomUUID(), workerToken: crypto.randomUUID(),
+  eventWorker: crypto.randomUUID(), eventWorkerToken: crypto.randomUUID()
 };
 const codeA = `E2eA${run}`.slice(0, 16);
 let A, B, DIRECTOR, WORKER, ANON;
@@ -87,7 +88,8 @@ test("set up synthetic fixtures", { skip }, async () => {
     insert into sponsor_student_links (portal_student_id, code, source) values (${q(ids.studentA)}, ${q(codeA)}, 'family_portal');
     insert into staff (id, email, pin_hash, display_name, role, session_token) values
       (${q(ids.director)}, ${q(`director-${run}@example.com`)}, 'not-a-login', 'E2E Director', 'director', ${q(ids.directorToken)}),
-      (${q(ids.worker)}, ${q(`worker-${run}@example.com`)}, 'not-a-login', 'E2E Worker', 'event_worker', ${q(ids.workerToken)});
+      (${q(ids.worker)}, ${q(`worker-${run}@example.com`)}, 'not-a-login', 'E2E Researcher', 'campaign_researcher', ${q(ids.workerToken)}),
+      (${q(ids.eventWorker)}, ${q(`event-${run}@example.com`)}, 'not-a-login', 'E2E Event Worker', 'event_worker', ${q(ids.eventWorkerToken)});
   `);
   // In staff-preview mode every request needs some staff session to pass the gate. Family checks
   // use a staff session with no letter or gift rights, so access is decided by the portal session.
@@ -135,7 +137,8 @@ test("draft → review → approve exact version → edit returns to review → 
   assert.equal(response.data.letter.status, "needs_review");
   letter = response.data.letter;
   assert.equal((await call(`/api/admin/carnegie-letters/${letter.id}`, { method: "POST", cookie: DIRECTOR, body: { action: "approve", version: letter.version + 1 } })).status, 409, "approval must name the exact version");
-  assert.equal((await call(`/api/admin/carnegie-letters/${letter.id}`, { method: "POST", cookie: WORKER, body: { action: "approve", version: letter.version } })).status, 403, "only reviewers approve");
+  assert.equal((await call(`/api/admin/carnegie-letters/${letter.id}`, { method: "POST", cookie: WORKER, body: { action: "approve", version: letter.version } })).status, 403, "the research role cannot approve");
+  assert.equal((await call("/api/admin/carnegie-letters", { cookie: staffCookie(ids.eventWorker, ids.eventWorkerToken) })).status, 200, "any portal staff role can open the review queue");
   assert.equal((await call(`/api/admin/carnegie-letters/${letter.id}`, { method: "POST", cookie: portalCookie(ids.guardianA), body: { action: "approve", version: letter.version } })).status, 404, "families cannot reach staff actions");
   response = await call(`/api/admin/carnegie-letters/${letter.id}`, { method: "POST", cookie: DIRECTOR, body: { action: "approve", version: letter.version } });
   assert.equal(response.status, 200);

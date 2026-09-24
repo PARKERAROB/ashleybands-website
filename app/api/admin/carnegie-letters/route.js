@@ -1,7 +1,6 @@
 import { privateJson, privateServerError } from "@/lib/privateResponse";
-import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
 import { logAudit, staffActor } from "@/lib/auditLog";
-import { carnegieLettersAccess, staffLetterQueue } from "@/lib/carnegieLettersServer";
+import { authorizeLetterReviewer, carnegieLettersAccess, staffLetterQueue } from "@/lib/carnegieLettersServer";
 
 export const runtime = "nodejs";
 
@@ -9,7 +8,7 @@ export const runtime = "nodejs";
 export async function GET(req) {
   const access = await carnegieLettersAccess(req);
   if (!access.open) return privateJson({ error: "Not found." }, 404);
-  const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.CARNEGIE_LETTERS_REVIEW);
+  const authorization = await authorizeLetterReviewer(req);
   if (!authorization.ok) return privateJson({ error: authorization.error }, authorization.status);
   try {
     const letters = await staffLetterQueue();

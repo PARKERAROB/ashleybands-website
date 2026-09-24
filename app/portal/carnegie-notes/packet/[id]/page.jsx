@@ -2,10 +2,10 @@ import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import QRCode from "qrcode";
 import NotesChart from "@/components/NotesChart";
-import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
 import { logAudit, staffActor } from "@/lib/auditLog";
 import { SPONSOR_CONTACT } from "@/lib/sponsorshipContent";
 import {
+  authorizeLetterReviewer,
   carnegieLettersAccess,
   familyActor,
   loadFamilyLetter,
@@ -43,7 +43,7 @@ async function resolveViewer(requestLike, id) {
     const letter = await loadFamilyLetter(session.personId, id);
     if (letter) return { letter, viewer: "family", actor: familyActor(session) };
   }
-  const staff = await authorizeStaffRequest(requestLike, STAFF_CAPABILITIES.CARNEGIE_LETTERS_REVIEW).catch(() => ({ ok: false }));
+  const staff = await authorizeLetterReviewer(requestLike).catch(() => ({ ok: false }));
   if (staff.ok) {
     const letter = await loadLetterById(id);
     if (letter) return { letter, viewer: "staff", actor: staffActor(staff.staff) };
@@ -183,7 +183,7 @@ export default async function CarnegieLetterPacketPage({ params }) {
             <p className={styles.slipField}><span>☐ Cash&nbsp;&nbsp;☐ Check #</span><i /></p>
             <p className={styles.slipField}><span>Donor email (optional, for a receipt):</span><i /></p>
           </div>
-          <p className={styles.slipNote}>{GIFT_SLIP_LINE}</p>
+          <p className={styles.slipNote}>Make checks payable to {CARNEGIE_CHECK_PAYEE}, memo “{carnegieCheckMemo(name)}.” {GIFT_SLIP_LINE}</p>
         </section>
       </article>
     </main>

@@ -93,9 +93,10 @@ test("student wording follows the director's rules", () => {
   const composed = letters.composeCarnegieLetter({ recipientType: "someone_i_know", recipientName: "Aunt Lee", meaningText: "m", helpText: "h", firstName: "Alex Sample", code: "abcDEF123456" });
   assert.equal(composed.ask, "Would you help me fill my music notes? My part of the team goal is $500, and every $5 or $10 note makes a difference. Every gift goes to the band's Carnegie campaign and lowers the trip cost for all of us.");
   assert.equal(composed.signature, "Alex", "first name only");
-  assert.match(composed.payLine, /AHS Band Boosters/);
-  assert.match(composed.payLine, /Carnegie · Alex/);
-  assert.equal(letters.CARNEGIE_CHECK_PAYEE, read("lib/sponsorshipContent.js").match(/boosterOrg: "([^"]+)"/)[1], "payee matches the existing check instructions");
+    assert.match(composed.payLine, /Carnegie · Alex/);
+  assert.equal(letters.CARNEGIE_CHECK_PAYEE, "Ashley High School Band Boosters", "director's payee wording");
+  assert.match(composed.payLine, /Ashley High School Band Boosters/);
+  assert.match(read("app/portal/carnegie-notes/packet/[id]/page.jsx"), /payable to \{CARNEGIE_CHECK_PAYEE\}[\s\S]*Make checks payable to \{CARNEGIE_CHECK_PAYEE\}/, "how to pay and the gift slip");
 
   const studentCopy = [
     ...NEW_SURFACES.filter((file) => !file.includes("/api/")).map((file) => readFileSync(file, "utf8")),
@@ -206,17 +207,19 @@ test("family routes scope to trusted students; staff routes need staff capabilit
   }
   for (const file of [...filesUnder("app/api/admin/carnegie-letters"), ...filesUnder("app/api/admin/carnegie-reported-gifts")]) {
     const source = readFileSync(file, "utf8");
-    assert.match(source, /authorizeStaffRequest\(req, STAFF_CAPABILITIES\.(CARNEGIE_LETTERS_REVIEW|SPONSORSHIP_GIFTS_WRITE)\)/, `${file} requires staff`);
+    assert.match(source, /authorizeLetterReviewer\(req\)|authorizeStaffRequest\(req, STAFF_CAPABILITIES\.SPONSORSHIP_GIFTS_WRITE\)/, `${file} requires staff`);
     assert.match(source, /logAudit\(/, `${file} is audited`);
   }
   const packet = read("app/portal/carnegie-notes/packet/[id]/page.jsx");
   assert.match(packet, /loadFamilyLetter\(session\.personId, id\)/);
-  assert.match(packet, /STAFF_CAPABILITIES\.CARNEGIE_LETTERS_REVIEW/);
+  assert.match(packet, /authorizeLetterReviewer\(requestLike\)/);
+  assert.match(read("lib/carnegieLettersServer.js"), /authorizeStaffRequest\(requestLike, STAFF_CAPABILITIES\.CARNEGIE_LETTERS_REVIEW, \{ safeCapabilityOnly: true \}\)/);
   assert.match(packet, /if \(!resolved\) notFound\(\)/);
   assert.equal(STAFF_CAPABILITIES.CARNEGIE_LETTERS_REVIEW, "carnegie.letters.review");
+  // Director decision 2026-09-24: every portal staff role reviews letters, except the no-family-data research role.
   for (const [role, capabilities] of Object.entries(ROLE_CAPABILITIES)) {
-    if (capabilities.includes("*")) continue;
-    assert.ok(!capabilities.includes("carnegie.letters.review"), `${role} does not review letters yet`);
+    const reviews = capabilities.includes("*") || capabilities.includes("carnegie.letters.review");
+    assert.equal(reviews, role !== "campaign_researcher", `${role} review access`);
   }
   const migration = read("supabase/migrations/202609240002_carnegie_student_letters.sql");
   for (const table of ["carnegie_student_letters", "carnegie_student_letter_events", "carnegie_reported_gifts", "carnegie_reported_gift_events"]) {
