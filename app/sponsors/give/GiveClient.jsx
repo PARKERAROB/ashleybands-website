@@ -24,14 +24,16 @@ function loadPaypalSdk(clientId) {
   return paypalSdkPromise;
 }
 
-export default function GiveClient({ campaignCode = "general", embedded = false }) {
+// attributionToken (#106): the gated Carnegie student landing passes its signed token directly.
+// Every existing caller omits it and keeps reading ?a= from the URL.
+export default function GiveClient({ campaignCode = "general", embedded = false, attributionToken: tokenProp = "" }) {
   const carnegie = campaignCode === CARNEGIE_CAMPAIGN;
   const Shell = embedded ? "div" : "main";
   const Heading = embedded ? "h2" : "h1";
   const params = useSearchParams();
   const prefill = carnegie ? carnegieGiftPrefill(params.get("kind"), params.get("amount")) : { giftKind: null, amount: "" };
   const [giftKind, setGiftKind] = useState(prefill.giftKind || (carnegie ? "donation" : "sponsorship"));
-  const attributionToken = params.get("a") || "";
+  const attributionToken = tokenProp || params.get("a") || "";
   const checkRequestKey = useRef("");
 
   const [onlineAvailable, setOnlineAvailable] = useState(true);

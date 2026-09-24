@@ -1,0 +1,46 @@
+.shell { background: #f4f1ea; min-height: 70vh; padding: 20px 16px 48px; font-family: Inter, sans-serif; }
+.wrap { max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+.eyebrow { margin: 0; font-family: Cinzel, serif; font-size: 12px; letter-spacing: 2px; color: #7b1829; font-weight: 700; text-transform: uppercase; }
+.title { margin: 0; font-family: "DM Serif Display", Georgia, serif; font-weight: 400; font-size: 30px; color: #4f101c; }
+.preview { margin: 0; padding: 8px 12px; border-radius: 8px; background: #fff4d6; border: 1px solid #e2c35a; font-size: 13px; color: #5c4300; }
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+.tab, .tabActive { min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1.5px solid #7b1829; background: #fff; color: #4f101c; font: 700 14px Inter, sans-serif; cursor: pointer; }
+.tabActive { background: #7b1829; color: #fff; }
+.section { display: flex; flex-direction: column; gap: 12px; }
+.filters { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip, .chipActive { min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid #cfc6b3; background: #fff; font: 600 13px Inter, sans-serif; color: #4a4340; cursor: pointer; }
+.chip span, .chipActive span { margin-left: 4px; font-weight: 700; }
+.chipActive { border-color: #7b1829; background: #7b1829; color: #fff; }
+.rule { margin: 0; font-size: 13px; color: #5f5752; }
+.muted { margin: 0; font-size: 13px; color: #5f5752; }
+.error { margin: 0; color: #9b1c1c; font-size: 14px; }
+.list { display: flex; flex-direction: column; gap: 12px; }
+.card { background: #fff; border-radius: 12px; border: 1px solid #e3dccb; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.cardHead { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
+.cardTitle { margin: 0 0 2px; font-weight: 700; font-size: 15px; overflow-wrap: anywhere; }
+.letterText { font-family: Georgia, serif; font-size: 15px; line-height: 1.55; display: flex; flex-direction: column; gap: 8px; }
+.letterText p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.fixed { color: #5f5752; }
+.ownWords { background: #f7f3e8; border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; border-left: 4px solid #c5a028; }
+.ownLabel { font-family: Inter, sans-serif; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #7b1829; font-weight: 700; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.primary, .secondary, .secondaryLink { min-height: 44px; padding: 0 16px; border-radius: 10px; font: 700 14px Inter, sans-serif; cursor: pointer; display: inline-flex; align-items: center; text-decoration: none; }
+.primary { background: #7b1829; color: #fff; border: 0; }
+.secondary, .secondaryLink { background: #fff; color: #4f101c; border: 1.5px solid #7b1829; }
+.primary:disabled, .secondary:disabled { opacity: 0.6; cursor: default; }
+.linkButton { background: none; border: 0; color: #7b1829; font: 600 14px Inter, sans-serif; text-decoration: underline; cursor: pointer; min-height: 44px; }
+.returnBox { background: #faf7f0; border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.row { display: flex; gap: 12px; flex-wrap: wrap; }
+.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; flex: 1 1 200px; }
+.field textarea, .field input, .field select { border: 1px solid #cfc6b3; border-radius: 8px; padding: 10px; font: 15px Inter, sans-serif; background: #fff; min-height: 44px; }
+.field textarea { min-height: 80px; }
+.subhead { margin: 8px 0 0; font-size: 15px; }
+.history { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
+.history li { background: #fff; border: 1px solid #e3dccb; border-radius: 10px; padding: 10px 12px; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.status_draft, .status_needs_review, .status_approved, .status_printed, .status_delivery_reported, .report_reported, .report_confirmed, .report_rejected { font-weight: 700; font-size: 13px; white-space: nowrap; }
+.status_draft { color: #5f5752; }
+.status_needs_review, .report_reported { color: #8a5a00; }
+.status_approved { color: #245c73; }
+.status_printed, .status_delivery_reported, .report_confirmed { color: #1f6b3a; }
+.report_rejected { color: #9b1c1c; white-space: normal; }
+@media (min-width: 900px) { .shell { padding: 32px 32px 56px; } .title { font-size: 34px; } }

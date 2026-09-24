@@ -98,6 +98,10 @@ const PRIVATE_OPERATIONAL_TABLES = [
   "business_outreach",
   "sponsor_gifts",
   "sponsor_student_links",
+  "carnegie_student_letters",
+  "carnegie_student_letter_events",
+  "carnegie_reported_gifts",
+  "carnegie_reported_gift_events",
   "backup_runs",
   "restore_verifications",
 ];
@@ -170,6 +174,8 @@ const SAFE_FILTER_COLUMN = {
   staff_scope_assignments: "staff_id",
   carnegie_trip_staff_tracking: "student_id",
   restore_verifications: "backup_run_id",
+  carnegie_student_letter_events: "letter_id",
+  carnegie_reported_gift_events: "reported_gift_id",
 };
 
 async function assertPermissionDenied(response, label) {
