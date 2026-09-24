@@ -10,6 +10,7 @@ import CarnegieFunding from "@/components/CarnegieFunding";
 import MattressSaleBanner from "@/components/MattressSaleBanner";
 import { BOOSTER_NONPROFIT_COPY, CARNEGIE_GIVING_PATH, CARNEGIE_SUGGESTED_AMOUNTS } from "@/lib/sponsorCampaigns.mjs";
 import { getSiteData } from "@/lib/siteData";
+import { CARNEGIE_SUPPORTERS } from "@/lib/carnegieSupporters.mjs";
 
 const PROMPTS = [
   "Where can I find upcoming band dates?",
@@ -90,6 +91,21 @@ export default function HomePage() {
       </section>
 
       <CarnegieFunding />
+
+      {CARNEGIE_SUPPORTERS.length > 0 && (
+        <section className="home-thanks" aria-labelledby="home-thanks-title">
+          <h2 id="home-thanks-title">Thank you for helping get us there.</h2>
+          <p>These supporters have made a gift to our Carnegie effort so far.</p>
+          <ul className="home-thanks-names">
+            {CARNEGIE_SUPPORTERS.map((supporter) => (
+              <li key={supporter.name}>
+                <strong>{supporter.name}</strong>
+                {supporter.detail && <span>{supporter.detail}</span>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section className="home-comeback" aria-labelledby="home-comeback-title">
         <div className="home-container home-comeback-grid">
