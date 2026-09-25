@@ -136,7 +136,12 @@ test("register acceptance is review-first, private, and staff-authorized", () =>
   assert.match(route, /request\.formData/);
   assert.match(route, /mode === "preview"/);
   assert.match(route, /private, no-store/);
-  assert.match(workspace, /Confirm the exact legal-name suggestions/);
+  // One reviewed click confirms the suggestions (#118); unmatched rows still block the import.
+  assert.match(workspace, /Accepting confirms the matches above/);
+  assert.match(workspace, /mode === "commit" && unresolvedOpen\.length/);
+  assert.match(workspace, /Choose a student for \$\{unresolvedOpen/);
+  assert.match(workspace, /\{preview && !preview\.alreadyAccepted \? <>/, "accept appears only after a preview");
+  assert.doesNotMatch(workspace, /type="checkbox" checked=\{acceptSuggestions\}/);
   assert.match(workspace, /Infinite Campus remains official/);
   assert.match(workspace, /never changes program or ensemble memberships/);
 });

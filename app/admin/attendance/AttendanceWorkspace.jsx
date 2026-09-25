@@ -424,12 +424,11 @@ function SchoolImport({ session, detailRef, onClose, onAccepted, onError }) {
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [mappings, setMappings] = useState({});
-  const [acceptSuggestions, setAcceptSuggestions] = useState(false);
-  const [completeSections, setCompleteSections] = useState(false);
   const [busy, setBusy] = useState(false);
-  const unresolvedReady = useMemo(() => (preview?.rows || [])
-    .filter((row) => row.matchStatus === "unresolved")
-    .every((row) => Boolean(mappings[row.rowKey])), [mappings, preview]);
+  const [panelError, setPanelError] = useState("");
+  // Reviewing the list and clicking Accept confirms the suggestions and the full-roster register (#118).
+  const unresolvedOpen = useMemo(() => (preview?.rows || [])
+    .filter((row) => row.matchStatus === "unresolved" && !mappings[row.rowKey]), [mappings, preview]);
 
   function authHeaders() {
     const headers = staffAuthHeaders(session);
@@ -439,7 +438,13 @@ function SchoolImport({ session, detailRef, onClose, onAccepted, onError }) {
 
   async function submit(mode) {
     if (!file) return;
+    if (mode === "commit" && unresolvedOpen.length) {
+      setPanelError(`Choose a student for ${unresolvedOpen.map((row) => row.sourceName).join(", ")} before accepting.`);
+      detailRef?.current?.querySelector(`[data-row-key="${unresolvedOpen[0].rowKey}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
     setBusy(true);
+    setPanelError("");
     onError("");
     try {
       const form = new FormData();
@@ -447,8 +452,8 @@ function SchoolImport({ session, detailRef, onClose, onAccepted, onError }) {
       form.set("mode", mode);
       if (mode === "commit") {
         form.set("manualMappings", JSON.stringify(mappings));
-        form.set("acceptSuggestions", String(acceptSuggestions));
-        form.set("completeSections", String(completeSections));
+        form.set("acceptSuggestions", "true");
+        form.set("completeSections", "true");
       }
       const response = await fetch("/api/admin/attendance/school-import", { method: "POST", headers: authHeaders(), body: form });
       const result = await response.json().catch(() => ({}));
@@ -461,6 +466,7 @@ function SchoolImport({ session, detailRef, onClose, onAccepted, onError }) {
       if (mode === "preview") setPreview(result);
       else await onAccepted();
     } catch (importError) {
+      setPanelError(importError.message);
       onError(importError.message);
     } finally {
       setBusy(false);
@@ -469,17 +475,15 @@ function SchoolImport({ session, detailRef, onClose, onAccepted, onError }) {
 
   const automaticRows = (preview?.rows || []).filter((row) => row.matchStatus === "automatic");
   const reviewRows = (preview?.rows || []).filter((row) => row.matchStatus !== "automatic");
-  const matchRow = (row) => <div key={row.rowKey} className={styles.matchRow}><strong>{row.sourceName}</strong><small>{row.sectionName} · ID ending {row.sourceStudentLast4}</small>{row.matchStatus === "automatic" ? <p className={styles.officialNote}>Matched: {row.proposedStudent.displayName}</p> : <select className={styles.previewButton} value={mappings[row.rowKey] || ""} onChange={(event) => setMappings((current) => ({ ...current, [row.rowKey]: event.target.value }))}><option value="">{row.proposedStudent ? `Use suggestion: ${row.proposedStudent.displayName}` : "Choose a student"}</option>{preview.candidates.map((candidate) => <option key={candidate.id} value={candidate.id}>{candidate.legalName} · Grade {candidate.grade}</option>)}</select>}</div>;
+  const matchRow = (row) => <div key={row.rowKey} data-row-key={row.rowKey} className={styles.matchRow}><strong>{row.sourceName}</strong><small>{row.sectionName} · ID ending {row.sourceStudentLast4}</small>{row.matchStatus === "automatic" ? <p className={styles.officialNote}>Matched: {row.proposedStudent.displayName}</p> : <select className={styles.previewButton} value={mappings[row.rowKey] || ""} onChange={(event) => setMappings((current) => ({ ...current, [row.rowKey]: event.target.value }))}><option value="">{row.proposedStudent ? `Use suggestion: ${row.proposedStudent.displayName}` : "Choose a student"}</option>{preview.candidates.map((candidate) => <option key={candidate.id} value={candidate.id}>{candidate.legalName} · Grade {candidate.grade}</option>)}</select>}</div>;
   return <aside ref={detailRef} tabIndex={-1} className={styles.detail} aria-label="Import Infinite Campus register">
     <DetailHeader eyebrow="Private tracking copy" title="Import register" subtitle="Infinite Campus PDF" onClose={onClose} />
-    <section className={styles.detailSection}><h3>Choose report</h3><p className={styles.detailCopy}>Use the Attendance Register PDF. The original file and raw district numbers are not retained.</p><input className={styles.previewButton} type="file" accept="application/pdf,.pdf" onChange={(event) => { setFile(event.target.files?.[0] || null); setPreview(null); setCompleteSections(false); }} /><button className={styles.previewButton} type="button" disabled={!file || busy} onClick={() => submit("preview")}>{busy ? "Reading…" : "Preview register"}</button></section>
+    <section className={styles.detailSection}><h3>Choose report</h3><p className={styles.detailCopy}>Use the Attendance Register PDF. The original file and raw district numbers are not retained.</p><input className={styles.previewButton} type="file" accept="application/pdf,.pdf" onChange={(event) => { setFile(event.target.files?.[0] || null); setPreview(null); setPanelError(""); }} /><button className={styles.previewButton} type="button" disabled={!file || busy} onClick={() => submit("preview")}>{busy ? "Reading…" : "Preview register"}</button></section>
     {preview?.alreadyAccepted ? <section className={styles.detailSection}><h3>Already imported</h3><p className={styles.detailCopy}>This exact PDF was accepted on {eventDate(preview.acceptedAt)}.</p></section> : null}
     {preview && !preview.alreadyAccepted ? <>
       <section className={styles.detailSection}><h3>Review</h3><dl className={styles.metadata}><div><dt>Generated</dt><dd>{preview.metadata.generatedLocal}</dd></div><div><dt>Through</dt><dd>{dateLabel(preview.metadata.throughDate)}</dd></div><div><dt>Sections</dt><dd>{preview.metadata.sectionCount}</dd></div><div><dt>Roster rows</dt><dd>{preview.metadata.rosterRowCount}</dd></div><div><dt>Marks</dt><dd>{preview.metadata.markCount}</dd></div><div><dt>Unmatched</dt><dd>{preview.counts.unresolved}</dd></div></dl><p className={styles.officialNote}>{preview.counts.automatic} protected-ID matches · {preview.counts.suggested} exact-name suggestions</p></section>
       <section className={styles.detailSection}><h3>Student matches</h3>{reviewRows.length ? <div className={styles.studentRows}>{reviewRows.map(matchRow)}</div> : <p className={styles.detailCopy}>No matches need review.</p>}{automaticRows.length ? <details className={styles.matchDisclosure}><summary>{automaticRows.length} protected-ID match{automaticRows.length === 1 ? "" : "es"}</summary><div className={styles.studentRows}>{automaticRows.map(matchRow)}</div></details> : null}</section>
-      {preview.counts.suggested ? <section className={styles.detailSection}><label style={{ display: "flex", gap: ".5rem", fontSize: ".68rem", lineHeight: 1.4 }}><input type="checkbox" checked={acceptSuggestions} onChange={(event) => setAcceptSuggestions(event.target.checked)} />Confirm the exact legal-name suggestions shown above.</label></section> : null}
-      <section className={styles.detailSection}><label style={{ display: "flex", gap: ".5rem", fontSize: ".68rem", lineHeight: 1.4 }}><input type="checkbox" checked={completeSections} onChange={(event) => setCompleteSections(event.target.checked)} />This PDF includes the full roster for each class shown.</label></section>
-      <section className={styles.detailSection}><button className={styles.previewButton} type="button" disabled={busy || !completeSections || !unresolvedReady || (preview.counts.suggested > 0 && !acceptSuggestions)} onClick={() => submit("commit")}>{busy ? "Saving…" : "Accept tracking copy"}</button><p className={styles.detailCopy}>This updates school-class enrollments only. It never changes program or ensemble memberships.</p></section>
+      <section className={styles.detailSection}><button className={styles.previewButton} type="button" disabled={busy} onClick={() => submit("commit")}>{busy ? "Saving…" : `Accept ${preview.metadata.rosterRowCount} students and import`}</button>{panelError ? <p className={styles.officialNote} role="alert">{panelError}</p> : null}<p className={styles.detailCopy}>Accepting confirms the matches above and that this Infinite Campus register lists every student in each class shown. It updates school-class enrollments only and never changes program or ensemble memberships.</p></section>
     </> : null}
   </aside>;
 }
