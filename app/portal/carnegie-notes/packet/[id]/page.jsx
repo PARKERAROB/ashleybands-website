@@ -8,6 +8,7 @@ import {
   authorizeLetterReviewer,
   carnegieLettersAccess,
   familyActor,
+  letterWithPrinted,
   loadFamilyLetter,
   loadLetterById,
   portalPerson,
@@ -67,7 +68,9 @@ export default async function CarnegieLetterPacketPage({ params }) {
   const { id } = await params;
   const resolved = await resolveViewer(requestLike, id);
   if (!resolved) notFound();
-  const { letter, viewer, actor } = resolved;
+  const { viewer, actor } = resolved;
+  // What prints: the staff-approved correction when there is one; the original is kept as written.
+  const letter = await letterWithPrinted(resolved.letter);
   await logAudit({ actor, action: "print_view", table: "carnegie_student_letters", recordId: letter.id, route: "/portal/carnegie-notes/packet/[id]" });
 
   const backHref = viewer === "staff" ? "/admin/carnegie-letters" : "/portal/carnegie-notes";
@@ -88,8 +91,8 @@ export default async function CarnegieLetterPacketPage({ params }) {
   const text = composeCarnegieLetter({
     recipientType: letter.recipient_type,
     recipientName: letter.recipient_name,
-    meaningText: letter.meaning_text,
-    helpText: letter.help_text,
+    meaningText: letter.printed_meaning_text,
+    helpText: letter.printed_help_text,
     firstName: student.firstName,
     code
   });

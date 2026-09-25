@@ -12,9 +12,9 @@ export async function GET(req) {
   const session = portalPerson(req);
   if (!session) return privateJson({ error: "Sign in to the Family Portal first." }, 401);
   try {
-    const students = await familyDashboard(session.personId);
-    await logAudit({ actor: familyActor(session), action: "view", table: "carnegie_student_letters", recordId: "family-carnegie-notes", route: "/api/portal/carnegie-notes" });
-    return privateJson({ students });
+    const { viewer, students } = await familyDashboard(session.personId);
+    await logAudit({ actor: familyActor(session, viewer), action: "view", table: "carnegie_student_letters", recordId: "family-carnegie-notes", route: "/api/portal/carnegie-notes" });
+    return privateJson({ viewer, students });
   } catch (error) {
     return privateServerError("carnegie-notes", error, "Your Carnegie notes could not be loaded.");
   }

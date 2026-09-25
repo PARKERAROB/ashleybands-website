@@ -74,7 +74,7 @@ export default function CarnegieNotesClient({ previewMode = false }) {
       if (response.status === 401) return setState({ status: "signed_out" });
       const json = await response.json().catch(() => ({}));
       if (!response.ok) return setState({ status: "error", error: json.error || "Your Carnegie notes could not be loaded." });
-      setState({ status: "ready", students: json.students || [] });
+      setState({ status: "ready", students: json.students || [], viewer: json.viewer || "family" });
       setSelected((current) => current || json.students?.[0]?.id || "");
     } catch {
       setState({ status: "error", error: "Your Carnegie notes could not be loaded." });
@@ -93,7 +93,7 @@ export default function CarnegieNotesClient({ previewMode = false }) {
       <div className={styles.wrap}>
         <div className={styles.topline}>
           <span className={styles.eyebrow}>Family Portal</span>
-          {student ? <span className={styles.muted}>Private to {student.firstName}&apos;s family</span> : null}
+          {student ? <span className={styles.muted}>{state.viewer === "student" ? `Signed in as ${student.firstName}` : `Private to ${student.firstName}'s family`}</span> : null}
         </div>
         <h1 className={styles.title}>{student ? `${student.firstName}'s Carnegie notes` : "My Carnegie notes"}</h1>
         {previewMode ? <p className={styles.preview}>Staff preview. Families cannot see this page yet.</p> : null}
@@ -121,13 +121,13 @@ export default function CarnegieNotesClient({ previewMode = false }) {
           </div>
         ) : null}
 
-        {student ? <StudentNotes student={student} reload={load} /> : null}
+        {student ? <StudentNotes student={student} reload={load} viewer={state.viewer} /> : null}
       </div>
     </main>
   );
 }
 
-function StudentNotes({ student, reload }) {
+function StudentNotes({ student, reload, viewer = "family" }) {
   const [copied, setCopied] = useState(false);
   const full = student.link ? `https://${PUBLIC_SITE}${student.link.path}` : "";
   const printable = student.letters.filter(letterIsPrintable);
@@ -156,7 +156,7 @@ function StudentNotes({ student, reload }) {
           <p className={styles.pendingLine}><span className={styles.pendingSwatch} aria-hidden="true" />{pendingNotesLine(student.pendingCents)}</p>
         ) : null}
         <dl className={styles.lines}>
-          <div><dt>Deposit paid</dt><dd>{student.depositPaidCents ? dollars(student.depositPaidCents) : "Not recorded yet"}</dd></div>
+          {student.depositPaidCents === null ? null : <div><dt>Deposit paid</dt><dd>{student.depositPaidCents ? dollars(student.depositPaidCents) : "Not recorded yet"}</dd></div>}
           <div><dt>Raised through my notes</dt><dd>{dollars(student.notesCents)}</dd></div>
         </dl>
       </section>
@@ -213,7 +213,9 @@ function LetterRow({ letter, student, reload }) {
   const who = letter.recipient_type === "general_supporter" ? "Any supporter" : letter.recipient_name || "Someone I know";
   const code = linkCode(student);
   const actions = code ? letterSendActions(letter) : [];
-  const mail = actions.includes("email") ? letterMailto(letter, { firstName: student.firstName, code }) : null;
+  // Email carries the words that print: the approved correction when there is one.
+  const printedLetter = { ...letter, meaning_text: letter.printed_meaning_text ?? letter.meaning_text, help_text: letter.printed_help_text ?? letter.help_text };
+  const mail = actions.includes("email") ? letterMailto(printedLetter, { firstName: student.firstName, code }) : null;
 
   async function reportSent(channel) {
     setBusy(true);
@@ -235,6 +237,7 @@ function LetterRow({ letter, student, reload }) {
         <span className={styles.letterWho}>{who} · {recipientTypeLabel(letter.recipient_type)}</span>
         <span className={styles[`status_${letter.status}`] || styles.status}>{LETTER_STATUS_LABELS[letter.status]}{letter.status === "delivery_reported" && letter.delivery_channel ? ` · ${letter.delivery_channel}` : ""}</span>
       </div>
+      {letter.corrected ? <p className={styles.hint}>Approved with spelling and grammar fixes. Your original words are kept.</p> : null}
       {letter.status === "draft" && letter.review_note ? <p className={styles.note}>Note from the band staff: {letter.review_note}</p> : null}
       <div className={styles.letterLinks}>
         {letter.status !== "delivery_reported" ? <Link href={`/portal/carnegie-notes/letter?id=${letter.id}`}>{letter.status === "draft" ? "Keep writing" : "View or edit"}</Link> : null}

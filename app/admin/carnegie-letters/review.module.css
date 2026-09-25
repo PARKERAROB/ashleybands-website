@@ -44,3 +44,13 @@
 .status_printed, .status_delivery_reported, .report_confirmed { color: #1f6b3a; }
 .report_rejected { color: #9b1c1c; white-space: normal; }
 @media (min-width: 900px) { .shell { padding: 32px 32px 56px; } .title { font-size: 34px; } }
+
+/* Corrections (#108) */
+.corrections { display: flex; flex-direction: column; gap: 10px; }
+.correction { border: 1px solid #e2c35a; background: #fffbef; border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.correctionHead { margin: 0; font-weight: 700; font-size: 14px; }
+.sideBySide { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; font-family: Georgia, serif; font-size: 15px; line-height: 1.55; }
+.sideBySide p { margin: 0 0 6px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.diff del { background: #fbe0e0; color: #7a1c1c; }
+.diff ins { background: #dff3e4; color: #14532d; text-decoration: none; }
+@media (min-width: 760px) { .sideBySide { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
