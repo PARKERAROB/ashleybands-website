@@ -169,9 +169,11 @@ const fundraisers = [
   {
     slug: "popcorn",
     title: "Perry's Popcorn Fundraiser",
-    summary: "Shop online, credit a student, and share one link. Orders ship directly to the purchaser.",
-    status: "Open now",
-    timing: "Ends midnight Wednesday, September 9",
+    summary: "This fundraiser ended September 9. Thank you to everyone who ordered and shared.",
+    status: "Ended",
+    timing: "Ended Wednesday, September 9",
+    // Ended campaigns keep their route for old links but leave current lists and the assistant (#113).
+    archived: true,
     location: "Online",
     source: sources.popcornFundraiser,
     externalHref: "https://www.perrysgourmetpopcornfundraising.com/",
@@ -285,7 +287,7 @@ const chatbotKnowledge = [
   // sheets redirect to /sponsors and must not compete with that live offer.
   ...pages.filter((page) => !page.archived && !["corporate-sponsorship", "family-sponsorship"].includes(page.slug))
     .map((page) => `\n\n${page.title.toUpperCase()}\nSource: https://ashleybands.com/info/${page.slug}\n${page.body}`),
-  ...fundraisers.map((fundraiser) => `\n\n${fundraiser.title.toUpperCase()}\n${fundraiser.body}`)
+  ...fundraisers.filter((fundraiser) => !fundraiser.archived).map((fundraiser) => `\n\n${fundraiser.title.toUpperCase()}\n${fundraiser.body}`)
 ].join("\n").replace(/\n{3,}/g, "\n\n");
 
 const chatbotCurrent = existsSync(chatbotPath) && readFileSync(chatbotPath, "utf8") === chatbotKnowledge;

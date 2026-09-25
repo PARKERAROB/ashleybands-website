@@ -2,9 +2,17 @@
 
 Ashley Bands is planning a New York trip for March 23-26, 2027, with the Carnegie Hall performance on March 25, 2027. Final participation, price, approvals, and funding remain subject to confirmation.
 
+### Where things stand
+
+The trip deposit has been submitted. The plan is to take everyone. Big updates are coming soon.
+
+### Help raise the money
+
+Students can share our story through My Carnegie Notes and letters in the [Family Portal](/portal). Every gift lowers the trip cost for every student who goes. Anyone can give at [Support the Carnegie trip](/support-carnegie).
+
 ### Family response
 
-One response per student was requested by Friday, September 4, 2026. Review the [current family commitment form](/carnegie-2027/commit) for the response choices, acknowledgement, and signatures. For help with a response after that date, [contact Mr. Parker](mailto:robert.parker@nhcs.net).
+If your family has not responded yet, or you are new to Ashley Bands, use the [family commitment form](/carnegie-2027/commit). It has the response choices, acknowledgement, and signatures. For help, [contact Mr. Parker](mailto:robert.parker@nhcs.net).
 
 Cost should not turn a yes, if funded, into a no. Families can indicate that their student intends to participate if the family responsibility can be reduced. Choose no only if the student cannot participate regardless of financial assistance.
 
@@ -30,7 +38,9 @@ Students are not individually confirmed until WorldStrides registration and requ
 
 ### Next steps
 
-- [Review or complete the family commitment](/carnegie-2027/commit).
+- [Open My Carnegie Notes and letters in the Family Portal](/portal).
+- [Support the Carnegie trip](/support-carnegie).
+- [Complete the family commitment](/carnegie-2027/commit) if your family has not responded yet.
 - [Read the family meeting packet](/carnegie-2027/meeting-packet). The current commitment form contains the updated response and deposit choices.
 - [Find current fundraisers](/fundraising).
 - [Open the band calendar](/calendar).

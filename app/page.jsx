@@ -185,10 +185,11 @@ export default function HomePage() {
                 <p className="home-now-tag">For participating families</p>
                 <h3>Carnegie Hall 2027</h3>
                 <p>
-                  Share your family’s response and deposit choice. Already completed the $50 deposit?
-                  Review your record in the portal.
+                  Write letters and track your student’s music notes in the Family Portal. New to Ashley Bands?
+                  Share your family’s response and deposit choice.
                 </p>
                 <div className="home-links">
+                  <Link href="/portal">My Carnegie Notes and letters</Link>
                   <Link href="/carnegie-2027/commit">Family commitment</Link>
                   <Link href="/info/carnegie-2027">Current trip information</Link>
                 </div>
@@ -198,7 +199,7 @@ export default function HomePage() {
                 <h3>Current fundraisers</h3>
                 <p>Campaign dates, student-credit instructions, and links to share with friends and family.</p>
                 <ul className="home-fundraisers">
-                  {data.fundraisers.map((fundraiser) => (
+                  {data.fundraisers.filter((fundraiser) => !fundraiser.archived).map((fundraiser) => (
                     <li key={fundraiser.slug}>
                       <Link href={`/fundraising/${fundraiser.slug}`}>{fundraiser.title}</Link>
                       <span>{fundraiser.timing || fundraiser.status}</span>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getFundraisers } from "@/lib/siteData";
+import { getCurrentFundraisers } from "@/lib/siteData";
 
 export const metadata = {
   title: "Current Fundraisers | Bands of AHS",
@@ -7,7 +7,7 @@ export const metadata = {
 };
 
 export default function FundraisingPage() {
-  const fundraisers = getFundraisers();
+  const fundraisers = getCurrentFundraisers();
 
   return (
     <main className="fundraising-page">

@@ -13,7 +13,8 @@ export async function generateMetadata({ params }) {
   const fundraiser = getFundraiserBySlug(slug);
   return {
     title: fundraiser ? `${fundraiser.title} | Bands of AHS` : "Bands of AHS",
-    description: fundraiser?.summary
+    description: fundraiser?.summary,
+    ...(fundraiser?.archived ? { robots: { index: false, follow: true } } : {})
   };
 }
 
@@ -42,17 +43,23 @@ export default async function FundraiserPage({ params }) {
             <dt>Where</dt>
             <dd>{fundraiser.location}</dd>
           </div>
-          <div>
-            <dt>Start here</dt>
-            <dd>
-              <a href={fundraiser.externalHref}>{fundraiser.externalLabel}</a>
-            </dd>
-          </div>
+          {fundraiser.archived ? null : (
+            <div>
+              <dt>Start here</dt>
+              <dd>
+                <a href={fundraiser.externalHref}>{fundraiser.externalLabel}</a>
+              </dd>
+            </div>
+          )}
         </dl>
       </header>
 
       <div className="fundraiser-detail-body">
-        <MarkdownBlock markdown={fundraiser.body} />
+        {fundraiser.archived ? (
+          <p className="fundraiser-status">This fundraiser has ended. See <Link href="/fundraising">current fundraisers</Link>.</p>
+        ) : (
+          <MarkdownBlock markdown={fundraiser.body} />
+        )}
 
         {fundraiser.flyers?.length ? (
           <section className="fundraiser-flyers" aria-labelledby="fundraiser-flyers-title">

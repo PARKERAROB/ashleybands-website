@@ -23,6 +23,6 @@ test("Carnegie answers preserve conditional funding and distinct deposit choices
     assert(knowledge.includes(required), `Missing family boundary: ${required}`);
   }
   assert(knowledge.includes("/carnegie-2027/commit"));
-  assert(knowledge.includes("PERRY'S POPCORN FUNDRAISER"));
+  assert(!knowledge.includes("PERRY'S POPCORN FUNDRAISER"), "ended fundraisers leave the assistant (#113)");
   assert(knowledge.includes("ASHLEY BANDS MATTRESS FUNDRAISER"));
 });
