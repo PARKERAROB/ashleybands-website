@@ -201,7 +201,7 @@ test("every new page and API checks the gate first, and only the gated portal li
 // ---- Privacy ---------------------------------------------------------------------------------
 test("family routes scope to trusted students; staff routes need staff capability", () => {
   const server = read("lib/carnegieLettersServer.js");
-  assert.match(server, /export async function loadFamilyLetter[\s\S]*trustedStudentIds\(personId\)[\s\S]*allowed\.includes\(data\.portal_student_id\) \? data : null/);
+  assert.match(server, /export async function loadFamilyLetter[\s\S]*notesStudentIds\(personId\)[\s\S]*allowed\.includes\(data\.portal_student_id\) \? data : null/);
   assert.match(server, /export async function createFamilyLetter[\s\S]*if \(!allowed\.includes\(studentId\)\) return \{ status: 404/);
   assert.match(server, /export async function createReportedGift[\s\S]*if \(!allowed\.includes\(studentId\)\) return \{ status: 404/);
   for (const file of filesUnder("app/api/portal/carnegie-notes")) {
@@ -379,4 +379,17 @@ test("Family Portal links the notes page only after the family release (#106)", 
 test("staff dashboard links the review queue only for letter reviewers (#112)", () => {
   const dashboard = readFileSync(new URL("../app/admin/page.jsx", import.meta.url), "utf8");
   assert.match(dashboard, /capability: STAFF_CAPABILITIES\.CARNEGIE_LETTERS_REVIEW, href: "\/admin\/carnegie-letters"/);
+});
+
+test("notes family rule admits legacy guardians but not legacy student records (#114)", () => {
+  const link = (person_type, assurance_level) => ({ student_id: "s", assurance_level, portal_people: { person_type } });
+  for (const level of ["legacy", "medium", "high"]) assert.equal(letters.notesEligibleLink(link("guardian", level)), true, `guardian ${level}`);
+  for (const level of ["low", "none", null, undefined]) assert.equal(letters.notesEligibleLink(link("guardian", level)), false, `guardian ${level}`);
+  assert.equal(letters.notesEligibleLink(link("student", "legacy")), false);
+  assert.equal(letters.notesEligibleLink(link("student", "high")), true);
+  assert.equal(letters.notesEligibleLink(link("unknown", "high")), false);
+  assert.equal(letters.notesEligibleLink({ assurance_level: "legacy", portal_people: [{ person_type: "guardian" }] }), true, "array join shape");
+  const server = readFileSync(new URL("../lib/carnegieLettersServer.js", import.meta.url), "utf8");
+  assert.doesNotMatch(server, /trustedStudentIds/, "notes no longer uses billing's stricter rule");
+  assert.match(server, /\.eq\("relationship_status", "trusted"\)[\s\S]*\.eq\("portal_students\.status", "active"\)/);
 });
