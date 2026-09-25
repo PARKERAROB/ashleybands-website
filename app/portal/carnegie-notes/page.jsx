@@ -9,7 +9,7 @@ export const metadata = {
   robots: { index: false, follow: false }
 };
 
-// Private family page (#106). Not linked anywhere; 404 unless the gate allows this request.
+// Private family page (#106). Linked from the Family Portal only in "on" mode; 404 unless the gate allows this request.
 export default async function CarnegieNotesPage() {
   const access = await carnegieLettersAccess({ cookies: await cookies() });
   if (!access.open) notFound();

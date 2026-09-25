@@ -68,7 +68,7 @@ function loadPaypalSdk(clientId) {
   return paypalSdkPromise;
 }
 
-export default function PortalReviewClient() {
+export default function PortalReviewClient({ carnegieNotesOpen = false }) {
   const [state, setState] = useState({ status: "loading", message: "Opening your profile..." });
   const [profile, setProfile] = useState(null);
   const [selectedStudentId, setSelectedStudentId] = useState("");
@@ -154,14 +154,14 @@ export default function PortalReviewClient() {
               />
               <div className="portal-workspace-main">
                 <BandReadySection student={selectedStudent} />
-                <CarnegieCommitmentSection student={selectedStudent} />
+                <CarnegieCommitmentSection student={selectedStudent} notesOpen={carnegieNotesOpen} />
                 <OnboardingSection student={selectedStudent} />
                 <ParticipationSection student={selectedStudent} onChanged={loadProfile} />
                 <StudentResourcesSection student={selectedStudent} />
                 <InstrumentRequestSection student={selectedStudent} />
                 <UniformSection student={selectedStudent} />
                 <BillingSection studentId={selectedStudent.id} studentName={selectedStudent.displayName} />
-                <FamilyResources studentId={selectedStudent.id} />
+                <FamilyResources studentId={selectedStudent.id} notesOpen={carnegieNotesOpen} />
               </div>
             </div>
           </>
@@ -190,7 +190,7 @@ function BandReadySection({ student }) {
   );
 }
 
-function CarnegieCommitmentSection({ student }) {
+function CarnegieCommitmentSection({ student, notesOpen }) {
   return (
     <section className="portal-workspace-section portal-band-ready-callout" aria-labelledby="portal-carnegie-heading">
       <div>
@@ -199,6 +199,7 @@ function CarnegieCommitmentSection({ student }) {
         <p>Submit the family intent for {student.displayName}, then pay the connected conditional deposit. The charge and payment appear in Funding and payments below.</p>
       </div>
       <Link className="portal-action-link" href={`/portal/carnegie-2027?studentId=${encodeURIComponent(student.id)}`}>Open Carnegie commitment</Link>
+      {notesOpen ? <Link className="portal-action-link" href="/portal/carnegie-notes">My Carnegie Notes and letters</Link> : null}
     </section>
   );
 }
@@ -222,12 +223,13 @@ function OnboardingSection({ student }) {
   );
 }
 
-function FamilyResources({ studentId }) {
+function FamilyResources({ studentId, notesOpen }) {
   return (
     <nav className="portal-family-resources" aria-label="Family resources">
       <strong>Family resources</strong>
       <Link href={`/portal/band-ready?studentId=${encodeURIComponent(studentId)}`}>Band Ready checklist</Link>
       <Link href={`/portal/carnegie-2027?studentId=${encodeURIComponent(studentId)}`}>Carnegie Hall commitment</Link>
+      {notesOpen ? <Link href="/portal/carnegie-notes">My Carnegie Notes and letters</Link> : null}
       <Link href={`/portal/clothing?studentId=${encodeURIComponent(studentId)}`}>Open House clothing order</Link>
       <Link href="/portal/sponsorship">Business sponsorship</Link>
       <Link href="/info/marching-band-2026">Marching Band information</Link>

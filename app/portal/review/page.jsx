@@ -1,4 +1,7 @@
 import PortalReviewClient from "./PortalReviewClient";
+import { carnegieLettersMode } from "@/lib/carnegieLetters.mjs";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Family Portal | Ashley Bands",
@@ -6,5 +9,6 @@ export const metadata = {
 };
 
 export default function PortalReviewPage() {
-  return <PortalReviewClient />;
+  // Link the Carnegie notes page only after the family release (#106).
+  return <PortalReviewClient carnegieNotesOpen={carnegieLettersMode() === "on"} />;
 }

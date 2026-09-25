@@ -178,7 +178,7 @@ test("the gate is OFF unless explicitly set, including in production", () => {
   for (const file of tracked) assert.doesNotMatch(read(file), /CARNEGIE_LETTERS_MODE/, `${file} must not turn the gate on`);
 });
 
-test("every new page and API checks the gate first, and nothing links to the new pages", () => {
+test("every new page and API checks the gate first, and only the gated portal links to the new pages", () => {
   assert.ok(ENTRY_POINTS.length >= 11, "all entry points found");
   for (const file of ENTRY_POINTS) {
     const source = readFileSync(file, "utf8");
@@ -192,7 +192,9 @@ test("every new page and API checks the gate first, and nothing links to the new
   assert.match(landing, /if \(!access\.open\) redirect\(`\$\{CARNEGIE_GIVING_PATH\}\?a=\$\{encodeURIComponent\(token\)\}#make-a-gift`\)/, "gate off keeps the #103 redirect");
   assert.match(landing, /generateMetadata[\s\S]*if \(!access\.open\) return \{\};/, "gate off adds no metadata");
   const linkers = gitGrepFiles(["/portal/carnegie-notes", "/admin/carnegie-letters"], ["app", "components", "content", "public"]);
-  for (const file of linkers) assert.ok(NEW_SURFACES.includes(file) || file.startsWith("app/api/"), `${file} must not link to the gated pages`);
+  // The Family Portal links only behind the "on" gate; see the family-release test below.
+  const GATED_LINKERS = ["app/portal/review/PortalReviewClient.jsx"];
+  for (const file of linkers) assert.ok(NEW_SURFACES.includes(file) || GATED_LINKERS.includes(file) || file.startsWith("app/api/"), `${file} must not link to the gated pages`);
 });
 
 // ---- Privacy ---------------------------------------------------------------------------------
@@ -362,4 +364,13 @@ test("expected gifts are validated, pending only, and never read by a total (#11
   assert.match(migration, /sponsor_gift_id uuid unique references public\.sponsor_gifts\(id\)/);
   assert.match(migration, /A confirmed or cancelled expected gift is final/);
   assert.doesNotMatch(migration, /^\s*(alter|drop|update|delete|insert)\s+(table\s+)?public\.(?!carnegie_expected_gift)/im);
+});
+
+test("Family Portal links the notes page only after the family release (#106)", async () => {
+  const { readFileSync } = await import("node:fs");
+  const page = readFileSync(new URL("../app/portal/review/page.jsx", import.meta.url), "utf8");
+  const client = readFileSync(new URL("../app/portal/review/PortalReviewClient.jsx", import.meta.url), "utf8");
+  assert.match(page, /carnegieNotesOpen=\{carnegieLettersMode\(\) === "on"\}/, "staff mode must not show the family link");
+  const links = client.match(/\{notesOpen \? <Link[^}]*href="\/portal\/carnegie-notes"/g) || [];
+  assert.equal(links.length, 2, "both portal links are gated on notesOpen");
 });
