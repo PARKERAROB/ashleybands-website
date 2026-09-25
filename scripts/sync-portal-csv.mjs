@@ -17,6 +17,15 @@ import { join } from "node:path";
 import { createClient } from "@supabase/supabase-js";
 import WebSocket from "ws";
 import { bandsofAHSDataDir, loadBandWebsiteEnv } from "./lib/workspace-paths.mjs";
+import {
+  familyOverlay,
+  mirrorFieldDiff,
+  overlayFields,
+  plannedPersonUpdate,
+  plannedRelationshipUpdate,
+  plannedStudentUpdate,
+  withdrawnSchoolEmailContacts
+} from "./lib/portal-mirror-plan.mjs";
 
 const BAND_DATA_DIR = bandsofAHSDataDir;
 const APPLY = process.argv.includes("--apply");
@@ -255,70 +264,157 @@ if (!APPLY) {
 }
 
 async function checkMirror() {
+  // Compare what --apply would write with hosted values, under the same family
+  // overlay. Hashes are provenance only (#116). Output is counts, never values.
   const [
     { data: dbStudents, error: studentError },
     { data: dbPeople, error: peopleError },
-    { data: dbResources, error: resourceError }
-  ] =
-    await Promise.all([
-      supabase.from("portal_students").select("source_student_id,source_row_hash"),
-      supabase.from("portal_people").select("source_person_key,source_row_hash"),
-      supabase.from("portal_student_resources").select("source_row_hash,portal_students(source_student_id)")
-    ]);
-  if (studentError) throw studentError;
-  if (peopleError) throw peopleError;
-  if (resourceError) throw resourceError;
+    { data: dbLinks, error: linkError },
+    { data: dbResources, error: resourceError },
+    { data: dbSchoolEmails, error: schoolEmailError },
+    { data: familyUpdates, error: familyUpdateError }
+  ] = await Promise.all([
+    supabase.from("portal_students").select("*"),
+    supabase.from("portal_people").select("id,source_person_key,person_type,display_name,first_name,last_name,source,source_row_hash"),
+    supabase.from("portal_student_people").select("student_id,person_id,role,relationship_status,primary_contact,source,source_row_hash").range(0, 9999),
+    supabase.from("portal_student_resources").select("source_row_hash,portal_students(source_student_id)"),
+    supabase
+      .from("portal_contact_methods")
+      .select("person_id,contact_type,value_normalized,verification_status,source")
+      .eq("contact_type", "email")
+      .like("value_normalized", "%@student.nhcs.net"),
+    supabase
+      .from("portal_update_requests")
+      .select("student_id,target_id,field_name,status")
+      .eq("status", "approved")
+      .range(0, 9999)
+  ]);
+  for (const error of [studentError, peopleError, linkError, resourceError, schoolEmailError, familyUpdateError]) {
+    if (error) throw error;
+  }
+  const overlay = familyOverlay(familyUpdates || []);
 
-  const compare = (expectedRows, actualRows, key) => {
-    const expected = new Map(expectedRows.map((row) => [row[key], row.source_row_hash]));
-    const actual = new Map((actualRows || []).map((row) => [row[key], row.source_row_hash]));
-    let missing = 0;
-    let changed = 0;
-    for (const [id, hash] of expected) {
-      if (!actual.has(id)) missing += 1;
-      else if (actual.get(id) !== hash) changed += 1;
+  const compareRows = (expectedRows, hostedRows, key, plan) => {
+    const hostedByKey = new Map((hostedRows || []).map((row) => [row[key], row]));
+    const expectedKeys = new Set(expectedRows.map((row) => row[key]));
+    const result = {
+      expected: expectedRows.length, actual: hostedByKey.size, missing: 0, changed: 0,
+      extra: 0, provenanceOnly: 0, overlayRows: 0, changedFields: {}, overlayFieldCounts: {}
+    };
+    for (const row of expectedRows) {
+      const hosted = hostedByKey.get(row[key]);
+      if (!hosted) { result.missing += 1; continue; }
+      const planned = plan(row, hosted);
+      const fields = mirrorFieldDiff(planned, hosted);
+      const kept = overlayFields(row, planned);
+      if (kept.length) result.overlayRows += 1;
+      for (const field of kept) result.overlayFieldCounts[field] = (result.overlayFieldCounts[field] || 0) + 1;
+      if (fields.length) {
+        result.changed += 1;
+        for (const field of fields) result.changedFields[field] = (result.changedFields[field] || 0) + 1;
+      } else if (row.source_row_hash !== hosted.source_row_hash) {
+        result.provenanceOnly += 1;
+      }
     }
-    let extra = 0;
-    for (const id of actual.keys()) if (!expected.has(id)) extra += 1;
-    return { expected: expected.size, actual: actual.size, missing, changed, extra };
+    for (const id of hostedByKey.keys()) if (!expectedKeys.has(id)) result.extra += 1;
+    return result;
+  };
+  const counts = (fields) => Object.entries(fields).map(([field, n]) => `${field}=${n}`).join(" ") || "none";
+  const printRows = (label, result) => {
+    console.log(
+      `${label} expected=${result.expected} hosted=${result.actual} ` +
+        `missing=${result.missing} changed=${result.changed} extra=${result.extra}`
+    );
+    if (result.changed) console.log(`  roster values apply would write: ${counts(result.changedFields)}`);
+    if (result.overlayRows) console.log(`  portal-side edits kept on ${result.overlayRows} row(s): ${counts(result.overlayFieldCounts)}`);
+    if (result.provenanceOnly) console.log(`  provenance-only (roster-only columns changed): ${result.provenanceOnly}`);
   };
 
-  const studentsResult = compare(portalStudents, dbStudents, "source_student_id");
-  const peopleResult = compare(portalPeople, dbPeople, "source_person_key");
-  const resourcesResult = compare(
+  const studentsResult = compareRows(portalStudents, dbStudents, "source_student_id",
+    (row, hosted) => plannedStudentUpdate(row, hosted, overlay));
+  const peopleResult = compareRows(portalPeople, dbPeople, "source_person_key",
+    (row, hosted) => plannedPersonUpdate(row, hosted, overlay));
+
+  const studentIds = new Map((dbStudents || []).map((row) => [row.source_student_id, row.id]));
+  const personIds = new Map((dbPeople || []).map((row) => [row.source_person_key, row.id]));
+  const expectedLinks = dedupedRelationships
+    .map((row) => ({
+      link_key: `${studentIds.get(row.sourceStudentId)}|${personIds.get(row.sourcePersonKey)}`,
+      student_id: studentIds.get(row.sourceStudentId),
+      person_id: personIds.get(row.sourcePersonKey),
+      role: row.role,
+      relationship_status: "trusted",
+      primary_contact: row.primary_contact,
+      source: row.source,
+      source_row_hash: row.source_row_hash
+    }))
+    .filter((row) => row.student_id && row.person_id);
+  const hostedLinks = (dbLinks || []).map((row) => ({ ...row, link_key: `${row.student_id}|${row.person_id}` }));
+  const linksResult = compareRows(expectedLinks, hostedLinks, "link_key", (row, hosted) => {
+    const { link_key: _key, student_id: _student, person_id: _person, ...fields } =
+      plannedRelationshipUpdate(row, hosted, overlay);
+    return fields;
+  });
+  linksResult.extra = 0; // Portal-created links (access requests, self-adds) are family-owned.
+
+  const resourcesResult = compareResourceHashes(
     portalResources,
     (dbResources || []).map((row) => ({
       source_student_id: row.portal_students?.source_student_id,
       source_row_hash: row.source_row_hash
-    })),
-    "source_student_id"
+    }))
   );
+
+  const sourceStudentIdByPersonId = new Map((dbPeople || [])
+    .filter((row) => row.person_type === "student" && row.source_person_key?.startsWith("student:"))
+    .map((row) => [row.id, row.source_person_key.slice("student:".length)]));
+  const rosterSchoolEmail = new Map(students.map((row) => [row.id, normalizeEmail(row.school_email)]));
+  const withdrawnSchoolEmails = withdrawnSchoolEmailContacts(dbSchoolEmails || [], sourceStudentIdByPersonId, rosterSchoolEmail);
+  const hostedSchoolEmailKeys = new Set((dbSchoolEmails || []).map((row) => `${row.person_id}|${row.value_normalized}`));
+  const missingSchoolEmails = students.filter((row) => {
+    const email = normalizeEmail(row.school_email);
+    const personId = personIds.get(`student:${row.id}`);
+    return email.endsWith("@student.nhcs.net") && personId && !hostedSchoolEmailKeys.has(`${personId}|${email}`);
+  }).length;
+
   const current =
-    studentsResult.missing === 0 &&
-    studentsResult.changed === 0 &&
-    peopleResult.missing === 0 &&
-    peopleResult.changed === 0 &&
+    [studentsResult, peopleResult, linksResult].every((result) => result.missing === 0 && result.changed === 0) &&
     resourcesResult.missing === 0 &&
     resourcesResult.changed === 0 &&
     resourcesResult.extra === 0 &&
+    missingSchoolEmails === 0 &&
+    withdrawnSchoolEmails.length === 0 &&
     conflicts.length === 0;
 
   console.log("Portal mirror drift check (read-only):");
-  console.log(
-    `students expected=${studentsResult.expected} hosted=${studentsResult.actual} ` +
-      `missing=${studentsResult.missing} changed=${studentsResult.changed} extra=${studentsResult.extra}`
-  );
-  console.log(
-    `people expected=${peopleResult.expected} hosted=${peopleResult.actual} ` +
-      `missing=${peopleResult.missing} changed=${peopleResult.changed} extra=${peopleResult.extra}`
-  );
+  printRows("students", studentsResult);
+  printRows("people", peopleResult);
+  printRows("relationships", linksResult);
   console.log(
     `student resources expected=${resourcesResult.expected} hosted=${resourcesResult.actual} ` +
       `missing=${resourcesResult.missing} changed=${resourcesResult.changed} extra=${resourcesResult.extra}`
   );
+  console.log(
+    `student school emails missing=${missingSchoolEmails} ` +
+      `withdrawn-by-roster-still-active=${withdrawnSchoolEmails.length}`
+  );
   console.log(`local conflicts=${conflicts.length}`);
   console.log(current ? "Portal mirror OK" : "Portal mirror DRIFTED (no writes made)");
   return current;
+}
+
+function compareResourceHashes(expectedRows, actualRows) {
+  const expected = new Map(expectedRows.map((row) => [row.source_student_id, row.source_row_hash]));
+  const actual = new Map(actualRows.map((row) => [row.source_student_id, row.source_row_hash]));
+  let missing = 0;
+  let changed = 0;
+  for (const [id, hash] of expected) {
+    if (!actual.has(id)) missing += 1;
+    else if (actual.get(id) !== hash) changed += 1;
+  }
+  let extra = 0;
+  for (const id of actual.keys()) if (!expected.has(id)) extra += 1;
+  return { expected: expected.size, actual: actual.size, missing, changed, extra };
 }
 
 await applySync();
@@ -330,18 +426,19 @@ async function applySync() {
     // The roster owns program facts, but family-entered contact values and any
     // approved-yet-unmerged profile edits must survive a roster refresh. Load
     // the hosted overlay before writing so the sync cannot roll those back.
-    const [{ data: existingStudents, error: existingStudentError }, { data: existingPeople, error: existingPeopleError }, { data: openFamilyUpdates, error: familyUpdateError }] = await Promise.all([
+    // scripts/lib/portal-mirror-plan.mjs owns the overlay; --check uses the same plan.
+    const [{ data: existingStudents, error: existingStudentError }, { data: existingPeople, error: existingPeopleError }, { data: familyUpdates, error: familyUpdateError }] = await Promise.all([
       supabase
         .from("portal_students")
-        .select("id, source_student_id, preferred_first, display_name, school_email, cell_phone, band_period_2026, ensemble_2026, instrument_2026, marching_2026, marching_role_category_2026, marching_assignment_2026"),
+        .select("id, source_student_id, preferred_first, display_name, notes, band_period_2026, ensemble_2026, instrument_2026, marching_2026, marching_role_category_2026, marching_assignment_2026"),
       supabase
         .from("portal_people")
         .select("id, source_person_key, display_name, first_name, last_name"),
       supabase
         .from("portal_update_requests")
-        .select("student_id, target_id, field_name")
+        .select("student_id, target_id, field_name, status")
         .eq("status", "approved")
-        .in("field_name", ["student_preferred_first", "person_display_name", "participation_bundle"])
+        .range(0, 9999)
     ]);
     if (existingStudentError) throw existingStudentError;
     if (existingPeopleError) throw existingPeopleError;
@@ -349,21 +446,7 @@ async function applySync() {
 
     const existingStudentBySource = new Map((existingStudents || []).map((row) => [row.source_student_id, row]));
     const existingPersonBySource = new Map((existingPeople || []).map((row) => [row.source_person_key, row]));
-    const protectedStudentIds = new Set(
-      (openFamilyUpdates || [])
-        .filter((row) => row.field_name === "student_preferred_first" && row.student_id)
-        .map((row) => row.student_id)
-    );
-    const protectedPersonIds = new Set(
-      (openFamilyUpdates || [])
-        .filter((row) => row.field_name === "person_display_name" && row.target_id)
-        .map((row) => row.target_id)
-    );
-    const protectedParticipationIds = new Set(
-      (openFamilyUpdates || [])
-        .filter((row) => row.field_name === "participation_bundle" && row.student_id)
-        .map((row) => row.student_id)
-    );
+    const overlay = familyOverlay(familyUpdates || []);
 
     const existingStudentRows = [];
     const newStudentRows = [];
@@ -373,27 +456,7 @@ async function applySync() {
         newStudentRows.push({ ...row, last_seen_sync_id: syncId });
         continue;
       }
-
-      // School email is roster-owned and now mirrors to the portal. Continue to
-      // omit cell_phone so a sync cannot erase a family-entered phone number.
-      const safeRow = { ...row };
-      delete safeRow.cell_phone;
-      if (protectedStudentIds.has(existing.id)) {
-        safeRow.preferred_first = existing.preferred_first;
-        safeRow.display_name = [existing.preferred_first || safeRow.legal_first, safeRow.legal_last]
-          .filter(Boolean)
-          .join(" ")
-          .trim() || existing.display_name;
-      }
-      if (protectedParticipationIds.has(existing.id)) {
-        safeRow.band_period_2026 = existing.band_period_2026;
-        safeRow.ensemble_2026 = existing.ensemble_2026;
-        safeRow.instrument_2026 = existing.instrument_2026;
-        safeRow.marching_2026 = existing.marching_2026;
-        safeRow.marching_role_category_2026 = existing.marching_role_category_2026;
-        safeRow.marching_assignment_2026 = existing.marching_assignment_2026;
-      }
-      existingStudentRows.push({ ...safeRow, last_seen_sync_id: syncId });
+      existingStudentRows.push({ ...plannedStudentUpdate(row, existing, overlay), last_seen_sync_id: syncId });
     }
     await upsert("portal_students", existingStudentRows, "source_student_id");
     await upsert("portal_students", newStudentRows, "source_student_id");
@@ -410,13 +473,7 @@ async function applySync() {
         newPersonRows.push({ ...row, last_seen_sync_id: syncId });
         continue;
       }
-      const safeRow = { ...row, last_seen_sync_id: syncId };
-      if (protectedPersonIds.has(existing.id)) {
-        safeRow.display_name = existing.display_name;
-        safeRow.first_name = existing.first_name;
-        safeRow.last_name = existing.last_name;
-      }
-      existingPersonRows.push(safeRow);
+      existingPersonRows.push({ ...plannedPersonUpdate(row, existing, overlay), last_seen_sync_id: syncId });
     }
     await upsert("portal_people", existingPersonRows, "source_person_key");
     await upsert("portal_people", newPersonRows, "source_person_key");
@@ -462,6 +519,12 @@ async function applySync() {
     await upsert("portal_student_resources", resourceRows, "student_id");
     console.log(`student resources: ${resourceRows.length} current, ${staleResourceIds.length} stale removed`);
 
+    const { data: existingLinks, error: existingLinkError } = await supabase
+      .from("portal_student_people")
+      .select("student_id, person_id, role, relationship_status, primary_contact, source")
+      .range(0, 9999);
+    if (existingLinkError) throw existingLinkError;
+    const existingLinkByKey = new Map((existingLinks || []).map((row) => [`${row.student_id}|${row.person_id}`, row]));
     const relationshipRows = dedupedRelationships
       .map((row) => ({
         student_id: studentIds.get(row.sourceStudentId),
@@ -473,7 +536,8 @@ async function applySync() {
         source_row_hash: row.source_row_hash,
         last_seen_sync_id: syncId
       }))
-      .filter((row) => row.student_id && row.person_id);
+      .filter((row) => row.student_id && row.person_id)
+      .map((row) => plannedRelationshipUpdate(row, existingLinkByKey.get(`${row.student_id}|${row.person_id}`), overlay));
     await upsert("portal_student_people", relationshipRows, "student_id,person_id");
 
     const contactRows = dedupedContactMethods
@@ -523,7 +587,8 @@ async function applySync() {
     );
     console.log(
       `family overlay: preserved contact columns on ${existingStudentRows.length} existing students; ` +
-      `${protectedStudentIds.size} open preferred-name edit(s); ${protectedPersonIds.size} open person-name edit(s)`
+      `${overlay.preferredName.size} preferred-name, ${overlay.notes.size} notes, ` +
+      `${overlay.participation.size} participation, ${overlay.personName.size} person-name edit(s) kept`
     );
 
     await finishSyncRun(syncId, "completed", {
