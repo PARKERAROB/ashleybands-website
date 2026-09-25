@@ -178,3 +178,11 @@ test("register PDF parsing works without @napi-rs/canvas or a worker file, as on
   assert.match(out, /RESULT /, out.slice(-800));
   assert.match(out, /HAS_DOMMATRIX function/);
 });
+
+test("accept casts the enrollment end date for SELECT DISTINCT (#119)", () => {
+  const fix = readFileSync("supabase/migrations/202609250001_fix_school_attendance_accept_ends_on.sql", "utf8");
+  assert.match(fix, /create or replace function public\.accept_school_attendance_import/);
+  assert.match(fix, /null::date, 'infinite_campus_attendance_register'/);
+  assert.match(fix, /grant execute on function public\.accept_school_attendance_import\(jsonb,uuid\)\s+to service_role;/);
+  assert.match(fix, /revoke all on function public\.accept_school_attendance_import\(jsonb,uuid\)\s+from public, anon, authenticated;/);
+});
