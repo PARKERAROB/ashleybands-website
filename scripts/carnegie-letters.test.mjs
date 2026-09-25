@@ -193,7 +193,8 @@ test("every new page and API checks the gate first, and only the gated portal li
   assert.match(landing, /generateMetadata[\s\S]*if \(!access\.open\) return \{\};/, "gate off adds no metadata");
   const linkers = gitGrepFiles(["/portal/carnegie-notes", "/admin/carnegie-letters"], ["app", "components", "content", "public"]);
   // The Family Portal links only behind the "on" gate; see the family-release test below.
-  const GATED_LINKERS = ["app/portal/review/PortalReviewClient.jsx"];
+  // The staff dashboard links the review queue behind the same review capability (#112).
+  const GATED_LINKERS = ["app/portal/review/PortalReviewClient.jsx", "app/admin/page.jsx"];
   for (const file of linkers) assert.ok(NEW_SURFACES.includes(file) || GATED_LINKERS.includes(file) || file.startsWith("app/api/"), `${file} must not link to the gated pages`);
 });
 
@@ -373,4 +374,9 @@ test("Family Portal links the notes page only after the family release (#106)", 
   assert.match(page, /carnegieNotesOpen=\{carnegieLettersMode\(\) === "on"\}/, "staff mode must not show the family link");
   const links = client.match(/\{notesOpen \? <Link[^}]*href="\/portal\/carnegie-notes"/g) || [];
   assert.equal(links.length, 2, "both portal links are gated on notesOpen");
+});
+
+test("staff dashboard links the review queue only for letter reviewers (#112)", () => {
+  const dashboard = readFileSync(new URL("../app/admin/page.jsx", import.meta.url), "utf8");
+  assert.match(dashboard, /capability: STAFF_CAPABILITIES\.CARNEGIE_LETTERS_REVIEW, href: "\/admin\/carnegie-letters"/);
 });
