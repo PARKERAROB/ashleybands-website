@@ -8,6 +8,7 @@ import {
   plannedPersonUpdate,
   plannedRelationshipUpdate,
   plannedStudentUpdate,
+  staffNotesVisibleToFamilies,
   withdrawnSchoolEmailContacts
 } from "./lib/portal-mirror-plan.mjs";
 
@@ -48,32 +49,37 @@ test("the sync never writes a family phone", () => {
   assert.equal("cell_phone" in plannedStudentUpdate(rosterStudent, hostedStudent, none), false);
 });
 
-test("approved family preferred name, notes and participation are kept", () => {
+test("approved family preferred name and participation are kept", () => {
   const hosted = {
     ...hostedStudent,
     preferred_first: "Tee",
     display_name: "Tee Student",
-    notes: "family note",
     instrument_2026: "Piccolo",
     band_period_2026: "2"
   };
   const overlay = familyOverlay([
     { student_id: "uuid-a", field_name: "student_preferred_first", status: "approved" },
-    { student_id: "uuid-a", field_name: "student_notes", status: "approved" },
     { student_id: "uuid-a", field_name: "participation_bundle", status: "approved" }
   ]);
   const planned = plannedStudentUpdate(rosterStudent, hosted, overlay);
   assert.deepEqual(mirrorFieldDiff(planned, hosted), []);
   assert.deepEqual(
     overlayFields(rosterStudent, planned).sort(),
-    ["band_period_2026", "display_name", "instrument_2026", "notes", "preferred_first"].sort()
+    ["band_period_2026", "display_name", "instrument_2026", "preferred_first"].sort()
   );
 });
 
 test("pending or rejected family requests do not protect a field", () => {
+  const hosted = { ...hostedStudent, preferred_first: "Tee", display_name: "Tee Student" };
+  const overlay = familyOverlay([{ student_id: "uuid-a", field_name: "student_preferred_first", status: "needs_review" }]);
+  assert.deepEqual(mirrorFieldDiff(plannedStudentUpdate(rosterStudent, hosted, overlay), hosted), ["preferred_first", "display_name"]);
+});
+
+test("roster staff notes never reach the family notes field", () => {
   const hosted = { ...hostedStudent, notes: "family note" };
-  const overlay = familyOverlay([{ student_id: "uuid-a", field_name: "student_notes", status: "needs_review" }]);
-  assert.deepEqual(mirrorFieldDiff(plannedStudentUpdate(rosterStudent, hosted, overlay), hosted), ["notes"]);
+  const planned = plannedStudentUpdate({ ...rosterStudent, notes: "private staff note" }, hosted, none);
+  assert.equal("notes" in planned, false);
+  assert.deepEqual(mirrorFieldDiff(planned, hosted), []);
 });
 
 test("a family guardian-name edit is kept", () => {
@@ -124,4 +130,15 @@ test("finds only unverified roster school addresses the roster withdrew", () => 
   ], people, roster);
   assert.equal(found.length, 1);
   assert.equal(found[0].person_id, "p1");
+});
+
+test("flags roster staff notes and admin stamps in the family notes field", () => {
+  const roster = [{ id: "student-a", notes: "Private  staff note" }, { id: "student-b", notes: "" }];
+  const flagged = staffNotesVisibleToFamilies([
+    { source_student_id: "student-a", notes: "private staff note" },
+    { source_student_id: "student-a", notes: "a family note" },
+    { source_student_id: "student-b", notes: "Added via admin by Staff" },
+    { source_student_id: "student-b", notes: null }
+  ], roster);
+  assert.equal(flagged.length, 2);
 });

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
+import { logAudit, staffActor } from "@/lib/auditLog";
 import {
   loadUnmatchedSignups,
   MARCHING_BAND_2026_FEE_CENTS,
@@ -77,8 +78,8 @@ export async function POST(req) {
         school_email: email || null,
         cell_phone: student.phone || null,
         status: "active",
-        source: "manual",
-        notes: `Created from MB signup by ${staff.display_name}`
+        // notes is family-visible (#117); source and the audit entry record the creation.
+        source: "manual"
       })
       .select("id")
       .single();
@@ -152,6 +153,15 @@ export async function POST(req) {
       created_by: staff.display_name
     });
   }
+
+  await logAudit({
+    actor: staffActor(staff),
+    action: existing ? "link_signup" : "create_from_signup",
+    table: "portal_students",
+    recordId: studentId,
+    changes: { signupId },
+    route: "/api/admin/students/unmatched-signups"
+  });
 
   return NextResponse.json({ ok: true, studentId, created: !existing });
 }

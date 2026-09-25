@@ -24,6 +24,7 @@ import {
   plannedPersonUpdate,
   plannedRelationshipUpdate,
   plannedStudentUpdate,
+  staffNotesVisibleToFamilies,
   withdrawnSchoolEmailContacts
 } from "./lib/portal-mirror-plan.mjs";
 
@@ -159,7 +160,8 @@ const portalStudents = students.map((row) => {
     school_email: row.school_email || null,
     cell_phone: null,
     status: row.status || null,
-    notes: row.notes || null,
+    // Roster notes are Rob's private staff notes and never reach the portal;
+    // portal_students.notes is the family-visible "Family notes" field (#117).
     source: "bdos_students_csv",
     source_row_hash: sourceRowHash
   };
@@ -377,7 +379,10 @@ async function checkMirror() {
     return email.endsWith("@student.nhcs.net") && personId && !hostedSchoolEmailKeys.has(`${personId}|${email}`);
   }).length;
 
+  const staffNotesVisible = staffNotesVisibleToFamilies(dbStudents || [], students).length;
+
   const current =
+    staffNotesVisible === 0 &&
     [studentsResult, peopleResult, linksResult].every((result) => result.missing === 0 && result.changed === 0) &&
     resourcesResult.missing === 0 &&
     resourcesResult.changed === 0 &&
@@ -398,6 +403,7 @@ async function checkMirror() {
     `student school emails missing=${missingSchoolEmails} ` +
       `withdrawn-by-roster-still-active=${withdrawnSchoolEmails.length}`
   );
+  console.log(`roster staff notes visible to families=${staffNotesVisible}`);
   console.log(`local conflicts=${conflicts.length}`);
   console.log(current ? "Portal mirror OK" : "Portal mirror DRIFTED (no writes made)");
   return current;
@@ -587,7 +593,7 @@ async function applySync() {
     );
     console.log(
       `family overlay: preserved contact columns on ${existingStudentRows.length} existing students; ` +
-      `${overlay.preferredName.size} preferred-name, ${overlay.notes.size} notes, ` +
+      `${overlay.preferredName.size} preferred-name, ` +
       `${overlay.participation.size} participation, ${overlay.personName.size} person-name edit(s) kept`
     );
 

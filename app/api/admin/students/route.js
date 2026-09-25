@@ -171,8 +171,8 @@ export async function POST(req) {
       school_email: schoolEmail || null,
       cell_phone: text(body.cellPhone) || null,
       status: "active",
-      source: "manual",
-      notes: text(body.notes) || `Added via admin by ${staff.display_name}`
+      // notes is family-visible (#117); source and the audit entry record who added the student.
+      source: "manual"
     })
     .select("id")
     .single();

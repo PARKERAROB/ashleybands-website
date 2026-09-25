@@ -7,8 +7,9 @@
 // hashes the whole roster row, including roster-only columns never mirrored.
 export const PROVENANCE_FIELDS = new Set(["source", "source_row_hash", "last_seen_sync_id"]);
 
-// Portal columns the roster sync never writes on an existing student.
-const FAMILY_STUDENT_COLUMNS = ["cell_phone"];
+// Portal columns the roster sync never writes on an existing student. notes is
+// the family-visible "Family notes" field; roster staff notes stay private (#117).
+const FAMILY_STUDENT_COLUMNS = ["cell_phone", "notes"];
 
 const PARTICIPATION_COLUMNS = [
   "band_period_2026",
@@ -33,7 +34,6 @@ export function familyOverlay(updateRequests = []) {
   return {
     preferredName: studentsWith("student_preferred_first"),
     participation: studentsWith("participation_bundle"),
-    notes: studentsWith("student_notes", "student_note"),
     personName: targetsWith("person_display_name", "edit_guardian"),
     guardianRole: targetsWith("edit_guardian")
   };
@@ -52,7 +52,6 @@ export function plannedStudentUpdate(row, existing, overlay) {
   if (overlay.participation.has(existing.id)) {
     for (const column of PARTICIPATION_COLUMNS) planned[column] = existing[column];
   }
-  if (overlay.notes.has(existing.id)) planned.notes = existing.notes;
   return planned;
 }
 
@@ -117,5 +116,19 @@ export function withdrawnSchoolEmailContacts(contacts, sourceStudentIdByPersonId
     const sourceStudentId = sourceStudentIdByPersonId.get(row.person_id);
     if (!sourceStudentId || !rosterSchoolEmailBySourceId.has(sourceStudentId)) return false;
     return rosterSchoolEmailBySourceId.get(sourceStudentId) !== row.value_normalized;
+  });
+}
+
+const ADMIN_NOTE_STAMP = /^(added via admin by|created from mb signup by) /;
+const noteText = (value) => String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
+
+// Hosted family-visible notes that are copies of roster staff notes or admin
+// creation stamps (#117). Must stay zero.
+export function staffNotesVisibleToFamilies(hostedStudents, rosterStudents) {
+  const rosterNotes = new Map(rosterStudents.map((row) => [row.id, noteText(row.notes)]));
+  return hostedStudents.filter((row) => {
+    const note = noteText(row.notes);
+    if (!note) return false;
+    return note === rosterNotes.get(row.source_student_id) || ADMIN_NOTE_STAMP.test(note);
   });
 }
