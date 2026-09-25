@@ -186,3 +186,29 @@ test("accept casts the enrollment end date for SELECT DISTINCT (#119)", () => {
   assert.match(fix, /grant execute on function public\.accept_school_attendance_import\(jsonb,uuid\)\s+to service_role;/);
   assert.match(fix, /revoke all on function public\.accept_school_attendance_import\(jsonb,uuid\)\s+from public, anon, authenticated;/);
 });
+
+test("register names match by legal name, then preferred name, and never double-match (#120)", async () => {
+  const { buildNameSuggestions } = await import("../lib/schoolAttendanceMatching.mjs");
+  const students = [
+    { id: "a", legal_first: "Isabelle", legal_last: "Example", preferred_first: "Charlie" },
+    { id: "b", legal_first: "Christopher", legal_last: "Sample", preferred_first: "Cooper" },
+    { id: "c", legal_first: "Sienna", legal_last: "Test", preferred_first: "Monét" },
+    { id: "d", legal_first: "Jordan", legal_last: "Twin", preferred_first: "" },
+    { id: "e", legal_first: "Alex", legal_last: "Dup", preferred_first: "" }
+  ];
+  const source = (sourceStudentNumber, sourceStudentName) => ({ sourceStudentNumber, sourceStudentName });
+  const map = buildNameSuggestions(students, [
+    source("1", "Example, Charlie G"),     // preferred name
+    source("2", "Sample, Christopher C"),  // legal name wins
+    source("3", "Test, Monet"),            // accent-insensitive preferred
+    source("4", "Twin, Jordan A"),
+    source("5", "Twin, Jordan B"),         // two numbers -> same student: no suggestion for either
+    source("6", "Nobody, Here")
+  ]);
+  assert.equal(map.get("1"), "a");
+  assert.equal(map.get("2"), "b");
+  assert.equal(map.get("3"), "c");
+  assert.equal(map.has("4"), false);
+  assert.equal(map.has("5"), false);
+  assert.equal(map.has("6"), false);
+});
