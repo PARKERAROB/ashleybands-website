@@ -141,7 +141,7 @@ test("register acceptance is review-first, private, and staff-authorized", () =>
   assert.match(workspace, /never changes program or ensemble memberships/);
 });
 
-test("register PDF parsing works without @napi-rs/canvas, as on Vercel (#115)", async () => {
+test("register PDF parsing works without @napi-rs/canvas or a worker file, as on Vercel (#115)", async () => {
   const { spawnSync } = await import("node:child_process");
   // A minimal one-page PDF; synthetic, so no student data is committed.
   const objects = ["<< /Type /Catalog /Pages 2 0 R >>", "<< /Type /Pages /Kids [3 0 R] /Count 1 >>", "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 200] >>"];
@@ -155,15 +155,21 @@ test("register PDF parsing works without @napi-rs/canvas, as on Vercel (#115)", 
       if (specifier === "@napi-rs/canvas") throw new Error("blocked for test");
       return next(specifier, context);
     } });
-    const { parseAttendanceRegisterPdf } = await import(${JSON.stringify(new URL("../lib/infiniteCampusAttendanceParser.mjs", import.meta.url).href)});
+    const parser = await import(${JSON.stringify(new URL("../lib/infiniteCampusAttendanceParser.mjs", import.meta.url).href)});
+    parser.ensureTextOnlyDomMatrix();
+    const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    // The bundled Vercel function has no pdf.worker.mjs beside the pdf.js chunk.
+    pdfjs.GlobalWorkerOptions.workerSrc = "/nonexistent/pdf.worker.mjs";
+    const { parseAttendanceRegisterPdf } = parser;
     try { await parseAttendanceRegisterPdf(Buffer.from(${JSON.stringify(pdf)}, "latin1")); console.log("RESULT parsed"); }
     catch (error) { console.log("RESULT " + error.message); }
     console.log("HAS_DOMMATRIX " + (typeof globalThis.DOMMatrix));
   `;
-  const run = spawnSync(process.execPath, ["--input-type=module", "-e", child], { encoding: "utf8", timeout: 60000 });
+  const run = spawnSync(process.execPath, ["--input-type=module", "-e", child], { encoding: "utf8", timeout: 60000, cwd: new URL("..", import.meta.url).pathname });
   const out = run.stdout + run.stderr;
   assert.match(out, /blocked for test|Cannot load "@napi-rs\/canvas"/, "the canvas package was really unavailable");
   assert.doesNotMatch(out, /DOMMatrix is not defined/);
+  assert.doesNotMatch(out, /Setting up fake worker failed/);
   assert.match(out, /RESULT /, out.slice(-800));
   assert.match(out, /HAS_DOMMATRIX function/);
 });
