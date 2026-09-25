@@ -140,3 +140,30 @@ test("register acceptance is review-first, private, and staff-authorized", () =>
   assert.match(workspace, /Infinite Campus remains official/);
   assert.match(workspace, /never changes program or ensemble memberships/);
 });
+
+test("register PDF parsing works without @napi-rs/canvas, as on Vercel (#115)", async () => {
+  const { spawnSync } = await import("node:child_process");
+  // A minimal one-page PDF; synthetic, so no student data is committed.
+  const objects = ["<< /Type /Catalog /Pages 2 0 R >>", "<< /Type /Pages /Kids [3 0 R] /Count 1 >>", "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 200] >>"];
+  let pdf = "%PDF-1.4\n"; const offsets = [];
+  objects.forEach((body, i) => { offsets.push(pdf.length); pdf += `${i + 1} 0 obj\n${body}\nendobj\n`; });
+  const xref = pdf.length;
+  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n${offsets.map((o) => `${String(o).padStart(10, "0")} 00000 n \n`).join("")}trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
+  const child = `
+    import { registerHooks } from "node:module";
+    registerHooks({ resolve(specifier, context, next) {
+      if (specifier === "@napi-rs/canvas") throw new Error("blocked for test");
+      return next(specifier, context);
+    } });
+    const { parseAttendanceRegisterPdf } = await import(${JSON.stringify(new URL("../lib/infiniteCampusAttendanceParser.mjs", import.meta.url).href)});
+    try { await parseAttendanceRegisterPdf(Buffer.from(${JSON.stringify(pdf)}, "latin1")); console.log("RESULT parsed"); }
+    catch (error) { console.log("RESULT " + error.message); }
+    console.log("HAS_DOMMATRIX " + (typeof globalThis.DOMMatrix));
+  `;
+  const run = spawnSync(process.execPath, ["--input-type=module", "-e", child], { encoding: "utf8", timeout: 60000 });
+  const out = run.stdout + run.stderr;
+  assert.match(out, /blocked for test|Cannot load "@napi-rs\/canvas"/, "the canvas package was really unavailable");
+  assert.doesNotMatch(out, /DOMMatrix is not defined/);
+  assert.match(out, /RESULT /, out.slice(-800));
+  assert.match(out, /HAS_DOMMATRIX function/);
+});
