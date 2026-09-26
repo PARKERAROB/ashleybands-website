@@ -1,0 +1,101 @@
+name: Release
+
+# Production release from GitHub (#146). Started by hand, held until Rob approves the
+# `production` environment, then runs the same checked wrapper as the Mac (docs/RELEASING.md).
+# This repository is public: nothing here may print secrets or private release diagnostics.
+
+on:
+  workflow_dispatch:
+    inputs:
+      issue:
+        description: Owning issue number
+        required: true
+      checked:
+        description: "One line: what was actually verified before authorizing"
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: production-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 60
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+      RELEASE_PUBLIC_OUTPUT: "1"
+      BANDSOFAHS_DIR: ${{ github.workspace }}/BandsofAHS
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - name: Check release inputs
+        working-directory: .
+        env:
+          ISSUE: ${{ inputs.issue }}
+          CHECKED: ${{ inputs.checked }}
+        run: |
+          [[ "$ISSUE" =~ ^[0-9]+$ ]] || { echo "Issue must be a number." >&2; exit 1; }
+          [[ "$CHECKED" =~ [^[:space:]] && "$CHECKED" != *$'\n'* ]] || { echo "Checked must be one non-empty line." >&2; exit 1; }
+
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          path: site
+
+      - uses: actions/checkout@v4
+        with:
+          repository: PARKERAROB/BandsofAHS
+          path: BandsofAHS
+          ssh-key: ${{ secrets.BANDSOFAHS_DEPLOY_KEY }}
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: site/.nvmrc
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: Provision release credentials
+        env:
+          BAND_WEBSITE_ENV_LOCAL: ${{ secrets.BAND_WEBSITE_ENV_LOCAL }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          umask 077
+          [[ -n "$BAND_WEBSITE_ENV_LOCAL" && -n "$VERCEL_TOKEN" ]] || { echo "Missing production environment secrets." >&2; exit 1; }
+          printf '%s\n' "$BAND_WEBSITE_ENV_LOCAL" > .env.local
+          mkdir -p .vercel "$HOME/.local/share/com.vercel.cli"
+          printf '%s\n' '{"projectId":"prj_zt07T3fHc75OimXD3SnBoP4JcQzr","orgId":"team_iJ1ikB48QN8eYHbQunrskJuf"}' > .vercel/project.json
+          node -e 'process.stdout.write(JSON.stringify({token: process.env.VERCEL_TOKEN}))' > "$HOME/.local/share/com.vercel.cli/auth.json"
+
+      - name: Prepare checkout
+        run: npm run setup:checkout
+
+      - name: Authorization commit
+        env:
+          ISSUE: ${{ inputs.issue }}
+          CHECKED: ${{ inputs.checked }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          APPROVED_BY: ${{ github.actor }}
+        run: |
+          git -c user.name=parkerarob -c user.email=robert.parker@nhcs.net commit --allow-empty \
+            -m "Authorize production release (#$ISSUE)" \
+            -m "Checked: $CHECKED" \
+            -m "Released from GitHub Actions after production environment approval. Started by $APPROVED_BY: $RUN_URL"
+          git push origin HEAD:main
+
+      - name: Checked release
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: npm run release:checked
+
+      - name: Remove release credentials
+        if: always()
+        working-directory: .
+        run: rm -f site/.env.local "$HOME/.local/share/com.vercel.cli/auth.json"
