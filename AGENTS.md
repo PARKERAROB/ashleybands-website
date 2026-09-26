@@ -1,6 +1,6 @@
 # AshleyBands website
 
-Before any repository work, read PROJECT_WORKFLOW.md in full, Workdesk's /Users/parkerarob/Documents/GitHub/workshop/AGENTS.md and CLAUDE.md, then this repository's CLAUDE.md and INDEX.md. Follow the issue workflow before edits; keep public issues sanitized.
+Before any repository work, read PROJECT_WORKFLOW.md in full, Workdesk's /Users/parkerarob/Documents/GitHub/Atlas/AGENTS.md and CLAUDE.md, then this repository's CLAUDE.md and INDEX.md. Follow the issue workflow before edits; keep public issues sanitized.
 
 Codex Area hooks adapt .claude/settings.json through Workdesk. Review new definitions through /hooks; configuration alone does not prove enforcement. Preserve stricter project privacy, authority, and verification requirements within platform constraints.
 
