@@ -1,0 +1,11 @@
+.form { max-width: 400px; margin: 72px auto; padding: 0 16px; font-family: system-ui, sans-serif; color: #24201d; }
+.form h2 { margin: 0 0 .5rem; font: 700 1.6rem Georgia, serif; }
+.intro { margin: 0 0 1.25rem; color: #4b584d; line-height: 1.5; }
+.label { display: block; margin: 12px 0 5px; font-size: 14px; font-weight: 700; color: #4b584d; }
+.input { box-sizing: border-box; width: 100%; min-height: 44px; padding: 10px 12px; font-size: 16px; border: 1px solid #b9b0a4; border-radius: 6px; font-family: system-ui, sans-serif; }
+.error { margin: 12px 0 0; color: #a3242f; font-size: 14px; line-height: 1.4; }
+.button { margin-top: 16px; width: 100%; min-height: 44px; padding: 10px 16px; font-size: 16px; font-weight: 600; border: none; border-radius: 6px; color: #fff; background: #7b1829; cursor: pointer; }
+.button:disabled { opacity: .7; cursor: wait; }
+.help { margin: 1rem 0 0; color: #4b584d; font-size: 14px; line-height: 1.5; }
+.help a { color: #7b1829; font-weight: 700; overflow-wrap: anywhere; }
+.loading { max-width: 400px; margin: 100px auto; padding: 0 16px; color: #4b584d; font-family: system-ui, sans-serif; }

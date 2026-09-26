@@ -377,7 +377,7 @@ test("Family Portal links the notes page only after the family release (#106)", 
 });
 
 test("staff dashboard links the review queue only for letter reviewers (#112)", () => {
-  const dashboard = readFileSync(new URL("../app/admin/page.jsx", import.meta.url), "utf8");
+  const dashboard = readFileSync(new URL("../lib/staffHome.js", import.meta.url), "utf8");
   assert.match(dashboard, /capability: STAFF_CAPABILITIES\.CARNEGIE_LETTERS_REVIEW, href: "\/admin\/carnegie-letters"/);
 });
 
