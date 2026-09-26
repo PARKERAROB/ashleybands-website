@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function SponsorGivePage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<main className="give-shell"><p role="status">Loading giving options…</p></main>}>
       <GiveClient />
     </Suspense>
   );

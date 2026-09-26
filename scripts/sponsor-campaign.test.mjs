@@ -218,3 +218,44 @@ test("public giving funnel keeps approved terms, drops written recognition offer
   assert.doesNotMatch(story, /being put together/);
   assert.doesNotMatch(giving, /href="\/info\/carnegie-2027"/, "donor story link no longer lands on family logistics");
 });
+
+test("capture failures give donors plain words and never raw PayPal text (#125)", async () => {
+  const db = memoryLedger();
+  const { createPendingGift } = giftHelpers(db);
+  const { gift } = await createPendingGift({ ...baseGift, campaignCode: "general", giftKind: "sponsorship", method: "online" });
+  db.rows[0].paypal_order_id = "SYNTHETIC-ORDER";
+  const logged = [];
+  let outcome;
+  const { POST } = load("app/api/sponsors/give/capture-order/route.js", {
+    ...campaigns, ...policy, ...receiptHelpers(db), supabaseAdmin: db, process: { env: {} },
+    console: { error: (...args) => logged.push(JSON.stringify(args)) },
+    NextResponse: { json: (body, options) => ({ body, status: options?.status || 200 }) },
+    sponsorOnlineGiveLive: () => true, clientIp: () => "synthetic", checkRateLimit: async () => ({ allowed: true }),
+    captureOrder: async () => outcome(),
+    extractCapture: capture => capture, amountToCents: value => Math.round(Number(value) * 100), dollars: cents => `$${cents / 100}`
+  }, ["POST"]);
+  const request = { url: "https://example.com/api/sponsors/give/capture-order", json: async () => ({ orderId: "SYNTHETIC-ORDER" }) };
+  const raw = /PayPal capture failed|UNPROCESSABLE|INSTRUMENT_DECLINED|PENDING|\{|\(/;
+
+  outcome = () => { throw new Error('PayPal capture failed (422): {"name":"UNPROCESSABLE_ENTITY","details":[{"issue":"INSTRUMENT_DECLINED"}]}'); };
+  let res = await POST(request);
+  assert.equal(res.status, 502);
+  assert.equal(res.body.error, "Your payment didn't go through, and you have not been charged. Try another card or PayPal option, or choose Pay by check.");
+  assert.doesNotMatch(res.body.error, raw);
+  assert.match(logged.at(-1), /INSTRUMENT_DECLINED/, "details stay in the server log");
+
+  outcome = () => { throw new Error("fetch failed: socket hang up"); };
+  res = await POST(request);
+  assert.doesNotMatch(res.body.error, /not been charged|socket/);
+  assert.match(res.body.error, /Please don't pay again/);
+
+  outcome = () => ({ captureStatus: "PENDING", captureId: "SYNTHETIC-CAPTURE", invoiceId: gift.invoice_id, customId: gift.id, amountValue: "1500.00" });
+  res = await POST(request);
+  assert.equal(res.body.error, "PayPal is still processing this payment. Please don't pay again. You'll get a receipt by email when it clears.");
+
+  outcome = () => ({ captureStatus: "COMPLETED", captureId: "SYNTHETIC-CAPTURE", invoiceId: "OTHER-INVOICE", customId: gift.id, amountValue: "1500.00" });
+  res = await POST(request);
+  assert.equal(res.status, 409);
+  assert.equal(res.body.error, "Something didn't match on this payment. Please don't pay again. Email Mr. Parker at robert.parker@nhcs.net and he'll sort it out.");
+  assert.equal(db.rows[0].status, "pending", "no failure path confirms the gift");
+});

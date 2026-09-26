@@ -59,7 +59,7 @@ export async function POST(req) {
     gift: { invoice_id: result.gift.invoice_id, tier: result.gift.tier },
     instructions: {
       payable_to: SPONSOR_CONTACT.boosterOrg,
-      mail_to: `${SPONSOR_CONTACT.school}, ${SPONSOR_CONTACT.address}, ${SPONSOR_CONTACT.cityStateZip}`,
+      mail_to: `${SPONSOR_CONTACT.school}, Attn: Band Director, ${SPONSOR_CONTACT.address}, ${SPONSOR_CONTACT.cityStateZip}`,
       memo: `${giftCampaignLabel(result.gift.campaign_code)} / ref ${result.gift.invoice_id}`,
       note: "Write the reference on the memo line so we can match your check and send your receipt."
     }
