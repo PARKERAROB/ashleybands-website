@@ -48,6 +48,34 @@ The local lock cannot coordinate another machine or a raw dashboard/CLI deployme
 publication on this checked path and coordinate any other publisher; the final commit/domain proof
 still detects a mismatched alias at the time it is checked.
 
+## Release from GitHub
+
+The `Release` workflow (`.github/workflows/release.yml`, #146) runs the same wrapper on a GitHub
+runner, so a cloud agent can ship on Rob's say-so without the Mac.
+
+1. Integrate and push the intended change to `main`, as above.
+2. Start `Release` from the Actions tab (or `workflow_dispatch`) on `main` with the owning issue
+   number and the one-line `Checked:` evidence.
+3. The job waits for Rob's approval on the `production` environment. That approval is the
+   authorization; the job then makes and pushes the narrow authorization commit itself.
+4. `npm run release:checked` runs unchanged. The concurrency group allows one GitHub release at a
+   time; it cannot coordinate with a Mac release, so do not run both at once.
+
+One-time setup in GitHub settings for the `production` environment: Rob as required reviewer,
+deployment branches limited to `main`, and these environment secrets (never paste them in chat):
+
+- `BAND_WEBSITE_ENV_LOCAL`: the full contents of the trusted `.env.local`.
+- `VERCEL_TOKEN`: a Vercel token for `robertparker-6198` with access to `robs-projects-9eb69de7`.
+- `BANDSOFAHS_DEPLOY_KEY`: private half of a read-only deploy key on `PARKERAROB/BandsofAHS`.
+
+GitHub offers required reviewers on private repositories only with GitHub Enterprise. Without one,
+the job starts when dispatched, so only start it on Rob's explicit release instruction.
+
+The runner uses the pushed `BandsofAHS` `main`, not a Mac working copy, so push calendar and roster
+changes there first. While this repository is public its Actions logs are public: on failure the
+runner prints only check labels, and the full log is discarded with the runner. Reproduce the
+failing phase on the Mac to diagnose it. A private repository shows the usual log tail.
+
 ## Failure and recovery
 
 Each phase prints a concise result and the full local log path. Logs and locks live outside Git in
