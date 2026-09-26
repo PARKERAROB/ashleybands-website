@@ -123,6 +123,11 @@ export default async function SponsorsHubPage() {
                   <li key={b}>{b}</li>
                 ))}
               </ul>
+              <p style={{ margin: "16px 0 0" }}>
+                <Link href={`/sponsors/give?amount=${tier.amount}`} className="sponsors-btn">
+                  Give ${tier.amount.toLocaleString("en-US")}
+                </Link>
+              </p>
             </article>
           ))}
         </div>

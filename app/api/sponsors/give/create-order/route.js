@@ -16,7 +16,7 @@ export const runtime = "nodejs";
 export async function POST(req) {
   if (!sponsorOnlineGiveLive()) {
     return NextResponse.json(
-      { error: "Online giving isn't available yet — pay by check, or contact the director." },
+      { error: "Online giving isn't available right now. Choose Pay by check, or email Mr. Parker at robert.parker@nhcs.net." },
       { status: 503 }
     );
   }
