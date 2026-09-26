@@ -81,7 +81,6 @@ export default function SiteNav() {
             href="/admin"
             className="nav-manage"
             aria-current={pathname.startsWith("/admin") ? "page" : undefined}
-            style={{ fontWeight: 700, color: "#7b1829" }}
           >
             Manage
           </Link>

@@ -16,8 +16,12 @@ export default function RootLayout({ children }) {
         <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
       <body>
+        <a className="skip-link" href="#main-content">Skip to content</a>
         <SiteNav />
-        {children}
+        {/* Pages render their own <main>, so the skip target wraps them instead of adding a second main. */}
+        <div id="main-content" tabIndex={-1}>
+          {children}
+        </div>
         <SiteFooter />
       </body>
     </html>
