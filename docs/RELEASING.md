@@ -68,9 +68,13 @@ deployment branches limited to `main`, and these environment secrets (never past
 - `VERCEL_TOKEN`: a Vercel token for `robertparker-6198` with access to `robs-projects-9eb69de7`.
 - `BANDSOFAHS_DEPLOY_KEY`: private half of a read-only deploy key on `PARKERAROB/BandsofAHS`.
 
+GitHub offers required reviewers on private repositories only with GitHub Enterprise. Without one,
+the job starts when dispatched, so only start it on Rob's explicit release instruction.
+
 The runner uses the pushed `BandsofAHS` `main`, not a Mac working copy, so push calendar and roster
-changes there first. Actions logs are public: on failure the runner prints only check labels, and
-the full log is discarded with the runner. Reproduce the failing phase on the Mac to diagnose it.
+changes there first. While this repository is public its Actions logs are public: on failure the
+runner prints only check labels, and the full log is discarded with the runner. Reproduce the
+failing phase on the Mac to diagnose it. A private repository shows the usual log tail.
 
 ## Failure and recovery
 

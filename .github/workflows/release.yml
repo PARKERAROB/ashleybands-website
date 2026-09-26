@@ -29,7 +29,8 @@ jobs:
     timeout-minutes: 60
     env:
       NEXT_TELEMETRY_DISABLED: "1"
-      RELEASE_PUBLIC_OUTPUT: "1"
+      # Public repo logs are public: show check labels only. A private repo shows the usual log tail.
+      RELEASE_PUBLIC_OUTPUT: ${{ github.event.repository.private && '0' || '1' }}
       BANDSOFAHS_DIR: ${{ github.workspace }}/BandsofAHS
     defaults:
       run:
