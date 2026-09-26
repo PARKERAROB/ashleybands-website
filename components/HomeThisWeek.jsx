@@ -6,7 +6,7 @@ import { upcomingList } from "@/lib/thisWeek.mjs";
 import styles from "./HomeThisWeek.module.css";
 
 // Compact "This week" strip for the home page (#134). The home page prerenders on the
-// client, so the 7-day window is computed after mount to avoid a hydration mismatch.
+// client, so the window (7 days, through Sunday) is computed after mount to avoid a hydration mismatch.
 export default function HomeThisWeek() {
   const [items, setItems] = useState(null);
   const [total, setTotal] = useState(0);
@@ -20,7 +20,7 @@ export default function HomeThisWeek() {
         return response.json();
       })
       .then((rows) => {
-        const week = upcomingList(rows, Date.now(), { days: 7 });
+        const week = upcomingList(rows, Date.now(), { days: 7, throughWeekend: true });
         setTotal(week.length);
         setItems(week.slice(0, 4));
       })
@@ -47,7 +47,7 @@ export default function HomeThisWeek() {
   } else if (failed) {
     body = <p className={styles.empty}>Open the band calendar for current dates.</p>;
   } else if (items) {
-    body = <p className={styles.empty}>Nothing on the band calendar in the next 7 days.</p>;
+    body = <p className={styles.empty}>Nothing on the band calendar through the weekend.</p>;
   } else {
     body = <p className={styles.empty}>Loading this week&apos;s dates…</p>;
   }

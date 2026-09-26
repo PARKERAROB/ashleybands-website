@@ -6,10 +6,10 @@ import styles from "./page.module.css";
 
 export const metadata = {
   title: "This Week | Bands of AHS",
-  description: "Ashley Bands events for the next 7 days, from the official band calendar."
+  description: "Ashley Bands events from today through the weekend, from the official band calendar."
 };
 
-// Rechecks hourly so "Today" and the 7-day window move forward without a deploy (#134).
+// Rechecks hourly so "Today" and the window (7 days, through Sunday) move forward without a deploy (#134).
 export const revalidate = 3600;
 
 function issueDate(date) {
@@ -20,7 +20,7 @@ function issueDate(date) {
 
 // Read at render time (hourly, per `revalidate`), in the band's timezone.
 function currentWeek() {
-  return upcomingByDay(calendarEvents, Date.now(), { days: 7 });
+  return upcomingByDay(calendarEvents, Date.now(), { days: 7, throughWeekend: true });
 }
 
 export default async function ThisWeekPage() {
@@ -32,11 +32,11 @@ export default async function ThisWeekPage() {
     <main className={`narrow-page ${styles.page}`}>
       <p className="eyebrow">For students and families</p>
       <h1>This week</h1>
-      <p className="lede">Band events for the next 7 days, from the official band calendar.</p>
+      <p className="lede">Band events from today through the weekend, from the official band calendar.</p>
 
       {days.length === 0 ? (
         <section className={styles.empty} aria-label="This week">
-          <p>Nothing on the band calendar in the next 7 days.</p>
+          <p>Nothing on the band calendar through the weekend.</p>
           <Link className="text-link" href="/calendar">See the full band calendar</Link>
         </section>
       ) : (

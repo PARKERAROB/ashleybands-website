@@ -7,6 +7,7 @@ import {
   timeText,
   upcomingByDay,
   upcomingList,
+  windowEnd,
   zonedNow
 } from "../lib/thisWeek.mjs";
 
@@ -125,4 +126,23 @@ test("assistant context lists date, title, time, and location", () => {
   assert(text.includes("Event evt-late, Starts 8am"));
   assert(!text.includes("evt-past"));
   assert(!text.includes("12am"));
+});
+
+test("through the weekend: the window stretches to the following Sunday (#143)", () => {
+  // Saturday Sept 26: 7 days would end Friday Oct 2; the weekend runs through Sunday Oct 4.
+  const days = upcomingByDay(EVENTS, NOW, { throughWeekend: true });
+  const ids = days.flatMap((d) => d.events.map((e) => e.id));
+  assert(ids.includes("evt-next"));
+  assert(ids.includes("evt-out"));
+  assert.equal(days.at(-1).date, "2026-10-04");
+  assert.equal(windowEnd("2026-09-26", { throughWeekend: true }), "2026-10-04");
+  // Sunday: 7 days end Saturday, so Sunday is added.
+  assert.equal(windowEnd("2026-09-27", { throughWeekend: true }), "2026-10-04");
+  // Monday: 7 days already end on Sunday.
+  assert.equal(windowEnd("2026-09-28", { throughWeekend: true }), "2026-10-04");
+  // Wednesday: runs through the next Sunday.
+  assert.equal(windowEnd("2026-09-30", { throughWeekend: true }), "2026-10-11");
+  // Default stays a plain 7 days.
+  assert.equal(windowEnd("2026-09-26"), "2026-10-02");
+  assert.equal(upcomingList(EVENTS, NOW, { throughWeekend: true }).at(-1).id, "evt-out");
 });
