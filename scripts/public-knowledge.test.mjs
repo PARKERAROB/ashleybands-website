@@ -25,13 +25,14 @@ test("Carnegie answers preserve conditional funding and distinct deposit choices
   }
   assert(knowledge.includes("/carnegie-2027/commit"));
   assert(!knowledge.includes("PERRY'S POPCORN FUNDRAISER"), "ended fundraisers leave the assistant (#113)");
-  assert(!knowledge.includes("ASHLEY BANDS MATTRESS FUNDRAISER"), "the mattress sale ended September 26 (#123)");
 });
 
 test("ended fundraisers leave current lists by archive flag or endsAt (#123)", () => {
   const mattress = data.fundraisers.find((item) => item.slug === "mattress");
-  assert.equal(mattress.archived, true);
-  assert.match(mattress.status, /^Ended September 26/);
+  // The sale stays listed until 4:00 p.m. Eastern on September 26, then leaves on its own.
+  assert.notEqual(mattress.archived, true);
+  assert.equal(isCurrentFundraiser(mattress, Date.parse("2026-09-26T15:59:00-04:00")), true);
+  assert.equal(isCurrentFundraiser(mattress, Date.parse("2026-09-26T16:00:00-04:00")), false);
   const open = { slug: "x", endsAt: "2026-09-27T04:00:00.000Z" };
   assert.equal(isCurrentFundraiser(open, Date.parse("2026-09-26T23:59:59-04:00")), true);
   assert.equal(isCurrentFundraiser(open, Date.parse("2026-09-27T00:00:00-04:00")), false);

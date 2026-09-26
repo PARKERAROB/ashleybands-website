@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-26T10:54:35.521Z",
+  "generatedAt": "2026-09-26T12:36:10.763Z",
   "sourceRoot": "content/pka-sources",
   "program": {
     "name": "Bands of Ashley High School",
@@ -61,11 +61,10 @@
     {
       "slug": "mattress",
       "title": "Ashley Bands Mattress Fundraiser",
-      "summary": "This fundraiser ended September 26. Thank you to everyone who shopped and shared.",
-      "status": "Ended September 26. Thank you.",
-      "timing": "Ended Saturday, September 26",
-      "archived": true,
-      "endsAt": "2026-09-27T04:00:00.000Z",
+      "summary": "Find one household that needs a mattress and invite them personally to the sale.",
+      "status": "Today until 4:00 p.m.",
+      "timing": "Saturday, September 26 · 10:00 a.m.-4:00 p.m.",
+      "endsAt": "2026-09-26T20:00:00.000Z",
       "location": "Ashley High School full-size gym",
       "source": "content/sources/fundraising/mattress.md",
       "externalHref": "https://raleigh.cfsbeds.com/events/eugene-ashley-high-school",
