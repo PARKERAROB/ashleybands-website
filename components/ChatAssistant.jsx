@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { calendarContextText } from "@/lib/thisWeek.mjs";
 
 const welcome = {
   role: "assistant",
@@ -36,6 +37,7 @@ export default function ChatAssistant() {
   const [messages, setMessages] = useState([welcome]);
   const [question, setQuestion] = useState("");
   const [knowledge, setKnowledge] = useState("");
+  const [calendarEvents, setCalendarEvents] = useState(undefined); // undefined while loading, null if it failed
   const [isLoading, setIsLoading] = useState(false);
   const endRef = useRef(null);
   const autoSubmittedRef = useRef(false);
@@ -45,6 +47,11 @@ export default function ChatAssistant() {
       .then((res) => res.text())
       .then(setKnowledge)
       .catch(() => setKnowledge(""));
+    // The next 30 days come from the live calendar file at question time, so answers stay current (#134).
+    fetch("/calendar-data.json")
+      .then((res) => (res.ok ? res.json() : null))
+      .then(setCalendarEvents)
+      .catch(() => setCalendarEvents(null));
   }, []);
 
   useEffect(() => {
@@ -53,11 +60,11 @@ export default function ChatAssistant() {
 
   useEffect(() => {
     const q = searchParams.get("q");
-    if (q && knowledge && !autoSubmittedRef.current) {
+    if (q && knowledge && calendarEvents !== undefined && !autoSubmittedRef.current) {
       autoSubmittedRef.current = true;
       askQuestion(q);
     }
-  }, [knowledge, searchParams]);
+  }, [knowledge, calendarEvents, searchParams]);
 
   async function askQuestion(text) {
     const trimmed = text.trim();
@@ -73,6 +80,8 @@ Your only job is to answer questions using the public band program information p
 
 PUBLIC BAND INFORMATION:
 ${knowledge || "(No public information loaded. Tell the user to contact Mr. Parker directly.)"}
+
+${calendarEvents ? calendarContextText(calendarEvents, Date.now(), { days: 30 }) : "(The upcoming calendar did not load. Point families to ashleybands.com/this-week and ashleybands.com/calendar.)"}
 
 Rules:
 1. Only answer band questions using the information above. Never invent band details.

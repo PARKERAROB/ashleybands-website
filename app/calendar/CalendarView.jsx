@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { findAnchoredEvent, zonedNow } from "@/lib/thisWeek.mjs";
 
 const MONTHS = ["January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"];
@@ -149,10 +150,27 @@ export default function CalendarView() {
         });
         const a = next ? ymd(next.start) : { y: today.getFullYear(), m: today.getMonth() };
         setCursor({ y: a.y, m: a.m });
+        openFromHash(rows);
       })
       .catch(() => setEvents([]));
 
   }, []);
+
+  // Deep link from /this-week: /calendar#<event id>-<YYYY-MM-DD> opens that event in its month (#134).
+  function openFromHash(rows) {
+    const ev = findAnchoredEvent(rows, window.location.hash, zonedNow(Date.now()).date);
+    if (!ev) return;
+    const a = ymd(ev.start);
+    setCursor({ y: a.y, m: a.m });
+    setOpenEvent(ev);
+  }
+
+  useEffect(() => {
+    if (!events) return undefined;
+    const onHash = () => openFromHash(events);
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, [events]);
 
   useEffect(() => {
     const onKey = (e) => {

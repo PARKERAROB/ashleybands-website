@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import HomeUpcomingEvents from "@/components/HomeUpcomingEvents";
+import HomeThisWeek from "@/components/HomeThisWeek";
 import NewsletterSignup from "@/components/NewsletterSignup";
 import CarnegieFunding from "@/components/CarnegieFunding";
 import MattressSaleBanner from "@/components/MattressSaleBanner";
@@ -13,6 +13,7 @@ import { getSiteData } from "@/lib/siteData";
 import { CARNEGIE_SUPPORTERS } from "@/lib/carnegieSupporters.mjs";
 
 const PROMPTS = [
+  "What's happening this week?",
   "Where can I find upcoming band dates?",
   "What do students need for band?",
   "How do I subscribe to the calendar?",
@@ -92,6 +93,8 @@ export default function HomePage() {
           <figcaption>Carnegie Hall · View from the Perlman Stage</figcaption>
         </figure>
       </section>
+
+      <HomeThisWeek />
 
       <CarnegieFunding />
 
@@ -177,7 +180,7 @@ export default function HomePage() {
 
 
       <section className="home-now" aria-labelledby="home-now-title">
-        <div className="home-container home-now-grid">
+        <div className="home-container">
           <div className="home-now-actions">
             <div className="home-heading">
               <p className="eyebrow">For students and families</p>
@@ -235,7 +238,6 @@ export default function HomePage() {
               </li>
             </ul>
           </div>
-          <HomeUpcomingEvents />
         </div>
       </section>
 
