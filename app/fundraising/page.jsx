@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PageHeader from "@/components/ui/PageHeader";
 import { getCurrentFundraisers } from "@/lib/siteData";
 
 export const metadata = {
@@ -14,14 +15,12 @@ export default function FundraisingPage() {
 
   return (
     <main className="fundraising-page">
-      <header className="fundraising-masthead">
-        <p className="eyebrow">Support Ashley Bands</p>
-        <h1>Current fundraisers</h1>
-        <p className="lede">
-          Pick the fundraiser you need. Each page has the current dates, the exact steps, and one
-          clear link to share.
-        </p>
-      </header>
+      <PageHeader
+        className="fundraising-masthead"
+        eyebrow="Support Ashley Bands"
+        title="Current fundraisers"
+        lede="Pick the fundraiser you need. Each page has the current dates, the exact steps, and one clear link to share."
+      />
 
       {fundraisers.length === 0 ? (
         <section className="fundraising-more" aria-label="Current Ashley Bands fundraisers">

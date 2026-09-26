@@ -456,7 +456,7 @@ function Styles() {
         text-transform: uppercase;
         letter-spacing: 2px;
         font-size: 12px;
-        color: #7b1829;
+        color: var(--garnet);
         font-weight: 700;
         margin: 0 0 4px;
       }
@@ -504,9 +504,9 @@ function Styles() {
         cursor: pointer;
       }
       .give-amounts button[aria-pressed="true"] {
-        border-color: #7b1829;
+        border-color: var(--garnet);
         background: #f7e4e7;
-        color: #7b1829;
+        color: var(--garnet);
       }
       .give-grid {
         display: grid;
@@ -535,14 +535,14 @@ function Styles() {
         color: #3a2f26;
       }
       .give-tab.on {
-        background: #7b1829;
-        border-color: #7b1829;
+        background: var(--garnet);
+        border-color: var(--garnet);
         color: #fff;
       }
       .give-btn {
-        border: 1px solid #7b1829;
+        border: 1px solid var(--garnet);
         background: #fff;
-        color: #7b1829;
+        color: var(--garnet);
         border-radius: 8px;
         padding: 11px 18px;
         font-size: 15px;
@@ -551,7 +551,7 @@ function Styles() {
         width: 100%;
       }
       .give-btn-primary {
-        background: #7b1829;
+        background: var(--garnet);
         color: #fff;
       }
       .give-paypal {
@@ -568,11 +568,11 @@ function Styles() {
         font-size: 14px;
       }
       .give-error {
-        color: #7b1829;
+        color: var(--garnet);
         font-weight: 600;
       }
       .give-shell a {
-        color: #7b1829;
+        color: var(--garnet);
       }
     `}</style>
   );

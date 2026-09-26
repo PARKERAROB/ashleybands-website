@@ -1,4 +1,5 @@
 import CalendarView from "./CalendarView";
+import PageHeader from "@/components/ui/PageHeader";
 
 export const metadata = {
   title: "Band Calendar | Bands of AHS",
@@ -8,12 +9,11 @@ export const metadata = {
 export default function CalendarPage() {
   return (
     <main className="narrow-page">
-      <p className="eyebrow">Official Dates</p>
-      <h1>Band Calendar</h1>
-      <p className="lede">
-        This is the source of truth for every band event. Subscribe once and new dates and time
-        changes show up on your phone automatically. No need to check back.
-      </p>
+      <PageHeader
+        eyebrow="Official Dates"
+        title="Band Calendar"
+        lede="This is the source of truth for every band event. Subscribe once and new dates and time changes show up on your phone automatically. No need to check back."
+      />
 
       <div className="cal-subscribe">
         <a className="button primary" href="webcal://ashleybands.com/calendar.ics">

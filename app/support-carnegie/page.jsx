@@ -4,6 +4,8 @@ import GiveClient from "@/app/sponsors/give/GiveClient";
 import CarnegieFunding from "@/components/CarnegieFunding";
 import { CARNEGIE_CAMPAIGN, CARNEGIE_PURPOSE } from "@/lib/sponsorCampaigns.mjs";
 import { SPONSOR_CONTACT } from "@/lib/sponsorshipContent";
+import PageHeader from "@/components/ui/PageHeader";
+import { ButtonLink } from "@/components/ui/Button";
 import "./giving.css";
 
 export const metadata = {
@@ -14,14 +16,20 @@ export const metadata = {
 export default function CarnegieGivingPage() {
   return (
     <main className="carnegie-giving">
-      <header className="carnegie-giving-intro">
-        <p className="eyebrow">Ashley High School Bands · Wilmington, NC</p>
-        <h1>Help Ashley students<br />take the stage.</h1>
-        <p className="carnegie-giving-lede">Six years after COVID nearly ended the program, both Ashley concert bands will play Carnegie Hall on March 25, 2027.</p>
+      <PageHeader
+        className="carnegie-giving-intro"
+        eyebrow="Ashley High School Bands · Wilmington, NC"
+        title={<>Help Ashley students<br />take the stage.</>}
+        lede="Six years after COVID nearly ended the program, both Ashley concert bands will play Carnegie Hall on March 25, 2027."
+        actions={
+          <>
+            <ButtonLink href="#make-a-gift">Make a gift</ButtonLink>
+            <ButtonLink href="/our-story" variant="quiet">Read our story <span aria-hidden="true">→</span></ButtonLink>
+          </>
+        }
+      >
         <p>Your gift goes to the group trip. It lowers the cost for every student who goes.</p>
-        <a href="#make-a-gift" className="home-btn home-btn-primary">Make a gift</a>{" "}
-        <Link className="carnegie-giving-detail-link" href="/our-story">Read our story →</Link>
-      </header>
+      </PageHeader>
       <CarnegieFunding />
       <div className="carnegie-giving-layout">
         <section id="make-a-gift" aria-label="Make a Carnegie campaign gift">

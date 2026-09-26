@@ -8,7 +8,7 @@
 .hero {
   padding: 30px clamp(16px, 4vw, 48px) 24px;
   color: #fffaf0;
-  background: #4f101c;
+  background: var(--garnet-dark);
 }
 
 .eyebrow {
@@ -58,7 +58,7 @@
   text-transform: uppercase;
 }
 
-.pastLabel { color: #4f101c; background: #f4e5b6; }
+.pastLabel { color: var(--garnet-dark); background: #f4e5b6; }
 .provisionalBadge { color: #735700; background: #f4e5b6; }
 
 .eventPicker {
@@ -168,7 +168,7 @@
 }
 
 .rosterStateHistorical { border-color: #a98b63; background: #f0e5d6; }
-.rosterState strong { color: #4f101c; }
+.rosterState strong { color: var(--garnet-dark); }
 .rosterState p { margin: 4px 0 0; color: #5f574b; font-size: 0.86rem; line-height: 1.45; }
 .rosterState button,
 .loadFailure button {
@@ -178,7 +178,7 @@
   border: 0;
   border-radius: 7px;
   color: #fff;
-  background: #7b1829;
+  background: var(--garnet);
   font: inherit;
   font-weight: 800;
   cursor: pointer;
@@ -200,7 +200,7 @@
   background: #fffaf0;
   text-align: center;
 }
-.loadFailure h1 { margin: 0; color: #4f101c; font-family: 'DM Serif Display', Georgia, serif; }
+.loadFailure h1 { margin: 0; color: var(--garnet-dark); font-family: 'DM Serif Display', Georgia, serif; }
 .loadFailure p { color: #6f675a; }
 
 .staffSection {
@@ -212,7 +212,7 @@
   background: #fff9e6;
 }
 
-.staffSection .eyebrow { color: #7b1829; }
+.staffSection .eyebrow { color: var(--garnet); }
 
 .compactSummary {
   min-height: 44px;
@@ -222,14 +222,14 @@
   gap: 16px;
   margin: -16px;
   padding: 13px 16px;
-  color: #4f101c;
+  color: var(--garnet-dark);
   cursor: pointer;
   list-style: none;
 }
 
 .compactSummary::-webkit-details-marker { display: none; }
 .compactSummary > span { display: flex; flex-direction: column; gap: 2px; }
-.compactSummary small { color: #7b1829; font-size: 0.65rem; font-weight: 850; letter-spacing: 0.06em; text-transform: uppercase; }
+.compactSummary small { color: var(--garnet); font-size: 0.65rem; font-weight: 850; letter-spacing: 0.06em; text-transform: uppercase; }
 .compactSummary span > strong { font-size: 1rem; }
 .compactSummary > strong { font-size: 1.15rem; white-space: nowrap; }
 .compactSummary::after { content: "+"; font-size: 1.25rem; font-weight: 800; }
@@ -245,9 +245,9 @@ details[open] > .compactSummary::after { content: "−"; }
   gap: 18px;
 }
 
-.staffHeading h2 { margin: 0; color: #4f101c; font-size: 1.3rem; }
+.staffHeading h2 { margin: 0; color: var(--garnet-dark); font-size: 1.3rem; }
 .staffHeading p:not(.eyebrow) { margin: 5px 0 0; color: #665f53; font-size: 0.85rem; }
-.staffHeading > strong { color: #4f101c; font-size: 1.45rem; white-space: nowrap; }
+.staffHeading > strong { color: var(--garnet-dark); font-size: 1.45rem; white-space: nowrap; }
 
 .staffList {
   display: grid;
@@ -303,7 +303,7 @@ details[open] > .compactSummary::after { content: "−"; }
 
 .staffStatusButton:disabled { cursor: wait; opacity: 0.58; }
 .staffStatusButton.present.selected { color: #fff; border-color: #36543d; background: #446349; }
-.staffStatusButton.absent.selected { color: #fff; border-color: #7d1e2a; background: #a32436; }
+.staffStatusButton.absent.selected { color: #fff; border-color: var(--garnet); background: #a32436; }
 .staffStatusButton.late.selected { color: #251d05; border-color: #b68e16; background: #e2bd45; }
 .staffStatusButton.left_early.selected { color: #fff; border-color: #6b486f; background: #7c5681; }
 
@@ -349,7 +349,7 @@ details[open] > .compactSummary::after { content: "−"; }
   border: 0;
   border-radius: 7px;
   color: #fff;
-  background: #7b1829;
+  background: var(--garnet);
   font: inherit;
   font-weight: 800;
   cursor: pointer;
@@ -393,7 +393,7 @@ details[open] > .compactSummary::after { content: "−"; }
   background: #fffaf0;
 }
 
-.expected .eyebrow { color: #7b1829; }
+.expected .eyebrow { color: var(--garnet); }
 
 .expectedHeading {
   display: flex;
@@ -402,8 +402,8 @@ details[open] > .compactSummary::after { content: "−"; }
   gap: 16px;
 }
 
-.expectedHeading h2 { margin: 0; color: #4f101c; font-size: 1.15rem; }
-.expectedHeading > strong { color: #4f101c; font-size: 1.7rem; }
+.expectedHeading h2 { margin: 0; color: var(--garnet-dark); font-size: 1.15rem; }
+.expectedHeading > strong { color: var(--garnet-dark); font-size: 1.7rem; }
 
 .expected ul {
   display: grid;
@@ -462,7 +462,7 @@ details[open] > .compactSummary::after { content: "−"; }
   border: 0;
   border-radius: 7px;
   color: #fff;
-  background: #7b1829;
+  background: var(--garnet);
   font: inherit;
   font-weight: 800;
   cursor: pointer;
@@ -568,7 +568,7 @@ details[open] > .compactSummary::after { content: "−"; }
 
 .sectionTitle {
   margin: 22px 0 7px;
-  color: #4f101c;
+  color: var(--garnet-dark);
   font-size: 0.78rem;
   font-weight: 900;
   letter-spacing: 0.08em;
@@ -647,7 +647,7 @@ details[open] > .compactSummary::after { content: "−"; }
 .statusButton:disabled { cursor: wait; opacity: 0.58; }
 .statusButton.present.selected { color: #fff; border-color: #36543d; background: #446349; }
 .statusButton.tardy.selected { color: #251d05; border-color: #b68e16; background: #e2bd45; }
-.statusButton.absent.selected { color: #fff; border-color: #7d1e2a; background: #a32436; }
+.statusButton.absent.selected { color: #fff; border-color: var(--garnet); background: #a32436; }
 
 .noteToggle {
   display: block;
@@ -794,7 +794,7 @@ details[open] > .compactSummary::after { content: "−"; }
   border: 0;
   border-radius: 7px;
   color: #fff;
-  background: #7b1829;
+  background: var(--garnet);
   font: inherit;
   font-size: 0.8rem;
   font-weight: 800;
@@ -874,7 +874,7 @@ details[open] > .compactSummary::after { content: "−"; }
   border: 0;
   border-radius: 8px;
   color: #fff;
-  background: #7b1829;
+  background: var(--garnet);
   font: inherit;
   font-weight: 800;
   cursor: pointer;
@@ -902,10 +902,10 @@ details[open] > .compactSummary::after { content: "−"; }
   border: 1px solid #d9cfbc;
   border-radius: 10px;
   background: #fffaf0;
-  box-shadow: inset 0 6px 0 #7b1829, 0 18px 55px rgba(35, 27, 18, 0.13);
+  box-shadow: inset 0 6px 0 var(--garnet), 0 18px 55px rgba(35, 27, 18, 0.13);
 }
 
-.gate h1 { color: #4f101c; }
+.gate h1 { color: var(--garnet-dark); }
 .gate > p:not(.eyebrow):not(.gateError) { margin: 12px 0 24px; color: #6f675a; }
 
 .gate label {
