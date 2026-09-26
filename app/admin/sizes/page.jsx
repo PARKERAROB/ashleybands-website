@@ -70,7 +70,7 @@ function SizesTable({ session }) {
         </span>
       </div>
       <p style={{ color: "#6f675a", fontSize: 13.5, margin: "6px 0 0" }}>
-        Final size uses the largest result from chest, waist or hip. Small is the minimum except for Hyeyul Um at XS.
+        Final size uses the largest result from chest, waist or hip. Small is the minimum, except for one student with an approved XS minimum.
         Classic Tops are Regular unless height is over 6&apos;1&quot;, which is Tall. Neck, arm and inseam are hemming numbers.
         A manual change stays in place until it is reset.
       </p>
