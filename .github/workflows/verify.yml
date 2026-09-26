@@ -19,8 +19,12 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      - name: Lint the security gate
-        run: npx eslint scripts/security-boundary.test.mjs
+      - name: Lint
+        run: npx eslint .
+      - name: Route registry and public privacy guardrail
+        run: |
+          npm run test:routes
+          npm run test:privacy
       - name: Test prototypes and domain rules
         run: |
           npm run test:onboarding
@@ -36,3 +40,14 @@ jobs:
           npm run test:newsletter
           npm run test:security
           npm run test:local-preview
+      - name: Build
+        # Dummy values only. The build must not need secrets; nothing here reaches a real service.
+        run: npx next build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:9
+          SUPABASE_URL: http://127.0.0.1:9
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: x
+          SUPABASE_ANON_KEY: x
+          SUPABASE_SECRET_KEY: x
+          PORTAL_SESSION_SECRET: localreviewsecretlocalreviewsecret

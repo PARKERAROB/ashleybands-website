@@ -2,56 +2,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-
-const HIDDEN_FOOTER_ROUTES = ["/raleigh-brief", "/attendance", "/day-1-agenda", "/regiment-os", "/carnegie-2027/team"];
-
-const COLUMNS = [
-  {
-    heading: "The Program",
-    links: [
-      { href: "/", label: "Home" },
-      { href: "/info/2026-2027-band-information", label: "2026-2027 Band Information" },
-      { href: "/info/marching-band-2026", label: "Marching Band 2026" },
-      { href: "/calendar", label: "Band Calendar" },
-      { href: "/newsletter", label: "AshleyBands Weekly" },
-      { href: "/handbook", label: "Handbook" },
-      { href: "/repertoire", label: "Performed Repertoire" },
-      { href: "/programs", label: "Concert Programs" }
-    ]
-  },
-  {
-    heading: "For Families",
-    links: [
-      { href: "/portal", label: "Family Portal" },
-      { href: "/portal/request", label: "Request Portal Access" },
-      { href: "/info/required-items", label: "Required Items" },
-      { href: "/info/the-band-folder", label: "Student Resources" },
-      { href: "https://ashleybandshirts.printify.me/", label: "Band Shirts Store", external: true }
-    ]
-  },
-  {
-    heading: "Support the Band",
-    links: [
-      { href: "/sponsors", label: "Become a Sponsor" },
-      { href: "/info/marching-band-funding", label: "Marching Band Funding" },
-      { href: "/fundraising", label: "Current Fundraisers" },
-      { href: "/boosters", label: "Band Boosters" }
-    ]
-  },
-  {
-    heading: "More",
-    links: [
-      { href: "/assistant", label: "Ask the Band Assistant" },
-      { href: "/sitemap-page", label: "Site map" },
-      { href: "/privacy", label: "Privacy Notice" },
-      { href: "/admin", label: "Staff Sign-In" }
-    ]
-  }
-];
+import { FOOTER_COLUMNS, hidesSiteChrome } from "@/lib/routes";
 
 export default function SiteFooter() {
   const pathname = usePathname();
-  if (HIDDEN_FOOTER_ROUTES.includes(pathname)) return null;
+  if (hidesSiteChrome(pathname)) return null;
 
   return (
     <footer className="site-footer">
@@ -75,7 +30,7 @@ export default function SiteFooter() {
           </p>
         </div>
         <nav className="site-footer-cols" aria-label="Footer">
-          {COLUMNS.map((col) => (
+          {FOOTER_COLUMNS.map((col) => (
             <div className="site-footer-col" key={col.heading}>
               <p className="site-footer-heading">{col.heading}</p>
               <ul>

@@ -1,3 +1,4 @@
+import ArchiveBanner from "@/components/ArchiveBanner";
 export const metadata = {
   title: "Spring Trip Recovery Updates | Bands of AHS",
   description: "Family-facing status updates for the Ashley Bands Spring Trip 2026 cancellation recovery process."
@@ -205,6 +206,7 @@ export default function SpringTripRecoveryPage() {
   return (
     <main className="recovery-page">
       <section className="recovery-hero">
+        <ArchiveBanner event="the spring 2026 trip recovery" />
         <p className="eyebrow">Spring Trip 2026</p>
         <h1>Recovery Updates</h1>
         <p>
