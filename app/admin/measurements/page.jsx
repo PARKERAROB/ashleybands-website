@@ -135,6 +135,7 @@ function MeasurementsAdmin({ session }) {
           <a href="/admin" style={link}>Staff home</a>
         </span>
       </div>
+      <p style={{ color: "#6f675a", fontSize: 14, margin: "6px 0 0" }}>Record each student&apos;s uniform measurements and see who still needs to be measured.</p>
       <p style={{ color: "#6f675a", fontSize: 14 }}>
         {measuredCount != null ? `${measuredCount} students measured` : "Loading progress…"}
       </p>
