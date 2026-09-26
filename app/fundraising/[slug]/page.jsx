@@ -61,7 +61,7 @@ export default async function FundraiserPage({ params }) {
           <MarkdownBlock markdown={fundraiser.body} />
         )}
 
-        {fundraiser.flyers?.length ? (
+        {fundraiser.flyers?.length && !fundraiser.archived ? (
           <section className="fundraiser-flyers" aria-labelledby="fundraiser-flyers-title">
             <p className="eyebrow">Save or share</p>
             <h2 id="fundraiser-flyers-title">Fundraiser flyers</h2>

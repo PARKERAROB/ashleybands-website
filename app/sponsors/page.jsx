@@ -54,7 +54,7 @@ export default async function SponsorsHubPage() {
           Families, alumni, friends, and businesses help fund staff, transportation, scholarships,
           and instruments. Give $5 or more, choose a sponsorship level, or help provide an instrument.
         </p>
-        <p>These giving options support the band program. For Carnegie Hall campaign support, <a href={`mailto:${SPONSOR_CONTACT.email}`}>contact Mr. Parker</a> or <Link href="/fundraising">explore current fundraisers</Link>.</p>
+        <p>Giving to the Carnegie Hall trip? <Link href="/support-carnegie">Give to the Carnegie trip</Link>. The options below support the year-round band program.</p>
         <div className="sponsors-cta-row">
           <Link href="/sponsors/give" className="sponsors-btn sponsors-btn-primary">
             Give now
@@ -203,11 +203,11 @@ export default async function SponsorsHubPage() {
       </section>
 
       <section className="sponsors-section sponsors-contact">
-        <p className="eyebrow">Next step</p>
-        <h2>Contact the director directly</h2>
+        <p className="eyebrow">Talk with Mr. Parker</p>
+        <h2>Questions or a custom sponsorship?</h2>
         <p>
-          To sponsor, talk through which path fits your business, or request the
-          instrument-by-instrument package menu:
+          Ready now? <Link href="/sponsors/give">Give online</Link>. To talk through Adopt-an-Instrument,
+          a multi-year partnership, or which level fits your business, email or call Mr. Parker:
         </p>
         <p className="sponsors-contact-block">
           <strong>{SPONSOR_CONTACT.director}</strong>, {SPONSOR_CONTACT.title}
@@ -224,9 +224,6 @@ export default async function SponsorsHubPage() {
         <p>
           Band family running outreach? →{" "}
           <Link href="/portal/sponsorship">Open family sponsorship</Link>
-        </p>
-        <p className="sponsors-footer-staff">
-          <Link href="/sponsors/dashboard">Staff dashboard</Link>
         </p>
       </footer>
     </main>

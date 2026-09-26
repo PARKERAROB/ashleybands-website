@@ -42,7 +42,7 @@ const COLUMNS = [
     heading: "More",
     links: [
       { href: "/assistant", label: "Ask the Band Assistant" },
-      { href: "/sitemap-page", label: "Site Map (every page)" },
+      { href: "/sitemap-page", label: "Site map" },
       { href: "/privacy", label: "Privacy Notice" },
       { href: "/admin", label: "Staff Sign-In" }
     ]
@@ -66,7 +66,13 @@ export default function SiteFooter() {
             <br />
             Wilmington, NC 28412
           </p>
-          <p className="site-footer-addr">Robert A. Parker, Director of Bands</p>
+          <p className="site-footer-addr">
+            Robert A. Parker, Director of Bands
+            <br />
+            <a href="mailto:robert.parker@nhcs.net">robert.parker@nhcs.net</a>
+            <br />
+            <a href="tel:+19107902360">(910) 790-2360</a>
+          </p>
         </div>
         <nav className="site-footer-cols" aria-label="Footer">
           {COLUMNS.map((col) => (

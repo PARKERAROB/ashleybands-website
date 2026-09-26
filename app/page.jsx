@@ -41,6 +41,9 @@ const INFO_GROUPS = [
 
 export default function HomePage() {
   const data = getSiteData();
+  // Archived only: this page prerenders on the client, so a time check here could mismatch on hydration.
+  // /fundraising also applies the optional endsAt date (#123).
+  const currentFundraisers = data.fundraisers.filter((fundraiser) => !fundraiser.archived);
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [giveKind, setGiveKind] = useState("personal");
@@ -198,17 +201,29 @@ export default function HomePage() {
                 <p className="home-now-tag">Ways to help</p>
                 <h3>Current fundraisers</h3>
                 <p>Campaign dates, student-credit instructions, and links to share with friends and family.</p>
-                <ul className="home-fundraisers">
-                  {data.fundraisers.filter((fundraiser) => !fundraiser.archived).map((fundraiser) => (
-                    <li key={fundraiser.slug}>
-                      <Link href={`/fundraising/${fundraiser.slug}`}>{fundraiser.title}</Link>
-                      <span>{fundraiser.timing || fundraiser.status}</span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="home-links">
-                  <Link href="/fundraising">All current fundraisers</Link>
-                </div>
+                {currentFundraisers.length ? (
+                  <>
+                    <ul className="home-fundraisers">
+                      {currentFundraisers.map((fundraiser) => (
+                        <li key={fundraiser.slug}>
+                          <Link href={`/fundraising/${fundraiser.slug}`}>{fundraiser.title}</Link>
+                          <span>{fundraiser.timing || fundraiser.status}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="home-links">
+                      <Link href="/fundraising">All current fundraisers</Link>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p>No fundraiser is running right now. You can still give to the Carnegie trip or sponsor the band.</p>
+                    <div className="home-links">
+                      <Link href="/support-carnegie">Give to the Carnegie trip</Link>
+                      <Link href="/sponsors">Sponsor the band</Link>
+                    </div>
+                  </>
+                )}
               </li>
               <li className="home-now-item">
                 <p className="home-now-tag">Program news</p>

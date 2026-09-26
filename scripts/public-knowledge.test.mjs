@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
+import { isCurrentFundraiser } from "../lib/fundraiserStatus.mjs";
 
 const read = (file) => readFileSync(new URL(`../${file}`, import.meta.url), "utf8");
 const data = JSON.parse(read("content/site-data.json"));
@@ -24,5 +25,19 @@ test("Carnegie answers preserve conditional funding and distinct deposit choices
   }
   assert(knowledge.includes("/carnegie-2027/commit"));
   assert(!knowledge.includes("PERRY'S POPCORN FUNDRAISER"), "ended fundraisers leave the assistant (#113)");
-  assert(knowledge.includes("ASHLEY BANDS MATTRESS FUNDRAISER"));
+  assert(!knowledge.includes("ASHLEY BANDS MATTRESS FUNDRAISER"), "the mattress sale ended September 26 (#123)");
+});
+
+test("ended fundraisers leave current lists by archive flag or endsAt (#123)", () => {
+  const mattress = data.fundraisers.find((item) => item.slug === "mattress");
+  assert.equal(mattress.archived, true);
+  assert.match(mattress.status, /^Ended September 26/);
+  const open = { slug: "x", endsAt: "2026-09-27T04:00:00.000Z" };
+  assert.equal(isCurrentFundraiser(open, Date.parse("2026-09-26T23:59:59-04:00")), true);
+  assert.equal(isCurrentFundraiser(open, Date.parse("2026-09-27T00:00:00-04:00")), false);
+  assert.equal(isCurrentFundraiser({ slug: "y" }, Date.now()), true);
+  assert.equal(isCurrentFundraiser({ slug: "z", archived: true }, 0), false);
+  const bandInfo = data.pages.find((item) => item.slug === "2026-2027-band-information");
+  assert(!bandInfo.body.includes("mattress fundraiser"), "Band Info no longer lists the ended sale");
+  assert(bandInfo.body.includes("Band Words, Explained"));
 });

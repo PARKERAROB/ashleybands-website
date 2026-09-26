@@ -1,12 +1,16 @@
 import Link from "next/link";
-import { getSiteData } from "@/lib/siteData";
+import { getCurrentFundraisers, getSiteData } from "@/lib/siteData";
 
 export const metadata = {
-  title: "Site Map | Bands of AHS"
+  title: "Site map | Bands of AHS"
 };
 
 export default function SitemapPage() {
   const data = getSiteData();
+  const currentFundraisers = getCurrentFundraisers();
+  const endedFundraisers = data.fundraisers.filter(
+    (fundraiser) => !currentFundraisers.some((current) => current.slug === fundraiser.slug)
+  );
 
   const sections = [
     { label: "Current Information", category: "Current information" },
@@ -22,7 +26,8 @@ export default function SitemapPage() {
     { title: "AshleyBands Weekly", href: "/newsletter" },
     { title: "Band Boosters", href: "/boosters" },
     { title: "Current Fundraisers", href: "/fundraising" },
-    ...data.fundraisers.map((fundraiser) => ({ title: fundraiser.title, href: `/fundraising/${fundraiser.slug}` })),
+    ...currentFundraisers.map((fundraiser) => ({ title: fundraiser.title, href: `/fundraising/${fundraiser.slug}` })),
+    { title: "Give to the Carnegie Trip", href: "/support-carnegie" },
     { title: "Family Portal", href: "/portal" },
     { title: "Carnegie Hall 2027 Family Commitment", href: "/carnegie-2027/commit" },
     { title: "Carnegie Hall 2027 Family Meeting Packet", href: "/carnegie-2027/meeting-packet" },
@@ -31,10 +36,13 @@ export default function SitemapPage() {
     { title: "Program Archive", href: "/programs" },
     { title: "Spring Concert 2026 Program", href: "/programs/spring-concert-2026" },
     { title: "Handbook", href: "/handbook" },
+    { title: "Band Assistant", href: "/assistant" }
+  ];
+
+  // Past activities that are not info pages. They stay reachable for old links (#123).
+  const archiveExtras = [
     { title: "Spring Trip Recovery", href: "/spring-trip-recovery" },
-    { title: "Band Assistant", href: "/assistant" },
-    { title: "Instrument Inventory (submit)", href: "/instrument-inventory" },
-    { title: "Music Library (submit)", href: "/music-library" }
+    ...endedFundraisers.map((fundraiser) => ({ title: `${fundraiser.title} (ended)`, href: `/fundraising/${fundraiser.slug}` }))
   ];
 
   const sponsorPages = [
@@ -61,14 +69,15 @@ export default function SitemapPage() {
     { title: "Business Outreach Dashboard", href: "/sponsors/dashboard/businesses" },
     { title: "Staff Sprint", href: "/staff-sprint" },
     { title: "Staff Sprint - Teacher View", href: "/staff-sprint/teacher" },
-    { title: "Raleigh Brief", href: "/raleigh-brief" }
+    { title: "Instrument Inventory (staff entry)", href: "/instrument-inventory" },
+    { title: "Music Library (staff entry)", href: "/music-library" }
   ];
 
   return (
     <main className="narrow-page">
       <p className="eyebrow">Navigation</p>
-      <h1>Site Map</h1>
-      <p className="lede">Every page on the Bands of Ashley High School website.</p>
+      <h1>Site map</h1>
+      <p className="lede">The main pages on the Bands of Ashley High School website.</p>
 
       <section className="sitemap-section">
         <h2>Main Pages</h2>
@@ -93,6 +102,13 @@ export default function SitemapPage() {
                   <span className="sitemap-summary">{page.summary}</span>
                 </li>
               ))}
+              {section.category === "Archive"
+                ? archiveExtras.map((page) => (
+                    <li key={page.href}>
+                      <Link href={page.href}>{page.title}</Link>
+                    </li>
+                  ))
+                : null}
             </ul>
           </section>
         );
@@ -111,7 +127,7 @@ export default function SitemapPage() {
 
       <section className="sitemap-section">
         <h2>Staff / Internal</h2>
-        <p className="sitemap-summary">Sign-in required. Listed for quick access.</p>
+        <p className="sitemap-summary">For staff and volunteers. Most of these pages need a staff sign-in.</p>
         <ul className="sitemap-list">
           {staffPages.map((page) => (
             <li key={page.href}>

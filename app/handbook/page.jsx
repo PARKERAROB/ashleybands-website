@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export const metadata = {
   title: "Band Handbook | Bands of AHS",
   description: "Ashley High School Band Program Handbook"
@@ -9,6 +11,16 @@ export default function HandbookPage() {
       <p className="eyebrow">Students &amp; Families</p>
       <h1>Band Handbook</h1>
       <p className="lede">Program expectations, policies, and information for Ashley band members.</p>
+      <div className="notice" role="note" style={{ marginTop: "1.5rem" }}>
+        <p>
+          <strong>This is the 2023-24 handbook.</strong> Its policies still apply. Its dates, schedules
+          and funding amounts do not.
+        </p>
+        <p>
+          For current dates, use the <Link href="/calendar">Band Calendar</Link>. For this fall&apos;s
+          marching band, see <Link href="/info/marching-band-2026">Marching Band 2026</Link>.
+        </p>
+      </div>
       <div style={{ marginTop: "1.5rem" }}>
         <a
           href="/handbook.pdf"

@@ -40,7 +40,7 @@ export default async function NewsletterPage() {
               <h2>{latest.title}</h2>
               <p>{latest.preview_text}</p>
               <Link className="newsletter-primary-link" href={`/newsletter/${latest.slug}`}>
-                Read this week&apos;s issue
+                Read the latest issue, {displayDate(latest.issue_date)}
               </Link>
             </article>
           ) : (

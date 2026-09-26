@@ -31,11 +31,25 @@ May 11, 2027 at 7:00 PM
 
 ## Marching Band / Fall Dates
 
-Families should also review [Marching Band 2026](/info/marching-band-2026) for fall dates and expectations.
+Families should also review [Marching Band 2026](/info/marching-band-2026) for fall expectations.
 
-Fall dates include:
-- September 26, 2026 - mattress fundraiser
-- October 17, 2026 - Pirate Classic, confirmed / registered
+All fall dates, including games, competitions and parades, are on the [band calendar](/calendar).
+
+## Band Words, Explained
+
+**MPA (Music Performance Adjudication):** a festival where each concert band performs for judges and earns a rating. Superior is the top rating. The NC Bandmasters Association runs it, and Ashley hosts one site each March.
+
+**NCBA:** the North Carolina Bandmasters Association, the state band directors' group. "NCBA Eastern" is its eastern district.
+
+**CCC (Conductor's Clinic and Concert):** a working week, then a weekend clinic and a concert. In 2026, guest clinicians worked with every Ashley band. This year's concert is February 27, 2027 at 3:00 PM.
+
+**All-County, All-District and All-State:** honor bands made up of selected students from many schools. All-County is for New Hanover County schools. Students earn All-District and All-State spots by audition.
+
+**Call time:** the time students must be in place and ready, in the band room or on campus as listed. It is earlier than the start time of the event.
+
+**MEAC:** the Minnie Evans Arts Center at Ashley. The band room is in this building.
+
+**WSW:** the Wilmington Symphonic Winds, a community wind band in Wilmington.
 
 ## Communication
 

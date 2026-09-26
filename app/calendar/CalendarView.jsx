@@ -13,10 +13,10 @@ const CAT_GROUPS = [
   { label: "Concert", color: "#245c73", match: (c) => c === "Concert" },
   { label: "Jazz", color: "#1f6f6a", match: (c) => c === "Jazz" },
   { label: "Honor Bands", color: "#446349", match: (c) => ["AllCounty", "AllDistrict", "AllState"].includes(c) },
-  { label: "MPA", color: "#a9781f", match: (c) => c === "MPA" },
-  { label: "CCC", color: "#6b3a5b", match: (c) => c === "CCC" },
+  { label: "MPA (judged festival)", color: "#a9781f", match: (c) => c === "MPA" },
+  { label: "Conductor's Clinic (CCC)", color: "#6b3a5b", match: (c) => c === "CCC" },
   { label: "Trip", color: "#b5551f", match: (c) => c === "Trip" },
-  { label: "WSW", color: "#4a5a7a", match: (c) => c === "WSW" },
+  { label: "Wilmington Symphonic Winds (WSW)", color: "#4a5a7a", match: (c) => c === "WSW" },
   { label: "School", color: "#6f675a", match: (c) => c === "School" }
 ];
 const OTHER = { label: "Other", color: "#8a7f6d", match: () => true };

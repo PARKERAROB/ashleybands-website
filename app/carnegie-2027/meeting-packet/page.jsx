@@ -18,12 +18,19 @@ export default function CarnegieMeetingPacketPage() {
     <main className={styles.page}>
       <header className={styles.hero}>
         <div className={styles.heroInner}>
+          <div className={styles.recordBanner} role="note">
+            <p>
+              <strong>This is the record of the September 1, 2026 family meeting.</strong> The deposit and
+              payment dates in this packet have passed. For current trip information, see{" "}
+              <Link href="/info/carnegie-2027">Carnegie Hall 2027</Link>.
+            </p>
+          </div>
           <p className={styles.eyebrow}>Ashley Bands • Family information</p>
           <h1>{packet.title}</h1>
           <p className={styles.subtitle}>{packet.subtitle}</p>
           <p className={styles.summary}>{packet.summary}</p>
           <div className={styles.actions}>
-            <Link className={styles.primary} href="/carnegie-2027/commit">Complete the commitment</Link>
+            <Link className={styles.primary} href="/carnegie-2027/commit">Not responded yet? Open the current form</Link>
             <a className={styles.secondary} href={PDF_PATH} download>Download the PDF packet</a>
           </div>
         </div>
@@ -90,7 +97,7 @@ export default function CarnegieMeetingPacketPage() {
         </Section>
 
         <section className={styles.finalAction}>
-          <p className={styles.eyebrow}>Due Friday, September 4</p>
+          <p className={styles.eyebrow}>Originally due Friday, September 4</p>
           <h2>Give the band program a reliable answer</h2>
           <p>Complete one response per student. A serious yes creates the connected $50 conditional-deposit charge and lets the family pay immediately.</p>
           <div className={styles.actions}><Link className={styles.primary} href="/carnegie-2027/commit">Sign and continue to payment</Link><a className={styles.secondary} href={PDF_PATH} download>Keep the PDF packet</a></div>
