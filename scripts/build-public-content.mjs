@@ -183,12 +183,11 @@ const fundraisers = [
   {
     slug: "mattress",
     title: "Ashley Bands Mattress Fundraiser",
-    summary: "Find one household that needs a mattress and invite them personally to the sale.",
-    status: "Today until 4:00 p.m.",
-    timing: "Saturday, September 26 · 10:00 a.m.-4:00 p.m.",
-    // Optional: a fundraiser with endsAt leaves current lists once that moment passes (#123).
-    // The sale ends at 4:00 p.m. Eastern on September 26.
-    endsAt: "2026-09-26T20:00:00.000Z",
+    summary: "The mattress sale was Saturday, September 26. Thank you to everyone who came and shared.",
+    status: "Ended",
+    timing: "Ended Saturday, September 26",
+    // Ended campaigns keep their route for old links but leave current lists and the assistant (#113, #148).
+    archived: true,
     location: "Ashley High School full-size gym",
     source: sources.mattressFundraiser,
     externalHref: "https://raleigh.cfsbeds.com/events/eugene-ashley-high-school",
