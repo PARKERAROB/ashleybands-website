@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
@@ -10,8 +11,16 @@ function text(v) {
   return String(v || "").trim();
 }
 
+// One student has an approved XS minimum. The repo is public, so the exception is keyed
+// by a hash of the normalized display name instead of the name itself.
+const XS_MINIMUM_NAME_HASHES = new Set(["290d7462692e4f2729410d9656f80446bb0ce3acb99fbcbc4ebe1b1fbd5a6ba3"]);
+
+function nameHash(name) {
+  return crypto.createHash("sha256").update(text(name).toLowerCase().replace(/\s+/g, " ")).digest("hex");
+}
+
 function minimumSizeFor(student) {
-  return student.display_name === "Hyeyul Um" ? "XS" : "S";
+  return XS_MINIMUM_NAME_HASHES.has(nameHash(student.display_name)) ? "XS" : "S";
 }
 
 // Build the row the table renders: the recommendation is computed on read from the
