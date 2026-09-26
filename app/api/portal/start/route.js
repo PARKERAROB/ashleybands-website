@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { sendPortalCodeEmail } from "@/lib/portalEmail";
 import { createNumericCode, hashCode } from "@/lib/portalTokens";
 import { checkRateLimit, clientIp } from "@/lib/rateLimit";
+import { PORTAL_TROUBLE_MESSAGE } from "@/lib/portalFamilyMessages";
 
 export const runtime = "nodejs";
 
@@ -33,7 +34,8 @@ export async function POST(request) {
     .not("verification_status", "in", "(hard_bounce,replaced,superseded)");
 
   if (error) {
-    return NextResponse.json({ error: "Portal lookup failed." }, { status: 500 });
+    console.error("[portal-start] contact lookup failed:", error.message);
+    return NextResponse.json({ error: PORTAL_TROUBLE_MESSAGE }, { status: 500 });
   }
 
   if (!contacts?.length) {
@@ -67,7 +69,8 @@ export async function POST(request) {
     });
 
   if (insertError) {
-    return NextResponse.json({ error: "Could not create sign-in code." }, { status: 500 });
+    console.error("[portal-start] sign-in code insert failed:", insertError.message);
+    return NextResponse.json({ error: PORTAL_TROUBLE_MESSAGE }, { status: 500 });
   }
 
   try {

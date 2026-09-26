@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { createPortalSession, hashCode, readPortalSession, setPortalSessionCookie, MAX_CODE_ATTEMPTS } from "@/lib/portalTokens";
+import { PORTAL_TROUBLE_MESSAGE } from "@/lib/portalFamilyMessages";
 
 export const runtime = "nodejs";
 
@@ -43,7 +44,8 @@ export async function POST(request) {
     .maybeSingle();
 
   if (error) {
-    return NextResponse.json({ error: "Portal code lookup failed." }, { status: 500 });
+    console.error("[portal-session] code lookup failed:", error.message);
+    return NextResponse.json({ error: PORTAL_TROUBLE_MESSAGE }, { status: 500 });
   }
   if (!link || new Date(link.expires_at).getTime() < Date.now()) {
     return NextResponse.json({ error: BAD_CODE }, { status: 401 });
@@ -61,7 +63,8 @@ export async function POST(request) {
 
   const personId = link.portal_contact_methods?.person_id;
   if (!personId) {
-    return NextResponse.json({ error: "Portal contact is not linked to a person." }, { status: 500 });
+    console.error("[portal-session] contact method is not linked to a person:", link.contact_method_id);
+    return NextResponse.json({ error: PORTAL_TROUBLE_MESSAGE }, { status: 500 });
   }
 
   const now = new Date().toISOString();
@@ -86,7 +89,8 @@ export async function POST(request) {
   ]);
 
   if (linkError || contactError) {
-    return NextResponse.json({ error: "Could not verify the code." }, { status: 500 });
+    console.error("[portal-session] code consume failed:", (linkError || contactError)?.message);
+    return NextResponse.json({ error: PORTAL_TROUBLE_MESSAGE }, { status: 500 });
   }
 
   const session = createPortalSession({

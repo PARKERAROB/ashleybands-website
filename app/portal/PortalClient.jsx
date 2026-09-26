@@ -3,11 +3,12 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { isSafePortalNext } from "@/lib/portalFamilyMessages";
 
 function requestedDestination() {
   if (typeof window === "undefined") return "/portal/review";
   const requested = new URLSearchParams(window.location.search).get("next") || "";
-  return requested.startsWith("/portal/") && !requested.startsWith("//") ? requested : "/portal/review";
+  return isSafePortalNext(requested) ? requested : "/portal/review";
 }
 
 export default function PortalClient() {

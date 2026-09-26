@@ -2,12 +2,26 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { sendPortalReviewAlert, sendPortalAccessGrantedEmail } from "@/lib/portalEmail";
 import { hashCode, MAX_CODE_ATTEMPTS } from "@/lib/portalTokens";
+import { PORTAL_TROUBLE_MESSAGE } from "@/lib/portalFamilyMessages";
 
 export const runtime = "nodejs";
 
 const BAD_CODE = "That code is incorrect or expired. Request a new one.";
 
+function troubleResponse(reason) {
+  console.error("[portal-request-confirm]", reason);
+  return NextResponse.json({ error: PORTAL_TROUBLE_MESSAGE }, { status: 500 });
+}
+
 export async function POST(request) {
+  try {
+    return await confirmAccessRequest(request);
+  } catch (error) {
+    return troubleResponse(error?.message || error);
+  }
+}
+
+async function confirmAccessRequest(request) {
   const body = await request.json().catch(() => ({}));
   const email = String(body.email || "").trim().toLowerCase();
   const code = String(body.code || "").trim();
@@ -27,7 +41,7 @@ export async function POST(request) {
     .limit(1)
     .maybeSingle();
 
-  if (linkLookupError) return NextResponse.json({ error: "Confirmation lookup failed." }, { status: 500 });
+  if (linkLookupError) return troubleResponse(`confirmation lookup failed: ${linkLookupError.message}`);
   if (!link || new Date(link.expires_at).getTime() < Date.now()) {
     return NextResponse.json({ error: BAD_CODE }, { status: 401 });
   }
@@ -48,7 +62,7 @@ export async function POST(request) {
     .eq("id", link.access_request_id)
     .maybeSingle();
   if (accessError || !accessRequest) {
-    return NextResponse.json({ error: "Access request not found." }, { status: 500 });
+    return troubleResponse(accessError ? `access request lookup failed: ${accessError.message}` : "access request not found");
   }
 
   const now = new Date().toISOString();
@@ -92,7 +106,7 @@ export async function POST(request) {
     })
     .select("id")
     .single();
-  if (reviewError) return NextResponse.json({ error: "Could not create review item." }, { status: 500 });
+  if (reviewError) return troubleResponse(`review item insert failed: ${reviewError.message}`);
 
   const [{ error: linkUpdateError }, { error: accessUpdateError }] = await Promise.all([
     supabaseAdmin
@@ -114,7 +128,7 @@ export async function POST(request) {
       .eq("id", accessRequest.id)
   ]);
   if (linkUpdateError || accessUpdateError) {
-    return NextResponse.json({ error: "Could not finalize confirmation." }, { status: 500 });
+    return troubleResponse(`finalize failed: ${(linkUpdateError || accessUpdateError)?.message}`);
   }
 
   if (granted) {

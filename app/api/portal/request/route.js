@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { sendPortalCodeEmail } from "@/lib/portalEmail";
 import { createNumericCode, hashCode } from "@/lib/portalTokens";
+import { PORTAL_TROUBLE_MESSAGE } from "@/lib/portalFamilyMessages";
 
 export const runtime = "nodejs";
 
@@ -55,7 +56,8 @@ export async function POST(request) {
     .single();
 
   if (requestError) {
-    return NextResponse.json({ error: "Could not create access request." }, { status: 500 });
+    console.error("[portal-request] access request insert failed:", requestError.message);
+    return NextResponse.json({ error: PORTAL_TROUBLE_MESSAGE }, { status: 500 });
   }
 
   const code = createNumericCode();
@@ -83,7 +85,8 @@ export async function POST(request) {
     });
 
   if (linkError) {
-    return NextResponse.json({ error: "Could not create confirmation code." }, { status: 500 });
+    console.error("[portal-request] confirmation code insert failed:", linkError.message);
+    return NextResponse.json({ error: PORTAL_TROUBLE_MESSAGE }, { status: 500 });
   }
 
   try {
