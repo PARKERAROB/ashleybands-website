@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import InstrumentRequestSection from "./InstrumentRequestSection";
 import PortalSectionIcon from "./PortalSectionIcon";
+import PortalErrorMessage from "../PortalErrorMessage";
+import { PORTAL_SIGNED_OUT_MESSAGE, PORTAL_TROUBLE_MESSAGE, portalErrorText } from "@/lib/portalFamilyMessages";
 import {
   BAND_PERIOD_OPTIONS,
   ENSEMBLE_OPTIONS,
@@ -46,6 +48,22 @@ function enrollmentValue(value) {
   return normalized ? value : "Not listed";
 }
 
+const PAYMENT_METHOD_LABELS = {
+  paypal: "Paid online (PayPal)",
+  online: "Paid online",
+  check: "Check",
+  employer_platform: "Employer giving program",
+  cash: "Cash",
+  venmo: "Venmo",
+  credit: "Credit",
+  other: "Payment"
+};
+
+function paymentMethodLabel(method) {
+  const key = String(method || "").trim().toLowerCase();
+  return PAYMENT_METHOD_LABELS[key] || "Payment";
+}
+
 function formatUsd(cents) {
   return `$${((Number(cents) || 0) / 100).toFixed(2)}`;
 }
@@ -74,10 +92,16 @@ export default function PortalReviewClient({ carnegieNotesOpen = false }) {
   const [selectedStudentId, setSelectedStudentId] = useState("");
 
   async function loadProfile() {
-    const res = await fetch("/api/portal/me");
+    let res;
+    try {
+      res = await fetch("/api/portal/me");
+    } catch {
+      setState({ status: "error", message: PORTAL_TROUBLE_MESSAGE });
+      return;
+    }
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      setState({ status: "error", message: data.error || "Profile access expired. Go to the sign-in page and request a new code." });
+      setState({ status: "error", message: res.status === 401 ? PORTAL_SIGNED_OUT_MESSAGE : PORTAL_TROUBLE_MESSAGE });
       return;
     }
     setProfile(data);
@@ -125,8 +149,23 @@ export default function PortalReviewClient({ carnegieNotesOpen = false }) {
             </p>
           ) : null}
         </header>
-        {state.status !== "ready" ? (
-          <p className={`portal-message ${state.status === "error" ? "error" : ""}`}>{state.message}</p>
+        {state.status === "loading" ? <p className="portal-message">{state.message}</p> : null}
+        {state.status === "error" ? (
+          <>
+            <PortalErrorMessage as="p" className="portal-message error" message={state.message} />
+            {state.message === PORTAL_TROUBLE_MESSAGE ? (
+              <button
+                type="button"
+                className="portal-primary-action"
+                onClick={() => {
+                  setState({ status: "loading", message: "Opening your profile..." });
+                  loadProfile();
+                }}
+              >
+                Try again
+              </button>
+            ) : null}
+          </>
         ) : null}
 
         {profile && selectedStudent ? (
@@ -181,7 +220,7 @@ function BandReadySection({ student }) {
   return (
     <section className="portal-workspace-section portal-band-ready-callout" aria-labelledby="portal-band-ready-heading">
       <div>
-        <p className="eyebrow">Open House</p>
+        <p className="eyebrow">Getting started</p>
         <h2 id="portal-band-ready-heading">Get {student.displayName} Band Ready</h2>
         <p>Complete the student&apos;s calendar, Day One supplies, forms, band expectations, clothing, Booster volunteer check-in, and Mr. Parker greeting in one saved path.</p>
       </div>
@@ -289,7 +328,7 @@ function BillingSection({ studentId, studentName }) {
       const res = await fetch("/api/billing/me");
       const json = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(json.error || "Could not load fees.");
+        setError(portalErrorText(res, json, "Could not load fees."));
         return;
       }
       setData(json);
@@ -301,11 +340,11 @@ function BillingSection({ studentId, studentName }) {
   useEffect(() => {
     let cancelled = false;
     fetch("/api/billing/me")
-      .then((r) => r.json().catch(() => ({})).then((j) => ({ ok: r.ok, j })))
-      .then(({ ok, j }) => {
+      .then((r) => r.json().catch(() => ({})).then((j) => ({ r, j })))
+      .then(({ r, j }) => {
         if (cancelled) return;
-        if (!ok) {
-          setError(j.error || "Could not load fees.");
+        if (!r.ok) {
+          setError(portalErrorText(r, j, "Could not load fees."));
           return;
         }
         setData(j);
@@ -332,7 +371,7 @@ function BillingSection({ studentId, studentName }) {
           <p>Fees, fundraising credit, and payment history for {studentName}.</p>
         </div>
       </div>
-      {error ? <p className="portal-field-error">{error}</p> : null}
+      <PortalErrorMessage as="p" message={error} />
       {!data && !error ? <p className="portal-muted-status">Loading financial record…</p> : null}
       {data && !hasActivity ? (
         <p className="portal-muted-status">No fees, payments, or funding activity is listed.</p>
@@ -403,7 +442,7 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setForgoError(json.error || "Could not save your choice. Please try again.");
+        setForgoError(portalErrorText(res, json, "Could not save your choice. Please try again."));
         return;
       }
       setConfirmOpen(false);
@@ -466,7 +505,7 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
             {student.payments.map((p) => (
               <li key={p.id}>
                 {new Date(p.receivedAt).toLocaleDateString()} — {formatUsd(p.amountCents)}{" "}
-                ({p.isSponsorship ? `sponsorship${p.payerName ? ` — ${p.payerName}` : ""}` : p.category === "carnegie_2027_conditional_deposit" ? `Carnegie Hall conditional deposit · ${p.method}` : p.method})
+                ({p.isSponsorship ? `sponsorship${p.payerName ? ` — ${p.payerName}` : ""}` : p.category === "carnegie_2027_conditional_deposit" ? `Carnegie Hall conditional deposit · ${paymentMethodLabel(p.method)}` : paymentMethodLabel(p.method)})
               </li>
             ))}
           </ul>
@@ -520,11 +559,7 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
               >
                 Apply my refund to marching band
               </button>
-              {forgoError ? (
-                <span className="portal-field-note portal-error-text">
-                  {forgoError}
-                </span>
-              ) : null}
+              <PortalErrorMessage className="portal-field-note portal-error-text" message={forgoError} />
             </>
           )}
         </div>
@@ -562,6 +597,8 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
         )
       ) : owes && !paymentsEnabled ? (
         <p className="portal-field-note">Online payment is coming soon. You can still pay by check.</p>
+      ) : owes ? (
+        <p className="portal-field-note">To pay this balance, mail a check payable to Ashley High School Band Boosters, or email Mr. Parker for an online payment link.</p>
       ) : null}
 
       {confirmOpen && refund ? (
@@ -584,9 +621,7 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
               {refund.topupCents > 0 ? ` (up to ${formatUsd(refund.fullCents)} if the final bus-company refund clears)` : ""}.
               This cannot be sent back to you as cash once applied.
             </p>
-            {forgoError ? (
-              <p className="portal-modal-error">{forgoError}</p>
-            ) : null}
+            <PortalErrorMessage as="p" className="portal-modal-error" message={forgoError} />
             <div className="portal-modal-actions">
               <button
                 type="button"
@@ -696,7 +731,7 @@ const MEASUREMENT_GROUPS = [
     title: "Student",
     fields: [
       { key: "gender", label: "Gender", type: "text" },
-      { key: "height", label: "Height", type: "text", placeholder: "e.g. 5-9" }
+      { key: "height", label: "Height", type: "text", placeholder: "e.g. 5-9", hint: "feet-inches, e.g. 5-9 for 5 ft 9 in" }
     ]
   },
   {
@@ -808,7 +843,7 @@ function MeasurementsPanel({ studentId }) {
       const data = await res.json().catch(() => ({}));
       if (cancelled) return;
       if (!res.ok) {
-        setError(data.error || "Could not load measurements.");
+        setError(portalErrorText(res, data, "Could not load measurements."));
         setStatus("ready");
         return;
       }
@@ -837,7 +872,7 @@ function MeasurementsPanel({ studentId }) {
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       setStatus("ready");
-      setError(data.error || "Could not save measurements.");
+      setError(portalErrorText(res, data, "Could not save measurements."));
       return;
     }
     setUpdatedAt(new Date().toISOString());
@@ -875,8 +910,9 @@ function MeasurementsPanel({ studentId }) {
           <div className="portal-measurement-grid">
             {group.fields.map((f) => (
               <div className="portal-field" key={f.key}>
-                <span className="portal-field-label">{f.label}</span>
+                <label className="portal-field-label" htmlFor={`measure-${studentId}-${f.key}`}>{f.label}</label>
                 <input
+                  id={`measure-${studentId}-${f.key}`}
                   type={f.type === "number" ? "number" : "text"}
                   step={f.type === "number" ? "0.5" : undefined}
                   value={form[f.key]}
@@ -891,8 +927,9 @@ function MeasurementsPanel({ studentId }) {
       ))}
       <div className="portal-measurement-grid">
         <div className="portal-field">
-          <span className="portal-field-label">Notes</span>
+          <label className="portal-field-label" htmlFor={`measure-${studentId}-notes`}>Notes</label>
           <textarea
+            id={`measure-${studentId}-notes`}
             value={form.notes}
             placeholder="Anything else that helps with fitting"
             onChange={(e) => setField("notes", e.target.value)}
@@ -906,7 +943,7 @@ function MeasurementsPanel({ studentId }) {
         </button>
       </div>
       {status === "saved" ? <span className="portal-field-pending">Saved. Thanks!</span> : null}
-      {error ? <span className="portal-field-error">{error}</span> : null}
+      <PortalErrorMessage message={error} />
     </div>
   );
 }
@@ -1101,7 +1138,7 @@ function ParticipationRequestForm({ student, initial, onCancel, onSubmitted }) {
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
       setStatus("idle");
-      setError(data.error || "Could not submit the request.");
+      setError(portalErrorText(response, data, "Could not submit the request."));
       return;
     }
     setStatus("saved");
@@ -1127,7 +1164,7 @@ function ParticipationRequestForm({ student, initial, onCancel, onSubmitted }) {
         <button type="submit" disabled={status === "saving"}>{status === "saving" ? "Submitting..." : "Send for approval"}</button>
         <button type="button" className="portal-link-btn" onClick={onCancel}>Cancel</button>
       </div>
-      {error ? <span className="portal-field-error">{error}</span> : null}
+      <PortalErrorMessage message={error} />
     </form>
   );
 }
@@ -1146,7 +1183,7 @@ function PendingParticipationRequest({ request, student, onChanged }) {
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
       setBusy(false);
-      setError(data.error || "Could not withdraw the request.");
+      setError(portalErrorText(response, data, "Could not withdraw the request."));
       return;
     }
     if (onChanged) await onChanged();
@@ -1164,7 +1201,7 @@ function PendingParticipationRequest({ request, student, onChanged }) {
         {request.requested?.marchingEnrollment === "Yes" ? <div><dt>Marching assignment</dt><dd>{request.requested?.marchingAssignment || "Not listed"}</dd></div> : null}
       </dl>
       <button type="button" className="portal-link-btn" disabled={busy} onClick={withdraw}>{busy ? "Withdrawing..." : `Withdraw ${student.displayName}'s request`}</button>
-      {error ? <span className="portal-field-error">{error}</span> : null}
+      <PortalErrorMessage message={error} />
     </div>
   );
 }
@@ -1226,7 +1263,7 @@ function StudentDemographics({ student, onSaved }) {
     if (failed) {
       const data = await failed.json().catch(() => ({}));
       setStatus("idle");
-      setMessage(data.error || "Could not save all student details.");
+      setMessage(portalErrorText(failed, data, "Could not save all student details."));
       if (onSaved) await onSaved();
       return;
     }
@@ -1254,7 +1291,7 @@ function StudentDemographics({ student, onSaved }) {
           <button type="submit" disabled={status === "saving"}>{status === "saving" ? "Saving..." : "Save student details"}</button>
           <button type="button" className="portal-link-btn" onClick={() => { setForm(original); setOpen(false); setMessage(""); }}>Cancel</button>
         </div>
-        {message ? <span className="portal-field-error">{message}</span> : null}
+        <PortalErrorMessage message={message} />
       </form>
     );
   }
@@ -1294,7 +1331,7 @@ function EditableField({ field, studentId, label, value, placeholder, note, feat
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       setStatus("idle");
-      setError(data.error || "Could not save.");
+      setError(portalErrorText(res, data, "Could not save."));
       return;
     }
     setCurrent(draft);
@@ -1337,7 +1374,7 @@ function EditableField({ field, studentId, label, value, placeholder, note, feat
         </div>
       )}
       {status === "saved" ? <span className="portal-field-pending">{SAVED_NOTE}</span> : null}
-      {error ? <span className="portal-field-error">{error}</span> : null}
+      <PortalErrorMessage message={error} />
     </div>
   );
 }
@@ -1366,7 +1403,7 @@ function GuardianEdit({ guardian, studentId, studentName, onSaved }) {
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       setStatus("idle");
-      setMessage(data.error || "Could not update this guardian.");
+      setMessage(portalErrorText(res, data, "Could not update this guardian."));
       return;
     }
     setStatus("saved");
@@ -1386,7 +1423,7 @@ function GuardianEdit({ guardian, studentId, studentName, onSaved }) {
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       setStatus("idle");
-      setMessage(data.error || "Could not remove this guardian.");
+      setMessage(portalErrorText(res, data, "Could not remove this guardian."));
       return;
     }
     setStatus("removed");
@@ -1408,7 +1445,7 @@ function GuardianEdit({ guardian, studentId, studentName, onSaved }) {
             Keep guardian
           </button>
         </div>
-        {message ? <span className="portal-field-error">{message}</span> : null}
+        <PortalErrorMessage message={message} />
       </div>
     );
   }
@@ -1433,7 +1470,7 @@ function GuardianEdit({ guardian, studentId, studentName, onSaved }) {
         <button type="submit" disabled={status === "saving" || !form.name.trim() || (!form.phone.trim() && !form.email.trim())}>{status === "saving" ? "Saving..." : "Save contact"}</button>
         <button type="button" className="portal-link-btn" onClick={() => { setOpen(false); setMessage(""); }}>Cancel</button>
       </div>
-      {message ? <span className={status === "saved" ? "portal-field-pending" : "portal-field-error"}>{message}</span> : null}
+      <PortalErrorMessage className={status === "saved" ? "portal-field-pending" : "portal-field-error"} message={message} />
     </form>
   );
 }
@@ -1456,7 +1493,7 @@ function GuardianAdd({ studentId, studentName, onAdded }) {
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       setStatus("idle");
-      setMessage(data.error || "Could not add this guardian.");
+      setMessage(portalErrorText(res, data, "Could not add this guardian."));
       return;
     }
     setStatus("done");
@@ -1514,7 +1551,7 @@ function GuardianAdd({ studentId, studentName, onAdded }) {
           Cancel
         </button>
       </div>
-      {message ? <span className={status === "done" ? "portal-field-pending" : "portal-field-error"}>{message}</span> : null}
+      <PortalErrorMessage className={status === "done" ? "portal-field-pending" : "portal-field-error"} message={message} />
     </form>
   );
 }

@@ -10,6 +10,15 @@ import { checkRateLimit, clientIp } from "@/lib/rateLimit";
  */
 const VALID_ACTIONS = new Set(["out", "talk", "band_only", "mb_info"]);
 
+// Families only ever see this. The specific reason is logged on the server.
+const FAMILY_ERROR =
+  "We couldn't record your answer from this link. Just reply to Mr. Parker's email with your choice and he'll take care of it.";
+
+function familyError(reason, status) {
+  console.error("[confirm]", reason);
+  return Response.json({ error: FAMILY_ERROR }, { status });
+}
+
 // The `s` value must resolve to a real roster student (by source_student_id or
 // school_email, exact match case-insensitive) before we accept a write from an
 // anonymous sender. Fails CLOSED (unlike the rate limiter): an unmatched id is
@@ -42,13 +51,13 @@ export async function POST(request) {
     const responseNote = (body.note || body.response_note || "").toString().trim().slice(0, 500);
 
     if (!studentId) {
-      return Response.json({ error: "missing student id" }, { status: 400 });
+      return familyError("missing student id", 400);
     }
     if (!VALID_ACTIONS.has(action)) {
-      return Response.json({ error: "invalid action" }, { status: 400 });
+      return familyError("invalid action", 400);
     }
     if (responderEmail && !responderEmail.includes("@")) {
-      return Response.json({ error: "invalid email" }, { status: 400 });
+      return Response.json({ error: "Please enter a valid email address." }, { status: 400 });
     }
 
     const ip = request.headers.get("x-forwarded-for") || "";
@@ -62,12 +71,12 @@ export async function POST(request) {
     }
 
     if (!(await isKnownStudent(studentId))) {
-      return Response.json({ error: "unknown student id" }, { status: 400 });
+      return familyError("unknown student id", 400);
     }
 
     const { url: supabaseUrl, key: supabaseKey } = getSupabaseEnv();
     if (!supabaseUrl || !supabaseKey) {
-      return Response.json({ error: "Supabase not configured" }, { status: 500 });
+      return familyError("Supabase not configured", 500);
     }
 
     const ua = request.headers.get("user-agent") || "";
@@ -92,12 +101,12 @@ export async function POST(request) {
 
     if (!res.ok) {
       const detail = await res.text();
-      return Response.json({ error: `db error: ${detail}` }, { status: 500 });
+      return familyError(`db error: ${detail}`, 500);
     }
 
     return Response.json({ ok: true });
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    return familyError(error?.message || error, 500);
   }
 }
 

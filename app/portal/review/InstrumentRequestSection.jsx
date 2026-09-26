@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import PortalSectionIcon from "./PortalSectionIcon";
+import PortalErrorMessage from "../PortalErrorMessage";
+import { portalErrorText } from "@/lib/portalFamilyMessages";
 
 export default function InstrumentRequestSection({ student }) {
   const [record, setRecord] = useState(null);
@@ -24,10 +26,10 @@ export default function InstrumentRequestSection({ student }) {
   useEffect(() => {
     let cancelled = false;
     fetch("/api/portal/instrument-request")
-      .then((res) => res.json().then((body) => ({ ok: res.ok, body })))
-      .then(({ ok, body }) => {
+      .then((res) => res.json().catch(() => ({})).then((body) => ({ res, body })))
+      .then(({ res, body }) => {
         if (cancelled) return;
-        if (!ok) setMessage(body.error || "Could not load the school instrument request.");
+        if (!res.ok) setMessage(portalErrorText(res, body, "Could not load the school instrument request."));
         else setRecord((body.requests || []).find((item) => item.student_id === student.id) || null);
       })
       .catch(() => !cancelled && setMessage("Could not load the school instrument request."))
@@ -46,7 +48,7 @@ export default function InstrumentRequestSection({ student }) {
         body: JSON.stringify({ studentId: student.id, ...form })
       });
       const body = await res.json().catch(() => ({}));
-      if (!res.ok) setMessage(body.error || "Could not submit the agreement.");
+      if (!res.ok) setMessage(portalErrorText(res, body, "Could not submit the agreement."));
       else {
         setRecord({ ...body.request, status: "submitted", student_id: student.id });
         setMessage("Submitted. Mr. Parker will add the assigned instrument information.");
@@ -69,7 +71,7 @@ export default function InstrumentRequestSection({ student }) {
         body: JSON.stringify({ studentId: student.id, action: "identify", ...identification })
       });
       const body = await res.json().catch(() => ({}));
-      if (!res.ok) setMessage(body.error || "Could not save the instrument identification.");
+      if (!res.ok) setMessage(portalErrorText(res, body, "Could not save the instrument identification."));
       else {
         setRecord(body.request);
         setMessage("Saved. The instrument is connected to this student and ready for Mr. Parker to verify.");
@@ -170,7 +172,7 @@ export default function InstrumentRequestSection({ student }) {
           </button>
         </form>
       ) : null}
-      {message ? <p className="portal-muted-status">{message}</p> : null}
+      <PortalErrorMessage as="p" className="portal-muted-status" message={message} />
       <p className="portal-footnote">
         <Link href={`/portal/band-ready/forms?studentId=${encodeURIComponent(student.id)}&refresh=1`}>Return to Band Ready forms</Link>
       </p>

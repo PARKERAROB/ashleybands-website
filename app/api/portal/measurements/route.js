@@ -10,13 +10,16 @@ export const runtime = "nodejs";
 // remain in the table, and leaving them out of the payload means an upsert
 // preserves any existing value instead of nulling it. Restoring one is one line.
 const NUMERIC_FIELDS = [
-  ["chestIn", "chest_in"],
-  ["waistIn", "waist_in"],
-  ["hipsIn", "hips_in"],
-  ["inseamIn", "inseam_in"],
-  ["neckIn", "neck_in"],
-  ["armLengthIn", "arm_length_in"]
+  ["chestIn", "chest_in", "Chest (in)"],
+  ["waistIn", "waist_in", "Waist (in)"],
+  ["hipsIn", "hips_in", "Hips (in)"],
+  ["inseamIn", "inseam_in", "Inseam (in)"],
+  ["neckIn", "neck_in", "Neck (in)"],
+  ["armLengthIn", "arm_length_in", "Arm Length (in)"]
 ];
+
+const LOAD_FAILED = "We couldn't load the measurements right now. Please try again in a few minutes.";
+const SAVE_FAILED = "We couldn't save the measurements right now. Please try again in a few minutes.";
 
 // Vendor sizes, not tape measurements: kept as text so "10.5 M" / "2XL" survive
 // intact (same reasoning as height). See migration 0031.
@@ -58,7 +61,7 @@ export async function GET(req) {
   if (!session?.personId) return NextResponse.json({ error: "Not signed in." }, { status: 401 });
 
   const studentId = text(new URL(req.url).searchParams.get("studentId"));
-  if (!studentId) return NextResponse.json({ error: "Missing studentId" }, { status: 400 });
+  if (!studentId) return NextResponse.json({ error: "Choose a student." }, { status: 400 });
   if (!(await hasTrustedStudentAccess(session.personId, studentId))) {
     return NextResponse.json({ error: "Not authorized for this student." }, { status: 403 });
   }
@@ -68,7 +71,10 @@ export async function GET(req) {
     .select("*")
     .eq("student_id", studentId)
     .maybeSingle();
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    console.error("[portal-measurements] load failed:", error.message);
+    return NextResponse.json({ error: LOAD_FAILED }, { status: 500 });
+  }
 
   await logAudit({
     actor: parentActor(session),
@@ -89,7 +95,7 @@ export async function PUT(req) {
 
   const body = await req.json().catch(() => ({}));
   const studentId = text(body.studentId);
-  if (!studentId) return NextResponse.json({ error: "Missing studentId" }, { status: 400 });
+  if (!studentId) return NextResponse.json({ error: "Choose a student." }, { status: 400 });
   if (!(await hasTrustedStudentAccess(session.personId, studentId))) {
     return NextResponse.json({ error: "Not authorized for this student." }, { status: 403 });
   }
@@ -99,7 +105,10 @@ export async function PUT(req) {
     .select("*")
     .eq("student_id", studentId)
     .maybeSingle();
-  if (loadError) return NextResponse.json({ error: loadError.message }, { status: 500 });
+  if (loadError) {
+    console.error("[portal-measurements] load before save failed:", loadError.message);
+    return NextResponse.json({ error: SAVE_FAILED }, { status: 500 });
+  }
 
   const payload = {
     student_id: studentId,
@@ -112,7 +121,7 @@ export async function PUT(req) {
     updated_at: new Date().toISOString()
   };
 
-  for (const [key, column] of NUMERIC_FIELDS) {
+  for (const [key, column, label] of NUMERIC_FIELDS) {
     const raw = body[key];
     if (raw === undefined || raw === null || raw === "") {
       payload[column] = null;
@@ -120,7 +129,7 @@ export async function PUT(req) {
     }
     const num = Number(raw);
     if (Number.isNaN(num)) {
-      return NextResponse.json({ error: `Invalid number for ${key}` }, { status: 400 });
+      return NextResponse.json({ error: `${label} must be a number, like 34 or 34.5.` }, { status: 400 });
     }
     payload[column] = num;
   }
@@ -132,7 +141,10 @@ export async function PUT(req) {
   const { error } = await supabaseAdmin
     .from("portal_student_measurements")
     .upsert(payload, { onConflict: "student_id" });
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    console.error("[portal-measurements] save failed:", error.message);
+    return NextResponse.json({ error: SAVE_FAILED }, { status: 500 });
+  }
 
   const changes = {};
   for (const field of Object.keys(payload)) {

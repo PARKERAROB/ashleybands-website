@@ -2,6 +2,7 @@ import { privateJson } from "@/lib/privateResponse";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { readPortalSession } from "@/lib/portalTokens";
 import { logAuditRequired } from "@/lib/auditLog";
+import { PORTAL_TROUBLE_MESSAGE } from "@/lib/portalFamilyMessages";
 
 export const runtime = "nodejs";
 
@@ -48,7 +49,8 @@ export async function GET(request) {
     ]);
 
   if (personError || linksError) {
-    return privateJson({ error: "Could not load portal profile." }, 500);
+    console.error("[portal-me] profile load failed:", (personError || linksError)?.message);
+    return privateJson({ error: PORTAL_TROUBLE_MESSAGE }, 500);
   }
 
   const students = (links || [])
@@ -186,7 +188,9 @@ export async function GET(request) {
     });
   } catch (error) {
     console.error("[portal-me-audit]", error?.message || error);
-    return privateJson({ error: "This private profile could not be durably attributed." }, 503);
+    // The profile is withheld when the view cannot be audited; the family only
+    // needs to know to try again.
+    return privateJson({ error: PORTAL_TROUBLE_MESSAGE }, 503);
   }
 
   return privateJson({

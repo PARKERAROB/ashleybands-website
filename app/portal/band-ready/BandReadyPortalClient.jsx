@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import styles from "./band-ready.module.css";
+import PortalErrorMessage from "../PortalErrorMessage";
+import { PORTAL_SIGNED_OUT_MESSAGE, portalErrorText, portalSignInHref } from "@/lib/portalFamilyMessages";
+import { CLOTHING_CLOSED_MESSAGE, isClothingOrderClosed } from "@/lib/openHouseClothing";
 
 const steps = [
   { id: "portal", number: "01", title: "Connect your family", body: "Your family is signed in and connected to this student." },
@@ -87,7 +90,7 @@ function stillNeededItems(data) {
     dayOne.instrumentStatus === "help" ? "Talk with Mr. Parker about the student’s instrument." : null,
     !data?.readiness?.complete?.["how-band-works"] ? "Review how band works and confirm the family understands." : null,
     !data?.readiness?.complete?.clothing ? "Review the Open House clothing collection." : null,
-    data?.progress?.clothing?.status === "return_later" ? "Return to the clothing collection by Tuesday, September 1 at 8:00 p.m." : null,
+    data?.progress?.clothing?.status === "return_later" && !isClothingOrderClosed() ? "Return to the clothing collection by Tuesday, September 1 at 8:00 p.m." : null,
     !data?.readiness?.complete?.boosters ? "Review the Band Booster and Level 2 volunteer information." : null,
     data?.progress?.boosters?.status === "plan_later" ? "Complete the annual NHCS volunteer training and Level 2 background check." : null,
     data?.progress?.boosters?.status === "need_help" ? "Check in with the Band Boosters for help with Level 2 volunteering." : null,
@@ -100,7 +103,7 @@ async function fetchBandReady(studentId = "") {
   const response = await fetch(`/api/portal/band-ready${query}`);
   const body = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const error = new Error(body.error || "Band Ready could not be loaded.");
+    const error = new Error(response.status === 401 ? PORTAL_SIGNED_OUT_MESSAGE : body.error || "Band Ready could not be loaded.");
     error.status = response.status;
     throw error;
   }
@@ -167,7 +170,7 @@ export default function BandReadyPortalClient({ step }) {
         body: JSON.stringify({ studentId, step: stepId, data: stepData })
       });
       const body = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(body.error || "This step could not be saved.");
+      if (!response.ok) throw new Error(portalErrorText(response, body, "This step could not be saved."));
       const updated = rememberBandReady({ ...data, progress: body.progress, readiness: body.readiness, completion: null });
       setData(updated);
       setStatus("ready");
@@ -211,7 +214,7 @@ export default function BandReadyPortalClient({ step }) {
           <p className={styles.eyebrow}>Ashley Bands Open House</p>
           <h1>Connect your family first.</h1>
           <p>{message}</p>
-          <Link className={styles.primaryButton} href="/portal?next=/portal/band-ready">Sign in to the Family Portal</Link>
+          <Link className={styles.primaryButton} href={portalSignInHref(`${window.location.pathname}${window.location.search}`)}>Sign in to the Family Portal</Link>
           <Link className={styles.textLink} href="/portal/request?next=/portal/band-ready">New email? Request access</Link>
         </section>
       </main>
@@ -268,7 +271,7 @@ export default function BandReadyPortalClient({ step }) {
         ) : null}
       </section>
 
-      {message ? <p className={styles.error} role="alert">{message}</p> : null}
+      <PortalErrorMessage as="p" className={styles.error} message={message} />
 
       {activeStep === "home" ? <Dashboard data={data} href={href} navigate={navigate} /> : null}
       {activeStep === "calendar" ? <CalendarStep data={data} save={save} busy={status === "saving"} href={href} navigate={navigate} /> : null}
@@ -435,18 +438,24 @@ function HowBandWorksStep({ data, save, busy, href, navigate }) {
 
 function ClothingStep({ data, save, busy, href, navigate, studentId }) {
   const paid = data.external?.clothingOrder?.payment_status === "paid";
-  const [status, setStatus] = useState(paid ? "ordered" : data.progress?.clothing?.status || "");
+  const [closed] = useState(() => isClothingOrderClosed());
+  const savedStatus = data.progress?.clothing?.status || "";
+  const [status, setStatus] = useState(paid ? "ordered" : closed && savedStatus === "return_later" ? "" : savedStatus);
   return (
     <StepShell eyebrow="Step 06" title="Confirm the required red band shirt." intro="Every band student needs the official red band shirt. Start there, then review any optional clothing your student or family would like." backHref={href("/portal/band-ready")} navigate={navigate}>
       <div className={`${styles.statusPanel} ${styles.statusNeeds}`}><span>!</span><div><h2>Required for every band student</h2><p>The official red band shirt is worn for pep rallies, community performances, parades, and informal band events.</p></div></div>
-      <div className={styles.deadline}><span>Final order deadline</span><strong>Tuesday, September 1 at 8:00 p.m.</strong><p>Payment is completed in the Family Portal.</p></div>
+      {closed ? (
+        <div className={styles.deadline}><span>Order closed</span><p>{CLOTHING_CLOSED_MESSAGE}</p></div>
+      ) : (
+        <div className={styles.deadline}><span>Final order deadline</span><strong>Tuesday, September 1 at 8:00 p.m.</strong><p>Payment is completed in the Family Portal.</p></div>
+      )}
       {paid ? <div className={`${styles.statusPanel} ${styles.statusGood}`}><span>✓</span><div><h2>Paid and ordered</h2><p>The order is already connected to this student. Items will be distributed through the band after the bulk order arrives.</p></div></div> : (
         <>
-          <div className={styles.actionLinks}><Link className={styles.primaryButton} href={`/portal/clothing?studentId=${encodeURIComponent(studentId)}`}>Open the clothing order</Link></div>
+          {closed ? null : <div className={styles.actionLinks}><Link className={styles.primaryButton} href={`/portal/clothing?studentId=${encodeURIComponent(studentId)}`}>Open the clothing order</Link></div>}
           <div className={styles.form}>
             <Choice name="clothing" checked={status === "ordered"} onChange={() => setStatus("ordered")} title="We placed our order" detail="The order and payment are complete." />
             <Choice name="clothing" checked={status === "not_ordering"} onChange={() => setStatus("not_ordering")} title="We are not ordering" detail="The student already has the required shirt, or the family does not need any optional items." />
-            <Choice name="clothing" checked={status === "return_later"} onChange={() => setStatus("return_later")} title="We will return later" detail="Add the deadline to our final reminder." />
+            {closed ? null : <Choice name="clothing" checked={status === "return_later"} onChange={() => setStatus("return_later")} title="We will return later" detail="Add the deadline to our final reminder." />}
           </div>
         </>
       )}
@@ -521,7 +530,7 @@ function ReviewStep({ data, setData, studentId, href, navigate }) {
     try {
       const response = await fetch("/api/portal/band-ready", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ studentId }) });
       const body = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(body.error || "Band Ready could not be finished.");
+      if (!response.ok) throw new Error(portalErrorText(response, body, "Band Ready could not be finished."));
       setResult(body);
       setData((current) => ({ ...current, completion: { completedAt: body.completedAt || current.completion?.completedAt, emailSentAt: body.emailSent ? new Date().toISOString() : current.completion?.emailSentAt, emailRecipients: body.recipients || current.completion?.emailRecipients, emailError: body.emailError || null } }));
     } catch (requestError) { setError(requestError.message); }
@@ -536,11 +545,11 @@ function ReviewStep({ data, setData, studentId, href, navigate }) {
         <article><h2>Day One</h2><p><strong>Instrument:</strong> {instrumentLabel(data.progress?.["day-one"]?.instrumentStatus)}</p><p><strong>Binder:</strong> {data.progress?.["day-one"]?.binderStatus === "have" ? "Ready" : "Still needed"}</p><p><strong>Band pencil:</strong> {data.progress?.["day-one"]?.pencilStatus === "have" ? `Ready${data.progress?.["day-one"]?.pencilName ? ` · ${data.progress["day-one"].pencilName}` : ""}` : "Still needed"}</p></article>
         <article><h2>Still needed</h2>{needed.length ? <ul>{needed.map((item) => <li key={item}>{item}</li>)}</ul> : <p>Nothing. This student reported having the Day One supplies they need.</p>}</article>
       </div>
-      {completionShown ? <div className={styles.prize}><p className={styles.eyebrow}>Challenge complete</p><h2>{data.student.display_name} is Band Ready!</h2><p>The personalized summary was sent to {result?.recipients?.length || data.completion?.emailRecipients?.length || "the connected"} student and family email address{(result?.recipients?.length || data.completion?.emailRecipients?.length) === 1 ? "" : "es"}.</p><strong>Show this screen to a student helper for a sticker or candy prize.</strong></div> : (
+      {completionShown ? <div className={styles.prize}><p className={styles.eyebrow}>Challenge complete</p><h2>{data.student.display_name} is Band Ready!</h2><p>The personalized summary was sent to {result?.recipients?.length || data.completion?.emailRecipients?.length || "the connected"} student and family email address{(result?.recipients?.length || data.completion?.emailRecipients?.length) === 1 ? "" : "es"}.</p></div> : (
         <div className={styles.finishPanel}><div><h2>{data.readiness.finished ? "Everything is ready to finish." : progressHeading}</h2><p>{data.readiness.finished ? "Finishing sends the personalized checklist email and unlocks the prize screen." : "Open each unfinished stop above. Your work is already saved."}</p></div><button className={styles.primaryButton} type="button" disabled={busy || !data.readiness.finished} onClick={finish}>{busy ? "Sending summary…" : "Finish Band Ready and email summary"}</button></div>
       )}
       {result?.emailError || data.completion?.emailError ? <p className={styles.error}>The checklist is saved, but the email could not be sent. Try finishing again.</p> : null}
-      {error ? <p className={styles.error}>{error}</p> : null}
+      <PortalErrorMessage as="p" className={styles.error} message={error} />
     </StepShell>
   );
 }
