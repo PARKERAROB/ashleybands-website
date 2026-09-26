@@ -46,7 +46,7 @@
     "test:newsletter": "node --test scripts/newsletter.test.mjs",
     "test:carnegie": "node --test scripts/carnegie-commitment.test.mjs scripts/carnegie-workspace.test.mjs",
     "test:practice-loop": "node --test scripts/practice-loop-prototype.test.mjs",
-    "test:security": "npm run test:workflow && node --test scripts/security-boundary.test.mjs",
+    "test:security": "npm run test:workflow && node --test scripts/security-boundary.test.mjs scripts/internal-docs-gate.test.mjs",
     "test:security:live": "SECURITY_LIVE=1 node --env-file=.env.local --test scripts/security-boundary.test.mjs",
     "test:workflow": "node --test scripts/project-workflow.test.mjs scripts/verify-live.test.mjs scripts/release-checked.test.mjs scripts/secret-value.test.mjs",
     "integration:doctor": "node scripts/integration.mjs doctor",

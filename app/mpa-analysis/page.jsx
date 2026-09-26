@@ -1,4 +1,6 @@
 import MpaAnalysisClient from "./MpaAnalysisClient";
+import StaffOnlyNotice from "@/components/StaffOnlyNotice";
+import { staffCanReadInternalDocs } from "@/lib/staffPageAccess";
 
 export const metadata = {
   title: "2026 NC MPA Analysis | Ashley Bands",
@@ -7,6 +9,8 @@ export const metadata = {
   robots: { index: false, follow: false }
 };
 
-export default function MpaAnalysisPage() {
+// Internal document: rendered only for signed-in program staff (#142).
+export default async function MpaAnalysisPage() {
+  if (!(await staffCanReadInternalDocs())) return <StaffOnlyNotice title="2026 NC MPA analysis" />;
   return <MpaAnalysisClient />;
 }

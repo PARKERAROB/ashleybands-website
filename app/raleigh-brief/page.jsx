@@ -1,4 +1,6 @@
 import RaleighBriefClient from "./RaleighBriefClient";
+import StaffOnlyNotice from "@/components/StaffOnlyNotice";
+import { staffCanReadInternalDocs } from "@/lib/staffPageAccess";
 
 export const metadata = {
   title: "Student Brief — NC General Assembly | Bands of AHS",
@@ -7,6 +9,8 @@ export const metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function RaleighBriefPage() {
+// Internal document: rendered only for signed-in program staff (#142).
+export default async function RaleighBriefPage() {
+  if (!(await staffCanReadInternalDocs())) return <StaffOnlyNotice title="Student brief, NC General Assembly" />;
   return <RaleighBriefClient />;
 }
