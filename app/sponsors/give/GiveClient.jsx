@@ -5,6 +5,54 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { BOOSTER_NONPROFIT_COPY, CARNEGIE_CAMPAIGN, CARNEGIE_TERMS_VERSION, CARNEGIE_CHANGE_TERMS, CARNEGIE_SUGGESTED_AMOUNTS, carnegieGiftPrefill, carnegieStudentGiftLine } from "@/lib/sponsorCampaigns.mjs";
 import { sponsorThankYouLine } from "@/lib/sponsorGiftPolicy.mjs";
+import { SPONSOR_CONTACT, TIERS } from "@/lib/sponsorshipContent";
+
+const GENERAL_PURPOSE = "Supports the Ashley band program: instructional staff, transportation, scholarships and instruments.";
+const PAY_FALLBACK_MESSAGE = "Payment could not be processed. Please try again or pay by check.";
+const LOGO_TIERS = new Set(["Patron", "Premier", "Legacy"]);
+// Short plain-language highlight for each level, drawn from the TIERS benefits.
+const TIER_HIGHLIGHTS = {
+  Friend: "concert program and website listing",
+  Partner: "bold concert program listing and a social media thank-you",
+  Patron: "logo in the concert program",
+  Premier: "logo on the equipment trailer and a PA read at home football games",
+  Legacy: "banner at home games and a Spotlight Sponsor social post"
+};
+
+// Same thresholds as tierForAmount in lib/sponsorRecognition.js: the highest level the amount reaches.
+function sponsorLevelForCents(cents) {
+  const whole = (Number(cents) || 0) / 100;
+  return [...TIERS].sort((a, b) => b.amount - a.amount).find((tier) => whole >= tier.amount) || null;
+}
+
+function formatDollars(cents) {
+  return `$${(cents / 100).toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
+}
+
+async function copyText(text) {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {
+    // Fall through to the selection-based copy below.
+  }
+  try {
+    const area = document.createElement("textarea");
+    area.value = text;
+    area.setAttribute("readonly", "");
+    area.style.position = "fixed";
+    area.style.opacity = "0";
+    document.body.appendChild(area);
+    area.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(area);
+    return ok;
+  } catch {
+    return false;
+  }
+}
 
 let paypalSdkPromise = null;
 function loadPaypalSdk(clientId) {
@@ -31,13 +79,15 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
   const Shell = embedded ? "div" : "main";
   const Heading = embedded ? "h2" : "h1";
   const params = useSearchParams();
-  const prefill = carnegie ? carnegieGiftPrefill(params.get("kind"), params.get("amount")) : { giftKind: null, amount: "" };
+  const prefill = carnegie ? carnegieGiftPrefill(params.get("kind"), params.get("amount")) : { giftKind: null, amount: carnegieGiftPrefill(null, params.get("amount")).amount };
   const [giftKind, setGiftKind] = useState(prefill.giftKind || (carnegie ? "donation" : "sponsorship"));
   const attributionToken = tokenProp || params.get("a") || "";
   const checkRequestKey = useRef("");
 
   const [onlineAvailable, setOnlineAvailable] = useState(true);
   const [open, setOpen] = useState("loading"); // loading | open | closed
+  const [closedReason, setClosedReason] = useState("outage"); // outage | expired
+  const [copyStatus, setCopyStatus] = useState("");
   const [businessName, setBusinessName] = useState("");
   const [studentName, setStudentName] = useState("");
   const [amount, setAmount] = useState(prefill.amount);
@@ -56,10 +106,13 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
       : `/api/sponsors/business-public`;
     const lookupUrl = carnegie ? `${url}${url.includes("?") ? "&" : "?"}campaign=${CARNEGIE_CAMPAIGN}` : url;
     fetch(lookupUrl)
-      .then((res) => (res.ok ? res.json().then((j) => ({ ok: true, j })) : { ok: false }))
+      .then((res) => (res.ok
+        ? res.json().then((j) => ({ ok: true, j }))
+        : res.json().catch(() => ({})).then((j) => ({ ok: false, expired: Boolean(attributionToken) && j?.error === "invalid_link" }))))
       .then((out) => {
         if (cancelled) return;
         if (!out.ok) {
+          setClosedReason(out.expired ? "expired" : "outage");
           setOpen("closed");
           return;
         }
@@ -77,6 +130,21 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
   const amountCents = Math.round(Number(amount) * 100);
   const amountValid = Number.isFinite(amountCents) && amountCents >= 500;
+  const level = !carnegie && amountValid ? sponsorLevelForCents(amountCents) : null;
+  const giftNoun = carnegie
+    ? "gift for Ashley’s Carnegie trip"
+    : level ? "sponsorship of the Bands of Ashley" : "gift to the Bands of Ashley";
+
+  async function copyCheckInstructions() {
+    if (!checkResult) return;
+    const text = [
+      `Make payable to: ${checkResult.payable_to}`,
+      `Mail to: ${checkResult.mail_to}`,
+      `Memo line: ${checkResult.memo}`
+    ].join("\n");
+    const ok = await copyText(text);
+    setCopyStatus(ok ? "Copied." : "Copy didn't work. Please write these down or take a screenshot.");
+  }
 
   async function submitCheck() {
     setError("");
@@ -123,11 +191,18 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
       <Shell className="give-shell">
         <div className="give-card">
           <Heading>{carnegie ? "Support Ashley’s Carnegie trip" : "Sponsor the Bands of Ashley"}</Heading>
-          <p>Online giving isn&apos;t open just yet. To sponsor now, contact the director or mail a check to the
-            Ashley High School Band Boosters.</p>
-          <p>
-            <Link href="/sponsors">See sponsorship levels</Link>
-          </p>
+          {closedReason === "expired" ? <>
+            <p>This giving link has expired. You can still give here.</p>
+            <p>
+              <Link href="/sponsors/give">Give to the band</Link>
+              {" · "}
+              <Link href="/support-carnegie">Give to the Carnegie trip</Link>
+            </p>
+          </> : (
+            <p>Online giving is temporarily unavailable. Mail a check payable to {SPONSOR_CONTACT.boosterOrg},
+              {" "}{SPONSOR_CONTACT.address}, {SPONSOR_CONTACT.cityStateZip}, or email
+              {" "}<a href={`mailto:${SPONSOR_CONTACT.email}`}>{SPONSOR_CONTACT.email}</a>.</p>
+          )}
         </div>
         <Styles />
       </Shell>
@@ -147,6 +222,7 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
             Your gift supports the whole Bands of Ashley program and will be credited to {studentName}&apos;s sponsorship total.
           </p>
         ) : businessName ? <p className="give-lede">{sponsorThankYouLine(businessName)}</p> : null}
+        {!carnegie ? <p className="give-lede">{GENERAL_PURPOSE}</p> : null}
 
         {checkResult ? (
           <div className="give-result" role="status" aria-live="polite">
@@ -158,20 +234,29 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
             </ul>
             <p className="give-muted">{checkResult.note}</p>
             <p className="give-muted">We&apos;ll send your tax receipt as soon as it arrives. Thank you.</p>
+            <button type="button" className="give-btn" onClick={copyCheckInstructions}>Copy instructions</button>
+            {copyStatus ? <p className="give-muted" role="status">{copyStatus}</p> : null}
+            <p className="give-muted">Questions? <a href={`mailto:${SPONSOR_CONTACT.email}`}>{SPONSOR_CONTACT.email}</a></p>
           </div>
         ) : onlineResult ? (
           <div className="give-result" role="status" aria-live="polite">
             <h2>Thank you, {onlineResult.business}!</h2>
             <p>
               {onlineResult.pending
-                ? `PayPal received your ${onlineResult.amount} sponsorship. Ashley Bands is reconciling the receipt now.`
-                : `Your ${onlineResult.amount} ${carnegie ? "gift for Ashley’s Carnegie trip" : "sponsorship of the Bands of Ashley"} is confirmed.`}
+                ? `PayPal has your ${onlineResult.amount} ${giftNoun}. We'll email your receipt once it's recorded. Please don't pay again.`
+                : `Your ${onlineResult.amount} ${giftNoun} is confirmed.`}
             </p>
-            <p className="give-muted">
-              {onlineResult.recognition === "sent"
-                ? `A receipt ${onlineResult.receiptNumber ? `(${onlineResult.receiptNumber})` : ""} was sent to the email on the PayPal account.`
-                : "Your payment is recorded. Ashley Bands will follow up if a receipt could not be delivered."}
-            </p>
+            {onlineResult.pending ? null : (
+              <p className="give-muted">
+                {onlineResult.recognition === "sent"
+                  ? `A receipt ${onlineResult.receiptNumber ? `(${onlineResult.receiptNumber})` : ""} was sent to the email on the PayPal account.`
+                  : "Your payment is recorded. Ashley Bands will follow up if a receipt could not be delivered."}
+              </p>
+            )}
+            {!carnegie && level && LOGO_TIERS.has(level.name) ? (
+              <p>Next: email your logo (PNG or PDF) to <a href={`mailto:${SPONSOR_CONTACT.email}`}>{SPONSOR_CONTACT.email}</a> so we can list you.</p>
+            ) : null}
+            <p className="give-muted">Questions? <a href={`mailto:${SPONSOR_CONTACT.email}`}>{SPONSOR_CONTACT.email}</a></p>
           </div>
         ) : (
           <>
@@ -192,7 +277,7 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
             <div className="give-grid">
               <label className="give-label">
                 {carnegie ? "Or enter another amount (USD)" : "Gift amount (USD)"}
-                <input type="number" min="5" step="1" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder={carnegie ? "Any amount, $5 or more" : "500"} />
+                <input type="number" min="5" step="1" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Any amount, $5 or more" />
               </label>
               {method === "check" ? (
                 <label className="give-label">
@@ -201,6 +286,13 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
                 </label>
               ) : null}
             </div>
+            {!carnegie && amountValid ? (
+              <p className="give-muted" aria-live="polite">
+                {level
+                  ? <>{formatDollars(amountCents)} matches the {level.name} level{TIER_HIGHLIGHTS[level.name] ? `: ${TIER_HIGHLIGHTS[level.name]}` : ""}. <Link href="/sponsors#tiers">See all levels</Link></>
+                  : "Thank you. Gifts under $250 are donations and aren't a sponsorship level."}
+              </p>
+            ) : null}
             <label className="give-label">
               Your name or business name
               <input
@@ -276,6 +368,7 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
 function PayPalGive({ clientId, campaignCode, giftKind, attributionToken, businessName, amountCents, payerName, payerEmail, onError, onDone }) {
   const ref = useRef(null);
   const requestKey = useRef("");
+  const serverMessage = useRef("");
   const dataRef = useRef({ campaignCode, giftKind, attributionToken, businessName, amountCents, payerName, payerEmail });
   useEffect(() => {
     dataRef.current = { campaignCode, giftKind, attributionToken, businessName, amountCents, payerName, payerEmail };
@@ -290,6 +383,7 @@ function PayPalGive({ clientId, campaignCode, giftKind, attributionToken, busine
         buttons = paypal.Buttons({
           createOrder: async () => {
             onError("");
+            serverMessage.current = "";
             const d = dataRef.current;
             if (!requestKey.current) requestKey.current = window.crypto.randomUUID();
             const res = await fetch("/api/sponsors/give/create-order", {
@@ -308,7 +402,11 @@ function PayPalGive({ clientId, campaignCode, giftKind, attributionToken, busine
               })
             });
             const json = await res.json().catch(() => ({}));
-            if (!res.ok) throw new Error(json.error || "Could not start the gift.");
+            if (!res.ok) {
+              // Deliberate plain server messages (over the limit, too many attempts) reach the donor.
+              serverMessage.current = json.error || "";
+              throw new Error(json.error || "Could not start the gift.");
+            }
             return json.orderId;
           },
           onApprove: async (data) => {
@@ -324,7 +422,7 @@ function PayPalGive({ clientId, campaignCode, giftKind, attributionToken, busine
             }
             onDone(json);
           },
-          onError: () => onError("Payment could not be processed. Please try again or pay by check.")
+          onError: () => onError(serverMessage.current || PAY_FALLBACK_MESSAGE)
         });
         buttons.render(ref.current);
       })
@@ -358,7 +456,7 @@ function Styles() {
         text-transform: uppercase;
         letter-spacing: 2px;
         font-size: 12px;
-        color: #7b1829;
+        color: var(--garnet);
         font-weight: 700;
         margin: 0 0 4px;
       }
@@ -406,9 +504,9 @@ function Styles() {
         cursor: pointer;
       }
       .give-amounts button[aria-pressed="true"] {
-        border-color: #7b1829;
+        border-color: var(--garnet);
         background: #f7e4e7;
-        color: #7b1829;
+        color: var(--garnet);
       }
       .give-grid {
         display: grid;
@@ -437,14 +535,14 @@ function Styles() {
         color: #3a2f26;
       }
       .give-tab.on {
-        background: #7b1829;
-        border-color: #7b1829;
+        background: var(--garnet);
+        border-color: var(--garnet);
         color: #fff;
       }
       .give-btn {
-        border: 1px solid #7b1829;
+        border: 1px solid var(--garnet);
         background: #fff;
-        color: #7b1829;
+        color: var(--garnet);
         border-radius: 8px;
         padding: 11px 18px;
         font-size: 15px;
@@ -453,7 +551,7 @@ function Styles() {
         width: 100%;
       }
       .give-btn-primary {
-        background: #7b1829;
+        background: var(--garnet);
         color: #fff;
       }
       .give-paypal {
@@ -470,11 +568,11 @@ function Styles() {
         font-size: 14px;
       }
       .give-error {
-        color: #7b1829;
+        color: var(--garnet);
         font-weight: 600;
       }
       .give-shell a {
-        color: #7b1829;
+        color: var(--garnet);
       }
     `}</style>
   );

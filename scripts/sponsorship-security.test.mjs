@@ -258,3 +258,24 @@ test("outreach send requires the exact reviewed queue, including same-size subst
   assert.equal(sameOutreachQueue(["a"], ["a", "b"]), false);
   assert.equal(sameOutreachQueue(undefined, ["a"]), false);
 });
+
+test("the general give form explains its purpose, level, and next steps (#125)", () => {
+  const givePage = source("app/sponsors/give/GiveClient.jsx");
+  assert.match(givePage, /Supports the Ashley band program: instructional staff, transportation, scholarships and instruments\./);
+  assert.match(givePage, /matches the \{level\.name\} level/);
+  assert.match(givePage, /Gifts under \$250 are donations and aren't a sponsorship level\./);
+  assert.doesNotMatch(givePage, /: "500"\}/);
+  assert.match(givePage, /This giving link has expired\. You can still give here\./);
+  assert.match(givePage, /Online giving is temporarily unavailable\. Mail a check payable to/);
+  assert.match(givePage, /Copy instructions/);
+  assert.match(givePage, /serverMessage\.current \|\| PAY_FALLBACK_MESSAGE/, "createOrder server messages reach the donor");
+  assert.doesNotMatch(givePage, /reconciling the receipt/);
+  assert.match(source("app/api/sponsors/give/check/route.js"), /Attn: Band Director/);
+  assert.match(source("app/sponsors/page.jsx"), /\/sponsors\/give\?amount=\$\{tier\.amount\}/);
+  assert.doesNotMatch(source("app/sponsors/give/page.jsx"), /fallback=\{null\}/);
+  // The live level hint uses the TIERS thresholds; they must stay in step with tierForAmount.
+  const thresholds = [...source("lib/sponsorRecognition.js").matchAll(/if \(d >= (\d+)\) return "(\w+)"/g)].map(([, amount, name]) => [name, Number(amount)]);
+  const tiers = source("lib/sponsorshipContent.js");
+  for (const [name, amount] of thresholds) assert.match(tiers, new RegExp(`name: "${name}",\\s*amount: ${amount},`));
+  assert.equal(thresholds.length, 5);
+});

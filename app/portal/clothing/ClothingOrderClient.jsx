@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./clothing-order.module.css";
+import PortalErrorMessage from "../PortalErrorMessage";
+import { portalErrorText } from "@/lib/portalFamilyMessages";
+import { CLOTHING_CLOSED_MESSAGE, isClothingOrderClosed } from "@/lib/openHouseClothing";
 
 let paypalPromise;
 function paypalSdk(clientId) {
@@ -21,6 +24,7 @@ function paypalSdk(clientId) {
 const money = (cents) => `$${(Number(cents || 0) / 100).toFixed(2)}`;
 
 export default function ClothingOrderClient() {
+  const [closed] = useState(() => isClothingOrderClosed());
   const [catalog, setCatalog] = useState(null);
   const [studentId, setStudentId] = useState("");
   const [lines, setLines] = useState([]);
@@ -33,15 +37,19 @@ export default function ClothingOrderClient() {
   const orderRef = useRef(null);
 
   useEffect(() => {
+    if (closed) return;
     fetch("/api/portal/clothing-order")
       .then(async (response) => {
-        const body = await response.json();
-        if (!response.ok) throw new Error(body.error || "Could not load the order form.");
+        const body = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          setMessage(portalErrorText(response, body, "Could not load the order form. Please try again."));
+          return;
+        }
         const requestedStudentId = new URLSearchParams(window.location.search).get("studentId") || "";
         const selectedStudentId = body.students?.some((student) => student.id === requestedStudentId) ? requestedStudentId : body.students?.[0]?.id || "";
         setCatalog(body); setStudentId(selectedStudentId);
-      }).catch((error) => setMessage(error.message));
-  }, []);
+      }).catch(() => setMessage("Could not load the order form. Check your connection and try again."));
+  }, [closed]);
 
   function selectedFor(product) {
     return selections[product.id] || { color: product.colors[0], size: "", quantity: 1 };
@@ -81,7 +89,7 @@ export default function ClothingOrderClient() {
     const res = await fetch("/api/portal/clothing-order", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ studentId, items: lines }) });
     const body = await res.json().catch(() => ({}));
     setBusy(false);
-    if (!res.ok) { setMessage(body.error || "Could not start payment."); return; }
+    if (!res.ok) { setMessage(portalErrorText(res, body, "Could not start payment.")); return; }
     const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
     try {
       const paypal = await paypalSdk(clientId);
@@ -91,7 +99,7 @@ export default function ClothingOrderClient() {
         onApprove: async (data) => {
           const capture = await fetch("/api/portal/clothing-order/capture", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ orderId: data.orderID }) });
           const result = await capture.json().catch(() => ({}));
-          if (!capture.ok) { setMessage(result.error || "Payment could not be confirmed."); return; }
+          if (!capture.ok) { setMessage(portalErrorText(capture, result, "Payment could not be confirmed.")); return; }
           setLines([]); setMessage("Paid and ordered. Your items will be distributed through the band after the bulk order arrives.");
         },
         onCancel: () => setMessage("Payment was cancelled; the order was not completed."),
@@ -100,7 +108,19 @@ export default function ClothingOrderClient() {
     } catch { setMessage("Could not open PayPal."); }
   }
 
-  if (!catalog) return <main className="portal-shell"><section className="portal-panel"><h1>Open House Clothing</h1><p>{message || "Loading…"}</p></section></main>;
+  if (closed) {
+    return (
+      <main className="portal-shell">
+        <section className="portal-panel">
+          <p className="eyebrow">Family Portal</p>
+          <h1>Open House Clothing</h1>
+          <p className="portal-copy">{CLOTHING_CLOSED_MESSAGE}</p>
+          <Link className="portal-action-link" href="/portal/review">Back to the Family Portal</Link>
+        </section>
+      </main>
+    );
+  }
+  if (!catalog) return <main className="portal-shell"><section className="portal-panel"><h1>Open House Clothing</h1>{message ? <PortalErrorMessage as="p" className="portal-message error" message={message} /> : <p>Loading…</p>}</section></main>;
   if (!catalog.students?.length) return <main className="portal-shell"><section className="portal-panel"><h1>Open House Clothing</h1><p>No student is connected to this Family Portal account.</p><Link href="/portal/request">Request student access</Link></section></main>;
   return (
     <main className={`portal-shell ${lines.length ? styles.shellWithMobileBar : ""}`}>
@@ -172,7 +192,7 @@ export default function ClothingOrderClient() {
               </div>
             )}
             <div ref={paypalRef} className={styles.paypal} />
-            {message ? <p className="portal-message">{message}</p> : null}
+            <PortalErrorMessage as="p" className="portal-message" message={message} />
           </aside>
         </div>
 

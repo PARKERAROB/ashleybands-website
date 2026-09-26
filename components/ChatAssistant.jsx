@@ -35,17 +35,9 @@ export default function ChatAssistant() {
   const searchParams = useSearchParams();
   const [messages, setMessages] = useState([welcome]);
   const [question, setQuestion] = useState("");
-  const [knowledge, setKnowledge] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const endRef = useRef(null);
   const autoSubmittedRef = useRef(false);
-
-  useEffect(() => {
-    fetch("/chatbot-knowledge.txt")
-      .then((res) => res.text())
-      .then(setKnowledge)
-      .catch(() => setKnowledge(""));
-  }, []);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -53,34 +45,15 @@ export default function ChatAssistant() {
 
   useEffect(() => {
     const q = searchParams.get("q");
-    if (q && knowledge && !autoSubmittedRef.current) {
+    if (q && !autoSubmittedRef.current) {
       autoSubmittedRef.current = true;
       askQuestion(q);
     }
-  }, [knowledge, searchParams]);
+  }, [searchParams]);
 
   async function askQuestion(text) {
     const trimmed = text.trim();
     if (!trimmed || isLoading) return;
-
-    const today = new Date().toLocaleDateString("en-US", {
-      weekday: "long", year: "numeric", month: "long", day: "numeric"
-    });
-
-    const systemPrompt = `You are a helpful assistant for the Ashley High School Band Program in Wilmington, NC. Today's date is ${today}.
-
-Your only job is to answer questions using the public band program information provided below.
-
-PUBLIC BAND INFORMATION:
-${knowledge || "(No public information loaded. Tell the user to contact Mr. Parker directly.)"}
-
-Rules:
-1. Only answer band questions using the information above. Never invent band details.
-2. If information is missing, unclear, private, student-specific, financial-account-specific, or family-specific, say that Mr. Parker should be contacted directly.
-3. Do not provide private student information, internal notes, accommodation details, balances, or anything that sounds like a non-public record.
-4. Keep answers concise and practical.
-5. If the question needs Mr. Parker's personal answer, respond as JSON: {"answer":"your helpful response","flagged":true}
-6. For answerable questions, respond with plain friendly text.`;
 
     setIsLoading(true);
     setMessages((current) => [...current, { role: "user", content: trimmed }]);
@@ -89,7 +62,7 @@ Rules:
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ systemPrompt, question: trimmed })
+        body: JSON.stringify({ question: trimmed })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error?.message || "The assistant is unavailable.");
@@ -148,6 +121,7 @@ Rules:
           value={question}
           onChange={(event) => setQuestion(event.target.value)}
           placeholder="Ask about dates, attire, the portal, trips, marching band..."
+          maxLength={1000}
           aria-label="Question"
         />
         <button type="submit" disabled={isLoading || !question.trim()}>

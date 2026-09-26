@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PageHeader from "@/components/ui/PageHeader";
 import { getCurrentFundraisers } from "@/lib/siteData";
 
 export const metadata = {
@@ -6,20 +7,30 @@ export const metadata = {
   description: "Current Ashley Bands fundraisers, dates, instructions, and official links."
 };
 
+// Rechecks hourly so a fundraiser with an endsAt date leaves this list soon after it ends (#123).
+export const revalidate = 3600;
+
 export default function FundraisingPage() {
   const fundraisers = getCurrentFundraisers();
 
   return (
     <main className="fundraising-page">
-      <header className="fundraising-masthead">
-        <p className="eyebrow">Support Ashley Bands</p>
-        <h1>Current fundraisers</h1>
-        <p className="lede">
-          Pick the fundraiser you need. Each page has the current dates, the exact steps, and one
-          clear link to share.
-        </p>
-      </header>
+      <PageHeader
+        className="fundraising-masthead"
+        eyebrow="Support Ashley Bands"
+        title="Current fundraisers"
+        lede="Pick the fundraiser you need. Each page has the current dates, the exact steps, and one clear link to share."
+      />
 
+      {fundraisers.length === 0 ? (
+        <section className="fundraising-more" aria-label="Current Ashley Bands fundraisers">
+          <h2>No fundraiser is running right now.</h2>
+          <p>
+            You can still <Link href="/support-carnegie">give to the Carnegie trip</Link> or{" "}
+            <Link href="/sponsors">sponsor the band</Link>.
+          </p>
+        </section>
+      ) : (
       <section className="fundraiser-card-grid" aria-label="Current Ashley Bands fundraisers">
         {fundraisers.map((fundraiser) => (
           <article className="fundraiser-card" key={fundraiser.slug}>
@@ -42,6 +53,7 @@ export default function FundraisingPage() {
           </article>
         ))}
       </section>
+      )}
 
       <section className="fundraising-note">
         <div>

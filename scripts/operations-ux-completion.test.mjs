@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const read = (path) => readFileSync(path, "utf8");
-const commandCenter = read("app/admin/page.jsx");
+const commandCenter = read("app/admin/page.jsx") + read("lib/staffHome.js");
 const commandRoute = read("app/api/admin/operations-summary/route.js");
 const commandData = read("lib/operationsSummary.js");
 const capabilities = read("lib/staffCapabilities.js");
@@ -28,7 +28,7 @@ const broadcast = read("app/admin/broadcast/page.jsx");
 
 test("the command center presents eight capability-gated operational areas from one protected live summary", () => {
   for (const area of ["students", "attendance", "financial", "forms", "assets", "ensembles", "calendar", "communication"]) {
-    assert.match(commandCenter, new RegExp(`id: "${area}"`));
+    assert.match(commandCenter, new RegExp(`metric: "${area}"`));
   }
   assert.match(commandCenter, /\/api\/admin\/operations-summary/);
   assert.match(commandCenter, /SPONSORSHIP_READ/);

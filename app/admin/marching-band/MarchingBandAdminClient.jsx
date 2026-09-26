@@ -286,6 +286,7 @@ export default function MarchingBandAdminClient() {
           <div>
             <p className="eyebrow">Staff only</p>
             <h1>Marching Band Dashboard</h1>
+            <p className="portal-copy">See each student&apos;s marching band status and who has not answered yet.</p>
             <p className="portal-copy">Signed in as {session.display_name}</p>
           </div>
           <div className="mb-admin-actions">

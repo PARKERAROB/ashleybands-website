@@ -1,0 +1,63 @@
+.notice {
+  --notice-edge: var(--info);
+  --notice-fill: var(--info-soft);
+  margin: 0 0 var(--space-5);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid color-mix(in srgb, var(--notice-edge) 25%, transparent);
+  border-left: 4px solid var(--notice-edge);
+  border-radius: var(--radius-sm);
+  background: var(--notice-fill);
+  color: var(--text);
+}
+
+.info {
+  --notice-edge: var(--info);
+  --notice-fill: var(--info-soft);
+}
+
+.deadline {
+  --notice-edge: var(--warning);
+  --notice-fill: var(--warning-soft);
+}
+
+.archived {
+  --notice-edge: var(--text-muted);
+  --notice-fill: var(--surface-sunken);
+}
+
+.error {
+  --notice-edge: var(--danger);
+  --notice-fill: var(--danger-soft);
+}
+
+.success {
+  --notice-edge: var(--success);
+  --notice-fill: var(--success-soft);
+}
+
+.title {
+  margin: 0;
+  color: var(--notice-edge);
+  font-size: var(--step-0);
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.body {
+  margin-top: var(--space-1);
+  font-size: var(--step-0);
+  line-height: 1.5;
+}
+
+.body > :first-child {
+  margin-top: 0;
+}
+
+.body > :last-child {
+  margin-bottom: 0;
+}
+
+.body a {
+  color: var(--accent-strong);
+  font-weight: 700;
+}

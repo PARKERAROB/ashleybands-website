@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { findAnchoredEvent, zonedNow } from "@/lib/thisWeek.mjs";
 
 const MONTHS = ["January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"];
@@ -13,10 +14,10 @@ const CAT_GROUPS = [
   { label: "Concert", color: "#245c73", match: (c) => c === "Concert" },
   { label: "Jazz", color: "#1f6f6a", match: (c) => c === "Jazz" },
   { label: "Honor Bands", color: "#446349", match: (c) => ["AllCounty", "AllDistrict", "AllState"].includes(c) },
-  { label: "MPA", color: "#a9781f", match: (c) => c === "MPA" },
-  { label: "CCC", color: "#6b3a5b", match: (c) => c === "CCC" },
+  { label: "MPA (judged festival)", color: "#a9781f", match: (c) => c === "MPA" },
+  { label: "Conductor's Clinic (CCC)", color: "#6b3a5b", match: (c) => c === "CCC" },
   { label: "Trip", color: "#b5551f", match: (c) => c === "Trip" },
-  { label: "WSW", color: "#4a5a7a", match: (c) => c === "WSW" },
+  { label: "Wilmington Symphonic Winds (WSW)", color: "#4a5a7a", match: (c) => c === "WSW" },
   { label: "School", color: "#6f675a", match: (c) => c === "School" }
 ];
 const OTHER = { label: "Other", color: "#8a7f6d", match: () => true };
@@ -149,10 +150,27 @@ export default function CalendarView() {
         });
         const a = next ? ymd(next.start) : { y: today.getFullYear(), m: today.getMonth() };
         setCursor({ y: a.y, m: a.m });
+        openFromHash(rows);
       })
       .catch(() => setEvents([]));
 
   }, []);
+
+  // Deep link from /this-week: /calendar#<event id>-<YYYY-MM-DD> opens that event in its month (#134).
+  function openFromHash(rows) {
+    const ev = findAnchoredEvent(rows, window.location.hash, zonedNow(Date.now()).date);
+    if (!ev) return;
+    const a = ymd(ev.start);
+    setCursor({ y: a.y, m: a.m });
+    setOpenEvent(ev);
+  }
+
+  useEffect(() => {
+    if (!events) return undefined;
+    const onHash = () => openFromHash(events);
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, [events]);
 
   useEffect(() => {
     const onKey = (e) => {

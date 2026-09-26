@@ -2,7 +2,7 @@
 .actions{display:flex;gap:1rem;align-items:center;margin:1.25rem 0;flex-wrap:wrap}
 .main button{padding:.65rem 1rem;border:1px solid #667768;border-radius:6px;background:#fff;color:#243128;cursor:pointer}
 .main button:disabled{opacity:.5;cursor:default}
-.context{background:#f1f4ef;border-left:4px solid #7b1829;padding:1rem 1.25rem;margin:1.5rem 0}
+.context{background:#f1f4ef;border-left:4px solid var(--garnet);padding:1rem 1.25rem;margin:1.5rem 0}
 .context h2{font-size:1.2rem;margin-top:0}
 .search{display:flex;gap:1rem;align-items:flex-end;margin:1.5rem 0}
 .search label{flex:1;min-width:0;font-weight:600}

@@ -1,0 +1,64 @@
+/* The shared page heading (#132). Width and outer spacing come from the page via className. */
+.header {
+  margin-block: 0 var(--space-6);
+}
+
+.header .eyebrow {
+  margin: 0 0 var(--space-2);
+  color: var(--gold-text);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+/* Two-class selectors so page rules like `.narrow-page h1` do not restyle the title. */
+.header .title {
+  max-width: 22ch;
+  margin: 0;
+  color: var(--accent-strong);
+  font-family: var(--font-display);
+  font-size: var(--step-4);
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+
+.header .lede {
+  max-width: 48rem;
+  margin: var(--space-4) 0 0;
+  color: var(--text-muted);
+  font-size: var(--step-1);
+  line-height: 1.45;
+}
+
+.header .body {
+  max-width: 48rem;
+  margin-top: var(--space-4);
+}
+
+.header .body > :first-child {
+  margin-top: 0;
+}
+
+.header .body > :last-child {
+  margin-bottom: 0;
+}
+
+.header .actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+@media (max-width: 560px) {
+  .header .actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

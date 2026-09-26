@@ -184,8 +184,11 @@ const fundraisers = [
     slug: "mattress",
     title: "Ashley Bands Mattress Fundraiser",
     summary: "Find one household that needs a mattress and invite them personally to the sale.",
-    status: "Coming September 26",
+    status: "Today until 4:00 p.m.",
     timing: "Saturday, September 26 · 10:00 a.m.-4:00 p.m.",
+    // Optional: a fundraiser with endsAt leaves current lists once that moment passes (#123).
+    // The sale ends at 4:00 p.m. Eastern on September 26.
+    endsAt: "2026-09-26T20:00:00.000Z",
     location: "Ashley High School full-size gym",
     source: sources.mattressFundraiser,
     externalHref: "https://raleigh.cfsbeds.com/events/eugene-ashley-high-school",
@@ -279,7 +282,7 @@ const siteData = {
 const chatbotKnowledge = [
   "ASHLEY HIGH SCHOOL BAND PUBLIC KNOWLEDGE BASE",
   "",
-  "The band calendar at ashleybands.com/calendar is the official source of truth for dates and times. Families subscribe to it once and updates appear automatically. If a date conflicts with another source, tell families to use the calendar or contact Mr. Parker.",
+  "The band calendar at ashleybands.com/calendar is the official source of truth for dates and times. Families subscribe to it once and updates appear automatically. If a date conflicts with another source, tell families to use the calendar or contact Mr. Parker. The next 7 days of band events are at ashleybands.com/this-week.",
   "",
   readRepoSource(sources.assistantOverview).trim(),
   siteData.boosters,

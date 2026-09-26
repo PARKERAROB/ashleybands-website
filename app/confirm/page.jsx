@@ -16,6 +16,9 @@ function StatusPanel({ title, children }) {
 
 const VALID_ACTIONS = new Set(["out", "talk", "band_only", "mb_info"]);
 
+const RECORD_FAILED =
+  "We couldn't record your answer from this link. Just reply to Mr. Parker's email with your choice and he'll take care of it.";
+
 function ForwardedEmailFallback({ studentId, action, studentName, parentName }) {
   const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
@@ -99,7 +102,6 @@ function ConfirmInner() {
   const invalidLink = !studentId || !VALID_ACTIONS.has(action);
 
   const [state, setState] = useState("loading"); // loading | success | error
-  const [error, setError] = useState("");
 
   useEffect(() => {
     if (invalidLink) {
@@ -110,16 +112,11 @@ function ConfirmInner() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ s: studentId, a: action, n: studentName, p: parentName })
     })
-      .then(async (r) => {
-        if (!r.ok) {
-          const data = await r.json().catch(() => ({}));
-          throw new Error(data.error || `error ${r.status}`);
-        }
-        setState("success");
+      .then((r) => {
+        setState(r.ok ? "success" : "error");
       })
-      .catch((err) => {
+      .catch(() => {
         setState("error");
-        setError(err.message || "Something went wrong.");
       });
   }, [studentId, action, studentName, parentName, invalidLink]);
 
@@ -128,8 +125,7 @@ function ConfirmInner() {
   if (invalidLink) {
     return (
       <StatusPanel title="Hmm, something went wrong">
-        <p>This confirmation link is missing information. If you got this email and want to respond, just reply directly and Mr. Parker will sort it out.</p>
-        <p>You can also just reply to Mr. Parker&rsquo;s email directly and he&rsquo;ll take care of it.</p>
+        <p>This confirmation link is missing information. Just reply to Mr. Parker&rsquo;s email with your choice and he&rsquo;ll take care of it.</p>
         <p><a href="mailto:robert.parker@nhcs.net">robert.parker@nhcs.net</a></p>
       </StatusPanel>
     );
@@ -146,8 +142,7 @@ function ConfirmInner() {
   if (state === "error") {
     return (
       <StatusPanel title="Hmm, something went wrong">
-        <p>{error}</p>
-        <p>You can also just reply to Mr. Parker&rsquo;s email directly and he&rsquo;ll take care of it.</p>
+        <p>{RECORD_FAILED}</p>
         <p><a href="mailto:robert.parker@nhcs.net">robert.parker@nhcs.net</a></p>
       </StatusPanel>
     );

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import HomeUpcomingEvents from "@/components/HomeUpcomingEvents";
+import HomeThisWeek from "@/components/HomeThisWeek";
 import NewsletterSignup from "@/components/NewsletterSignup";
 import CarnegieFunding from "@/components/CarnegieFunding";
 import MattressSaleBanner from "@/components/MattressSaleBanner";
@@ -13,6 +13,7 @@ import { getSiteData } from "@/lib/siteData";
 import { CARNEGIE_SUPPORTERS } from "@/lib/carnegieSupporters.mjs";
 
 const PROMPTS = [
+  "What's happening this week?",
   "Where can I find upcoming band dates?",
   "What do students need for band?",
   "How do I subscribe to the calendar?",
@@ -41,6 +42,9 @@ const INFO_GROUPS = [
 
 export default function HomePage() {
   const data = getSiteData();
+  // Archived only: this page prerenders on the client, so a time check here could mismatch on hydration.
+  // /fundraising also applies the optional endsAt date (#123).
+  const currentFundraisers = data.fundraisers.filter((fundraiser) => !fundraiser.archived);
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [giveKind, setGiveKind] = useState("personal");
@@ -89,6 +93,8 @@ export default function HomePage() {
           <figcaption>Carnegie Hall · View from the Perlman Stage</figcaption>
         </figure>
       </section>
+
+      <HomeThisWeek />
 
       <CarnegieFunding />
 
@@ -174,7 +180,7 @@ export default function HomePage() {
 
 
       <section className="home-now" aria-labelledby="home-now-title">
-        <div className="home-container home-now-grid">
+        <div className="home-container">
           <div className="home-now-actions">
             <div className="home-heading">
               <p className="eyebrow">For students and families</p>
@@ -198,17 +204,29 @@ export default function HomePage() {
                 <p className="home-now-tag">Ways to help</p>
                 <h3>Current fundraisers</h3>
                 <p>Campaign dates, student-credit instructions, and links to share with friends and family.</p>
-                <ul className="home-fundraisers">
-                  {data.fundraisers.filter((fundraiser) => !fundraiser.archived).map((fundraiser) => (
-                    <li key={fundraiser.slug}>
-                      <Link href={`/fundraising/${fundraiser.slug}`}>{fundraiser.title}</Link>
-                      <span>{fundraiser.timing || fundraiser.status}</span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="home-links">
-                  <Link href="/fundraising">All current fundraisers</Link>
-                </div>
+                {currentFundraisers.length ? (
+                  <>
+                    <ul className="home-fundraisers">
+                      {currentFundraisers.map((fundraiser) => (
+                        <li key={fundraiser.slug}>
+                          <Link href={`/fundraising/${fundraiser.slug}`}>{fundraiser.title}</Link>
+                          <span>{fundraiser.timing || fundraiser.status}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="home-links">
+                      <Link href="/fundraising">All current fundraisers</Link>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p>No fundraiser is running right now. You can still give to the Carnegie trip or sponsor the band.</p>
+                    <div className="home-links">
+                      <Link href="/support-carnegie">Give to the Carnegie trip</Link>
+                      <Link href="/sponsors">Sponsor the band</Link>
+                    </div>
+                  </>
+                )}
               </li>
               <li className="home-now-item">
                 <p className="home-now-tag">Program news</p>
@@ -220,7 +238,6 @@ export default function HomePage() {
               </li>
             </ul>
           </div>
-          <HomeUpcomingEvents />
         </div>
       </section>
 

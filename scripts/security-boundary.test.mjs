@@ -371,9 +371,10 @@ test("limited-role command center returns a record-free capability shell", () =>
   assert.match(route, /metrics:\s*\{\}/);
   assert.match(route, /authorizedBuckets/);
   assert.match(route, /authorizedCapabilities/);
-  const page = readFileSync("app/admin/page.jsx", "utf8");
+  const page = readFileSync("lib/staffHome.js", "utf8");
+  assert.match(readFileSync("app/admin/page.jsx", "utf8"), /staffHomeView\(session, summary/);
   assert.match(page, /assignedCapabilities/);
-  assert.match(page, /staffHasCapability\(session, area\.capability\) && assigned\(area\.capability\)/);
+  assert.match(page, /staffHasCapability\(session, item\.capability\) && assigned\(item\.capability\)/);
 });
 
 test("staff access controls issue route-compatible limited-role scopes", () => {
@@ -525,8 +526,8 @@ test("shared private responses prevent storage of authenticated payloads", () =>
 });
 
 test("staff command center hides work outside the signed-in role", () => {
-  const source = readFileSync("app/admin/page.jsx", "utf8");
-  assert.match(source, /staffHasCapability\(session, link\.capability\)/);
+  const source = readFileSync("lib/staffHome.js", "utf8");
+  assert.match(source, /staffHasCapability\(session, item\.capability\)/);
   for (const capability of ["STUDENTS_READ", "BILLING_READ", "ASSETS_READ", "COMMUNICATIONS_READ", "SPONSORSHIP_READ", "SYSTEM_DATA_INVENTORY_READ"]) {
     assert.match(source, new RegExp(`STAFF_CAPABILITIES\\.${capability}\\b`));
   }

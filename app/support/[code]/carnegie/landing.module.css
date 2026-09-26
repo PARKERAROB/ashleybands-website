@@ -1,5 +1,5 @@
 .landing { background: #f7f3e8; min-height: 70vh; }
-.hero { background: #4f101c; color: #f7f3e8; padding: 22px 16px 26px; display: flex; flex-direction: column; gap: 10px; }
+.hero { background: var(--garnet-dark); color: #f7f3e8; padding: 22px 16px 26px; display: flex; flex-direction: column; gap: 10px; }
 .hero > * { max-width: 720px; width: 100%; margin-left: auto; margin-right: auto; }
 .kicker { margin: 0; font-family: Cinzel, serif; font-size: 11px; letter-spacing: 2px; color: #e2c35a; font-weight: 700; text-transform: uppercase; }
 .invite { margin: 0; font-size: 15px; color: #f1e6cc; }
@@ -12,6 +12,6 @@
 .chart { width: 100%; max-width: 460px; height: auto; align-self: center; display: block; }
 .give { scroll-margin-top: 16px; }
 .more { margin: 0; font-size: 14px; }
-.more a { color: #7b1829; font-weight: 600; }
+.more a { color: var(--garnet); font-weight: 600; }
 @media (min-width: 900px) { .heading { font-size: 40px; } .hero { padding: 32px 24px 36px; } }
-.match { margin: -4px 0 0; font-size: 14px; font-weight: 600; color: #4f101c; background: #fff; border: 1px solid #e3dccb; border-left: 4px solid #c5a028; border-radius: 8px; padding: 10px 12px; }
+.match { margin: -4px 0 0; font-size: 14px; font-weight: 600; color: var(--garnet-dark); background: #fff; border: 1px solid #e3dccb; border-left: 4px solid #c5a028; border-radius: 8px; padding: 10px 12px; }

@@ -6,28 +6,28 @@
 .controlsHint { margin: 0; font-size: 14px; color: #4a4340; }
 .controlsRow { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .printButton, .markButton { min-height: 46px; padding: 0 18px; border-radius: 10px; font: 700 15px Inter, sans-serif; cursor: pointer; }
-.printButton { background: #7b1829; color: #fff; border: 0; }
-.markButton { background: #fff; color: #4f101c; border: 1.5px solid #7b1829; }
+.printButton { background: var(--garnet); color: #fff; border: 0; }
+.markButton { background: #fff; color: var(--garnet-dark); border: 1.5px solid var(--garnet); }
 .markButton:disabled { opacity: 0.6; }
 .controlsState { font-size: 14px; color: #1f6b3a; font-weight: 600; }
 .controlsError { margin: 0; color: #9b1c1c; font-size: 14px; }
-.backLink { color: #7b1829; font-weight: 600; font-size: 14px; }
+.backLink { color: var(--garnet); font-weight: 600; font-size: 14px; }
 .previewNote { margin: 0; padding: 8px 12px; border-radius: 8px; background: #fff4d6; border: 1px solid #e2c35a; font-size: 13px; color: #5c4300; }
 
 .sheet { width: 8.5in; min-height: 11in; background: #fff; color: #191716; box-sizing: border-box; box-shadow: 0 8px 30px rgba(35, 27, 18, 0.15); display: flex; flex-direction: column; overflow: hidden; }
-.logo { display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: #7b1829; flex-shrink: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.logo { display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--garnet); flex-shrink: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 .logo img { display: block; }
-.org { margin: 0; font-family: Cinzel, serif; font-weight: 700; font-size: 20px; letter-spacing: 2px; color: #4f101c; text-transform: uppercase; }
-.sub { margin: 4px 0 0; font-family: Inter, sans-serif; font-size: 12px; letter-spacing: 1.5px; color: #7b1829; font-weight: 600; text-transform: uppercase; }
+.org { margin: 0; font-family: Cinzel, serif; font-weight: 700; font-size: 20px; letter-spacing: 2px; color: var(--garnet-dark); text-transform: uppercase; }
+.sub { margin: 4px 0 0; font-family: Inter, sans-serif; font-size: 12px; letter-spacing: 1.5px; color: var(--garnet); font-weight: 600; text-transform: uppercase; }
 
 /* Front */
-.front { padding: 0.6in 0.8in 0.5in; border-top: 14px solid #7b1829; gap: 16px; font-family: "Source Serif 4", Georgia, serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.front { padding: 0.6in 0.8in 0.5in; border-top: 14px solid var(--garnet); gap: 16px; font-family: "Source Serif 4", Georgia, serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 .frontHead { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; border-bottom: 2px solid #c5a028; padding-bottom: 12px; }
 .body { margin: 0; font-size: 16.5px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
 .ownWords { background: #f7f3e8; border-radius: 10px; padding: 16px 22px; display: flex; flex-direction: column; gap: 8px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-.ownLabel { margin: 0; font-family: Inter, sans-serif; font-size: 11px; letter-spacing: 1.5px; color: #7b1829; font-weight: 600; text-transform: uppercase; }
+.ownLabel { margin: 0; font-family: Inter, sans-serif; font-size: 11px; letter-spacing: 1.5px; color: var(--garnet); font-weight: 600; text-transform: uppercase; }
 .ownText { margin: 0; font-size: 16.5px; line-height: 1.55; font-style: italic; white-space: pre-wrap; overflow-wrap: anywhere; }
-.signature { font-family: "DM Serif Display", Georgia, serif; font-size: 26px; color: #4f101c; }
+.signature { font-family: "DM Serif Display", Georgia, serif; font-size: 26px; color: var(--garnet-dark); }
 .frontFoot { margin-top: auto; display: flex; gap: 20px; align-items: center; border-top: 1px solid #e3dccb; padding-top: 16px; font-family: Inter, sans-serif; }
 .qrSmall, .qrLarge { display: block; flex-shrink: 0; line-height: 0; }
 .qrSmall { width: 92px; height: 92px; }
@@ -38,23 +38,23 @@
 .url { font-size: 15px !important; font-weight: 600; color: #191716; overflow-wrap: anywhere; }
 
 /* Back */
-.back { border: 10px solid #7b1829; font-family: Inter, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.back { border: 10px solid var(--garnet); font-family: Inter, sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 .backHead { padding: 22px 32px 0; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
-.banner { background: #7b1829; color: #fff; padding: 10px 22px 12px; margin-top: 8px; border-radius: 4px; transform: rotate(-1.5deg); display: inline-flex; flex-direction: column; }
+.banner { background: var(--garnet); color: #fff; padding: 10px 22px 12px; margin-top: 8px; border-radius: 4px; transform: rotate(-1.5deg); display: inline-flex; flex-direction: column; }
 .bannerTop { font-family: Cinzel, serif; font-weight: 700; font-size: 38px; line-height: 1; text-transform: uppercase; }
 .bannerScript { font-family: Caveat, cursive; font-weight: 700; font-size: 68px; line-height: 0.9; color: #e2c35a; }
 .backMark { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
-.backMark p { margin: 0; font-family: Cinzel, serif; font-size: 12px; letter-spacing: 1.5px; color: #4f101c; text-align: right; font-weight: 700; text-transform: uppercase; }
+.backMark p { margin: 0; font-family: Cinzel, serif; font-size: 12px; letter-spacing: 1.5px; color: var(--garnet-dark); text-align: right; font-weight: 700; text-transform: uppercase; }
 .backMain { padding: 14px 32px 0; display: flex; gap: 16px; }
 .backLeft { width: 210px; flex-shrink: 0; display: flex; flex-direction: column; gap: 14px; }
 .backLede { margin: 0; font-size: 15px; line-height: 1.45; }
-.backLede strong { color: #7b1829; }
+.backLede strong { color: var(--garnet); }
 .backCampaign { margin: 0; font-size: 14px; line-height: 1.45; color: #4a4340; }
-.sticky { margin: 0; background: #f3e2a6; padding: 10px 14px; border-radius: 4px; transform: rotate(-2deg); font-family: Caveat, cursive; font-weight: 700; font-size: 28px; line-height: 1; color: #4f101c; }
+.sticky { margin: 0; background: #f3e2a6; padding: 10px 14px; border-radius: 4px; transform: rotate(-2deg); font-family: Caveat, cursive; font-weight: 700; font-size: 28px; line-height: 1; color: var(--garnet-dark); }
 .studentLabel { margin: 0; font-size: 15px; color: #4a4340; }
-.studentName { font-family: "DM Serif Display", Georgia, serif; font-size: 30px; color: #4f101c; }
+.studentName { font-family: "DM Serif Display", Georgia, serif; font-size: 30px; color: var(--garnet-dark); }
 .backRight { flex-grow: 1; display: flex; flex-direction: column; align-items: flex-end; }
-.goal { margin: 0; font-family: Cinzel, serif; font-size: 40px; font-weight: 700; color: #4f101c; line-height: 1; text-transform: uppercase; }
+.goal { margin: 0; font-family: Cinzel, serif; font-size: 40px; font-weight: 700; color: var(--garnet-dark); line-height: 1; text-transform: uppercase; }
 .goal span { color: #b8901a; }
 .chart { width: 100%; max-width: 470px; height: auto; margin-top: 6px; }
 .stepsRow { list-style: none; margin: 0; padding: 10px 32px 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
@@ -63,18 +63,18 @@
 .pay { margin: 14px 32px 0; display: flex; gap: 20px; align-items: center; border-top: 2px solid #c5a028; padding-top: 14px; }
 .pay p { margin: 0 0 4px; font-size: 13.5px; line-height: 1.4; color: #4a4340; }
 .pay strong { color: #191716; }
-.payTitle { font-family: Cinzel, serif; font-size: 14px !important; letter-spacing: 1.5px; font-weight: 700; color: #7b1829 !important; text-transform: uppercase; }
-.thanks { margin: 6px 32px 8px; text-align: right; font-family: Caveat, cursive; font-weight: 700; font-size: 28px; color: #7b1829; }
+.payTitle { font-family: Cinzel, serif; font-size: 14px !important; letter-spacing: 1.5px; font-weight: 700; color: var(--garnet) !important; text-transform: uppercase; }
+.thanks { margin: 6px 32px 8px; text-align: right; font-family: Caveat, cursive; font-weight: 700; font-size: 28px; color: var(--garnet); }
 
 /* Tear-off gift slip */
-.slip { margin: auto 0 0; border-top: 2px dashed #7b1829; padding: 10px 32px 16px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
+.slip { margin: auto 0 0; border-top: 2px dashed var(--garnet); padding: 10px 32px 16px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
 .slipHead { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
-.slipTitle { margin: 0; font-family: Cinzel, serif; font-weight: 700; letter-spacing: 1.5px; color: #7b1829; text-transform: uppercase; font-size: 13px; }
+.slipTitle { margin: 0; font-family: Cinzel, serif; font-weight: 700; letter-spacing: 1.5px; color: var(--garnet); text-transform: uppercase; font-size: 13px; }
 .slipCut { margin: 0; font-size: 11px; color: #6b625d; }
 .slipGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 20px; }
 .slipField { display: flex; gap: 6px; align-items: flex-end; margin: 0; }
 .slipField span { white-space: nowrap; }
-.slipField i { flex-grow: 1; border-bottom: 1px solid #191716; min-height: 18px; font-style: normal; font-family: "DM Serif Display", Georgia, serif; font-size: 16px; color: #4f101c; }
+.slipField i { flex-grow: 1; border-bottom: 1px solid #191716; min-height: 18px; font-style: normal; font-family: "DM Serif Display", Georgia, serif; font-size: 16px; color: var(--garnet-dark); }
 .slipNote { margin: 0; font-weight: 600; }
 
 @media screen and (max-width: 860px) {
@@ -100,4 +100,4 @@
   .sheet:last-of-type { break-after: auto; page-break-after: auto; }
 }
 .slipGrid p:last-child { grid-column: 1 / -1; }
-.matchLine { font-weight: 600; color: #4f101c !important; }
+.matchLine { font-weight: 600; color: var(--garnet-dark) !important; }

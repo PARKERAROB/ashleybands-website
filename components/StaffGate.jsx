@@ -2,6 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { readStaffSession, saveStaffSession, revokeStaffSession } from "@/lib/staffSession";
+import styles from "./StaffGate.module.css";
+
+const HELP_EMAIL = "robert.parker@nhcs.net";
+
+// Friendlier wording for the sign-in errors people actually hit (#131). The request
+// and response contract with /api/sponsors/staff-auth is unchanged.
+function friendlySignInError(status, serverMessage) {
+  if (status === 401) return "That email and PIN don't match. Check both and try again.";
+  if (status === 400) return "Enter your email and your PIN.";
+  if (status === 429) return "Too many tries. Wait a few minutes, then try again.";
+  if (status === 503) return "Sign-in is down for a moment. Try again in a few minutes.";
+  return serverMessage || "Sign-in didn't work. Try again.";
+}
 
 // Wraps any staff-only UI. Renders a login form until the staff member is
 // authenticated, then calls children(session, signOut). Reuses the shared
@@ -20,7 +33,7 @@ export function StaffGate({ children }) {
   }, []);
 
   if (!auth.ready) {
-    return <p style={loadingState}>Loading staff access…</p>;
+    return <p className={styles.loading}>Loading staff access…</p>;
   }
 
   const session = auth.session;
@@ -39,7 +52,7 @@ export function StaffGate({ children }) {
   return children(session, signOut);
 }
 
-export function StaffLogin({ onAuthed, title = "Staff Login", description }) {
+export function StaffLogin({ onAuthed, title = "Staff sign-in", description }) {
   const [form, setForm] = useState({ email: "", pin: "" });
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
@@ -56,23 +69,23 @@ export function StaffLogin({ onAuthed, title = "Staff Login", description }) {
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setErr(data.error || "Login failed");
+        setErr(friendlySignInError(res.status, data.error));
         return;
       }
       saveStaffSession(data);
       onAuthed(data);
     } catch {
-      setErr("Staff sign-in could not connect. Please try again.");
+      setErr("We couldn't reach the sign-in server. Check your connection and try again.");
     } finally {
       setBusy(false);
     }
   };
 
   return (
-    <form onSubmit={login} style={{ maxWidth: 400, margin: "100px auto", padding: "0 16px", fontFamily: "system-ui, sans-serif" }}>
+    <form onSubmit={login} className={styles.form}>
       <h2>{title}</h2>
-      {description && <p>{description}</p>}
-      <label htmlFor="staff-email" style={loginLabel}>Email</label>
+      <p className={styles.intro}>{description || "Staff and booster sign-in. Use the email and PIN Mr. Parker gave you."}</p>
+      <label htmlFor="staff-email" className={styles.label}>Email</label>
       <input
         id="staff-email"
         name="email"
@@ -81,9 +94,9 @@ export function StaffLogin({ onAuthed, title = "Staff Login", description }) {
         required
         value={form.email}
         onChange={(e) => setForm({ ...form, email: e.target.value })}
-        style={loginInput}
+        className={styles.input}
       />
-      <label htmlFor="staff-pin" style={{ ...loginLabel, marginTop: 12 }}>PIN</label>
+      <label htmlFor="staff-pin" className={styles.label}>PIN</label>
       <input
         id="staff-pin"
         name="pin"
@@ -93,15 +106,11 @@ export function StaffLogin({ onAuthed, title = "Staff Login", description }) {
         required
         value={form.pin}
         onChange={(e) => setForm({ ...form, pin: e.target.value })}
-        style={loginInput}
+        className={styles.input}
       />
-      {err && <p style={{ color: "#a3242f", fontSize: 13 }} aria-live="polite">{err}</p>}
-      <button type="submit" disabled={busy} style={loginBtn}>{busy ? "Signing in…" : "Sign In"}</button>
+      {err && <p className={styles.error} aria-live="polite">{err}</p>}
+      <button type="submit" disabled={busy} className={styles.button}>{busy ? "Signing in…" : "Sign in"}</button>
+      <p className={styles.help}>Forgot your PIN? Email Mr. Parker at <a href={`mailto:${HELP_EMAIL}`}>{HELP_EMAIL}</a>.</p>
     </form>
   );
 }
-
-const loginLabel = { display: "block", marginBottom: 5, fontSize: 13, fontWeight: 700, color: "#4b584d" };
-const loginInput = { boxSizing: "border-box", width: "100%", padding: "10px 12px", fontSize: 14, border: "1px solid #ccc", borderRadius: 6, fontFamily: "system-ui, sans-serif" };
-const loginBtn = { marginTop: 12, width: "100%", padding: "10px 16px", fontSize: 14, fontWeight: 600, border: "none", borderRadius: 6, color: "#fff", background: "#7b1829", cursor: "pointer" };
-const loadingState = { maxWidth: 400, margin: "100px auto", padding: "0 16px", color: "#4b584d", fontFamily: "system-ui, sans-serif" };

@@ -639,7 +639,7 @@ function Styles() {
         text-transform: uppercase;
         letter-spacing: 2px;
         font-size: 12px;
-        color: #7b1829;
+        color: var(--garnet);
         font-weight: 700;
         margin: 0;
       }
@@ -751,7 +751,7 @@ function Styles() {
         font-size: 18px;
       }
       .sp-tag {
-        background: #7b1829;
+        background: var(--garnet);
         color: #fff;
         border-radius: 12px;
         padding: 3px 10px;
@@ -811,14 +811,14 @@ function Styles() {
         min-height: 44px;
       }
       .sp-chip.on {
-        background: #7b1829;
-        border-color: #7b1829;
+        background: var(--garnet);
+        border-color: var(--garnet);
         color: #fff;
       }
       .sp-btn {
-        border: 1px solid #7b1829;
+        border: 1px solid var(--garnet);
         background: #fff;
-        color: #7b1829;
+        color: var(--garnet);
         border-radius: 8px;
         padding: 9px 16px;
         font-size: 15px;
@@ -831,7 +831,7 @@ function Styles() {
         min-height: 44px;
       }
       .sp-btn-primary {
-        background: #7b1829;
+        background: var(--garnet);
         color: #fff;
       }
       .sp-btn:disabled {
@@ -844,7 +844,7 @@ function Styles() {
       .sp-link {
         background: none;
         border: none;
-        color: #7b1829;
+        color: var(--garnet);
         font-weight: 600;
         cursor: pointer;
         padding: 8px 0;
@@ -936,14 +936,14 @@ function Styles() {
         font-size: 14px;
       }
       .sp-error {
-        color: #7b1829;
+        color: var(--garnet);
         font-weight: 600;
       }
       .sp-foot {
         margin-top: 24px;
       }
       .sp-shell a:not(.sp-btn) {
-        color: #7b1829;
+        color: var(--garnet);
       }
       @media (prefers-reduced-motion: reduce) {
         .sp-bar-fill {

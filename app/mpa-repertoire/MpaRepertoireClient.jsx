@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 const BASE = "/mpa-repertoire-data";
@@ -144,8 +143,7 @@ export default function MpaRepertoireClient() {
           <h1>MPA Repertoire — Eastern District</h1>
           <p>
             {m.rows.toLocaleString()} pieces performed, {m.years[0]}–{m.years[m.years.length - 1]} ·{" "}
-            {m.works.toLocaleString()} unique works. Grades use the current NCBA MPA list. Paired with the{" "}
-            <Link href="/mpa-analysis">2026 MPA results analysis</Link>.
+            {m.works.toLocaleString()} unique works. Grades use the current NCBA MPA list.
           </p>
         </div>
         <aside className="mpa-warning">

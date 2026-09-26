@@ -1,124 +1,96 @@
 import Link from "next/link";
-import { getSiteData } from "@/lib/siteData";
+import { getCurrentFundraisers, getSiteData } from "@/lib/siteData";
+import { routesByDoor } from "@/lib/routes";
 
 export const metadata = {
-  title: "Site Map | Bands of AHS"
+  title: "Site map | Bands of AHS"
 };
+
+// Built from the route registry in lib/routes.js (#133), grouped by who each page is for.
+// Info pages and fundraisers come from content, so new ones appear here without a code change.
+function PageList({ pages }) {
+  return (
+    <ul className="sitemap-list">
+      {pages.map((page) => (
+        <li key={page.href}>
+          <Link href={page.href}>{page.title}</Link>
+          {page.summary ? <span className="sitemap-summary">{page.summary}</span> : null}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+const listed = (door) =>
+  routesByDoor(door)
+    .filter((route) => route.listed && !route.pending)
+    .map((route) => ({ title: route.title, href: route.path, group: route.group }));
 
 export default function SitemapPage() {
   const data = getSiteData();
+  const currentFundraisers = getCurrentFundraisers();
+  const endedFundraisers = data.fundraisers.filter(
+    (fundraiser) => !currentFundraisers.some((current) => current.slug === fundraiser.slug)
+  );
+  const infoPages = (category) =>
+    data.pages
+      .filter((page) => page.category === category)
+      .map((page) => ({ title: page.title, href: `/info/${page.slug}`, summary: page.summary }));
 
-  const sections = [
-    { label: "Current Information", category: "Current information" },
-    { label: "Everyday Resources", category: "Everyday resources" },
-    { label: "Support the Band", category: "Support the band" },
-    { label: "Archive (past activities)", category: "Archive" }
+  const publicPages = listed("public");
+  const byGroup = (group) => publicPages.filter((page) => page.group === group);
+
+  const publicSections = [
+    { label: "Main pages", pages: byGroup("Main pages") },
+    { label: "Current information", pages: infoPages("Current information") },
+    { label: "Everyday resources", pages: infoPages("Everyday resources") },
+    { label: "Practice maps", pages: byGroup("Practice maps") },
+    {
+      label: "Support the band",
+      pages: [
+        ...byGroup("Support the band"),
+        ...currentFundraisers.map((fundraiser) => ({ title: fundraiser.title, href: `/fundraising/${fundraiser.slug}` })),
+        ...infoPages("Support the band")
+      ]
+    }
   ];
 
-  const mainPages = [
-    { title: "Home", href: "/" },
-    { title: "Our Story", href: "/our-story" },
-    { title: "Band Calendar", href: "/calendar" },
-    { title: "AshleyBands Weekly", href: "/newsletter" },
-    { title: "Band Boosters", href: "/boosters" },
-    { title: "Current Fundraisers", href: "/fundraising" },
-    ...data.fundraisers.map((fundraiser) => ({ title: fundraiser.title, href: `/fundraising/${fundraiser.slug}` })),
-    { title: "Family Portal", href: "/portal" },
-    { title: "Carnegie Hall 2027 Family Commitment", href: "/carnegie-2027/commit" },
-    { title: "Carnegie Hall 2027 Family Meeting Packet", href: "/carnegie-2027/meeting-packet" },
-    { title: "Request Portal Access", href: "/portal/request" },
-    { title: "Performed Repertoire", href: "/repertoire" },
-    { title: "Program Archive", href: "/programs" },
-    { title: "Spring Concert 2026 Program", href: "/programs/spring-concert-2026" },
-    { title: "Handbook", href: "/handbook" },
-    { title: "Spring Trip Recovery", href: "/spring-trip-recovery" },
-    { title: "Band Assistant", href: "/assistant" },
-    { title: "Instrument Inventory (submit)", href: "/instrument-inventory" },
-    { title: "Music Library (submit)", href: "/music-library" }
-  ];
-
-  const sponsorPages = [
-    { title: "Become a Sponsor", href: "/sponsors" },
-    { title: "Family Campaign Tools", href: "/sponsors/campaign" },
-    { title: "Sponsorship Tracker", href: "/sponsors/tracker" },
-    { title: "Sponsorship Packet (print)", href: "/sponsors/print/packet" },
-    { title: "Leave-Behind Card (print)", href: "/sponsors/print/leave-behind" },
-    { title: "Tracker Sheet (print)", href: "/sponsors/print/tracker" }
-  ];
-
-  const staffPages = [
-    { title: "Staff Hub (all dashboards)", href: "/admin" },
-    { title: "Broadcast (email families)", href: "/admin/broadcast" },
-    { title: "AshleyBands Weekly (draft, publish, send)", href: "/admin/newsletter" },
-    { title: "Student Billing", href: "/admin/billing" },
-    { title: "Carnegie Commitment Sheet", href: "/admin/carnegie-2027" },
-    { title: "Add / Edit Student", href: "/admin/students" },
-    { title: "Profile Requests", href: "/admin/profile-requests" },
-    { title: "Marching Band Dashboard", href: "/admin/marching-band" },
-    { title: "Instrument Inventory (review)", href: "/admin/instrument-inventory" },
-    { title: "Music Library (review)", href: "/admin/music-library" },
-    { title: "Sponsor Dashboard", href: "/sponsors/dashboard" },
-    { title: "Business Outreach Dashboard", href: "/sponsors/dashboard/businesses" },
-    { title: "Staff Sprint", href: "/staff-sprint" },
-    { title: "Staff Sprint - Teacher View", href: "/staff-sprint/teacher" },
-    { title: "Raleigh Brief", href: "/raleigh-brief" }
+  const archivePages = [
+    ...listed("archive"),
+    ...infoPages("Archive"),
+    ...endedFundraisers.map((fundraiser) => ({ title: `${fundraiser.title} (ended)`, href: `/fundraising/${fundraiser.slug}` }))
   ];
 
   return (
     <main className="narrow-page">
       <p className="eyebrow">Navigation</p>
-      <h1>Site Map</h1>
-      <p className="lede">Every page on the Bands of Ashley High School website.</p>
+      <h1>Site map</h1>
+      <p className="lede">Every page for families, students and supporters, grouped by who it is for.</p>
 
-      <section className="sitemap-section">
-        <h2>Main Pages</h2>
-        <ul className="sitemap-list">
-          {mainPages.map((page) => (
-            <li key={page.href}>
-              <Link href={page.href}>{page.title}</Link>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {sections.map((section) => {
-        const pages = data.pages.filter((p) => p.category === section.category);
-        return (
-          <section className="sitemap-section" key={section.category}>
+      {publicSections.map((section) =>
+        section.pages.length ? (
+          <section className="sitemap-section" key={section.label}>
             <h2>{section.label}</h2>
-            <ul className="sitemap-list">
-              {pages.map((page) => (
-                <li key={page.slug}>
-                  <Link href={`/info/${page.slug}`}>{page.title}</Link>
-                  <span className="sitemap-summary">{page.summary}</span>
-                </li>
-              ))}
-            </ul>
+            <PageList pages={section.pages} />
           </section>
-        );
-      })}
+        ) : null
+      )}
 
       <section className="sitemap-section">
-        <h2>Sponsorship Tools &amp; Print</h2>
-        <ul className="sitemap-list">
-          {sponsorPages.map((page) => (
-            <li key={page.href}>
-              <Link href={page.href}>{page.title}</Link>
-            </li>
-          ))}
-        </ul>
+        <h2>Family Portal</h2>
+        <p className="sitemap-summary">Most portal pages open after you sign in with your family email.</p>
+        <PageList pages={listed("family")} />
       </section>
 
       <section className="sitemap-section">
-        <h2>Staff / Internal</h2>
-        <p className="sitemap-summary">Sign-in required. Listed for quick access.</p>
-        <ul className="sitemap-list">
-          {staffPages.map((page) => (
-            <li key={page.href}>
-              <Link href={page.href}>{page.title}</Link>
-            </li>
-          ))}
-        </ul>
+        <h2>Archive (past events)</h2>
+        <p className="sitemap-summary">Records of past events. Dates and deadlines on these pages have passed.</p>
+        <PageList pages={archivePages} />
+      </section>
+
+      <section className="sitemap-section">
+        <h2>Staff workspace (sign-in required)</h2>
+        <PageList pages={[{ title: "Staff sign-in", href: "/admin" }]} />
       </section>
     </main>
   );

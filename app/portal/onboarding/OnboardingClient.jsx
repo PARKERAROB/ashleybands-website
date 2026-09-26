@@ -2,6 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import PortalErrorMessage from "../PortalErrorMessage";
+import { PORTAL_SIGNED_OUT_MESSAGE, portalErrorText, portalSignInHref } from "@/lib/portalFamilyMessages";
 import ContactStep from "../onboarding-prototype/ContactStep";
 import FamilyStep from "../onboarding-prototype/FamilyStep";
 import IdentityStep from "../onboarding-prototype/IdentityStep";
@@ -59,6 +62,7 @@ function payloadForStep(step, form) {
 }
 
 export default function OnboardingClient() {
+  const router = useRouter();
   const [state, setState] = useState({ status: "loading", message: "Opening student onboarding…" });
   const [students, setStudents] = useState([]);
   const [studentId, setStudentId] = useState("");
@@ -73,7 +77,10 @@ export default function OnboardingClient() {
     const response = await fetch(`/api/portal/onboarding?studentId=${encodeURIComponent(nextStudentId)}`, { cache: "no-store" });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      setState({ status: data.code === "STRONG_RELATIONSHIP_REQUIRED" ? "verify" : "error", message: data.error || "Student onboarding could not be opened." });
+      setState({
+        status: data.code === "STRONG_RELATIONSHIP_REQUIRED" ? "verify" : response.status === 401 ? "signin" : "error",
+        message: portalErrorText(response, data, "Student onboarding could not be opened."),
+      });
       return;
     }
     const onboarding = data.onboarding;
@@ -92,7 +99,7 @@ export default function OnboardingClient() {
       const data = await response.json().catch(() => ({}));
       if (cancelled) return;
       if (!response.ok) {
-        setState({ status: "signin", message: data.error || "Sign in to open student onboarding." });
+        setState({ status: "signin", message: response.status === 401 ? PORTAL_SIGNED_OUT_MESSAGE : "Sign in to open student onboarding." });
         return;
       }
       const currentStudents = (data.students || []).filter((student) => String(student.status || "").toLowerCase() === "active");
@@ -137,10 +144,14 @@ export default function OnboardingClient() {
       : stepIndex === 3 ? musicComplete
         : stepIndex === 5 ? Boolean(form?.accurate && requiredRecordComplete) : true;
 
-  async function submitStep(event) {
-    event.preventDefault();
-    if (!canContinue || !form || !record) return;
-    const step = stepIndex + 1;
+  const exitHref = `/portal/review?studentId=${encodeURIComponent(studentId)}`;
+  // The review step only records the final "accurate" confirmation, so leaving it saves nothing.
+  const canSaveAndExit = stepIndex < steps.length - 1 && canContinue;
+  const savedStepCount = record?.progress?.status === "complete"
+    ? steps.length
+    : Number(record?.progress?.lastCompletedStep || 0);
+
+  async function saveStep(step) {
     setSaveState({ status: "saving", message: "Saving…" });
     try {
       const response = await fetch("/api/portal/onboarding", {
@@ -155,20 +166,34 @@ export default function OnboardingClient() {
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
-        setSaveState({ status: "error", message: data.error || "This step could not be saved." });
-        return;
+        setSaveState({ status: "error", message: portalErrorText(response, data, "This step could not be saved.") });
+        return false;
       }
       if (data.onboarding) setRecord(data.onboarding);
       setSaveState({ status: "saved", message: "Saved" });
-      if (step === 6) {
-        setFinished(true);
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      } else {
-        jumpTo(stepIndex + 1);
-      }
+      return true;
     } catch {
       setSaveState({ status: "error", message: "This step could not be saved. Check your connection and try again." });
+      return false;
     }
+  }
+
+  async function submitStep(event) {
+    event.preventDefault();
+    if (!canContinue || !form || !record) return;
+    const step = stepIndex + 1;
+    if (!(await saveStep(step))) return;
+    if (step === 6) {
+      setFinished(true);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      jumpTo(stepIndex + 1);
+    }
+  }
+
+  async function saveAndExit() {
+    if (!canSaveAndExit || !form || !record) return;
+    if (await saveStep(stepIndex + 1)) router.push(exitHref);
   }
 
   async function chooseStudent(nextStudentId) {
@@ -182,10 +207,10 @@ export default function OnboardingClient() {
       <main className={styles.page}>
         <section className={styles.finished}>
           <p className={styles.eyebrow}>Student onboarding</p>
-          <h1>{state.status === "loading" ? "Opening the student record." : "Onboarding is not available yet."}</h1>
+          <h1>{state.status === "loading" ? "Opening the student record." : state.status === "signin" ? "Please sign in again." : "Onboarding is not available yet."}</h1>
           <p>{state.message}</p>
           <div className={styles.finishActions}>
-            {state.status === "signin" ? <Link href={`/portal?next=${encodeURIComponent("/portal/onboarding")}`}>Sign in</Link> : null}
+            {state.status === "signin" ? <Link href={portalSignInHref(`/portal/onboarding${window.location.search}`)}>Sign in again</Link> : null}
             {state.status === "verify" ? <Link href={`/portal/request?next=${encodeURIComponent(`/portal/onboarding?studentId=${studentId}`)}`}>Verify the family connection</Link> : null}
             <Link href="/portal/review">Return to the Family Portal</Link>
           </div>
@@ -215,7 +240,11 @@ export default function OnboardingClient() {
     <main className={styles.page}>
       <header className={styles.topbar}>
         <div><strong>Ashley Bands</strong><span>Student onboarding</span></div>
-        <Link href={`/portal/review?studentId=${encodeURIComponent(studentId)}`}>Save and exit</Link>
+        {canSaveAndExit ? (
+          <button type="button" className={styles.exitButton} onClick={saveAndExit} disabled={saveState.status === "saving"}>Save and exit</button>
+        ) : (
+          <Link href={exitHref}>{stepIndex === steps.length - 1 ? "Back to the Family Portal" : "Exit without saving this step"}</Link>
+        )}
       </header>
       <section className={styles.hero}>
         <p className={styles.prototypeFlag}>{record.completion ? "Onboarding complete · Update information" : "Saved student record"}</p>
@@ -237,8 +266,8 @@ export default function OnboardingClient() {
       <div className={styles.workspace}>
         <nav className={styles.stepNav} aria-label="Onboarding steps">
           {steps.map(([number, short, title], index) => (
-            <button key={number} type="button" onClick={() => jumpTo(index)} className={index === stepIndex ? styles.activeStep : index < stepIndex ? styles.completeStep : ""} aria-current={index === stepIndex ? "step" : undefined}>
-              <span>{index < stepIndex ? "✓" : number}</span><div><small>{short}</small><strong>{title}</strong></div>
+            <button key={number} type="button" onClick={() => jumpTo(index)} className={index === stepIndex ? styles.activeStep : index < savedStepCount ? styles.completeStep : ""} aria-current={index === stepIndex ? "step" : undefined}>
+              <span>{index < savedStepCount ? "✓" : number}</span><div><small>{short}</small><strong>{title}</strong></div>
             </button>
           ))}
           <p><strong>One-time setup</strong> Later, update only what changed.</p>
@@ -253,7 +282,7 @@ export default function OnboardingClient() {
           <footer className={styles.formActions}>
             <button type="button" className={styles.backButton} onClick={() => jumpTo(Math.max(0, stepIndex - 1))} disabled={stepIndex === 0 || saveState.status === "saving"}>Back</button>
             <div>
-              <small aria-live="polite">{saveState.status === "error" ? saveState.message : !canContinue ? "Complete the required fields." : saveState.message || "You can return to any step."}</small>
+              <small aria-live="polite">{saveState.status === "error" ? <PortalErrorMessage message={saveState.message} className="" /> : !canContinue ? "Complete the required fields." : saveState.message || "You can return to any step."}</small>
               <button type="submit" className={styles.nextButton} disabled={!canContinue || saveState.status === "saving"}>{saveState.status === "saving" ? "Saving…" : stepIndex === steps.length - 1 ? "Finish onboarding" : "Save and continue"}</button>
             </div>
           </footer>

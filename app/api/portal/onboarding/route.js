@@ -12,6 +12,30 @@ function response(body, status = 200) {
   return NextResponse.json(body, { status, headers: PRIVATE_HEADERS });
 }
 
+// Database validation text is written for developers. Families see these instead.
+const FAMILY_SAVE_MESSAGES = {
+  "Invalid personal email": "Check the personal email address. It does not look complete.",
+  "One to four guardians are required": "Add at least one guardian and no more than four.",
+  "Guardian 1 is incomplete": "Add Guardian 1's name, relationship, email, and phone to continue.",
+  "Invalid guardian email": "Check the guardian email addresses. One does not look complete.",
+  "Primary instrument is required": "Choose a primary instrument to continue.",
+  "Previous school is required": "Choose the previous school to continue.",
+  "Outside-county school, city, and state are required": "Add the previous school's name, city, and state to continue.",
+  "Invalid shirt size": "Choose a shirt size from the list.",
+  "Accuracy confirmation is required": "Check the box to confirm the information is accurate.",
+  "Primary guardian record is incomplete": "Guardian 1's information is not complete. Go back to the Family step to finish it.",
+  "Music background is incomplete": "The music background is not complete. Go back to the Music step to finish it.",
+  "Strongly verified student relationship required": "This family connection must be verified before onboarding can be saved.",
+};
+
+function familySaveMessage(error, status) {
+  const known = FAMILY_SAVE_MESSAGES[String(error?.message || "").trim()];
+  if (known) return known;
+  if (status === 403) return "This account cannot save onboarding for this student. Email Mr. Parker for help.";
+  if (status === 400) return "Something on this step needs another look. Check your answers and try again.";
+  return "This onboarding step could not be saved. Please try again in a few minutes.";
+}
+
 function cleanId(value) {
   return String(value || "").trim();
 }
@@ -71,7 +95,8 @@ export async function PATCH(request) {
   if (error) {
     const status = error.code === "42501" ? 403 : error.code === "22023" ? 400 : 500;
     if (status === 500) console.error("[onboarding] save failed:", error.message);
-    return response({ error: status === 500 ? "This onboarding step could not be saved." : error.message }, status);
+    else console.warn("[onboarding] save rejected:", error.message);
+    return response({ error: familySaveMessage(error, status) }, status);
   }
 
   try {

@@ -525,27 +525,27 @@ test(
         await entry.getByLabel("Email", { exact: true }).fill(staff[0].email);
         await entry.getByLabel("PIN", { exact: true }).fill("000000");
         await entry
-          .getByRole("button", { name: "Sign In", exact: true })
+          .getByRole("button", { name: "Sign in", exact: true })
           .click();
         await entry
-          .getByText("Email or PIN not recognized", { exact: true })
+          .getByText("That email and PIN don't match. Check both and try again.", { exact: true })
           .waitFor();
         assert.ok(entry.url().endsWith("/sign-in"));
         await entry.route("**/api/sponsors/staff-auth", (route) =>
           route.abort(),
         );
         await entry
-          .getByRole("button", { name: "Sign In", exact: true })
+          .getByRole("button", { name: "Sign in", exact: true })
           .click();
         await entry
-          .getByText("Staff sign-in could not connect. Please try again.", {
+          .getByText("We couldn't reach the sign-in server. Check your connection and try again.", {
             exact: true,
           })
           .waitFor();
         await entry.unroute("**/api/sponsors/staff-auth");
         await entry.getByLabel("PIN", { exact: true }).fill("246810");
         await entry
-          .getByRole("button", { name: "Sign In", exact: true })
+          .getByRole("button", { name: "Sign in", exact: true })
           .click();
         await entry.waitForURL(base + "/carnegie-2027/team");
         await entry
@@ -631,7 +631,7 @@ test(
         await entry.getByLabel("Email", { exact: true }).fill(staff[0].email);
         await entry.getByLabel("PIN", { exact: true }).fill("246810");
         await entry
-          .getByRole("button", { name: "Sign In", exact: true })
+          .getByRole("button", { name: "Sign in", exact: true })
           .click();
         await entry.waitForURL(base + "/carnegie-2027/team");
         await entry
