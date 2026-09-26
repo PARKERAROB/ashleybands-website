@@ -7,6 +7,7 @@ import {
   timeText,
   upcomingByDay,
   upcomingList,
+  weekWindowDays,
   zonedNow
 } from "../lib/thisWeek.mjs";
 
@@ -125,4 +126,22 @@ test("assistant context lists date, title, time, and location", () => {
   assert(text.includes("Event evt-late, Starts 8am"));
   assert(!text.includes("evt-past"));
   assert(!text.includes("12am"));
+});
+
+test("the week runs through the coming weekend", () => {
+  const at = (iso) => Date.parse(iso);
+  // Saturday: seven days would stop on Friday, so the window stretches to Sunday.
+  assert.equal(weekWindowDays(at("2026-09-26T10:00:00-04:00")), 9);
+  // Sunday: seven days would stop on Saturday, so it gains Sunday.
+  assert.equal(weekWindowDays(at("2026-09-27T10:00:00-04:00")), 8);
+  // Monday through Sunday already covers the weekend.
+  assert.equal(weekWindowDays(at("2026-09-28T10:00:00-04:00")), 7);
+  assert.equal(weekWindowDays(at("2026-10-02T10:00:00-04:00")), 7);
+  const events = [
+    { id: "evt-1", title: "Marching Rehearsal", start: "2026-09-29T16:00", end: "2026-09-29T19:00" },
+    { id: "evt-2", title: "Saturday Rehearsal", start: "2026-10-03T08:00", end: "2026-10-03T12:00" }
+  ];
+  const now = at("2026-09-26T14:00:00-04:00");
+  const titles = upcomingList(events, now, { days: weekWindowDays(now) }).map((ev) => ev.title);
+  assert.deepEqual(titles, ["Marching Rehearsal", "Saturday Rehearsal"]);
 });

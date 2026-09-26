@@ -282,7 +282,7 @@ const siteData = {
 const chatbotKnowledge = [
   "ASHLEY HIGH SCHOOL BAND PUBLIC KNOWLEDGE BASE",
   "",
-  "The band calendar at ashleybands.com/calendar is the official source of truth for dates and times. Families subscribe to it once and updates appear automatically. If a date conflicts with another source, tell families to use the calendar or contact Mr. Parker. The next 7 days of band events are at ashleybands.com/this-week.",
+  "The band calendar at ashleybands.com/calendar is the official source of truth for dates and times. Families subscribe to it once and updates appear automatically. If a date conflicts with another source, tell families to use the calendar or contact Mr. Parker. This week's band events, through the weekend, are at ashleybands.com/this-week.",
   "",
   readRepoSource(sources.assistantOverview).trim(),
   siteData.boosters,
