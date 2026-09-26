@@ -1,8 +1,8 @@
 .meeting-deck-root {
   --meeting-ink: #1d1816;
   --meeting-paper: #fffaf0;
-  --meeting-garnet: #7b1829;
-  --meeting-garnet-dark: #4f101c;
+  --meeting-garnet: var(--garnet);
+  --meeting-garnet-dark: var(--garnet-dark);
   --meeting-gold: #d2aa32;
   --meeting-blue: #245c73;
   position: fixed;

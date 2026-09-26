@@ -1,4 +1,6 @@
 import Link from "next/link";
+import PageHeader from "@/components/ui/PageHeader";
+import { ButtonLink } from "@/components/ui/Button";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import {
   SPONSOR_CONTACT,
@@ -47,29 +49,22 @@ export default async function SponsorsHubPage() {
   const sponsors = await fetchListedSponsors();
   return (
     <main className="sponsors-page">
-      <section className="sponsors-hero">
-        <p className="eyebrow">Support the Bands of Ashley High School</p>
-        <h1>Become a Screaming Eagle Sponsor</h1>
-        <p className="sponsors-lede">
-          Families, alumni, friends, and businesses help fund staff, transportation, scholarships,
-          and instruments. Give $5 or more, choose a sponsorship level, or help provide an instrument.
-        </p>
+      <PageHeader
+        className="sponsors-hero"
+        eyebrow="Support the Bands of Ashley High School"
+        title="Become a Screaming Eagle Sponsor"
+        lede="Families, alumni, friends, and businesses help fund staff, transportation, scholarships, and instruments. Give $5 or more, choose a sponsorship level, or help provide an instrument."
+        actions={
+          <>
+            <ButtonLink href="/sponsors/give">Give now</ButtonLink>
+            <ButtonLink href="#tiers" variant="secondary">See sponsorship levels</ButtonLink>
+            <ButtonLink href={`mailto:${SPONSOR_CONTACT.email}`} variant="secondary">Contact Mr. Parker</ButtonLink>
+            <ButtonLink href="/sponsors/print/packet" variant="secondary">Print the full packet</ButtonLink>
+          </>
+        }
+      >
         <p>Giving to the Carnegie Hall trip? <Link href="/support-carnegie">Give to the Carnegie trip</Link>. The options below support the year-round band program.</p>
-        <div className="sponsors-cta-row">
-          <Link href="/sponsors/give" className="sponsors-btn sponsors-btn-primary">
-            Give now
-          </Link>
-          <a href="#tiers" className="sponsors-btn">
-            See sponsorship levels
-          </a>
-          <a href={`mailto:${SPONSOR_CONTACT.email}`} className="sponsors-btn">
-            Contact Mr. Parker
-          </a>
-          <Link href="/sponsors/print/packet" className="sponsors-btn">
-            Print the full packet
-          </Link>
-        </div>
-      </section>
+      </PageHeader>
 
       {sponsors.length ? (
         <section className="sponsors-section" id="our-sponsors">

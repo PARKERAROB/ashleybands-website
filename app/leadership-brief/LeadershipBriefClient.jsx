@@ -5,7 +5,7 @@ import { useState } from "react";
 /* ------------------------------------------------------------------ atoms */
 
 const STATUS_STYLE = {
-  FROZEN: { bg: "#7b1829", fg: "#fff" },
+  FROZEN: { bg: "var(--garnet)", fg: "#fff" },
   stated: { bg: "#e8ddc4", fg: "#4a4231" },
   floated: { bg: "#e4e9ef", fg: "#41505f" },
   open: { bg: "#fbe7d2", fg: "#7a4a18" },

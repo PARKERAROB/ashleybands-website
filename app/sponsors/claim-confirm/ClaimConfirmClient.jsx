@@ -44,7 +44,7 @@ export default function ClaimConfirmClient() {
     color: "#20160f"
   };
   const btn = {
-    background: action === "pool" ? "#f0f0f0" : "#7b1829",
+    background: action === "pool" ? "#f0f0f0" : "var(--garnet)",
     color: action === "pool" ? "#555" : "#fff",
     border: "none",
     borderRadius: 8,
@@ -59,7 +59,7 @@ export default function ClaimConfirmClient() {
       <main style={wrap}>
         <h1>Link expired</h1>
         <p>This confirmation link is no longer valid. Open your sponsorship dashboard in the Family Portal instead.</p>
-        <p><a href="/portal/sponsorship" style={{ color: "#7b1829" }}>Open my dashboard</a></p>
+        <p><a href="/portal/sponsorship" style={{ color: "var(--garnet)" }}>Open my dashboard</a></p>
       </main>
     );
   }
@@ -73,7 +73,7 @@ export default function ClaimConfirmClient() {
             ? "Thanks for following up. This business is still on your list."
             : "No problem. This business is back in the pool for another family."}
         </p>
-        <p><a href="/portal/sponsorship" style={{ color: "#7b1829" }}>Open my dashboard</a></p>
+        <p><a href="/portal/sponsorship" style={{ color: "var(--garnet)" }}>Open my dashboard</a></p>
       </main>
     );
   }
@@ -83,7 +83,7 @@ export default function ClaimConfirmClient() {
       <main style={wrap}>
         <h1>That didn&apos;t work</h1>
         <p>{result?.reason === "not_yours" ? "This lead isn't currently assigned to you." : "Please try again from your dashboard."}</p>
-        <p><a href="/portal/sponsorship" style={{ color: "#7b1829" }}>Open my dashboard</a></p>
+        <p><a href="/portal/sponsorship" style={{ color: "var(--garnet)" }}>Open my dashboard</a></p>
       </main>
     );
   }

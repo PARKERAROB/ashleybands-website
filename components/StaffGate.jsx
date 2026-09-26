@@ -103,5 +103,5 @@ export function StaffLogin({ onAuthed, title = "Staff Login", description }) {
 
 const loginLabel = { display: "block", marginBottom: 5, fontSize: 13, fontWeight: 700, color: "#4b584d" };
 const loginInput = { boxSizing: "border-box", width: "100%", padding: "10px 12px", fontSize: 14, border: "1px solid #ccc", borderRadius: 6, fontFamily: "system-ui, sans-serif" };
-const loginBtn = { marginTop: 12, width: "100%", padding: "10px 16px", fontSize: 14, fontWeight: 600, border: "none", borderRadius: 6, color: "#fff", background: "#7b1829", cursor: "pointer" };
+const loginBtn = { marginTop: 12, width: "100%", padding: "10px 16px", fontSize: 14, fontWeight: 600, border: "none", borderRadius: 6, color: "#fff", background: "var(--garnet)", cursor: "pointer" };
 const loadingState = { maxWidth: 400, margin: "100px auto", padding: "0 16px", color: "#4b584d", fontFamily: "system-ui, sans-serif" };

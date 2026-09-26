@@ -33,6 +33,7 @@ jobs:
           npm run test:ensembles-memberships-prototype
           npm run test:memberships-live
           npm run test:sponsorship
+          npm run test:design
           npm run test:newsletter
           npm run test:security
           npm run test:local-preview
