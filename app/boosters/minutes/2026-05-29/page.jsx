@@ -1,3 +1,4 @@
+import ArchiveBanner from "@/components/ArchiveBanner";
 export const metadata = {
   title: "Booster Meeting Minutes — May 29, 2026 | Bands of AHS",
   description: "Ashley High School Band Boosters meeting minutes, May 29, 2026.",
@@ -10,6 +11,7 @@ export default function BoosterMinutes20260529() {
       <p className="eyebrow">Band Boosters</p>
       <h1>Meeting Minutes</h1>
       <p className="lede">May 29, 2026 · 6:00 PM · Band Room · Band Booster Organization Meeting</p>
+      <ArchiveBanner event="the May 29, 2026 booster meeting" href="/boosters" linkLabel="See the Band Boosters page" />
 
       <div className="markdown-block">
         <h2>Attendance</h2>

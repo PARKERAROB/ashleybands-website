@@ -4,19 +4,7 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { readStaffSession } from "@/lib/staffSession";
-
-const HIDDEN_NAV_ROUTES = ["/raleigh-brief", "/attendance", "/day-1-agenda", "/regiment-os", "/carnegie-2027/team"];
-const NAV_LINKS = [
-  { href: "/info/2026-2027-band-information", label: "Band Info" },
-  { href: "/info/marching-band-2026", label: "Marching Band" },
-  { href: "/calendar", label: "Calendar" },
-  { href: "/newsletter", label: "Weekly" },
-  { href: "/portal", label: "Family Portal", profile: true },
-  { href: "/fundraising", label: "Fundraisers" },
-  { href: "/sponsors", label: "Support" },
-  { href: "/info/the-band-folder", label: "Student Resources" },
-  { href: "/assistant", label: "Ask" }
-];
+import { NAV_LINKS, hidesSiteChrome } from "@/lib/routes";
 
 export default function SiteNav() {
   const pathname = usePathname();
@@ -52,7 +40,7 @@ export default function SiteNav() {
     router.push("/portal");
   }
 
-  if (HIDDEN_NAV_ROUTES.includes(pathname)) return null;
+  if (hidesSiteChrome(pathname)) return null;
 
   // When signed in, the Profile link goes straight to the dashboard.
   const profileHref = session.signedIn ? "/portal/review" : "/portal";

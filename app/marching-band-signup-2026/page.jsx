@@ -1,3 +1,4 @@
+import ArchiveBanner from "@/components/ArchiveBanner";
 export const metadata = {
   title: "2026 Marching Band Sign-Up | Ashley Bands"
 };
@@ -6,6 +7,7 @@ export default function MarchingBandSignupPage() {
   return (
     <main className="signup-page">
       <section className="signup-intro">
+        <ArchiveBanner event="the 2026 marching band sign-up" />
         <p className="eyebrow">Ashley Bands</p>
         <h1>2026 Marching Band Sign-Up</h1>
         <p>Sign-up for the 2026 marching band season is closed.</p>

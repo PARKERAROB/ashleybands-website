@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
+import ArchiveBanner from "@/components/ArchiveBanner";
 
 const TOPICS = [
   {
@@ -230,6 +231,7 @@ function TopicCard({ topic }) {
 export default function RaleighBriefClient() {
   return (
     <main className="narrow-page">
+      <ArchiveBanner event="the May 20, 2026 student visit to the NC General Assembly" />
       <p className="eyebrow">
         <Link href="/" style={{ color: "inherit", textDecoration: "none" }}>Bands of Ashley High School</Link>
         {" · "}
