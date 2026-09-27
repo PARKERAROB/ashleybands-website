@@ -42,7 +42,7 @@ const projectFile = path.join(bandWebsiteRoot, ".vercel", "project.json");
 if (!existsSync(projectFile)) fail("missing .vercel/project.json; run vercel link for band-website");
 const project = JSON.parse(readFileSync(projectFile, "utf8"));
 if (project.projectId !== EXPECTED_PROJECT_ID || project.orgId !== EXPECTED_ORG_ID) {
-  fail("Vercel is linked to the wrong project or team; expected robs-projects-9eb69de7/band-website");
+  fail("Vercel is linked to the wrong project or team; expected parkerarob/band-website");
 }
 
 const supabaseRefFile = path.join(bandWebsiteRoot, "supabase", ".temp", "project-ref");
@@ -90,7 +90,7 @@ if (vercel.status !== 0 || vercel.stdout.trim() !== "robertparker-6198") {
 
 const vercelEnv = spawnSync(
   "npx",
-  ["--yes", "vercel@59.1.4", "env", "ls", "--scope", "robs-projects-9eb69de7"],
+  ["--yes", "vercel@59.1.4", "env", "ls", "--scope", "parkerarob"],
   { cwd: bandWebsiteRoot, encoding: "utf8" }
 );
 if (vercelEnv.status !== 0

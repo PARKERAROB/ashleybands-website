@@ -16,7 +16,7 @@ try {
   if (!existsSync("node_modules") || lstatSync("node_modules").isSymbolicLink()) fail("Run npm run setup:checkout; dependencies must be installed inside this checkout.");
   if (!existsSync(bandWebsiteEnvPath) || !existsSync(".env.local")) fail("Missing local environment. Provision the ignored .env.local from the trusted local environment; never print or commit its contents.");
   if (!existsSync(path.join(bandsofAHSRoot, "data/calendar-events.jsonl"))) fail("Set BANDSOFAHS_DIR to the canonical BandsofAHS checkout.");
-  if (!existsSync(".vercel/project.json")) fail("Missing Vercel link. Run bash scripts/runtime.sh npx --yes vercel@59.1.4 link --yes --scope robs-projects-9eb69de7 --project band-website.");
+  if (!existsSync(".vercel/project.json")) fail("Missing Vercel link. Run bash scripts/runtime.sh npx --yes vercel@59.1.4 link --yes --scope parkerarob --project band-website.");
   const project = JSON.parse(readFileSync(".vercel/project.json", "utf8"));
   if (project.projectId !== "prj_zt07T3fHc75OimXD3SnBoP4JcQzr" || project.orgId !== "team_iJ1ikB48QN8eYHbQunrskJuf") fail("Wrong Vercel project/team link; relink to band-website.");
   if (!process.argv.includes("--setup")) {

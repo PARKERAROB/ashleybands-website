@@ -39,7 +39,7 @@ if [[ "$(git rev-parse HEAD)" != "$released_sha" ]]; then
 fi
 started_at="$(node -e 'process.stdout.write(String(Date.now()))')"
 phase deployment npx --yes vercel@59.1.4 --prod --yes \
-  --scope robs-projects-9eb69de7 --project band-website \
+  --scope parkerarob --project band-website \
   --meta "validationCommit=$released_sha"
 phase live-proof npm run verify:live -- --expected-commit "$released_sha" --not-before "$started_at"
 echo "Release complete: $released_sha; ashleybands.com verified. Log: $log"

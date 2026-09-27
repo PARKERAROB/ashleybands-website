@@ -3,7 +3,7 @@
 import { spawnSync } from "node:child_process";
 
 const PROJECT = "band-website";
-const TEAM = "robs-projects-9eb69de7";
+const TEAM = "parkerarob";
 const DOMAIN = "ashleybands.com";
 const IDENTITY_MARKER = "<title>Bands of AHS</title>";
 const VERCEL = ["npx", "--yes", "vercel@59.1.4"];
