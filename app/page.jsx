@@ -85,9 +85,9 @@ export default function HomePage() {
           <p className="home-giving-trust"><strong>{BOOSTER_NONPROFIT_COPY}</strong></p>
         </div>
         <figure className="home-campaign-art">
-          <Image src="/images/home/perlman-stage.avif" alt="View from the Perlman Stage at Carnegie Hall, with a grand piano and the auditorium beyond" fill sizes="(max-width: 900px) 100vw, 48vw" priority style={{ objectFit: "cover" }} />
+          <Image src="/images/home/perlman-stage.avif" alt="View from the Perelman Stage at Carnegie Hall, with a grand piano and the auditorium beyond" fill sizes="(max-width: 900px) 100vw, 48vw" priority style={{ objectFit: "cover" }} />
           <div className="home-campaign-art-title" aria-hidden="true"><span>New York City</span><strong>Carnegie<br />2027</strong></div>
-          <figcaption>Carnegie Hall · View from the Perlman Stage</figcaption>
+          <figcaption>Carnegie Hall · View from the Perelman Stage</figcaption>
         </figure>
       </section>
 
