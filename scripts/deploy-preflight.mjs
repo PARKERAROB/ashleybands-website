@@ -79,13 +79,20 @@ try {
   );
 }
 
+// Identity is the account email, not the renameable username. — Rob, 2026-09-27, #150
 const vercel = spawnSync(
   "npx",
-  ["--yes", "vercel@59.1.4", "whoami"],
+  ["--yes", "vercel@59.1.4", "api", "/v2/user", "--raw"],
   { cwd: bandWebsiteRoot, encoding: "utf8" }
 );
-if (vercel.status !== 0 || vercel.stdout.trim() !== "robertparker-6198") {
-  fail("Vercel CLI is not authenticated as robertparker-6198");
+let vercelEmail = null;
+try {
+  vercelEmail = vercel.status === 0 ? JSON.parse(vercel.stdout).user?.email : null;
+} catch {
+  vercelEmail = null;
+}
+if (vercelEmail !== "rob@parkerarob.com") {
+  fail("Vercel CLI is not authenticated as the rob@parkerarob.com account");
 }
 
 const vercelEnv = spawnSync(
