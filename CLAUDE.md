@@ -4,6 +4,10 @@ Before repository work, read PROJECT_WORKFLOW.md in full. Every meaningful chang
 
 Public Next.js/Vercel/Supabase application for private ~/Atlas/BandsofAHS records. Only sanitized projections, website-owned content, and application code belong here.
 
+## Design
+
+- Before building or changing any page or component, read docs/DESIGN.md and build from its tokens, components/ui parts, and templates. Icons come from lucide-react; never hand-draw an icon. Update DESIGN.md in the same change that adds or alters a token, part, or pattern.
+
 ## Sources
 
 - Edit content/sources/ markdown, then npm run content:build; never hand-edit generated content/*.json.

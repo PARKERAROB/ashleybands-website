@@ -132,6 +132,21 @@ Any time a page asks for money: what it is for, the amount, who receives it, and
 />
 ```
 
+## Icons
+
+Use `lucide-react` for every icon. Do not hand-draw SVG icons or use emoji as icons.
+
+```jsx
+import { CalendarDays, MapPin } from "lucide-react";
+
+<CalendarDays size={20} aria-hidden="true" />
+```
+
+- Size icons at 16, 20 or 24px. Color comes from `currentColor`, so set it with a token on the parent.
+- An icon beside text is decoration: add `aria-hidden="true"`. An icon-only button needs an `aria-label`.
+- Never let an icon carry meaning alone. Keep the word next to it.
+- Older inline SVGs and text arrows still exist. Replace them when you touch that page.
+
 ## Page templates
 
 **Info page** (handbook, about, policies). `PageHeader` with a lede and no actions. Then sections with
