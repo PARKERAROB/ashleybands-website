@@ -443,11 +443,11 @@ function Styles() {
         max-width: 560px;
         margin: 0 auto;
         padding: 36px 18px 80px;
-        color: #20160f;
+        color: var(--text);
       }
       .give-card {
-        background: #fff;
-        border: 1px solid #ece3d6;
+        background: var(--surface-raised);
+        border: 1px solid var(--line);
         border-radius: 14px;
         padding: 24px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
@@ -460,12 +460,17 @@ function Styles() {
         font-weight: 700;
         margin: 0 0 4px;
       }
+      /* Page title and section heading: garnet DM Serif Display (#153). */
       .give-card h1, .give-card h2 {
         margin: 0 0 10px;
-        font-size: 26px;
+        color: var(--accent-strong);
+        font-family: var(--font-display);
+        font-size: var(--step-2);
+        font-weight: 400;
+        line-height: 1.15;
       }
       .give-lede {
-        color: #3a2f26;
+        color: var(--text);
         line-height: 1.5;
       }
       .give-kind { border: 0; padding: 0; margin: 18px 0; }
@@ -473,7 +478,7 @@ function Styles() {
       .give-kind label { display: flex; align-items: center; gap: 8px; min-height: 44px; }
       .give-label {
         display: block;
-        font-size: 14px;
+        font-size: var(--step--1);
         font-weight: 600;
         margin-top: 14px;
       }
@@ -483,7 +488,7 @@ function Styles() {
         box-sizing: border-box;
         margin-top: 5px;
         padding: 10px 12px;
-        border: 1px solid #cabfad;
+        border: 1px solid var(--border-strong);
         border-radius: 8px;
         font-size: 15px;
       }
@@ -495,17 +500,17 @@ function Styles() {
       }
       .give-amounts button {
         min-height: 48px;
-        border: 1.5px solid #cabfad;
-        background: #fffaf0;
+        border: 1.5px solid var(--border-strong);
+        background: var(--paper-strong);
         border-radius: 8px;
-        font-size: 16px;
+        font-size: var(--step-0);
         font-weight: 700;
-        color: #20160f;
+        color: var(--text);
         cursor: pointer;
       }
       .give-amounts button[aria-pressed="true"] {
         border-color: var(--garnet);
-        background: #f7e4e7;
+        background: var(--accent-soft);
         color: var(--garnet);
       }
       .give-grid {
@@ -526,22 +531,22 @@ function Styles() {
       .give-tab {
         flex: 1;
         min-height: 44px;
-        border: 1px solid #c9bba6;
-        background: #fff;
+        border: 1px solid var(--border-strong);
+        background: var(--surface-raised);
         border-radius: 8px;
         padding: 10px;
         font-weight: 600;
         cursor: pointer;
-        color: #3a2f26;
+        color: var(--text);
       }
       .give-tab.on {
         background: var(--garnet);
         border-color: var(--garnet);
-        color: #fff;
+        color: var(--text-on-accent);
       }
       .give-btn {
         border: 1px solid var(--garnet);
-        background: #fff;
+        background: var(--surface-raised);
         color: var(--garnet);
         border-radius: 8px;
         padding: 11px 18px;
@@ -552,7 +557,7 @@ function Styles() {
       }
       .give-btn-primary {
         background: var(--garnet);
-        color: #fff;
+        color: var(--text-on-accent);
       }
       .give-paypal {
         margin-top: 6px;
@@ -564,8 +569,8 @@ function Styles() {
         line-height: 1.7;
       }
       .give-muted {
-        color: #6f675a;
-        font-size: 14px;
+        color: var(--muted);
+        font-size: var(--step--1);
       }
       .give-error {
         color: var(--garnet);

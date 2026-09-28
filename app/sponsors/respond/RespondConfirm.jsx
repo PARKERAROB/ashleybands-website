@@ -94,13 +94,13 @@ export default function RespondConfirm({ token, action, businessName }) {
         disabled={state === "sending"}
         style={{
           display: "inline-block",
-          background: isYes ? "#2f7a2f" : "#555",
-          color: "#fff",
+          background: isYes ? "var(--success)" : "var(--text-muted)",
+          color: "var(--text-on-accent)",
           padding: "12px 22px",
           borderRadius: 6,
           border: "none",
           fontWeight: 600,
-          fontSize: 16,
+          fontSize: "var(--step-0)",
           cursor: state === "sending" ? "default" : "pointer",
           opacity: state === "sending" ? 0.6 : 1
         }}

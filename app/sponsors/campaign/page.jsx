@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { SPONSOR_CONTACT } from "@/lib/sponsorshipContent";
+import PageHeader from "@/components/ui/PageHeader";
+import { ButtonLink } from "@/components/ui/Button";
 
 export const metadata = {
   title: "Family Campaign Tools | Bands of AHS Sponsors",
@@ -10,23 +12,18 @@ export const metadata = {
 export default function CampaignPage() {
   return (
     <main className="sponsors-page">
-      <section className="sponsors-hero">
-        <p className="eyebrow">For students and families</p>
-        <h1>Family Campaign Tools</h1>
-        <p className="sponsors-lede">
-          Share a student support link with family, friends, or businesses. You can also add
-          businesses you know and keep follow-up organized in your Family Portal. Participation
-          is optional. Every student is in the same standing whether their family brings in a sponsor or not.
-        </p>
-        <div className="sponsors-cta-row">
-          <Link href="/portal/sponsorship" className="sponsors-btn sponsors-btn-primary">
-            Open family sponsorship
-          </Link>
-          <Link href="/sponsors" className="sponsors-btn">
-            ← Back to sponsor info
-          </Link>
-        </div>
-      </section>
+      <PageHeader
+        className="sponsors-hero"
+        eyebrow="For students and families"
+        title="Family Campaign Tools"
+        lede="Share a student support link with family, friends, or businesses. You can also add businesses you know and keep follow-up organized in your Family Portal. Participation is optional. Every student is in the same standing whether their family brings in a sponsor or not."
+        actions={
+          <>
+            <ButtonLink href="/portal/sponsorship">Open family sponsorship</ButtonLink>
+            <ButtonLink href="/sponsors" variant="secondary">← Back to sponsor info</ButtonLink>
+          </>
+        }
+      />
 
       <section className="sponsors-section">
         <p className="eyebrow">The pitch in 90 seconds</p>
@@ -64,9 +61,7 @@ export default function CampaignPage() {
           have expressed interest and are available to claim.
         </p>
         <div className="sponsors-cta-row">
-          <Link href="/portal/sponsorship" className="sponsors-btn sponsors-btn-primary">
-            Open family sponsorship
-          </Link>
+          <ButtonLink href="/portal/sponsorship">Open family sponsorship</ButtonLink>
         </div>
       </section>
 
@@ -80,9 +75,7 @@ export default function CampaignPage() {
               The single page you hand to the business after a visit. Tier summary, Adopt-an-
               Instrument overview, tax info, contact. Print one per business.
             </p>
-            <Link href="/sponsors/print/leave-behind" className="sponsors-btn sponsors-btn-primary">
-              Print leave-behind
-            </Link>
+            <ButtonLink href="/sponsors/print/leave-behind">Print leave-behind</ButtonLink>
           </article>
           <article className="campaign-printable">
             <h3>Full packet</h3>
@@ -91,9 +84,7 @@ export default function CampaignPage() {
               sponsorship form. Use this when a business wants the complete picture or asks for
               something to share internally.
             </p>
-            <Link href="/sponsors/print/packet" className="sponsors-btn">
-              Print full packet
-            </Link>
+            <ButtonLink href="/sponsors/print/packet" variant="secondary">Print full packet</ButtonLink>
           </article>
           <article className="campaign-printable">
             <h3>Paper outreach sheet</h3>
@@ -102,9 +93,7 @@ export default function CampaignPage() {
               log. (The online tracker does the same thing with auto-save and dedup against other
               families.)
             </p>
-            <Link href="/sponsors/print/tracker" className="sponsors-btn">
-              Print outreach sheet
-            </Link>
+            <ButtonLink href="/sponsors/print/tracker" variant="secondary">Print outreach sheet</ButtonLink>
           </article>
         </div>
       </section>

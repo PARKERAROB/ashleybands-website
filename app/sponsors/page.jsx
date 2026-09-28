@@ -1,7 +1,9 @@
 import Link from "next/link";
 import PageHeader from "@/components/ui/PageHeader";
 import { ButtonLink } from "@/components/ui/Button";
+import LevelCard, { LevelGrid } from "@/components/ui/LevelCard";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import styles from "./page.module.css";
 import {
   SPONSOR_CONTACT,
   TIERS,
@@ -73,27 +75,9 @@ export default async function SponsorsHubPage() {
           <p>
             These businesses are funding the Bands of Ashley. When you support them, you support our students.
           </p>
-          <ul
-            style={{
-              listStyle: "none",
-              padding: 0,
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 10
-            }}
-          >
+          <ul className={styles.sponsorList}>
             {sponsors.map((name) => (
-              <li
-                key={name}
-                style={{
-                  border: "1px solid #ece3d6",
-                  borderRadius: 18,
-                  padding: "8px 16px",
-                  fontWeight: 600
-                }}
-              >
-                {name}
-              </li>
+              <li key={name}>{name}</li>
             ))}
           </ul>
         </section>
@@ -107,25 +91,24 @@ export default async function SponsorsHubPage() {
           tier sponsorship feeds the scholarship pool that covers marching band season fees and
           trip costs for students whose families need help. {MULTI_YEAR_DISCOUNT_NOTE}
         </p>
-        <div className="tier-grid">
+        <LevelGrid className={styles.levels}>
           {TIERS.map((tier) => (
-            <article key={tier.name} className={`tier-card${tier.best ? " tier-card-best" : ""}`}>
-              {tier.best && <span className="tier-tag">{tier.tag}</span>}
-              <h3>{tier.name}</h3>
-              <p className="tier-amount">{tier.label}</p>
+            <LevelCard
+              key={tier.name}
+              name={tier.name}
+              amount={tier.label}
+              featured={Boolean(tier.best)}
+              tag={tier.tag}
+              action={{ href: `/sponsors/give?amount=${tier.amount}`, label: `Give $${tier.amount.toLocaleString("en-US")}` }}
+            >
               <ul>
                 {tier.benefits.map((b) => (
                   <li key={b}>{b}</li>
                 ))}
               </ul>
-              <p style={{ margin: "16px 0 0" }}>
-                <Link href={`/sponsors/give?amount=${tier.amount}`} className="sponsors-btn">
-                  Give ${tier.amount.toLocaleString("en-US")}
-                </Link>
-              </p>
-            </article>
+            </LevelCard>
           ))}
-        </div>
+        </LevelGrid>
       </section>
 
       <section className="sponsors-section">

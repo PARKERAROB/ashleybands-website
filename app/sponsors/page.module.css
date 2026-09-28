@@ -1,0 +1,19 @@
+/* Sponsors hub (#153). */
+.sponsorList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 0;
+  list-style: none;
+}
+
+.sponsorList li {
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  font-weight: 600;
+}
+
+.levels {
+  margin-top: 20px;
+}

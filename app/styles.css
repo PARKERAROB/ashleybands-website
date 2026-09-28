@@ -58,8 +58,7 @@ body {
 
 /* On garnet backgrounds a garnet ring disappears; use gold there. */
 .site-footer :focus-visible,
-.hero :focus-visible,
-.fundraising-note :focus-visible {
+.hero :focus-visible {
   outline-color: var(--gold);
 }
 
@@ -330,8 +329,7 @@ main {
 /* Bright gold stays readable on the dark garnet panels. */
 .hero .eyebrow,
 .home-ask .eyebrow,
-.home-dates .eyebrow,
-.fundraising-note .eyebrow {
+.home-dates .eyebrow {
   color: var(--gold);
 }
 
@@ -501,8 +499,8 @@ h2 {
   max-width: 900px;
   margin: 0;
   color: var(--garnet-dark);
-  font-family: 'DM Serif Display', Georgia, serif;
-  font-size: clamp(44px, 7vw, 78px);
+  font-family: var(--font-display);
+  font-size: var(--step-4);
   font-weight: 400;
   line-height: 0.98;
   text-wrap: balance;
@@ -531,8 +529,8 @@ h2 {
   margin: 0 0 18px;
   padding: 6px 10px;
   border-radius: 999px;
-  background: #efe2b8;
-  color: #5d4912;
+  background: var(--warning-soft);
+  color: var(--gold-text);
   font-size: 0.73rem;
   font-weight: 850;
   letter-spacing: 0.08em;
@@ -541,7 +539,7 @@ h2 {
 
 .fundraiser-card h2 {
   color: var(--garnet-dark);
-  font-family: 'DM Serif Display', Georgia, serif;
+  font-family: var(--font-display);
   font-weight: 400;
 }
 
@@ -596,30 +594,19 @@ h2 {
   background: var(--garnet);
 }
 
-.fundraising-note {
-  display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
-  gap: clamp(24px, 6vw, 78px);
-  align-items: end;
-  padding: clamp(34px, 6vw, 64px);
-  border-radius: 18px;
-  background: var(--garnet-dark);
-  color: var(--paper-strong);
-}
-
-.fundraising-note h2 {
-  max-width: 680px;
-  color: var(--paper-strong);
-  text-wrap: balance;
-}
-
-.fundraising-note > p {
-  margin: 0;
-  color: rgba(255, 250, 240, 0.78);
-}
+/* The CalloutPanel on /fundraising sets its own colors; the page sets width only. */
 
 .fundraising-more {
   padding: clamp(52px, 8vw, 88px) 0;
+}
+
+/* Section headings in the display serif (#153). */
+.fundraising-more h2,
+.fundraiser-flyers h2,
+.fundraiser-detail-body .markdown-block h2 {
+  color: var(--garnet-dark);
+  font-family: var(--font-display);
+  font-weight: 400;
 }
 
 .fundraising-home-callout {
@@ -700,7 +687,7 @@ h2 {
 
 .fundraiser-detail-body .markdown-block p,
 .fundraiser-detail-body .markdown-block li {
-  font-size: 17px;
+  font-size: var(--step-0);
   line-height: 1.7;
 }
 
@@ -740,7 +727,6 @@ h2 {
 
 @media (max-width: 760px) {
   .fundraiser-card-grid,
-  .fundraising-note,
   .fundraiser-detail-hero,
   .fundraiser-flyer-grid {
     grid-template-columns: 1fr;
@@ -1046,11 +1032,16 @@ h2 {
   border-bottom: 1px solid var(--line);
 }
 
+/* Page title: garnet DM Serif Display (#153). */
 .signup-intro h1 {
   max-width: 820px;
   margin: 0;
-  font-size: clamp(40px, 6vw, 72px);
-  line-height: 0.96;
+  color: var(--accent-strong);
+  font-family: var(--font-display);
+  font-size: var(--step-4);
+  font-weight: 400;
+  line-height: 1.02;
+  text-wrap: balance;
 }
 
 .signup-intro p {
@@ -1084,6 +1075,8 @@ h2 {
 
 .signup-section h2 {
   color: var(--garnet-dark);
+  font-family: var(--font-display);
+  font-weight: 400;
 }
 
 .signup-section p {
@@ -1110,7 +1103,7 @@ h2 {
   min-height: 44px;
   padding: 10px 12px;
   color: var(--ink);
-  background: #fffdf8;
+  background: var(--paper-strong);
   border: 1px solid rgba(54, 42, 26, 0.25);
   border-radius: 8px;
   font: inherit;
@@ -1176,25 +1169,25 @@ h2 {
 }
 
 .signup-success {
-  color: #2f5f36;
+  color: var(--success);
 }
 
 .signup-error {
-  color: #8f2638;
+  color: var(--danger);
 }
 
 .refund-banner {
   margin: 0 0 24px;
   padding: 16px 18px;
-  border-radius: 10px;
-  border: 1px solid #e2c275;
-  background: #fdf6e3;
-  color: #5a4a1f;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--gold);
+  background: var(--warning-soft);
+  color: var(--warning);
   line-height: 1.5;
 }
 
 .refund-banner strong {
-  color: #8f2638;
+  color: var(--danger);
 }
 
 @media (max-width: 900px) {
@@ -2113,19 +2106,24 @@ h2 {
   padding: 48px 24px 96px;
 }
 .sponsors-hero {
-  border-bottom: 1px solid #e5e1d8;
+  border-bottom: 1px solid var(--line);
   padding-bottom: 32px;
   margin-bottom: 32px;
 }
+/* Page titles are garnet DM Serif Display (#153). */
 .sponsors-hero h1 {
-  font-family: "Cinzel", serif;
-  font-size: clamp(2rem, 4vw, 3rem);
+  color: var(--accent-strong);
+  font-family: var(--font-display);
+  font-size: var(--step-4);
+  font-weight: 400;
+  line-height: 1.02;
   margin: 8px 0 16px;
+  text-wrap: balance;
 }
 .sponsors-lede {
-  font-size: 1.125rem;
+  font-size: var(--step-1);
   max-width: 70ch;
-  color: #3a3a3a;
+  color: var(--text-muted);
 }
 .sponsors-cta-row {
   display: flex;
@@ -2161,79 +2159,37 @@ h2 {
 }
 .sponsors-section {
   padding: 32px 0;
-  border-bottom: 1px solid #efece4;
+  border-bottom: 1px solid var(--line);
 }
+/* Section headings: DM Serif Display, not Cinzel (#153). */
 .sponsors-section h2 {
-  font-family: "Cinzel", serif;
-  font-size: 1.5rem;
+  color: var(--accent-strong);
+  font-family: var(--font-display);
+  font-size: var(--step-3);
+  font-weight: 400;
   margin: 4px 0 16px;
 }
 .sponsors-subhead {
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-body);
   font-size: 1rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #6a5a30;
+  color: var(--gold-text);
   margin-top: 24px;
   margin-bottom: 8px;
-}
-.tier-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
-  margin-top: 20px;
-}
-.tier-card {
-  border: 1px solid #e5e1d8;
-  border-radius: 8px;
-  padding: 20px;
-  background: #fafafa;
-  position: relative;
-}
-.tier-card-best {
-  border-color: #c9b377;
-  border-width: 2px;
-  background: #fff8e6;
-}
-.tier-tag {
-  position: absolute;
-  top: -10px;
-  right: 16px;
-  background: #4a3a10;
-  color: #fff;
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  padding: 4px 10px;
-  border-radius: 4px;
-}
-.tier-card h3 {
-  font-family: "Cinzel", serif;
-  margin: 0 0 4px;
-}
-.tier-amount {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #4a3a10;
-  margin: 0 0 12px;
-}
-.tier-card ul {
-  margin: 0;
-  padding-left: 18px;
-  font-size: 0.92rem;
 }
 .adopt-band {
   margin-top: 20px;
 }
 .adopt-band h4 {
-  font-family: "Cinzel", serif;
+  font-family: var(--font-body);
   font-size: 1.1rem;
+  font-weight: 800;
   margin: 16px 0 4px;
 }
 .adopt-band-typical {
   font-style: italic;
-  color: #6a5a30;
+  color: var(--gold-text);
   margin: 0 0 8px;
 }
 .adopt-table {
@@ -2245,20 +2201,20 @@ h2 {
 .adopt-table td {
   text-align: left;
   padding: 6px 12px;
-  border-bottom: 1px solid #efece4;
+  border-bottom: 1px solid var(--line);
 }
 .adopt-table th {
-  background: #fafafa;
+  background: var(--surface-raised);
   font-weight: 600;
 }
 .adopt-note {
   font-size: 0.85rem;
-  color: #555;
+  color: var(--text-muted);
   margin-top: 12px;
   font-style: italic;
 }
 .sponsors-contact {
-  background: #fafafa;
+  background: var(--surface-raised);
   border-radius: 8px;
   padding: 24px;
   margin-top: 32px;
@@ -2475,7 +2431,6 @@ h2 {
     color: #111;
     text-decoration: none;
   }
-  .tier-card,
   .print-adopt-band,
   .print-section {
     page-break-inside: avoid;
@@ -2728,10 +2683,10 @@ h2 {
 .sponsors-footer {
   margin-top: 48px;
   padding-top: 24px;
-  border-top: 1px solid #e5e1d8;
+  border-top: 1px solid var(--line);
   text-align: center;
   font-size: 0.9rem;
-  color: #6a5a30;
+  color: var(--gold-text);
 }
 .sponsors-footer p {
   margin: 4px 0;
@@ -2758,21 +2713,22 @@ h2 {
   margin-top: 16px;
 }
 .campaign-printable {
-  border: 1px solid #e5e1d8;
+  border: 1px solid var(--line);
   border-radius: 8px;
   padding: 20px;
-  background: #fafafa;
+  background: var(--surface-raised);
   display: flex;
   flex-direction: column;
 }
 .campaign-printable h3 {
-  font-family: "Cinzel", serif;
+  font-family: var(--font-body);
+  font-weight: 800;
   margin: 0 0 8px;
   font-size: 1.15rem;
 }
 .campaign-printable p {
   font-size: 0.92rem;
-  color: #444;
+  color: var(--text-muted);
   flex: 1;
   margin-bottom: 16px;
 }

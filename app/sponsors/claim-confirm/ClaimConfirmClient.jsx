@@ -41,15 +41,24 @@ export default function ClaimConfirmClient() {
     margin: "0 auto",
     padding: "48px 18px",
     textAlign: "center",
-    color: "#20160f"
+    color: "var(--text)"
+  };
+  // Page title: garnet DM Serif Display (#153).
+  const title = {
+    margin: "0 0 var(--space-4)",
+    color: "var(--accent-strong)",
+    fontFamily: "var(--font-display)",
+    fontSize: "var(--step-3)",
+    fontWeight: 400,
+    lineHeight: 1.1
   };
   const btn = {
-    background: action === "pool" ? "#f0f0f0" : "var(--garnet)",
-    color: action === "pool" ? "#555" : "#fff",
+    background: action === "pool" ? "var(--surface-sunken)" : "var(--garnet)",
+    color: action === "pool" ? "var(--text-muted)" : "var(--text-on-accent)",
     border: "none",
     borderRadius: 8,
     padding: "12px 22px",
-    fontSize: 16,
+    fontSize: "var(--step-0)",
     fontWeight: 600,
     cursor: "pointer"
   };
@@ -57,7 +66,7 @@ export default function ClaimConfirmClient() {
   if (invalid) {
     return (
       <main style={wrap}>
-        <h1>Link expired</h1>
+        <h1 style={title}>Link expired</h1>
         <p>This confirmation link is no longer valid. Open your sponsorship dashboard in the Family Portal instead.</p>
         <p><a href="/portal/sponsorship" style={{ color: "var(--garnet)" }}>Open my dashboard</a></p>
       </main>
@@ -67,7 +76,7 @@ export default function ClaimConfirmClient() {
   if (state === "done") {
     return (
       <main style={wrap}>
-        <h1>{result?.action === "went" ? "Got it. It stays yours" : "Released to the pool"}</h1>
+        <h1 style={title}>{result?.action === "went" ? "Got it. It stays yours" : "Released to the pool"}</h1>
         <p>
           {result?.action === "went"
             ? "Thanks for following up. This business is still on your list."
@@ -81,7 +90,7 @@ export default function ClaimConfirmClient() {
   if (state === "error") {
     return (
       <main style={wrap}>
-        <h1>That didn&apos;t work</h1>
+        <h1 style={title}>That didn&apos;t work</h1>
         <p>{result?.reason === "not_yours" ? "This lead isn't currently assigned to you." : "Please try again from your dashboard."}</p>
         <p><a href="/portal/sponsorship" style={{ color: "var(--garnet)" }}>Open my dashboard</a></p>
       </main>
@@ -90,7 +99,7 @@ export default function ClaimConfirmClient() {
 
   return (
     <main style={wrap}>
-      <h1>{action === "went" ? "Mark this business contacted?" : "Send this business back to the pool?"}</h1>
+      <h1 style={title}>{action === "went" ? "Mark this business contacted?" : "Send this business back to the pool?"}</h1>
       <p>
         {action === "went"
           ? "We'll keep it assigned to you and stop the countdown."

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import PageHeader from "@/components/ui/PageHeader";
+import CalloutPanel from "@/components/ui/CalloutPanel";
 import { getCurrentFundraisers } from "@/lib/siteData";
 
 export const metadata = {
@@ -55,16 +56,17 @@ export default function FundraisingPage() {
       </section>
       )}
 
-      <section className="fundraising-note">
-        <div>
-          <p className="eyebrow">Newsletter and fundraiser pages</p>
-          <h2>Each fundraiser has one page, and the newsletter points to it.</h2>
-        </div>
+      <CalloutPanel
+        className="fundraising-note"
+        split
+        eyebrow="Newsletter and fundraiser pages"
+        title="Each fundraiser has one page, and the newsletter points to it."
+      >
         <p>
           Save or share the fundraiser page itself. If a detail changes, families will still have
           one current place to check.
         </p>
-      </section>
+      </CalloutPanel>
 
       <section className="fundraising-more">
         <h2>Looking for another way to help?</h2>
