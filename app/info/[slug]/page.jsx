@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import MarkdownBlock from "@/components/MarkdownBlock";
+import PageHeader from "@/components/ui/PageHeader";
+import Notice from "@/components/ui/Notice";
 import { getPageBySlug, getSiteData } from "@/lib/siteData";
 
 export function generateStaticParams() {
@@ -23,15 +25,12 @@ export default async function InfoPage({ params }) {
 
   return (
     <main className={`narrow-page${page.archived ? " archived-page" : ""}`}>
-      <p className="eyebrow">{page.audience}</p>
-      <h1>{page.title}</h1>
-      <p className="lede">{page.summary}</p>
+      <PageHeader eyebrow={page.audience} title={page.title} lede={page.summary} />
       {page.archived && (
-        <aside className="archive-notice" aria-label="Archived information">
-          <h2>Archived information</h2>
+        <Notice tone="archived" title="Archived information">
           <p>This page preserves historical information from spring 2026. Its dates, costs, payment instructions, and calls to action do not apply to current activities.</p>
           <p><Link href="/info/carnegie-2027">Current Carnegie trip information</Link> · <Link href="/fundraising">Current fundraisers</Link> · <Link href="/calendar">Band calendar</Link></p>
-        </aside>
+        </Notice>
       )}
       <MarkdownBlock markdown={page.body.replace(/^#{1,2} [^\n]+\n+/, "")} />
     </main>

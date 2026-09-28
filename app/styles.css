@@ -753,28 +753,32 @@ h2 {
   font-size: 20px;
 }
 
+/* Markdown content (info pages, fundraisers): h1/h2 in the display serif, h3 in bold body type (#153). */
 .markdown-block h1,
 .markdown-block h2,
 .markdown-block h3 {
-  margin-top: 30px;
-  color: var(--garnet-dark);
+  margin: var(--space-6) 0 var(--space-3);
+  color: var(--accent-strong);
 }
 
-.markdown-block h1 {
-  font-size: 38px;
-}
-
+.markdown-block h1,
 .markdown-block h2 {
-  font-size: 28px;
+  font-family: var(--font-display);
+  font-size: var(--step-3);
+  font-weight: 400;
+  line-height: 1.1;
 }
 
 .markdown-block h3 {
-  font-size: 20px;
+  font-family: var(--font-body);
+  font-size: var(--step-1);
+  font-weight: 800;
+  line-height: 1.25;
 }
 
 .markdown-block p,
 .markdown-block li {
-  color: #322d26;
+  color: var(--text);
 }
 
 .markdown-block ul {
@@ -783,8 +787,8 @@ h2 {
 
 .markdown-block code {
   padding: 2px 5px;
-  border-radius: 5px;
-  background: #ece2ce;
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
 }
 
 .markdown-block .cta-link {
@@ -793,7 +797,7 @@ h2 {
   padding: 11px 20px;
   border-radius: 8px;
   background: var(--garnet-dark);
-  color: #fff;
+  color: var(--text-on-accent);
   font-weight: 600;
   text-decoration: none;
 }
@@ -806,21 +810,21 @@ h2 {
   width: 100%;
   border-collapse: collapse;
   margin: 18px 0;
-  font-size: 15px;
+  font-size: var(--step--1);
 }
 
 .markdown-block .md-table th,
 .markdown-block .md-table td {
   text-align: left;
   padding: 9px 12px;
-  border-bottom: 1px solid #e1d6bf;
+  border-bottom: 1px solid var(--border);
   vertical-align: top;
-  color: #322d26;
+  color: var(--text);
 }
 
 .markdown-block .md-table th {
-  background: #f3ead6;
-  color: var(--garnet-dark);
+  background: var(--surface-sunken);
+  color: var(--accent-strong);
   white-space: nowrap;
 }
 
@@ -952,73 +956,44 @@ h2 {
   opacity: 0.55;
 }
 
+/* /confirm forwarded-email form (#153): fields and button come from the shared parts. */
 .fallback-form {
   display: grid;
-  gap: 12px;
-  margin-top: 28px;
-  padding: 18px;
-  background: #f8f1e2;
-  border: 1px solid rgba(197, 160, 40, 0.45);
-  border-radius: 8px;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+  padding: var(--space-5);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
 }
 
 .fallback-form h2 {
   margin: 0;
-  font-family: var(--sans);
-  font-size: 18px;
+  color: var(--accent-strong);
+  font-family: var(--font-display);
+  font-size: var(--step-2);
+  font-weight: 400;
 }
 
 .fallback-form p {
   margin: 0;
 }
 
-.fallback-form label {
-  display: grid;
-  gap: 6px;
-  font-weight: 800;
-}
-
-.fallback-form input,
-.fallback-form textarea {
-  width: 100%;
-  padding: 11px 12px;
-  color: var(--ink);
-  background: #fffdf8;
-  border: 1px solid rgba(54, 42, 26, 0.28);
-  border-radius: 8px;
-  font: inherit;
-  font-weight: 500;
-}
-
-.fallback-form textarea {
-  min-height: 86px;
-  resize: vertical;
-}
-
-.fallback-form button {
+.fallback-form .fallback-submit {
   justify-self: start;
-  min-height: 42px;
-  padding: 10px 16px;
-  border: 0;
-  border-radius: 8px;
-  background: var(--garnet);
-  color: #fff7e8;
-  font-weight: 900;
-  cursor: pointer;
-}
-
-.fallback-form button:disabled {
-  cursor: not-allowed;
-  opacity: 0.65;
 }
 
 .fallback-message {
-  color: #2f5f36;
+  color: var(--success);
   font-weight: 800;
 }
 
 .fallback-message.error {
-  color: #8f2638;
+  color: var(--danger);
+}
+
+.confirm-contact {
+  margin-top: var(--space-5);
 }
 
 .signup-page {
@@ -1364,18 +1339,17 @@ h2 {
 }
 
 .sitemap-section {
-  margin-top: 40px;
+  margin-top: var(--space-7);
 }
 
 .sitemap-section h2 {
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin: 0 0 14px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--line);
+  margin: 0 0 var(--space-4);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border);
+  color: var(--accent-strong);
+  font-family: var(--font-display);
+  font-size: var(--step-2);
+  font-weight: 400;
 }
 
 .sitemap-list {
@@ -1404,8 +1378,8 @@ h2 {
 }
 
 .sitemap-summary {
-  font-size: 14px;
-  color: var(--muted);
+  font-size: var(--step--1);
+  color: var(--text-muted);
 }
 
 .archive-list {
@@ -1478,11 +1452,11 @@ h2 {
 }
 
 .repertoire-page {
-  padding-bottom: 60px;
+  padding-bottom: var(--space-8);
 }
 
 .repertoire-intro {
-  padding-bottom: 24px;
+  padding-bottom: var(--space-5);
 }
 
 .repertoire-list {
@@ -1491,50 +1465,26 @@ h2 {
 }
 
 .repertoire-year {
-  margin-top: 34px;
+  margin-top: var(--space-6);
 }
 
 .repertoire-year h2 {
-  margin-bottom: 12px;
-  color: var(--garnet-dark);
+  margin-bottom: var(--space-3);
+  color: var(--accent-strong);
+  font-family: var(--font-display);
+  font-weight: 400;
 }
 
-.repertoire-table-wrap {
-  overflow-x: auto;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--paper-strong);
-}
-
-.repertoire-table {
-  width: 100%;
-  border-collapse: collapse;
+/* Four columns scroll sideways on a phone instead of squeezing (#153). */
+.repertoire-table-wrap table {
   min-width: 760px;
-}
-
-.repertoire-table th,
-.repertoire-table td {
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--line);
-  text-align: left;
-  vertical-align: top;
-}
-
-.repertoire-table th {
-  color: var(--muted);
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.repertoire-table tr:last-child td {
-  border-bottom: 0;
 }
 
 .table-note {
   display: block;
   margin-top: 3px;
-  font-size: 12px;
+  font-size: var(--step--1);
+  font-weight: 400;
 }
 
 /* ── Internal MPA Analysis Viewer ─────────────────── */
@@ -1542,7 +1492,7 @@ h2 {
 .mpa-viewer {
   min-height: calc(100vh - 72px);
   padding-bottom: clamp(44px, 6vw, 82px);
-  background: #f2ede2;
+  background: var(--paper);
 }
 
 .mpa-hero {
@@ -1559,7 +1509,7 @@ h2 {
   max-width: 900px;
   margin: 0;
   color: var(--garnet-dark);
-  font-size: clamp(38px, 6vw, 72px);
+  font-size: var(--step-4);
   line-height: 0.98;
 }
 
@@ -1568,14 +1518,14 @@ h2 {
 .mpa-section-head p {
   max-width: 760px;
   color: var(--muted);
-  font-size: 18px;
+  font-size: var(--step-0);
 }
 
 .mpa-warning,
 .mpa-final-note {
   padding: 18px;
-  background: #fff6d8;
-  border: 1px solid #dfbd5e;
+  background: var(--warning-soft);
+  border: 1px solid var(--gold);
   border-radius: 8px;
 }
 
@@ -1594,7 +1544,7 @@ h2 {
 .mpa-warning span,
 .mpa-final-note p {
   margin-top: 6px;
-  color: #5f5026;
+  color: var(--warning);
 }
 
 .mpa-tabs {
@@ -1605,7 +1555,7 @@ h2 {
   gap: 8px;
   overflow-x: auto;
   padding: 12px clamp(18px, 5vw, 72px);
-  background: rgba(242, 237, 226, 0.94);
+  background: color-mix(in srgb, var(--paper) 94%, transparent);
   border-bottom: 1px solid var(--line);
   backdrop-filter: blur(10px);
 }
@@ -1619,14 +1569,14 @@ h2 {
   border: 1px solid var(--line);
   border-radius: 8px;
   font: inherit;
-  font-size: 13px;
+  font-size: var(--step--1);
   font-weight: 900;
   cursor: pointer;
 }
 
 .mpa-tabs button.active,
 .mpa-tabs button:hover {
-  color: #fff7e8;
+  color: var(--text-on-accent);
   background: var(--garnet);
   border-color: var(--garnet);
 }
@@ -1639,12 +1589,20 @@ h2 {
 
 .mpa-section h2,
 .mpa-section h3 {
-  color: var(--garnet-dark);
+  color: var(--accent-strong);
+}
+
+/* Section headings in the display serif, ensemble names in bold body type (#153). */
+.mpa-section h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
 }
 
 .mpa-section h3 {
   margin: 24px 0 10px;
-  font-size: 22px;
+  font-family: var(--font-body);
+  font-size: var(--step-1);
+  font-weight: 800;
 }
 
 .mpa-section-head {
@@ -1674,7 +1632,7 @@ h2 {
 .mpa-stat span,
 .mpa-callout span {
   color: var(--blue);
-  font-size: 12px;
+  font-size: var(--step--1);
   font-weight: 900;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -1685,7 +1643,7 @@ h2 {
   display: block;
   margin-top: 8px;
   color: var(--garnet-dark);
-  font-size: clamp(30px, 4vw, 44px);
+  font-size: var(--step-3);
   line-height: 1;
 }
 
@@ -1727,7 +1685,7 @@ h2 {
 
 .mpa-table th {
   color: var(--muted);
-  font-size: 12px;
+  font-size: var(--step--1);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -1741,7 +1699,7 @@ h2 {
   gap: 6px;
   min-width: 180px;
   color: var(--garnet-dark);
-  font-size: 13px;
+  font-size: var(--step--1);
   font-weight: 900;
 }
 
@@ -1752,7 +1710,7 @@ h2 {
   min-height: 42px;
   padding: 9px 10px;
   color: var(--ink);
-  background: #fffdf8;
+  background: var(--surface-raised);
   border: 1px solid var(--line);
   border-radius: 8px;
   font: inherit;
@@ -1773,8 +1731,8 @@ h2 {
   border-radius: 999px;
   font-size: 11px;
   font-weight: 900;
-  color: #fff;
-  background: #8a8f98;
+  color: var(--text-on-accent);
+  background: var(--text-muted);
   white-space: nowrap;
 }
 
@@ -1788,6 +1746,14 @@ h2 {
   flex-wrap: wrap;
 }
 
+.mpa-hero .mpa-hero-header {
+  margin: 0;
+}
+
+.mpa-more {
+  margin-top: var(--space-2);
+}
+
 .mpa-ens-block {
   margin-top: 14px;
 }
@@ -1798,8 +1764,8 @@ h2 {
 
 .mpa-ens-meta {
   font-weight: 400;
-  color: #6b6b6b;
-  font-size: 13px;
+  color: var(--text-muted);
+  font-size: var(--step--1);
 }
 
 .mpa-piece-list {
@@ -1812,11 +1778,11 @@ h2 {
 }
 
 .mpa-comp {
-  color: #6b6b6b;
+  color: var(--text-muted);
 }
 
 .mpa-pill.grade {
-  background: #3a6ea5;
+  background: var(--info);
 }
 
 .mpa-rate {
@@ -1826,13 +1792,13 @@ h2 {
   padding: 1px 8px;
   border-radius: 6px;
   font-weight: 900;
-  font-size: 12px;
-  color: #fff;
+  font-size: var(--step--1);
+  color: var(--text-on-accent);
 }
 
-.mpa-rate.good { background: #2e7d32; }
-.mpa-rate.mid { background: #b07d18; }
-.mpa-rate.low { background: #a13b2b; }
+.mpa-rate.good { background: var(--success); }
+.mpa-rate.mid { background: var(--warning); }
+.mpa-rate.low { background: var(--danger); }
 
 .mpa-bars {
   display: grid;
@@ -1856,7 +1822,7 @@ h2 {
 .mpa-bar-track {
   height: 12px;
   overflow: hidden;
-  background: #e3d8c5;
+  background: var(--surface-sunken);
   border-radius: 999px;
 }
 
@@ -1874,8 +1840,8 @@ h2 {
 .mpa-discussion ul {
   margin: 0;
   padding-left: 20px;
-  color: #322d26;
-  font-size: 17px;
+  color: var(--text);
+  font-size: var(--step-0);
 }
 
 .mpa-discussion li + li {
@@ -1914,7 +1880,7 @@ h2 {
   border: 0;
   border-radius: 8px;
   background: var(--garnet);
-  color: #fff7e8;
+  color: var(--text-on-accent);
   font: inherit;
   font-weight: 900;
   cursor: pointer;
@@ -1922,7 +1888,7 @@ h2 {
 
 .mpa-error {
   margin: 0;
-  color: #8f2638;
+  color: var(--garnet);
   font-weight: 900;
 }
 
@@ -5157,3 +5123,27 @@ h2 {
 }
 
 .home-giving-trust { max-width: 580px; font-size: 14px; line-height: 1.6; margin: 16px 0 24px; }
+
+/* ---- Handbook (#153) ---- */
+.handbook-pdf {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-5);
+  margin-top: var(--space-5);
+}
+
+.handbook-frame {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+/* ---- Policy pages (#153): section headings in the display serif ---- */
+.policy-page h2 {
+  margin: var(--space-6) 0 var(--space-3);
+  color: var(--accent-strong);
+  font-family: var(--font-display);
+  font-size: var(--step-3);
+  font-weight: 400;
+}

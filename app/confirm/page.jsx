@@ -2,11 +2,14 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import PageHeader from "@/components/ui/PageHeader";
+import Field from "@/components/ui/Field";
+import Button from "@/components/ui/Button";
 
 function StatusPanel({ title, children }) {
   return (
-    <main className="narrow-page">
-      <h1>{title}</h1>
+    <main className="narrow-page confirm-page">
+      <PageHeader title={title} />
       <div className="copy-block">
         {children}
       </div>
@@ -66,8 +69,7 @@ function ForwardedEmailFallback({ studentId, action, studentName, parentName }) 
     <form className="fallback-form" onSubmit={submitContact}>
       <h2>Was this email forwarded to you?</h2>
       <p>If Mr. Parker may not have your current email address, add it here so he knows who responded.</p>
-      <label>
-        Email address
+      <Field label="Email address">
         <input
           type="email"
           value={email}
@@ -75,19 +77,18 @@ function ForwardedEmailFallback({ studentId, action, studentName, parentName }) 
           placeholder="name@example.com"
           disabled={status === "saving" || status === "saved"}
         />
-      </label>
-      <label>
-        Optional note
+      </Field>
+      <Field label="Optional note">
         <textarea
           value={note}
           onChange={(event) => setNote(event.target.value)}
           placeholder="Anything Mr. Parker should know"
           disabled={status === "saving" || status === "saved"}
         />
-      </label>
-      <button type="submit" disabled={status === "saving" || status === "saved"}>
+      </Field>
+      <Button type="submit" className="fallback-submit" disabled={status === "saving" || status === "saved"}>
         {status === "saving" ? "Saving..." : status === "saved" ? "Saved" : "Add email"}
-      </button>
+      </Button>
       {message && <p className={`fallback-message ${status === "error" ? "error" : ""}`}>{message}</p>}
     </form>
   );
@@ -155,7 +156,7 @@ function ConfirmInner() {
         <p>Recorded that {friendlyName} won&rsquo;t be in band at Ashley next year. No further follow-up needed.</p>
         <p>The door stays open. If anything changes mid-summer, just send Mr. Parker a note.</p>
         <ForwardedEmailFallback studentId={studentId} action={action} studentName={studentName} parentName={parentName} />
-        <p style={{ marginTop: "1.5rem" }}>
+        <p className="confirm-contact">
           <a href="mailto:robert.parker@nhcs.net">robert.parker@nhcs.net</a>
         </p>
       </StatusPanel>
@@ -168,7 +169,7 @@ function ConfirmInner() {
         <p>Recorded that {friendlyName} is planning to take band class, but not marching band.</p>
         <p>Mr. Parker is looking forward to having {friendlyName} in band class next semester.</p>
         <ForwardedEmailFallback studentId={studentId} action={action} studentName={studentName} parentName={parentName} />
-        <p style={{ marginTop: "1.5rem" }}>
+        <p className="confirm-contact">
           <a href="mailto:robert.parker@nhcs.net">robert.parker@nhcs.net</a>
         </p>
       </StatusPanel>

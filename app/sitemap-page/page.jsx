@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getCurrentFundraisers, getSiteData } from "@/lib/siteData";
 import { routesByDoor } from "@/lib/routes";
+import PageHeader from "@/components/ui/PageHeader";
 
 export const metadata = {
   title: "Site map | Bands of AHS"
@@ -63,9 +64,11 @@ export default function SitemapPage() {
 
   return (
     <main className="narrow-page">
-      <p className="eyebrow">Navigation</p>
-      <h1>Site map</h1>
-      <p className="lede">Every page for families, students and supporters, grouped by who it is for.</p>
+      <PageHeader
+        eyebrow="Navigation"
+        title="Site map"
+        lede="Every page for families, students and supporters, grouped by who it is for."
+      />
 
       {publicSections.map((section) =>
         section.pages.length ? (

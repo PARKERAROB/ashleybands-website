@@ -1,3 +1,5 @@
+import PageHeader from "@/components/ui/PageHeader";
+import DataTable from "@/components/ui/DataTable";
 import { repertoire } from "./repertoireData";
 
 export const metadata = {
@@ -27,52 +29,54 @@ export default function RepertoirePage() {
 
   const years = Object.keys(piecesByYear).sort((a, b) => Number(b) - Number(a));
 
+  const columns = [
+    { key: "piece", label: "Piece", rowHeader: true },
+    { key: "composer", label: "Composer / Arranger" },
+    { key: "event", label: "Event" },
+    { key: "ensemble", label: "Ensemble" }
+  ];
+
   return (
     <main className="repertoire-page">
-      <section className="narrow-page repertoire-intro">
-        <p className="eyebrow">Archive</p>
-        <h1>Performed Repertoire</h1>
-        <p className="lede">
-          A public record of pieces performed by the Bands of Ashley High School.
-        </p>
+      <PageHeader
+        className="narrow-page repertoire-intro"
+        eyebrow="Archive"
+        title="Performed Repertoire"
+        lede="A public record of pieces performed by the Bands of Ashley High School."
+      >
         <p className="archive-note">
           This list is maintained from the program repertoire archive and will continue to grow as
           future concerts are added.
         </p>
-      </section>
+      </PageHeader>
 
       <section className="repertoire-list">
         {years.map((year) => (
           <section className="repertoire-year" key={year}>
             <h2>{year}</h2>
-            <div className="repertoire-table-wrap">
-              <table className="repertoire-table">
-                <thead>
-                  <tr>
-                    <th>Piece</th>
-                    <th>Composer / Arranger</th>
-                    <th>Event</th>
-                    <th>Ensemble</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {piecesByYear[year].map((piece, index) => (
-                    <tr key={`${piece.title}-${piece.date}-${piece.ensemble}-${index}`}>
-                      <td>
-                        <strong>{piece.title}</strong>
-                        {piece.notes ? <span className="table-note">{piece.notes}</span> : null}
-                      </td>
-                      <td>{formatComposer(piece) || "Traditional / not listed"}</td>
-                      <td>
-                        {piece.cycle}
-                        <span className="table-note">{piece.date}</span>
-                      </td>
-                      <td>{piece.ensemble}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <DataTable
+              className="repertoire-table-wrap"
+              label={`Pieces performed in ${year}`}
+              columns={columns}
+              rowKey={(row) => row.key}
+              rows={piecesByYear[year].map((piece, index) => ({
+                key: `${piece.title}-${piece.date}-${piece.ensemble}-${index}`,
+                piece: (
+                  <>
+                    {piece.title}
+                    {piece.notes ? <span className="table-note">{piece.notes}</span> : null}
+                  </>
+                ),
+                composer: formatComposer(piece) || "Traditional / not listed",
+                event: (
+                  <>
+                    {piece.cycle}
+                    <span className="table-note">{piece.date}</span>
+                  </>
+                ),
+                ensemble: piece.ensemble
+              }))}
+            />
           </section>
         ))}
       </section>

@@ -3,6 +3,8 @@
 // Source of record: BandsofAHS/projects/placement-authority-2026-27/privacy-notice-DRAFT.md
 // Any wording change goes back through Mr. Parker.
 
+import PageHeader from "@/components/ui/PageHeader";
+
 export const metadata = {
   title: "Privacy Notice | Bands of AHS",
   description: "What information ashleybands.com collects, how it is used, and the choices available to families."
@@ -10,9 +12,8 @@ export const metadata = {
 
 export default function PrivacyNoticePage() {
   return (
-    <main className="narrow-page">
-      <h1>Privacy Notice</h1>
-      <p className="lede">Effective date: September 23, 2026 · ashleybands.com</p>
+    <main className="narrow-page policy-page">
+      <PageHeader title="Privacy Notice" lede="Effective date: September 23, 2026 · ashleybands.com" />
 
       <p>
         This site supports the Ashley High School band program. This notice describes the

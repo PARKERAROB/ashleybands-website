@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import PageHeader from "@/components/ui/PageHeader";
 
 const BASE = "/mpa-repertoire-data";
 const GRADES = ["I", "II", "III", "IV", "V", "VI"];
@@ -138,14 +139,17 @@ export default function MpaRepertoireClient() {
   return (
     <main className="mpa-viewer">
       <section className="mpa-hero">
-        <div>
-          <p className="eyebrow">Working data view</p>
-          <h1>MPA Repertoire — Eastern District</h1>
-          <p>
-            {m.rows.toLocaleString()} pieces performed, {m.years[0]}–{m.years[m.years.length - 1]} ·{" "}
-            {m.works.toLocaleString()} unique works. Grades use the current NCBA MPA list.
-          </p>
-        </div>
+        <PageHeader
+          className="mpa-hero-header"
+          eyebrow="Working data view"
+          title="MPA Repertoire — Eastern District"
+          lede={
+            <>
+              {m.rows.toLocaleString()} pieces performed, {m.years[0]}–{m.years[m.years.length - 1]} ·{" "}
+              {m.works.toLocaleString()} unique works. Grades use the current NCBA MPA list.
+            </>
+          }
+        />
         <aside className="mpa-warning">
           <strong>Working archive</strong>
           <span>
@@ -196,7 +200,7 @@ export default function MpaRepertoireClient() {
                 <tr key={i}><td><strong>{a.n}</strong></td><td>{a.t}</td><td className="mpa-comp">{a.c || "Not listed"}</td><td>{a.mg ? <span className="mpa-pill grade">{a.mg}</span> : <span className="mpa-comp">—</span>}</td><td className="mpa-comp">{a.lv}</td><td className="mpa-comp">{a.fy === a.ly ? a.fy : `${a.fy}–${a.ly}`}</td></tr>
               ))}</tbody>
             </table>
-            {counts.length > 700 ? <p className="mpa-comp" style={{ marginTop: 8 }}>Showing first 700 — narrow with filters.</p> : null}
+            {counts.length > 700 ? <p className="mpa-comp mpa-more">Showing first 700 — narrow with filters.</p> : null}
           </div>
         </section>
       ) : null}

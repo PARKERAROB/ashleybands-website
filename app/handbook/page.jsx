@@ -1,4 +1,7 @@
 import Link from "next/link";
+import PageHeader from "@/components/ui/PageHeader";
+import Notice from "@/components/ui/Notice";
+import { ButtonLink } from "@/components/ui/Button";
 
 export const metadata = {
   title: "Band Handbook | Bands of AHS",
@@ -8,35 +11,23 @@ export const metadata = {
 export default function HandbookPage() {
   return (
     <main className="narrow-page">
-      <p className="eyebrow">Students &amp; Families</p>
-      <h1>Band Handbook</h1>
-      <p className="lede">Program expectations, policies, and information for Ashley band members.</p>
-      <div className="notice" role="note" style={{ marginTop: "1.5rem" }}>
-        <p>
-          <strong>This is the 2023-24 handbook.</strong> Its policies still apply. Its dates, schedules
-          and funding amounts do not.
-        </p>
+      <PageHeader
+        eyebrow="Students & Families"
+        title="Band Handbook"
+        lede="Program expectations, policies, and information for Ashley band members."
+      />
+      <Notice tone="info" title="This is the 2023-24 handbook.">
+        <p>Its policies still apply. Its dates, schedules and funding amounts do not.</p>
         <p>
           For current dates, use the <Link href="/calendar">Band Calendar</Link>. For this fall&apos;s
           marching band, see <Link href="/info/marching-band-2026">Marching Band 2026</Link>.
         </p>
-      </div>
-      <div style={{ marginTop: "1.5rem" }}>
-        <a
-          href="/handbook.pdf"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ display: "inline-block", marginBottom: "1.5rem", fontWeight: 600 }}
-        >
+      </Notice>
+      <div className="handbook-pdf">
+        <ButtonLink href="/handbook.pdf" variant="secondary" target="_blank" rel="noopener noreferrer">
           Download PDF
-        </a>
-        <iframe
-          src="/handbook.pdf"
-          width="100%"
-          height="900"
-          style={{ border: "1px solid #ddd", borderRadius: "6px", display: "block" }}
-          title="Band Handbook"
-        />
+        </ButtonLink>
+        <iframe src="/handbook.pdf" width="100%" height="900" className="handbook-frame" title="Band Handbook" />
       </div>
     </main>
   );
