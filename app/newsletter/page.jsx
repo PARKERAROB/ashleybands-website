@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PageHeader from "@/components/ui/PageHeader";
 import NewsletterSignup from "@/components/NewsletterSignup";
 import { listPublishedNewsletterIssues } from "@/lib/newsletter";
 
@@ -24,13 +25,12 @@ export default async function NewsletterPage() {
 
   return (
     <main className="newsletter-page">
-      <section className="newsletter-masthead">
-        <p className="newsletter-kicker">Sundays from Ashley Bands</p>
-        <h1>AshleyBands Weekly</h1>
-        <p>
-          What our students accomplished, what is happening this week, and what students and families need to know.
-        </p>
-      </section>
+      <PageHeader
+        className="newsletter-masthead"
+        eyebrow="Sundays from Ashley Bands"
+        title="AshleyBands Weekly"
+        lede="What our students accomplished, what is happening this week, and what students and families need to know."
+      />
 
       <section className="newsletter-layout">
         <div className="newsletter-main-column">
