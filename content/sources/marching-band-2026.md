@@ -1,12 +1,12 @@
 ## Marching Band 2026
 
-This page covers the full 2026 marching band season: the schedule, what is expected, the cost, and how it is funded.
+This page covers the 2026 marching band season: the schedule, what is expected, the cost, and how it is funded.
 
 The Screaming Eagle Regiment is a competitive marching band. Sign-up for the 2026 season is closed.
 
 ## The Season at a Glance
 
-The [band calendar](/calendar) is the single source for all marching band dates, times, and locations. Check it often. It is kept current as the season develops.
+The [band calendar](/calendar) has all marching band dates, times, and locations. Check it often. It is kept current as the season develops.
 
 Regular rehearsals run Tuesdays and Thursdays, 4:00 - 7:00 PM, plus Saturdays on non-competition weeks. Colorguard and leadership have additional times. Every specific date lives on the calendar.
 
@@ -27,7 +27,7 @@ NHCS has covered transportation for the past two seasons, and we expect that to 
 
 On a band of about 70 students, that is roughly **$600 to $670 per student** in true cost, or about **$500 to $585 per student** as the shared goal.
 
-This is not a bill. No student pays a required individual fee. What we ask each family to help meet is a **$500 funding goal**. See [how we fund the season](/info/marching-band-funding) for the full breakdown and the ways to meet it.
+No student pays a required individual fee. We ask each family to help meet a **$500 funding goal**. See [how we fund the season](/info/marching-band-funding) for the full breakdown and the ways to meet it.
 
 ## How It Is Funded
 

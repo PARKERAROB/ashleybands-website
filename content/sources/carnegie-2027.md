@@ -4,7 +4,7 @@ Ashley Bands is planning a New York trip for March 23-26, 2027, with the Carnegi
 
 ### Where things stand
 
-The trip deposit has been submitted. The plan is to take everyone. Big updates are coming soon.
+The trip deposit has been submitted. The plan is to take everyone.
 
 ### Help raise the money
 
@@ -14,7 +14,7 @@ Students can share our story through My Carnegie Notes and letters in the [Famil
 
 If your family has not responded yet, or you are new to Ashley Bands, use the [family commitment form](/carnegie-2027/commit). It has the response choices, acknowledgement, and signatures. For help, [contact Mr. Parker](mailto:robert.parker@nhcs.net).
 
-Cost should not turn a yes, if funded, into a no. Families can indicate that their student intends to participate if the family responsibility can be reduced. Choose no only if the student cannot participate regardless of financial assistance.
+Families can indicate that their student intends to participate if the family responsibility can be reduced. Choose no only if the student cannot participate regardless of financial assistance.
 
 ### Cost and conditional deposit
 

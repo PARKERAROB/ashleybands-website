@@ -2,17 +2,13 @@
 
 This page shows what a competitive marching band season actually costs, and how we fund it together so no family carries it alone.
 
-We believe in being fully transparent. These are the real numbers. Nothing here is hidden.
-
-The short version: the season costs far more than any one family is asked to give. We set a shared funding goal, and we meet it together through sponsorships, fundraising, booster and district support, and optional family contributions. No student is ever kept off the field over money.
+These are the real numbers. The season costs far more than any one family is asked to give. We set a shared funding goal, and we meet it together through sponsorships, fundraising, booster and district support, and optional family contributions. No student is ever kept off the field over money.
 
 ## What We Are Asking This Year
 
 About **70 students** are expected to march with the Screaming Eagle Regiment in 2026.
 
 Our funding goal is **$500 per student**, which is about **$35,000 total**.
-
-A few things to be clear about:
 
 - **This is a goal, not a bill.** No student pays a required fee to march.
 - The $500 covers the costs due up front: custom music, drill, instructional staff, uniforms, and equipment.
@@ -33,7 +29,7 @@ On a band of about 70 students, that works out to:
 | Shared band goal (NHCS covers transport) | $35,000 - $41,000 | about $500 - $585 |
 | **What we ask each family to help meet** | **$35,000** | **$500** |
 
-That is why the ask is $500. It sits at the floor of the real per-student range. We close the rest together.
+The ask is $500 because that is the floor of the real per-student range. We close the rest together.
 
 ## What the Cost Includes
 
@@ -55,8 +51,6 @@ A competitive marching band season is far more than performances at football gam
 
 ## How This Compares
 
-This estimate is large, but it is not out of line with what competitive marching band requires.
-
 Public information from other band programs shows a wide range of family contribution structures:
 
 - North Carolina public examples ranged from about **$350 to $1,450** per student
@@ -64,7 +58,7 @@ Public information from other band programs shows a wide range of family contrib
 - local and state competitive programs without major overnights often landed around **$350 to $600**
 - higher-travel, staff-heavy, or national-level programs often landed around **$900 to $1,600+**
 
-The biggest cost drivers are not contest entry fees. They are staff, custom music, drill, choreography, transportation, props, equipment, meals, and production. Our numbers are tied to the same categories every competitive program faces.
+The biggest cost drivers are staff, custom music, drill, choreography, transportation, props, equipment, meals, and production, not contest entry fees.
 
 ## How We Fund It
 
@@ -86,7 +80,7 @@ When you sign up, your family meets the $500 goal one of two ways:
 - **Pay it directly.** $500 up front, or $250 up front and $250 by band camp. Pay online through this website, or drop a check or cash in the payment box in the band room.
 - **Bring sponsorship contacts instead.** Give us **5 local businesses your family has a real connection to** (where you are a regular, know the owner, or have done business). Share the business name and a contact. We log them and send the first outreach. Then you deliver the sponsorship packet in person. One $2,000 sponsor can cover your student and several others.
 
-On top of that, **we ask every family to pursue sponsorships regardless** of how they meet their $500. If about 70 families each reach 5 businesses, that is more than 300 local connections, every one tied personally to a student. That is how the season gets funded. The more sponsors we have, the less any family pays.
+On top of that, **we ask every family to pursue sponsorships regardless** of how they meet their $500. If about 70 families each reach 5 businesses, that is more than 300 local connections, every one tied personally to a student. The more sponsors we have, the less any family pays.
 
 ## Separate: Student Clothing
 

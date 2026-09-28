@@ -83,7 +83,7 @@ Students may be added to class-specific Google Chat groups using their school-ma
 
 Google Chat is for students only. Parents do not have access to student Google Chat groups.
 
-Important note: with the change from Google to Microsoft, we may transition to Microsoft Teams this year.
+With the change from Google to Microsoft, we may transition to Microsoft Teams this year.
 
 ## Student Materials
 
@@ -122,8 +122,6 @@ The red band shirt is used for pep rallies, community performances, parades, and
 [Buy the official Red Band Shirt](https://ashleybandshirts.printify.me/).
 
 ## Parent Involvement
-
-Parents are part of the success of the program.
 
 Useful ways to help include:
 
