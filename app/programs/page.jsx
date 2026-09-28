@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PageHeader } from "@/components/ui";
 
 export const metadata = {
   title: "Program Archive | Bands of AHS",
@@ -17,11 +18,11 @@ const programs = [
 export default function ProgramsPage() {
   return (
     <main className="narrow-page">
-      <p className="eyebrow">Archive</p>
-      <h1>Concert Programs</h1>
-      <p className="lede">
-        Digital programs are kept here as an archive of performances by the Bands of Ashley High School.
-      </p>
+      <PageHeader
+        eyebrow="Archive"
+        title="Concert Programs"
+        lede="Digital programs are kept here as an archive of performances by the Bands of Ashley High School."
+      />
 
       <div className="archive-list">
         {programs.map((program) => (

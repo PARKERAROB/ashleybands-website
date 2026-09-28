@@ -1,4 +1,5 @@
 import MarkdownBlock from "@/components/MarkdownBlock";
+import { PageHeader } from "@/components/ui";
 import { getSiteData } from "@/lib/siteData";
 
 export const metadata = {
@@ -9,9 +10,11 @@ export const metadata = {
 export default function BoostersPage() {
   return (
     <main className="narrow-page">
-      <p className="eyebrow">Support Ashley Bands</p>
-      <h1>Band Boosters</h1>
-      <p className="lede">Every parent and guardian in the program is a member.</p>
+      <PageHeader
+        eyebrow="Support Ashley Bands"
+        title="Band Boosters"
+        lede="Every parent and guardian in the program is a member."
+      />
       <MarkdownBlock markdown={getSiteData().boosters} />
     </main>
   );

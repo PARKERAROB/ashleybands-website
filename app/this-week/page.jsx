@@ -1,5 +1,6 @@
 import Link from "next/link";
 import calendarEvents from "@/public/calendar-data.json";
+import { DayList, PageHeader } from "@/components/ui";
 import { listPublishedNewsletterIssues } from "@/lib/newsletter";
 import { longDate, upcomingByDay } from "@/lib/thisWeek.mjs";
 import styles from "./page.module.css";
@@ -30,44 +31,33 @@ export default async function ThisWeekPage() {
 
   return (
     <main className={`narrow-page ${styles.page}`}>
-      <p className="eyebrow">For students and families</p>
-      <h1>This week</h1>
-      <p className="lede">Band events from today through the weekend, from the official band calendar.</p>
+      <PageHeader
+        eyebrow="For students and families"
+        title="This week"
+        lede="Band events from today through the weekend, from the official band calendar."
+      />
 
-      {days.length === 0 ? (
-        <section className={styles.empty} aria-label="This week">
-          <p>Nothing on the band calendar through the weekend.</p>
-          <Link className="text-link" href="/calendar">See the full band calendar</Link>
-        </section>
-      ) : (
-        <div className={styles.days}>
-          {days.map((day) => (
-            <section key={day.date} className={styles.day} aria-labelledby={`day-${day.date}`}>
-              <h2 id={`day-${day.date}`} className={styles.dayLabel}>
-                {day.label}
-                {day.label === "Today" || day.label === "Tomorrow" ? (
-                  <span className={styles.dayDate}>{longDate(day.date)}</span>
-                ) : null}
-              </h2>
-              <ul className={styles.list}>
-                {day.events.map((event) => (
-                  <li key={event.anchor} className={styles.event}>
-                    <h3 className={styles.title}>{event.title}</h3>
-                    <p className={styles.meta}>
-                      <span>{event.time}</span>
-                      {event.location ? <span>{event.location}</span> : null}
-                    </p>
-                    {event.description ? <p className={styles.description}>{event.description}</p> : null}
-                    <Link className={styles.details} href={event.href} aria-label={`Details for ${event.title}, ${day.label}`}>
-                      Details
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))}
-        </div>
-      )}
+      <DayList
+        days={days.map((day) => ({
+          key: day.date,
+          label: day.label,
+          date: day.label === "Today" || day.label === "Tomorrow" ? longDate(day.date) : null,
+          events: day.events.map((event) => ({
+            key: event.anchor,
+            title: event.title,
+            time: event.time,
+            place: event.location,
+            note: event.description,
+            href: event.href
+          }))
+        }))}
+        empty={
+          <>
+            <p className={styles.emptyText}>Nothing on the band calendar through the weekend.</p>
+            <Link className="text-link" href="/calendar">See the full band calendar</Link>
+          </>
+        }
+      />
 
       <section className={styles.todo} aria-labelledby="family-todo">
         <h2 id="family-todo">What families need to do</h2>

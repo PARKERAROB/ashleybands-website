@@ -152,7 +152,11 @@ a {
   align-items: center;
   gap: 10px;
   color: var(--garnet-dark);
-  font-weight: 800;
+  /* The band's name is the one place Cinzel is used (#153). */
+  font-family: var(--font-wordmark);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   text-decoration: none;
 }
 
