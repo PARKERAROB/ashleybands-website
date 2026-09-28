@@ -3,11 +3,14 @@
   margin: 0 auto;
   padding: 2rem 1.25rem 4rem;
   color: var(--ink);
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--font-body);
 }
 
 .staff-sprint-page h1 {
-  font-size: 2rem;
+  color: var(--garnet-dark);
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--step-3);
   margin: 0 0 0.5rem;
 }
 
@@ -162,6 +165,12 @@
   height: 100%;
   background: linear-gradient(90deg, var(--gold), var(--garnet));
   transition: width 0.25s ease;
+}
+
+.staff-sprint-page h2 {
+  color: var(--garnet-dark);
+  font-family: var(--font-display);
+  font-weight: 400;
 }
 
 .staff-sprint-results h2 {
