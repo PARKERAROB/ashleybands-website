@@ -63,57 +63,62 @@
       "plans": {
         "Mon": {
           "fundamentals": [
-            "Warm-up: add",
-            "FSP: add page",
-            "101: add number",
-            "Theory: add topic"
+            "50 Progressives",
+            "FSP",
+            "101"
           ],
           "rehearsal": [
-            "Fall Concert music: add pieces"
+            "Let Freedom Ring!",
+            "Legends and Heroes",
+            "Salute to the Armed Services"
           ]
         },
         "Tue": {
           "fundamentals": [
-            "Warm-up: add",
-            "FSP: add page",
-            "101: add number",
-            "Theory: add topic"
+            "50 Progressives",
+            "FSP",
+            "101"
           ],
           "rehearsal": [
-            "Fall Concert music: add pieces"
+            "Let Freedom Ring!",
+            "Legends and Heroes",
+            "Salute to the Armed Services"
           ]
         },
         "Wed": {
           "fundamentals": [
-            "Warm-up: add",
-            "FSP: add page",
-            "101: add number",
-            "Theory: add topic"
+            "50 Progressives",
+            "FSP",
+            "101"
           ],
           "rehearsal": [
-            "Fall Concert music: add pieces"
+            "Let Freedom Ring!",
+            "Legends and Heroes",
+            "Salute to the Armed Services"
           ]
         },
         "Thu": {
           "fundamentals": [
-            "Warm-up: add",
-            "FSP: add page",
-            "101: add number",
-            "Theory: add topic"
+            "50 Progressives",
+            "FSP",
+            "101"
           ],
           "rehearsal": [
-            "Fall Concert music: add pieces"
+            "Let Freedom Ring!",
+            "Legends and Heroes",
+            "Salute to the Armed Services"
           ]
         },
         "Fri": {
           "fundamentals": [
-            "Warm-up: add",
-            "FSP: add page",
-            "101: add number",
-            "Theory: add topic"
+            "50 Progressives",
+            "FSP",
+            "101"
           ],
           "rehearsal": [
-            "Fall Concert music: add pieces"
+            "Let Freedom Ring!",
+            "Legends and Heroes",
+            "Salute to the Armed Services"
           ]
         }
       },
@@ -128,65 +133,83 @@
         "text": "Add due items",
         "date": ""
       },
-      "nextWeek": [
-        "Add due items"
-      ]
+      "nextWeek": []
     },
     "percussion": {
       "plans": {
         "Mon": {
           "fundamentals": [
-            "Warm-up: add",
-            "FSP: add page",
-            "101: add number",
-            "Theory: add topic"
+            "50 Progressives",
+            "FSP",
+            "101"
           ],
           "rehearsal": [
-            "Fall Concert music: add pieces"
+            "Let Freedom Ring!",
+            "Legends and Heroes",
+            "Salute to the Armed Services",
+            "Cenotaph",
+            "A Bernstein Tribute",
+            "The Entertainer"
           ]
         },
         "Tue": {
           "fundamentals": [
-            "Warm-up: add",
-            "FSP: add page",
-            "101: add number",
-            "Theory: add topic"
+            "50 Progressives",
+            "FSP",
+            "101"
           ],
           "rehearsal": [
-            "Fall Concert music: add pieces"
+            "Let Freedom Ring!",
+            "Legends and Heroes",
+            "Salute to the Armed Services",
+            "Cenotaph",
+            "A Bernstein Tribute",
+            "The Entertainer"
           ]
         },
         "Wed": {
           "fundamentals": [
-            "Warm-up: add",
-            "FSP: add page",
-            "101: add number",
-            "Theory: add topic"
+            "50 Progressives",
+            "FSP",
+            "101"
           ],
           "rehearsal": [
-            "Fall Concert music: add pieces"
+            "Let Freedom Ring!",
+            "Legends and Heroes",
+            "Salute to the Armed Services",
+            "Cenotaph",
+            "A Bernstein Tribute",
+            "The Entertainer"
           ]
         },
         "Thu": {
           "fundamentals": [
-            "Warm-up: add",
-            "FSP: add page",
-            "101: add number",
-            "Theory: add topic"
+            "50 Progressives",
+            "FSP",
+            "101"
           ],
           "rehearsal": [
-            "Fall Concert music: add pieces"
+            "Let Freedom Ring!",
+            "Legends and Heroes",
+            "Salute to the Armed Services",
+            "Cenotaph",
+            "A Bernstein Tribute",
+            "The Entertainer"
           ]
         },
         "Fri": {
           "fundamentals": [
-            "Warm-up: add",
-            "FSP: add page",
-            "101: add number",
-            "Theory: add topic"
+            "50 Progressives",
+            "FSP",
+            "101"
           ],
           "rehearsal": [
-            "Fall Concert music: add pieces"
+            "Let Freedom Ring!",
+            "Legends and Heroes",
+            "Salute to the Armed Services",
+            "Cenotaph",
+            "A Bernstein Tribute",
+            "The Entertainer"
           ]
         }
       },
@@ -201,65 +224,73 @@
         "text": "Add due items",
         "date": ""
       },
-      "nextWeek": [
-        "Add due items"
-      ]
+      "nextWeek": []
     },
     "wind": {
       "plans": {
         "Mon": {
           "fundamentals": [
-            "Warm-up: add",
-            "FSP: add page",
-            "101: add number",
-            "Theory: add topic"
+            "50 Progressives",
+            "FSP",
+            "101"
           ],
           "rehearsal": [
-            "Fall Concert music: add pieces"
+            "Salute to the Armed Services",
+            "Cenotaph",
+            "A Bernstein Tribute",
+            "The Entertainer"
           ]
         },
         "Tue": {
           "fundamentals": [
-            "Warm-up: add",
-            "FSP: add page",
-            "101: add number",
-            "Theory: add topic"
+            "50 Progressives",
+            "FSP",
+            "101"
           ],
           "rehearsal": [
-            "Fall Concert music: add pieces"
+            "Salute to the Armed Services",
+            "Cenotaph",
+            "A Bernstein Tribute",
+            "The Entertainer"
           ]
         },
         "Wed": {
           "fundamentals": [
-            "Warm-up: add",
-            "FSP: add page",
-            "101: add number",
-            "Theory: add topic"
+            "50 Progressives",
+            "FSP",
+            "101"
           ],
           "rehearsal": [
-            "Fall Concert music: add pieces"
+            "Salute to the Armed Services",
+            "Cenotaph",
+            "A Bernstein Tribute",
+            "The Entertainer"
           ]
         },
         "Thu": {
           "fundamentals": [
-            "Warm-up: add",
-            "FSP: add page",
-            "101: add number",
-            "Theory: add topic"
+            "50 Progressives",
+            "FSP",
+            "101"
           ],
           "rehearsal": [
-            "Fall Concert music: add pieces"
+            "Salute to the Armed Services",
+            "Cenotaph",
+            "A Bernstein Tribute",
+            "The Entertainer"
           ]
         },
         "Fri": {
           "fundamentals": [
-            "Warm-up: add",
-            "FSP: add page",
-            "101: add number",
-            "Theory: add topic"
+            "50 Progressives",
+            "FSP",
+            "101"
           ],
           "rehearsal": [
-            "Fall Concert music: add pieces"
+            "Salute to the Armed Services",
+            "Cenotaph",
+            "A Bernstein Tribute",
+            "The Entertainer"
           ]
         }
       },
@@ -274,9 +305,7 @@
         "text": "Add due items",
         "date": ""
       },
-      "nextWeek": [
-        "Add due items"
-      ]
+      "nextWeek": []
     }
   },
   "bigDates": [
