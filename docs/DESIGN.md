@@ -160,6 +160,11 @@ receives money and when the deadline is.
 `DataTable` or list for the work. Keep the current state and the next action at the top. Show an
 explicit unknown state instead of a blank.
 
+**Room display** (the unlisted band room board, #154, `app/room/[slug]`). One screen, no scrolling at
+1920x1080 or 3840x2160. Sizes scale from one viewport unit (`--u` in its CSS module) instead of the
+fluid type steps, and lucide icons size in `em` so they grow with the text. Garnet top bar, paper panels,
+tap targets at least 44px. Check with `npm run preview:shots -- /room/<slug> --viewports display,display4k,phone`.
+
 ## Voice
 
 - Write for a parent who knows nothing about the band.

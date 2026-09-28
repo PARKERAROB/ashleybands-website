@@ -1,0 +1,314 @@
+/* Band room board (#154). One screen on a wall display: everything scales with the viewport,
+   so 1920x1080 and 3840x2160 show the same layout with no scrolling. */
+
+.board {
+  --u: min(2.2vh, 1.25vw);
+  box-sizing: border-box;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: calc(var(--u) * 0.8);
+  padding: calc(var(--u) * 1) calc(var(--u) * 1.4);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: var(--u);
+  line-height: 1.25;
+}
+
+.board h1,
+.board h2,
+.board h3,
+.board p,
+.board ul,
+.board ol {
+  margin: 0;
+}
+
+.board h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  font-family: var(--font-display);
+  font-weight: 400;
+  color: var(--accent);
+  font-size: 1.5em;
+  line-height: 1.1;
+}
+
+/* ---- Top bar: class, switcher, clock ---- */
+.top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: calc(var(--u) * 1.2);
+  padding: calc(var(--u) * 0.7) calc(var(--u) * 1.1);
+  border-radius: var(--radius-md);
+  background: var(--accent);
+  color: var(--text-on-accent);
+  border-bottom: calc(var(--u) * 0.3) solid var(--gold);
+}
+
+.block {
+  font-size: 1.15em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.title h1 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 3.2em;
+  line-height: 1;
+}
+
+.switcher {
+  display: flex;
+  gap: calc(var(--u) * 0.5);
+}
+
+.switchBtn,
+.switchOn {
+  min-height: max(var(--tap-target), calc(var(--u) * 3.6));
+  min-width: calc(var(--u) * 7);
+  padding: 0.4em 0.8em;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--text-on-accent);
+  font-family: var(--font-body);
+  font-size: calc(var(--u) * 1.1);
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: left;
+  cursor: pointer;
+}
+
+.switchBtn span,
+.switchOn span {
+  display: block;
+  font-size: 0.75em;
+  font-weight: 600;
+}
+
+.switchBtn {
+  background: transparent;
+  color: var(--text-on-accent);
+}
+
+.switchOn {
+  background: var(--text-on-accent);
+  color: var(--accent-strong);
+}
+
+.clock {
+  text-align: right;
+}
+
+.time {
+  font-size: 3em;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.date {
+  font-size: 1.15em;
+  font-weight: 600;
+}
+
+/* ---- Strip: next test, due, big date ---- */
+.strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: calc(var(--u) * 0.8);
+}
+
+.stripItem,
+.stripBig {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: calc(var(--u) * 0.6) calc(var(--u) * 0.9);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  border: 2px solid var(--border-strong);
+  font-size: 1.2em;
+  font-weight: 600;
+}
+
+.stripItem > svg {
+  color: var(--accent);
+  flex: none;
+}
+
+.stripItem h2,
+.stripBig h2 {
+  font-size: 1.1em;
+}
+
+.stripBig {
+  background: var(--accent-strong);
+  border-color: var(--gold);
+  color: var(--text-on-accent);
+}
+
+.stripBig h2 {
+  color: var(--text-on-accent);
+}
+
+.stripBig > svg {
+  color: var(--gold);
+  flex: none;
+}
+
+/* ---- Main: today's plan, announcements, next week ---- */
+.main {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: calc(var(--u) * 0.8);
+  min-height: 0;
+}
+
+.plan,
+.panel {
+  min-height: 0;
+  overflow: hidden;
+  padding: calc(var(--u) * 0.8) calc(var(--u) * 1);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  border: 2px solid var(--border);
+}
+
+.plan h2 {
+  font-size: 2em;
+  margin-bottom: 0.3em;
+}
+
+.planParts {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: calc(var(--u) * 1.2);
+}
+
+.partTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  margin-bottom: 0.4em !important;
+  padding-bottom: 0.2em;
+  border-bottom: calc(var(--u) * 0.15) solid var(--gold);
+  font-size: 1.35em;
+  font-weight: 700;
+  color: var(--accent-strong);
+}
+
+.planList {
+  padding-left: 1.1em;
+  font-size: 1.7em;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.planList li + li {
+  margin-top: 0.3em;
+}
+
+.planList li::marker {
+  color: var(--accent);
+}
+
+.side {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+  gap: calc(var(--u) * 0.8);
+  min-height: 0;
+}
+
+.panel h2 {
+  margin-bottom: 0.35em;
+}
+
+.list {
+  padding-left: 1.1em;
+  font-size: 1.1em;
+}
+
+.list li + li {
+  margin-top: 0.3em;
+}
+
+.empty {
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 1.3em;
+}
+
+/* ---- Week row ---- */
+.week {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: calc(var(--u) * 0.6);
+}
+
+.day,
+.dayToday {
+  padding: calc(var(--u) * 0.6) calc(var(--u) * 0.8);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  border: 2px solid var(--border);
+  min-height: calc(var(--u) * 6);
+}
+
+.day h2,
+.dayToday h2 {
+  font-size: 1.25em;
+  margin-bottom: 0.25em;
+}
+
+.dayToday {
+  border: calc(var(--u) * 0.2) solid var(--accent);
+  background: var(--accent-soft);
+}
+
+.due h3 {
+  margin-top: 0.3em;
+  font-size: 0.9em;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--warning);
+}
+
+/* Phone or narrow window: stack and let it scroll. The wall display never hits this. */
+@media (max-width: 800px), (max-aspect-ratio: 1/1) {
+  .board {
+    --u: 16px;
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+    grid-template-rows: none;
+  }
+
+  .top,
+  .main,
+  .planParts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .clock {
+    text-align: left;
+  }
+
+  .switcher {
+    flex-wrap: wrap;
+  }
+
+  .strip,
+  .week {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .title h1 {
+    font-size: 2.2em;
+  }
+}

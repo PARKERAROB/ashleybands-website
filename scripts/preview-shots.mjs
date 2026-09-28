@@ -16,12 +16,15 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export const VIEWPORTS = {
   phone: { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true },
   desktop: { viewport: { width: 1366, height: 900 }, deviceScaleFactor: 1 },
+  // Wall displays (#154). Opt in with --viewports display,display4k.
+  display: { viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 },
+  display4k: { viewport: { width: 3840, height: 2160 }, deviceScaleFactor: 1 },
 };
 const LOOPBACK = new Set(["localhost", "127.0.0.1", "[::1]"]);
 const HIDE_DEV_OVERLAY = "nextjs-portal { display: none !important; }";
 
 export function parseArgs(argv) {
-  const opts = { routes: [], viewports: Object.keys(VIEWPORTS), out: null, baseUrl: null, timeout: 180000 };
+  const opts = { routes: [], viewports: ["phone", "desktop"], out: null, baseUrl: null, timeout: 180000 };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === "--out") opts.out = argv[++i];

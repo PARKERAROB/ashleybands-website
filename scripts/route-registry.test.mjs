@@ -100,6 +100,8 @@ test("hidden-chrome matching is prefix-aware", () => {
   assert.equal(hidesSiteChrome("/carnegie-2027/commit"), false);
   assert.equal(hidesSiteChrome("/attendance-report"), false);
   assert.equal(hidesSiteChrome("/"), false);
+  assert.equal(hidesSiteChrome("/room/any-slug"), true);
+  assert.equal(hidesSiteChrome("/roomy"), false);
 });
 
 test("nav keeps its order with This week first", () => {
@@ -125,6 +127,7 @@ test("robots and sitemap never expose staff, portal, prototype or internal route
   for (const base of ["/admin", "/api", "/portal", "/leadership-brief", "/mpa-analysis", "/raleigh-brief"]) {
     assert.ok(disallowed.includes(base), `robots.txt should disallow ${base}`);
   }
+  assert.ok(!disallowed.some((base) => base.startsWith("/room")), "robots.txt must not point at the unlisted room board");
   for (const route of sitemapRoutes()) {
     assert.ok(["public", "archive"].includes(route.door), `${route.path} is ${route.door}`);
     assert.ok(!route.internal && !route.path.includes("["), route.path);

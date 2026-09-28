@@ -1,0 +1,289 @@
+{
+  "_readme": "Band room board (#154). Hand-edited source. Atlas updates weekly and redeploys. Per class, per weekday: plans.<Day>.fundamentals (warm-up, FSP, 101, theory) and plans.<Day>.rehearsal (pieces and spots). 3 to 5 short bullets each. Program items come from BandsofAHS data/calendar-events.jsonl. No student data. No em dashes.",
+  "slug": "yf7ycrjwun2z",
+  "weekOf": "2026-09-28",
+  "tests": [
+    {
+      "date": "2026-09-28",
+      "label": "Playing Test #6, 50 Progressives"
+    },
+    {
+      "date": "2026-10-05",
+      "label": "Playing Test #7, 50 Progressives"
+    }
+  ],
+  "week": [
+    {
+      "day": "Mon",
+      "date": "2026-09-28",
+      "program": [
+        "Due: Playing Test #6, 50 Progressives"
+      ]
+    },
+    {
+      "day": "Tue",
+      "date": "2026-09-29",
+      "program": [
+        "Marching rehearsal 4:00 to 7:00 PM"
+      ]
+    },
+    {
+      "day": "Wed",
+      "date": "2026-09-30",
+      "program": []
+    },
+    {
+      "day": "Thu",
+      "date": "2026-10-01",
+      "program": [
+        "Marching rehearsal 4:00 to 7:00 PM"
+      ]
+    },
+    {
+      "day": "Fri",
+      "date": "2026-10-02",
+      "program": []
+    }
+  ],
+  "nextWeek": {
+    "weekOf": "2026-10-05",
+    "program": [
+      "Mon Oct 5: Playing Test #7, 50 Progressives",
+      "Tue Oct 6 and Thu Oct 8: Marching rehearsal 4:00 to 7:00 PM",
+      "Sat Oct 10: White Oak competition."
+    ]
+  },
+  "announcements": [
+    "Marching band funding goals are being finalized. Get yours taken care of.",
+    "Need marching shoes or other gear? Take care of it now as we head into competition prep.",
+    "Saturday stadium rehearsal, Oct 3, 9:00 AM to 4:00 PM."
+  ],
+  "classes": {
+    "concert": {
+      "plans": {
+        "Mon": {
+          "fundamentals": [
+            "Warm-up: add",
+            "FSP: add page",
+            "101: add number",
+            "Theory: add topic"
+          ],
+          "rehearsal": [
+            "Fall Concert music: add pieces"
+          ]
+        },
+        "Tue": {
+          "fundamentals": [
+            "Warm-up: add",
+            "FSP: add page",
+            "101: add number",
+            "Theory: add topic"
+          ],
+          "rehearsal": [
+            "Fall Concert music: add pieces"
+          ]
+        },
+        "Wed": {
+          "fundamentals": [
+            "Warm-up: add",
+            "FSP: add page",
+            "101: add number",
+            "Theory: add topic"
+          ],
+          "rehearsal": [
+            "Fall Concert music: add pieces"
+          ]
+        },
+        "Thu": {
+          "fundamentals": [
+            "Warm-up: add",
+            "FSP: add page",
+            "101: add number",
+            "Theory: add topic"
+          ],
+          "rehearsal": [
+            "Fall Concert music: add pieces"
+          ]
+        },
+        "Fri": {
+          "fundamentals": [
+            "Warm-up: add",
+            "FSP: add page",
+            "101: add number",
+            "Theory: add topic"
+          ],
+          "rehearsal": [
+            "Fall Concert music: add pieces"
+          ]
+        }
+      },
+      "due": {
+        "Mon": [],
+        "Tue": [],
+        "Wed": [],
+        "Thu": [],
+        "Fri": []
+      },
+      "keyDue": {
+        "text": "Add due items",
+        "date": ""
+      },
+      "nextWeek": [
+        "Add due items"
+      ]
+    },
+    "percussion": {
+      "plans": {
+        "Mon": {
+          "fundamentals": [
+            "Warm-up: add",
+            "FSP: add page",
+            "101: add number",
+            "Theory: add topic"
+          ],
+          "rehearsal": [
+            "Fall Concert music: add pieces"
+          ]
+        },
+        "Tue": {
+          "fundamentals": [
+            "Warm-up: add",
+            "FSP: add page",
+            "101: add number",
+            "Theory: add topic"
+          ],
+          "rehearsal": [
+            "Fall Concert music: add pieces"
+          ]
+        },
+        "Wed": {
+          "fundamentals": [
+            "Warm-up: add",
+            "FSP: add page",
+            "101: add number",
+            "Theory: add topic"
+          ],
+          "rehearsal": [
+            "Fall Concert music: add pieces"
+          ]
+        },
+        "Thu": {
+          "fundamentals": [
+            "Warm-up: add",
+            "FSP: add page",
+            "101: add number",
+            "Theory: add topic"
+          ],
+          "rehearsal": [
+            "Fall Concert music: add pieces"
+          ]
+        },
+        "Fri": {
+          "fundamentals": [
+            "Warm-up: add",
+            "FSP: add page",
+            "101: add number",
+            "Theory: add topic"
+          ],
+          "rehearsal": [
+            "Fall Concert music: add pieces"
+          ]
+        }
+      },
+      "due": {
+        "Mon": [],
+        "Tue": [],
+        "Wed": [],
+        "Thu": [],
+        "Fri": []
+      },
+      "keyDue": {
+        "text": "Add due items",
+        "date": ""
+      },
+      "nextWeek": [
+        "Add due items"
+      ]
+    },
+    "wind": {
+      "plans": {
+        "Mon": {
+          "fundamentals": [
+            "Warm-up: add",
+            "FSP: add page",
+            "101: add number",
+            "Theory: add topic"
+          ],
+          "rehearsal": [
+            "Fall Concert music: add pieces"
+          ]
+        },
+        "Tue": {
+          "fundamentals": [
+            "Warm-up: add",
+            "FSP: add page",
+            "101: add number",
+            "Theory: add topic"
+          ],
+          "rehearsal": [
+            "Fall Concert music: add pieces"
+          ]
+        },
+        "Wed": {
+          "fundamentals": [
+            "Warm-up: add",
+            "FSP: add page",
+            "101: add number",
+            "Theory: add topic"
+          ],
+          "rehearsal": [
+            "Fall Concert music: add pieces"
+          ]
+        },
+        "Thu": {
+          "fundamentals": [
+            "Warm-up: add",
+            "FSP: add page",
+            "101: add number",
+            "Theory: add topic"
+          ],
+          "rehearsal": [
+            "Fall Concert music: add pieces"
+          ]
+        },
+        "Fri": {
+          "fundamentals": [
+            "Warm-up: add",
+            "FSP: add page",
+            "101: add number",
+            "Theory: add topic"
+          ],
+          "rehearsal": [
+            "Fall Concert music: add pieces"
+          ]
+        }
+      },
+      "due": {
+        "Mon": [],
+        "Tue": [],
+        "Wed": [],
+        "Thu": [],
+        "Fri": []
+      },
+      "keyDue": {
+        "text": "Add due items",
+        "date": ""
+      },
+      "nextWeek": [
+        "Add due items"
+      ]
+    }
+  },
+  "bigDates": [
+    {
+      "date": "2026-10-22",
+      "time": "7:00 PM",
+      "label": "Fall Concert"
+    }
+  ]
+}
