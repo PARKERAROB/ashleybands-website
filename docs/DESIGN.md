@@ -4,6 +4,20 @@ How Ashley Bands pages look and read. The homepage (`app/page.jsx`) is the refer
 neutrals, Ashley garnet, restrained gold and strong serif headings. Issue #132 set up the pieces
 below so new pages start from the same parts.
 
+## Decisions
+
+Rob reviewed the guide against screenshots of the live pages on 2026-09-28 (#153):
+
+- **Colors:** paper neutrals, Ashley garnet and restrained gold stay the band's colors.
+- **Page titles:** every page title is garnet DM Serif Display. No black or sans page titles.
+- **Section headings:** large section headings (h2) use DM Serif Display. Small headings (h3 and below,
+  card and event titles) use bold Inter.
+- **Band name:** Cinzel is only for the band's name, "The Bands of Ashley High School" or "Bands of AHS",
+  in the top bar, the footer and any title that is the name itself. Never use it for other headings.
+- **Parts:** the callout panel, level card and day list below replace the hand-built versions on pages.
+
+Pages that do not follow these yet are converted in batches under #153.
+
 ## Tokens
 
 All tokens live in `app/tokens.css`. `app/layout.jsx` imports it before `app/styles.css`, so every
@@ -12,8 +26,8 @@ page and CSS module can use them. Use a token, not a hex value.
 | Group | Tokens | Use |
 | --- | --- | --- |
 | Palette | `--ink`, `--paper`, `--paper-strong`, `--garnet`, `--garnet-dark`, `--gold`, `--gold-text`, `--line`, `--muted`, `--blue`, `--green` | The raw brand colors. |
-| Semantic | `--surface`, `--surface-raised`, `--surface-sunken`, `--border`, `--border-strong`, `--text`, `--text-muted`, `--text-on-accent`, `--accent`, `--accent-strong`, `--accent-soft`, `--info`, `--danger`, `--success`, `--warning` (each status also has a `-soft` fill), `--focus` | Prefer these in new work. |
-| Type | `--font-display` (DM Serif Display), `--font-body` (Inter), `--font-wordmark` (Cinzel, wordmark only) | Headings use display. Everything else uses body. |
+| Semantic | `--surface`, `--surface-raised`, `--surface-sunken`, `--border`, `--border-strong`, `--text`, `--text-muted`, `--text-on-accent`, `--text-on-accent-muted`, `--accent`, `--accent-strong`, `--accent-soft`, `--info`, `--danger`, `--success`, `--warning` (each status also has a `-soft` fill), `--focus` | Prefer these in new work. |
+| Type | `--font-display` (DM Serif Display), `--font-body` (Inter), `--font-wordmark` (Cinzel, band name only) | Page titles and h2s use display. Small headings and everything else use body. |
 | Type scale | `--step--1` (13-14px), `--step-0` (16-18px), `--step-1` (19-23px), `--step-2` (22-30px), `--step-3` (30-44px), `--step-4` (40-72px) | Fluid sizes with `clamp()`. |
 | Space | `--space-1` 4px, `--space-2` 8px, `--space-3` 12px, `--space-4` 16px, `--space-5` 24px, `--space-6` 32px, `--space-7` 48px, `--space-8` 64px | Margins, padding, gaps. |
 | Shape | `--radius-sm` 6px, `--radius-md` 10px, `--radius-pill`, `--tap-target` 44px | Corners and touch size. |
@@ -22,6 +36,8 @@ page and CSS module can use them. Use a token, not a hex value.
 Color rules:
 
 - Gold text on a light background uses `--gold-text`. `--gold` is for rules, borders and dark garnet panels.
+- On `--garnet-dark`, use `--gold` for labels, `--paper-strong` for headings and `--text-on-accent-muted` for body text.
+- Do not add other fonts. Georgia and system fonts are fallbacks only.
 - Garnet on paper and ink on paper both pass contrast easily. Status colors pass 4.5:1 on paper and on their own `-soft` fill.
 - Keyboard focus is global (`:focus-visible` in `app/styles.css`, colored by `--focus`). Do not remove outlines.
 
@@ -132,6 +148,61 @@ Any time a page asks for money: what it is for, the amount, who receives it, and
 />
 ```
 
+### CalloutPanel
+
+The dark garnet panel for the one message a section should end on: a gold eyebrow, a serif heading in
+light text, body text and optional actions. `split` puts the heading left and the body right on wider
+screens. Inside the panel a primary button turns gold and a secondary button turns light, so use the
+normal `Button` and `ButtonLink`.
+
+```jsx
+<CalloutPanel
+  eyebrow="Carnegie Hall 2027"
+  title="Help the band get to New York."
+  actions={<ButtonLink href="/support-carnegie">Give to the trip</ButtonLink>}
+>
+  <p>Every gift lowers the cost for every student who goes.</p>
+</CalloutPanel>
+```
+
+Use at most one per screen area. It is not a Notice: a deadline or error still uses `Notice`.
+
+### LevelCard and LevelGrid
+
+One giving or price level: the name in bold body type, the amount in the display serif, what it
+includes, and one action. `featured` outlines one card in gold, with an optional `tag`. Put the cards in
+a `LevelGrid` so they line up and stack on a phone.
+
+```jsx
+<LevelGrid>
+  <LevelCard name="Partner" amount="$500" action={{ href: "/sponsors/give?amount=500", label: "Give $500" }}>
+    <ul><li>Bold name listing in the concert program</li></ul>
+  </LevelCard>
+  <LevelCard name="Premier" amount="$1,500" featured tag="Best value" action={{ href: "/sponsors/give?amount=1500", label: "Give $1,500" }}>
+    <ul><li>Logo on the equipment trailer</li></ul>
+  </LevelCard>
+</LevelGrid>
+```
+
+Take amounts and benefits from their source. Add a `MoneyLine` where the page takes the money.
+
+### DayList
+
+Events grouped by day: a serif day heading with an optional date beside it, then one row per event
+with time, place, an optional note and a Details link. `compact` lays the days side by side on wider
+screens, for the home page strip. Pass `empty` for the no-events message.
+
+```jsx
+<DayList
+  days={[{ key: "2026-10-01", label: "Thursday, October 1", events: [
+    { key: "rehearsal", title: "[Event name]", time: "[Time]", place: "[Place]", href: "/calendar#[anchor]" }
+  ] }]}
+  empty={<p>Nothing on the band calendar this week. <a href="/calendar">See the full calendar</a>.</p>}
+/>
+```
+
+Build `days` from the calendar source (`lib/thisWeek.mjs`), never from dates typed into a page.
+
 ## Icons
 
 Use `lucide-react` for every icon. Do not hand-draw SVG icons or use emoji as icons.
@@ -159,6 +230,9 @@ receives money and when the deadline is.
 **Workspace page** (portal, staff tools). A short `PageHeader` with no eyebrow. Then `StatusChip`s and a
 `DataTable` or list for the work. Keep the current state and the next action at the top. Show an
 explicit unknown state instead of a blank.
+
+**Headings on any page.** One h1 from `PageHeader`. Large section headings (h2) in the display serif,
+garnet or ink. Small headings (h3 and below) in bold Inter. Cinzel only where the band's name is the text.
 
 **Room display** (the unlisted band room board, #154, `app/room/[slug]`). One screen, no scrolling at
 1920x1080 or 3840x2160. Sizes scale from one viewport unit (`--u` in its CSS module) instead of the

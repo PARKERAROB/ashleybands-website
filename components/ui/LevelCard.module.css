@@ -1,0 +1,79 @@
+/* Giving or price level card (#153). */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+  gap: var(--space-4);
+  align-items: stretch;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+}
+
+.featured {
+  border: 2px solid var(--gold);
+  box-shadow: var(--shadow-sm);
+}
+
+.tag {
+  align-self: flex-start;
+  margin: 0 0 var(--space-3);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--warning-soft);
+  color: var(--gold-text);
+  font-size: var(--step--1);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.card .name {
+  margin: 0;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: var(--step-1);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.amount {
+  margin: var(--space-1) 0 var(--space-4);
+  color: var(--accent-strong);
+  font-family: var(--font-display);
+  font-size: var(--step-3);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.05;
+}
+
+.body {
+  flex: 1;
+  color: var(--text);
+  font-size: var(--step--1);
+  line-height: 1.5;
+}
+
+.body ul {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding-left: 1.1em;
+}
+
+.body > :first-child {
+  margin-top: 0;
+}
+
+.body > :last-child {
+  margin-bottom: 0;
+}
+
+.action {
+  margin: var(--space-5) 0 0;
+}

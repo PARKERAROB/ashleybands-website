@@ -30,6 +30,8 @@
   --text: var(--ink);
   --text-muted: var(--muted);
   --text-on-accent: var(--paper-strong);
+  /* Secondary text on --garnet-dark panels. 11:1 on --garnet-dark. */
+  --text-on-accent-muted: #eadfd2;
   --accent: var(--garnet);
   --accent-strong: var(--garnet-dark);
   --accent-soft: #f4e4e4;
