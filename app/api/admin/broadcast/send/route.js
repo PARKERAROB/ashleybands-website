@@ -74,7 +74,7 @@ export async function POST(req) {
       return privateJson({ error: "No recipients matched this audience." }, 400);
     }
 
-    const result = await dispatchBroadcast(created.broadcastId);
+    const result = await dispatchBroadcast(created.broadcastId, { replyTo: created.replyTo });
     return privateJson({
       ok: true,
       broadcastId: created.broadcastId,

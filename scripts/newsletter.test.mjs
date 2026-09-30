@@ -89,3 +89,19 @@ test("the first issue is a reviewed draft, never an automatic send", async () =>
   assert.doesNotMatch(server, /cron|schedule/i);
   assert.match(server, /Publish the newsletter archive before sending email/);
 });
+
+test("portal and broadcast mail replies go to a monitored inbox", async () => {
+  const { resolveReplyTo, DEFAULT_PORTAL_REPLY_TO } = await import("../lib/emailReplyTo.mjs");
+  assert.equal(DEFAULT_PORTAL_REPLY_TO, "robert.parker@nhcs.net");
+  assert.equal(resolveReplyTo(null, {}), DEFAULT_PORTAL_REPLY_TO);
+  assert.equal(resolveReplyTo("", { PORTAL_EMAIL_REPLY_TO: " office@example.org " }), "office@example.org");
+  assert.equal(resolveReplyTo("override@example.org", { PORTAL_EMAIL_REPLY_TO: "office@example.org" }), "override@example.org");
+  const email = await readFile(new URL("../lib/portalEmail.js", import.meta.url), "utf8");
+  assert.match(email, /replyTo: resolveReplyTo\(replyTo\)/, "every portal send carries a reply-to");
+  const broadcast = await readFile(new URL("../lib/broadcast.js", import.meta.url), "utf8");
+  assert.match(broadcast, /export async function dispatchBroadcast\(broadcastId, \{ replyTo = null \} = \{\}\)/);
+  assert.match(broadcast, /html: broadcast\.body_html,\s*replyTo\s*\}/);
+  assert.match(broadcast, /replyTo = null,\s*\}\) \{/, "createBroadcast accepts a reply-to override");
+  const route = await readFile(new URL("../app/api/admin/broadcast/send/route.js", import.meta.url), "utf8");
+  assert.match(route, /dispatchBroadcast\(created\.broadcastId, \{ replyTo: created\.replyTo \}\)/);
+});
