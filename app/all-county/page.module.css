@@ -1,0 +1,21 @@
+.page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4) var(--space-7);
+}
+
+.frame {
+  display: block;
+  width: 100%;
+  height: min(85vh, 1000px);
+  min-height: 640px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+}
+
+.fallback {
+  margin: var(--space-4) 0 0;
+  color: var(--text-muted);
+  font-size: var(--step--1);
+}
