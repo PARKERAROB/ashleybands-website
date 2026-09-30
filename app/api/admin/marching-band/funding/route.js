@@ -3,7 +3,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
 import { logAudit, staffActor } from "@/lib/auditLog";
 import { chargeKindForCategory, loadStudentLedgers } from "@/lib/billing";
-import { MARCHING_STUDENT_CREDIT_CAMPAIGN } from "@/lib/sponsorCampaigns.mjs";
+import { MARCHING_STUDENT_CREDIT_CAMPAIGN, countedLedgerSponsorships } from "@/lib/sponsorCampaigns.mjs";
 
 export const runtime = "nodejs";
 
@@ -45,14 +45,14 @@ export async function GET(request) {
   const [{ charges, payments }, { data: giftRows, error: giftError }] = await Promise.all([
     loadStudentLedgers(studentIds),
     studentIds.length ? supabaseAdmin.from("sponsor_gifts")
-      .select("portal_student_id,amount_cents")
+      .select("id,portal_student_id,amount_cents")
       .in("portal_student_id", studentIds)
       .eq("campaign_code", MARCHING_STUDENT_CREDIT_CAMPAIGN)
       .eq("status", "confirmed") : Promise.resolve({ data: [], error: null }),
   ]);
   if (giftError) return NextResponse.json({ error: "Could not load campaign funding." }, { status: 500 });
   const giftsByStudent = (giftRows || []).reduce((result, gift) => {
-    result[gift.portal_student_id] = (result[gift.portal_student_id] || 0) + (Number(gift.amount_cents) || 0);
+    (result[gift.portal_student_id] ||= []).push(gift);
     return result;
   }, {});
 
@@ -65,8 +65,11 @@ export async function GET(request) {
     );
     const goalCents = sum(fundingCharges, "amount_cents");
     const familyContributionCents = sum(fundingPayments.filter((payment) => !payment.is_sponsorship), "amount_cents");
-    const legacySponsorshipCreditCents = sum(fundingPayments.filter((payment) => payment.is_sponsorship), "amount_cents");
-    const sponsorshipCents = giftsByStudent[student.id] || 0;
+    const ledgerSponsorships = fundingPayments.filter((payment) => payment.is_sponsorship);
+    const legacySponsorshipCreditCents = sum(ledgerSponsorships, "amount_cents");
+    const studentGifts = giftsByStudent[student.id] || [];
+    const countedLedgerCents = sum(countedLedgerSponsorships(ledgerSponsorships, studentGifts.map((gift) => gift.id)), "amount_cents");
+    const sponsorshipCents = sum(studentGifts, "amount_cents") + countedLedgerCents;
     const raisedCents = familyContributionCents + sponsorshipCents;
 
     return {

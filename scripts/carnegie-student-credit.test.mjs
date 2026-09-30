@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import * as campaigns from "../lib/sponsorCampaigns.mjs";
 import * as policy from "../lib/sponsorGiftPolicy.mjs";
 
@@ -105,6 +105,33 @@ test("the forward migration scopes the views and adds a staff-only Carnegie cred
   for (const column of ["goal_cents", "family_contribution_cents", "confirmed_gift_cents", "legacy_sponsorship_credit_cents", "raised_cents", "remaining_cents"]) {
     assert.match(view("student_campaign_summary"), new RegExp(`as ${column}`));
   }
+});
+
+// #159: completed marching ledger sponsorships count toward the marching goal, once.
+test("ledger sponsorship credit counts unless it projects a gift already counted", () => {
+  const GIFT = "ca3dcab5-0000-4c6c-89e1-302f6b3102b7";
+  const ledger = [
+    { id: "p1", amount_cents: 50000, notes: "Funding attribution supplied on 2026-08-30." },
+    { id: "p2", amount_cents: 50000, notes: "Need check number" },
+    { id: "p3", amount_cents: 10000, notes: `Funding-ledger projection of sponsor_gifts.id ${GIFT} so the view includes it.` }
+  ];
+  assert.equal(campaigns.projectedSponsorGiftId(ledger[2]), GIFT);
+  assert.equal(campaigns.projectedSponsorGiftId(ledger[0]), null);
+  assert.deepEqual(campaigns.countedLedgerSponsorships(ledger, [GIFT.toUpperCase()]).map((p) => p.id), ["p1", "p2"], "projection of a counted gift is not double-counted");
+  assert.deepEqual(campaigns.countedLedgerSponsorships(ledger, []).map((p) => p.id), ["p1", "p2", "p3"], "projection counts when its gift is not counted");
+});
+
+test("every marching funding surface adds counted ledger sponsorships to raised (#159)", () => {
+  const route = read("app/api/admin/marching-band/funding/route.js");
+  assert.match(route, /const sponsorshipCents = sum\(studentGifts, "amount_cents"\) \+ countedLedgerCents/);
+  const current = read("lib/currentStudents.js");
+  assert.match(current, /campaignRaisedCents = sum\(campaignContributions\) \+ confirmedSponsorshipCents \+ countedLedgerSponsorshipCents/);
+  assert.doesNotMatch(read("app/portal/review/PortalReviewClient.jsx"), /reconciled separately/);
+  const family = read("app/api/billing/me/route.js");
+  assert.match(family, /const raisedCents = \(Number\(campaign\.raised_cents\) \|\| 0\) \+ countedLedgerSponsorshipCents/);
+  assert.match(family, /remainingCents: Math\.max\(goalCents - raisedCents, 0\)/);
+  assert.match(family, /p\.status === "completed" && p\.is_sponsorship/, "only completed ledger sponsorships");
+  assert.equal(existsSync(new URL("../supabase/migrations/202609300001_count_ledger_sponsorship_credit.sql", import.meta.url)), false, "the view still excludes ledger credit, so the app adds it exactly once");
 });
 
 function memoryDb({ students = [] } = {}) {

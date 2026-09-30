@@ -95,7 +95,7 @@ function LiveWorkspace({ session, signOut, initialView, initialStudentId, initia
     result.goal += student.campaign.goalCents;
     result.raised += student.campaign.raisedCents;
     result.gifts += student.campaign.confirmedGiftCents;
-    result.legacy += student.campaign.legacySponsorshipCreditCents;
+    result.legacy += student.campaign.countedLedgerSponsorshipCents || 0;
     return result;
   }, { feeCharged: 0, feePaid: 0, feeBalance: 0, goal: 0, raised: 0, gifts: 0, legacy: 0 }), [rows]);
 
@@ -144,7 +144,7 @@ function LiveWorkspace({ session, signOut, initialView, initialStudentId, initia
         </>}
       </section>
 
-      {totals.legacy && view === "campaign" ? <p className={styles.reconcileNotice}>{money(totals.legacy)} in older sponsorship credits is shown separately and is not double-counted until reconciled.</p> : null}
+      {totals.legacy && view === "campaign" ? <p className={styles.reconcileNotice}>Raised includes {money(totals.legacy)} in older ledger sponsorship credits.</p> : null}
       {error ? <p className={styles.error}>{error}</p> : null}
 
       {selectedStudent ? <section className={styles.scopeBar}>
@@ -196,7 +196,7 @@ function StudentFinancialDetail({ student }) {
     <header><div><span>Student financial picture</span><h2>{student.displayName}</h2></div><Link href={`/admin/students?student=${encodeURIComponent(student.id)}`}>Full student →</Link></header>
     <div className={styles.detailGrid}>
       <article><h3>Program fees</h3><p><span>Charged</span><strong>{money(student.fee.chargedCents)}</strong></p><p><span>Paid</span><strong>{money(student.fee.paidCents)}</strong></p><p><span>Fee balance</span><strong>{money(student.fee.balanceCents)}</strong></p>{student.fee.charges.map((row) => <small key={row.id}>{row.label || row.category} · {money(row.amount_cents)}</small>)}<Link href={`/admin/billing?studentId=${encodeURIComponent(student.id)}`}>Manage fee ledger →</Link></article>
-      <article><h3>Campaign funding</h3><p><span>Goal</span><strong>{student.campaign.goalCents ? money(student.campaign.goalCents) : "Not set"}</strong></p><p><span>Family contributions</span><strong>{money(student.campaign.familyContributionCents)}</strong></p><p><span>Confirmed gifts</span><strong>{money(student.campaign.confirmedGiftCents)}</strong></p><p><span>Progress</span><strong>{money(student.campaign.raisedCents)}</strong></p>{student.campaign.legacySponsorshipCreditCents ? <small>{money(student.campaign.legacySponsorshipCreditCents)} older sponsor credit awaiting reconciliation</small> : null}</article>
+      <article><h3>Campaign funding</h3><p><span>Goal</span><strong>{student.campaign.goalCents ? money(student.campaign.goalCents) : "Not set"}</strong></p><p><span>Family contributions</span><strong>{money(student.campaign.familyContributionCents)}</strong></p><p><span>Confirmed gifts</span><strong>{money(student.campaign.confirmedGiftCents)}</strong></p><p><span>Progress</span><strong>{money(student.campaign.raisedCents)}</strong></p>{student.campaign.countedLedgerSponsorshipCents ? <small>Includes {money(student.campaign.countedLedgerSponsorshipCents)} older ledger sponsorship credit</small> : null}</article>
     </div>
   </section>;
 }

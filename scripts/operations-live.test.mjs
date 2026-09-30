@@ -30,9 +30,10 @@ test("operations migration establishes normalized assets, forms, and separated f
   assert.match(migration, /check \(role in \('director','sponsor_lead','program_staff'\)\)/);
 });
 
-test("financial operations default to active students and do not double-count legacy gifts", () => {
+test("financial operations default to active students and count ledger sponsorships once (#159)", () => {
   assert.match(financial, /\.eq\("status", "active"\)/);
-  assert.match(financial, /const campaignRaisedCents = campaignContributionCents \+ confirmedGiftCents/);
+  assert.match(financial, /const campaignRaisedCents = campaignContributionCents \+ confirmedGiftCents \+ countedLedgerSponsorshipCents/);
+  assert.match(financial, /countedLedgerSponsorships\(legacySponsorshipCredits, confirmedGifts\.map/);
   assert.doesNotMatch(financial, /campaignRaisedCents = .*legacySponsorshipCreditCents/);
   assert.match(financial, /feeCharges = .*&& !isCampaign/);
   assert.match(familyBilling, /category: c\.category/);

@@ -9,6 +9,7 @@ import {
   forgoRefundLive
 } from "@/lib/billing";
 import { isPaypalConfigured } from "@/lib/paypal";
+import { MARCHING_STUDENT_CREDIT_CAMPAIGN, countedLedgerSponsorships } from "@/lib/sponsorCampaigns.mjs";
 
 export const runtime = "nodejs";
 
@@ -28,13 +29,18 @@ export async function GET(request) {
     .select("id, display_name, preferred_first")
     .in("id", studentIds);
 
-  const [{ charges, payments, balances }, { data: campaignRows, error: campaignError }] = await Promise.all([
+  const [{ charges, payments, balances }, { data: campaignRows, error: campaignError }, { data: giftRows, error: giftError }] = await Promise.all([
     loadStudentLedgers(studentIds),
     supabaseAdmin.from("student_campaign_summary")
       .select("student_id,goal_cents,family_contribution_cents,confirmed_gift_cents,legacy_sponsorship_credit_cents,raised_cents,remaining_cents")
       .in("student_id", studentIds),
+    supabaseAdmin.from("sponsor_gifts")
+      .select("id,portal_student_id")
+      .in("portal_student_id", studentIds)
+      .eq("campaign_code", MARCHING_STUDENT_CREDIT_CAMPAIGN)
+      .eq("status", "confirmed"),
   ]);
-  if (campaignError) return NextResponse.json({ error: "Could not load current campaign records." }, { status: 500, headers: { "Cache-Control": "private, no-store" } });
+  if (campaignError || giftError) return NextResponse.json({ error: "Could not load current campaign records." }, { status: 500, headers: { "Cache-Control": "private, no-store" } });
   const campaignByStudent = new Map((campaignRows || []).map((row) => [row.student_id, row]));
 
   // Spring-Trip forgo offer — DARK by default. Only attach when the flag is live,
@@ -45,6 +51,15 @@ export async function GET(request) {
     const bal = balances[s.id] || { charged_cents: 0, paid_cents: 0, balance_cents: 0 };
     const credit = refundCredits[s.id];
     const campaign = campaignByStudent.get(s.id) || {};
+    // The view's raised excludes ledger sponsorship credit; add the counted part here (#159),
+    // skipping any ledger row that projects a gift the view already counted.
+    const ledgerSponsorships = (payments[s.id] || []).filter((p) => p.status === "completed" && p.is_sponsorship
+      && (p.kind === "funding_goal" || (!p.kind && chargeKindForCategory(p.category) === "funding_goal")));
+    const giftIds = (giftRows || []).filter((gift) => gift.portal_student_id === s.id).map((gift) => gift.id);
+    const countedLedgerSponsorshipCents = countedLedgerSponsorships(ledgerSponsorships, giftIds)
+      .reduce((total, p) => total + (Number(p.amount_cents) || 0), 0);
+    const goalCents = Number(campaign.goal_cents) || 0;
+    const raisedCents = (Number(campaign.raised_cents) || 0) + countedLedgerSponsorshipCents;
     return {
       id: s.id,
       name: s.display_name,
@@ -60,12 +75,13 @@ export async function GET(request) {
       paidCents: Number(bal.paid_cents) || 0,
       balanceCents: Number(bal.balance_cents) || 0,
       campaign: {
-        goalCents: Number(campaign.goal_cents) || 0,
+        goalCents,
         familyContributionCents: Number(campaign.family_contribution_cents) || 0,
         confirmedGiftCents: Number(campaign.confirmed_gift_cents) || 0,
         legacySponsorshipCreditCents: Number(campaign.legacy_sponsorship_credit_cents) || 0,
-        raisedCents: Number(campaign.raised_cents) || 0,
-        remainingCents: Number(campaign.remaining_cents) || 0,
+        countedLedgerSponsorshipCents,
+        raisedCents,
+        remainingCents: Math.max(goalCents - raisedCents, 0),
       },
       charges: (charges[s.id] || []).map((c) => ({
         id: c.id,

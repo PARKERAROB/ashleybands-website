@@ -407,9 +407,8 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
     ...calculatedGoal,
     charged: Number(student.campaign.goalCents) || 0,
     paid: Number(student.campaign.raisedCents) || 0,
-    sponsorship: Number(student.campaign.confirmedGiftCents) || 0,
+    sponsorship: (Number(student.campaign.confirmedGiftCents) || 0) + (Number(student.campaign.countedLedgerSponsorshipCents) || 0),
     remaining: Number(student.campaign.remainingCents) || 0,
-    legacy: Number(student.campaign.legacySponsorshipCreditCents) || 0,
   } : calculatedGoal;
   const fee = kindTotals("fee");
   const hasGoal = goal.charges.length > 0 || goal.charged > 0 || goal.paid > 0;
@@ -478,7 +477,6 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
           <span className="portal-field-note">
             This is the 2026 Marching Band goal, not a bill. Sponsorships and fundraising count toward it.
           </span>
-          {goal.legacy > 0 ? <span className="portal-field-note">An older {formatUsd(goal.legacy)} sponsorship credit is being reconciled separately and is not double-counted here.</span> : null}
         </div>
       ) : null}
 

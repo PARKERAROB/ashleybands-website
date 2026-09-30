@@ -445,7 +445,7 @@ function StudentDetail({ student, onClose, onCopyContacts, detailRef }) {
         <DetailLine label="Campaign goal" value={money(student.finances.campaignGoalCents)} />
         <DetailLine label="Campaign raised" value={money(student.finances.campaignRaisedCents)} />
         <DetailLine label="Confirmed gifts" value={money(student.finances.confirmedSponsorshipCents)} />
-        {student.finances.legacySponsorshipCreditCents ? <DetailLine label="Older gift credits" value={`${money(student.finances.legacySponsorshipCreditCents)} · awaiting reconciliation`} /> : null}
+        {student.finances.countedLedgerSponsorshipCents ? <DetailLine label="Older gift credits" value={`${money(student.finances.countedLedgerSponsorshipCents)} · counted in raised`} /> : null}
       </DetailSection> : null}
 
       <DetailSection title="Status history">
