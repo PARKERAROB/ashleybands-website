@@ -9,6 +9,9 @@ if [[ "$(node --version 2>/dev/null || true)" != "v$required" ]]; then
     unset npm_config_prefix
     source "${NVM_DIR:-$HOME/.nvm}/nvm.sh"
     nvm use --silent "$required" >/dev/null
+    # nvm swaps its PATH entry in place; an earlier node (e.g. ~/.local/bin) can still win.
+    PATH="$(dirname "$(nvm which "$required")"):$PATH"
+    export PATH
   else
     echo "Runtime setup needed: install Node $required (see .nvmrc), then retry." >&2
     exit 1
