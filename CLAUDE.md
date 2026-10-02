@@ -25,6 +25,7 @@ Public Next.js/Vercel/Supabase application for private ~/Atlas/BandsofAHS record
 - Every admin route reading or writing person data calls logAudit from lib/auditLog.js with actor and action. Logging failure must not block the request.
 - Standing database access is read-only; writes require task authorization. Use established ignored .env.local credentials (NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SECRET_KEY) with PostgREST; never expose them.
 - students is the CSV roster projection; portal_students is portal identity. portal_student_measurements.student_id references portal_students.id, not students.id. Verify joins before interpreting an empty result. Measurement source records provenance; portal_self_edit means family entry. Report a minor's submission presence, time, and provenance, not body measurements. Requery current counts.
+- Recording or confirming any Carnegie business gift also adds that business to lib/carnegieSupporters.mjs (the homepage thank-you list below the tracker) and ships it once the gift is confirmed and received. — Rob, 2026-10-01, #161
 - Family portal messages, Resend broadcasts and send queues: Atlas stages, shows Rob the exact message and audience in chat, and sends that exact message after Rob approves it ("good", "send it"). One approval covers one message; no standing or blanket approval; any edit needs a fresh approval. — Rob, 2026-09-30, supersedes "draft/stage only; Rob sends"
 
 ## Release
