@@ -106,6 +106,7 @@ const PRIVATE_OPERATIONAL_TABLES = [
   "carnegie_expected_gift_events",
   "backup_runs",
   "restore_verifications",
+  "media_consent_responses",
 ];
 
 const PRIVATE_OPERATIONAL_VIEWS = [

@@ -100,7 +100,7 @@ test("portal and broadcast mail replies go to a monitored inbox", async () => {
   assert.match(email, /replyTo: resolveReplyTo\(replyTo\)/, "every portal send carries a reply-to");
   const broadcast = await readFile(new URL("../lib/broadcast.js", import.meta.url), "utf8");
   assert.match(broadcast, /export async function dispatchBroadcast\(broadcastId, \{ replyTo = null \} = \{\}\)/);
-  assert.match(broadcast, /html: broadcast\.body_html,\s*replyTo\s*\}/);
+  assert.match(broadcast, /text: personal \? personal\.text : undefined,\s*replyTo\s*\}/);
   assert.match(broadcast, /replyTo = null,\s*\}\) \{/, "createBroadcast accepts a reply-to override");
   const route = await readFile(new URL("../app/api/admin/broadcast/send/route.js", import.meta.url), "utf8");
   assert.match(route, /dispatchBroadcast\(created\.broadcastId, \{ replyTo: created\.replyTo \}\)/);

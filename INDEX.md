@@ -80,3 +80,10 @@ listed projection contract explicitly brings in a safe subset.
 - Printed-part catalog and validation: `lib/percussionPreferences.mjs`; identity adapter: `lib/percussionPreferencesServer.js`.
 - Private source-tagged storage: `supabase/migrations/202609180001_percussion_preferences.sql`. No licensed music or student data committed.
 - Focused checks: `npm run test:percussion-preferences`. Issue #85.
+
+## Media interview permission (#162)
+
+- Answers: `supabase/migrations/202610020001_media_consent.sql` (`media_consent_responses`: student_id -> portal_students.id, answer yes/no, source, created_at; append-only, latest row per student wins; service role only).
+- Signed links, email block and readout helpers: `lib/mediaConsent.mjs`; per-recipient dispatch in `lib/broadcast.js` when a body contains `{{media_consent}}` on its own line.
+- Family page and write path: `app/media-consent/`, `app/api/media-consent/route.js`.
+- Dry-run counts, preview copies and results: `node --env-file=.env.local scripts/media-consent.mjs dry-run|preview|results`. Tests: `scripts/media-consent.test.mjs` (in `npm run test:audience`).
