@@ -57,7 +57,7 @@ export async function POST(request) {
     return NextResponse.json({ error: "Payment was not completed." }, { status: 402 });
   }
   if (
-    payment.kind !== "fee"
+    !["fee", "funding_goal"].includes(payment.kind)
     || detail.invoiceId !== payment.invoice_id
     || detail.customId !== payment.student_id
     || amountToCents(detail.amountValue) !== Number(payment.amount_cents)
@@ -85,7 +85,8 @@ export async function POST(request) {
       .select("display_name")
       .eq("id", payment.student_id)
       .maybeSingle();
-    const { data: balance } = await supabaseAdmin
+    const contribution = payment.kind === "funding_goal";
+    const { data: balance } = contribution ? { data: null } : await supabaseAdmin
       .from("student_program_fee_summary")
       .select("balance_cents")
       .eq("student_id", payment.student_id)
@@ -98,7 +99,8 @@ export async function POST(request) {
         amount: `$${centsToAmount(payment.amount_cents)}`,
         method: "PayPal / card",
         invoiceId: payment.invoice_id,
-        balance: balance ? `$${centsToAmount(balance.balance_cents)}` : ""
+        balance: balance ? `$${centsToAmount(balance.balance_cents)}` : "",
+        ...(contribution ? { purpose: "Marching Band season funding goal", contribution: true } : {})
       });
     }
   } catch {

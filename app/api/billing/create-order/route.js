@@ -46,34 +46,17 @@ export async function POST(request) {
     .eq("id", studentId)
     .maybeSingle();
 
-  const requestedCategory = String(body.category || "").trim();
-  let chargeQuery = supabaseAdmin.from("fee_charges")
-    .select("category,amount_cents")
-    .eq("student_id", studentId)
-    .eq("status", "active")
-    .eq("kind", "fee");
-  if (requestedCategory) chargeQuery = chargeQuery.eq("category", requestedCategory);
-  const { data: feeCharges, error: chargeError } = await chargeQuery;
-  const feeCategories = [...new Set((feeCharges || []).map((charge) => charge.category))];
-  if (chargeError || feeCategories.length !== 1) {
-    return NextResponse.json({ error: feeCategories.length > 1 ? "Choose which fee this payment applies to." : "No active program fee was found for this payment." }, { status: 409 });
-  }
-  const paymentCategory = feeCategories[0];
-  const { data: completedPayments, error: paymentError } = await supabaseAdmin
-    .from("fee_payments")
-    .select("amount_cents")
-    .eq("student_id", studentId)
-    .eq("category", paymentCategory)
-    .eq("kind", "fee")
-    .eq("status", "completed");
-  if (paymentError) {
-    return NextResponse.json({ error: "Could not verify the current fee balance." }, { status: 503 });
-  }
-  const chargedCents = (feeCharges || []).reduce((total, charge) => total + (Number(charge.amount_cents) || 0), 0);
-  const paidCents = (completedPayments || []).reduce((total, payment) => total + (Number(payment.amount_cents) || 0), 0);
-  const remainingCents = Math.max(chargedCents - paidCents, 0);
+  const target = body.kind === "funding_goal"
+    ? await fundingGoalTarget(studentId)
+    : await feeTarget(studentId, String(body.category || "").trim());
+  if (target.error) return NextResponse.json({ error: target.error }, { status: target.status });
+  const { paymentKind, paymentCategory, remainingCents } = target;
   if (!remainingCents || amountCents > remainingCents) {
-    return NextResponse.json({ error: "The payment amount is greater than the current fee balance." }, { status: 409 });
+    return NextResponse.json({
+      error: paymentKind === "funding_goal"
+        ? "The contribution is more than what remains on the goal."
+        : "The payment amount is greater than the current fee balance."
+    }, { status: 409 });
   }
 
   const invoiceId = generateInvoiceId();
@@ -87,7 +70,7 @@ export async function POST(request) {
       method: "paypal",
       status: "pending",
       category: paymentCategory,
-      kind: "fee",
+      kind: paymentKind,
       invoice_id: invoiceId,
       recorded_by: "family_online"
     })
@@ -103,7 +86,7 @@ export async function POST(request) {
       amountCents,
       studentId,
       invoiceId,
-      description: `Ashley Bands program fee — ${student?.display_name || "student"}`,
+      description: `${paymentKind === "funding_goal" ? "Ashley Bands marching band contribution" : "Ashley Bands program fee"} — ${student?.display_name || "student"}`,
       requestId: invoiceId,
     });
 
@@ -120,4 +103,52 @@ export async function POST(request) {
       .eq("id", payment.id);
     return NextResponse.json({ error: "Could not start PayPal payment." }, { status: 502 });
   }
+}
+
+async function feeTarget(studentId, requestedCategory) {
+  let chargeQuery = supabaseAdmin.from("fee_charges")
+    .select("category,amount_cents")
+    .eq("student_id", studentId)
+    .eq("status", "active")
+    .eq("kind", "fee");
+  if (requestedCategory) chargeQuery = chargeQuery.eq("category", requestedCategory);
+  const { data: feeCharges, error: chargeError } = await chargeQuery;
+  const feeCategories = [...new Set((feeCharges || []).map((charge) => charge.category))];
+  if (chargeError || feeCategories.length !== 1) {
+    return { status: 409, error: feeCategories.length > 1 ? "Choose which fee this payment applies to." : "No active program fee was found for this payment." };
+  }
+  const paymentCategory = feeCategories[0];
+  const { data: completedPayments, error: paymentError } = await supabaseAdmin
+    .from("fee_payments")
+    .select("amount_cents")
+    .eq("student_id", studentId)
+    .eq("category", paymentCategory)
+    .eq("kind", "fee")
+    .eq("status", "completed");
+  if (paymentError) return { status: 503, error: "Could not verify the current fee balance." };
+  const chargedCents = (feeCharges || []).reduce((total, charge) => total + (Number(charge.amount_cents) || 0), 0);
+  const paidCents = (completedPayments || []).reduce((total, payment) => total + (Number(payment.amount_cents) || 0), 0);
+  return { paymentKind: "fee", paymentCategory, remainingCents: Math.max(chargedCents - paidCents, 0) };
+}
+
+// Marching band goal contributions (#167). The goal is not a bill; the cap only stops a family
+// from contributing past what remains. Same charge rule as student_campaign_summary.
+async function fundingGoalTarget(studentId) {
+  const [{ data: goalCharges, error: chargeError }, { data: summary, error: summaryError }] = await Promise.all([
+    supabaseAdmin.from("fee_charges")
+      .select("category")
+      .eq("student_id", studentId)
+      .eq("status", "active")
+      .or("kind.eq.funding_goal,category.like.marching_band*"),
+    supabaseAdmin.from("student_campaign_summary")
+      .select("remaining_cents")
+      .eq("student_id", studentId)
+      .maybeSingle(),
+  ]);
+  const categories = [...new Set((goalCharges || []).map((charge) => charge.category))];
+  if (chargeError || summaryError) return { status: 503, error: "Could not verify the current goal." };
+  if (categories.length !== 1) return { status: 409, error: "No active marching band goal was found for this contribution." };
+  // ponytail: the view's remaining ignores ledger sponsorship credit, so it can exceed what the portal
+  // shows; extra is still a program contribution. Share the /api/billing/me math if that matters.
+  return { paymentKind: "funding_goal", paymentCategory: categories[0], remainingCents: Number(summary?.remaining_cents) || 0 };
 }

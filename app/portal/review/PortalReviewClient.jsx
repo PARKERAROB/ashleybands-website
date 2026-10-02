@@ -424,6 +424,15 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
     amountRef.current = amount;
   }, [amount]);
 
+  // Marching band goal contributions (#167): any amount up to what remains.
+  const canContributeOnline = goal.remaining > 0 && paymentsEnabled && Boolean(clientId);
+  const [showGive, setShowGive] = useState(false);
+  const [giveAmount, setGiveAmount] = useState((goal.remaining / 100).toFixed(2));
+  const giveAmountRef = useRef(giveAmount);
+  useEffect(() => {
+    giveAmountRef.current = giveAmount;
+  }, [giveAmount]);
+
   // Spring-Trip forgo offer (only present when the feature flag is live server-side).
   const refund = student.springTripRefund || null;
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -477,6 +486,44 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
           <span className="portal-field-note">
             This is the 2026 Marching Band goal, not a bill. Sponsorships and fundraising count toward it.
           </span>
+          {goal.remaining > 0 ? (
+            <>
+              {canContributeOnline ? (
+                showGive ? (
+                  <div className="portal-field-edit portal-pay-form">
+                    <label className="portal-field-label" htmlFor={`give-${student.id}`}>
+                      Amount to contribute (any amount up to {formatUsd(goal.remaining)})
+                    </label>
+                    <input
+                      id={`give-${student.id}`}
+                      type="number"
+                      min="1"
+                      step="0.01"
+                      value={giveAmount}
+                      onChange={(e) => setGiveAmount(e.target.value)}
+                    />
+                    <PayPalButton
+                      clientId={clientId}
+                      studentId={student.id}
+                      kind="funding_goal"
+                      amountRef={giveAmountRef}
+                      onPaid={() => {
+                        setShowGive(false);
+                        if (onPaid) onPaid();
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <button type="button" className="portal-primary-action" onClick={() => setShowGive(true)}>
+                    Contribute online
+                  </button>
+                )
+              ) : null}
+              <span className="portal-field-note">
+                Checks work too. Make them payable to Ashley High School Band Boosters and write {student.name}&rsquo;s name on the memo line.
+              </span>
+            </>
+          ) : null}
         </div>
       ) : null}
 
@@ -645,7 +692,7 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
   );
 }
 
-function PayPalButton({ clientId, studentId, category, amountRef, onPaid }) {
+function PayPalButton({ clientId, studentId, category, kind, amountRef, onPaid }) {
   const containerRef = useRef(null);
   const [status, setStatus] = useState("");
 
@@ -662,7 +709,7 @@ function PayPalButton({ clientId, studentId, category, amountRef, onPaid }) {
             const res = await fetch("/api/billing/create-order", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ studentId, amountCents, category })
+              body: JSON.stringify({ studentId, amountCents, category, kind })
             });
             const json = await res.json().catch(() => ({}));
             if (!res.ok) throw new Error(json.error || "Could not start payment.");
@@ -691,7 +738,7 @@ function PayPalButton({ clientId, studentId, category, amountRef, onPaid }) {
       cancelled = true;
       if (buttons && buttons.close) buttons.close();
     };
-  }, [clientId, studentId, category, amountRef, onPaid]);
+  }, [clientId, studentId, category, kind, amountRef, onPaid]);
 
   return (
     <div>

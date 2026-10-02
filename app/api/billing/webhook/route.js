@@ -132,7 +132,7 @@ export async function POST(request) {
         .maybeSingle();
       if (paymentError || !payment) throw new Error(paymentError?.message || "Family payment not found.");
       if (
-        payment.kind !== "fee"
+        !["fee", "funding_goal"].includes(payment.kind)
         || amountToCents(resource.amount?.value) !== Number(payment.amount_cents)
         || resource.amount?.currency_code !== "USD"
         || (resource.custom_id && resource.custom_id !== payment.student_id)

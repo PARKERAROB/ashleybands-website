@@ -90,3 +90,20 @@ test("asset apply publishes through one service-only database transaction", () =
   assert.doesNotMatch(assetImporter, /\.from\("assets"\)\.upsert/);
   assert.doesNotMatch(assetImporter, /\.from\("asset_assignments"\)\.insert/);
 });
+
+test("families can contribute online toward the marching band goal and checks are explained (#167)", () => {
+  const createOrder = read("app/api/billing/create-order/route.js");
+  const goalMigration = read("supabase/migrations/202610020002_funding_goal_online_contributions.sql");
+  assert.match(createOrder, /body\.kind === "funding_goal"/);
+  assert.match(createOrder, /from\("student_campaign_summary"\)[\s\S]*remaining_cents/);
+  assert.match(createOrder, /amountCents > remainingCents/);
+  assert.match(createOrder, /kind: paymentKind/);
+  assert.match(createOrder, /\.eq\("kind", "fee"\)/); // fee path keeps its own lookup
+  assert.match(goalMigration, /v_kind not in \('fee','funding_goal'\)/);
+  assert.match(goalMigration, /grant execute on function public\.settle_online_fee_payment_with_audit\([^;]+to service_role/);
+  for (const route of [familyCapture, billingWebhook]) assert.match(route, /\["fee", "funding_goal"\]\.includes\(payment\.kind\)/);
+  assert.match(familyReview, /Contribute online/);
+  assert.match(familyReview, /kind="funding_goal"/);
+  assert.match(familyReview, /payable to Ashley High School Band Boosters/);
+  assert.match(familyReview, /goal\.remaining > 0 \? \(/);
+});
