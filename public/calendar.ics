@@ -498,4 +498,14 @@ DESCRIPTION:Director nominations and student MP3 audition submissions are
  ion upload. Official information: https://uncw.edu/academics/colleges/chs
  sa/departments/music/performances-engagement/honor-band-festival/
 END:VEVENT
+BEGIN:VEVENT
+UID:evt-0123-program@ashleybands.com
+DTSTAMP:20260610T000000Z
+SUMMARY:StarNews visit - Wind Ensemble
+DTSTART;TZID=America/New_York:20261008T134500
+DTEND;TZID=America/New_York:20261008T153000
+LOCATION:Ashley High School band room
+DESCRIPTION:StarNews will film and interview students during Wind Ensemble
+ .
+END:VEVENT
 END:VCALENDAR

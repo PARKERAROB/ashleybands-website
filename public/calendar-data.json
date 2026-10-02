@@ -470,6 +470,16 @@
   "description": null
  },
  {
+  "id": "evt-0123",
+  "title": "StarNews visit - Wind Ensemble",
+  "start": "2026-10-08T13:45",
+  "end": "2026-10-08T15:30",
+  "all_day": false,
+  "category": "School",
+  "location": "Ashley High School band room",
+  "description": "StarNews will film and interview students during Wind Ensemble."
+ },
+ {
   "id": "evt-0108",
   "title": "Marching Rehearsal",
   "start": "2026-10-08T16:00",
