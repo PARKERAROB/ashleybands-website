@@ -1,0 +1,37 @@
+.list { list-style: none; margin: var(--space-6) 0 0; padding: 0; display: grid; gap: var(--space-4); }
+
+.piece {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.piece > div:first-child { flex: 1 1 280px; }
+
+.piece h2 { margin: 0; color: var(--text); font-family: var(--font-body); font-size: var(--step-1); font-weight: 700; }
+
+.piece p { margin: var(--space-1) 0 0; color: var(--text-muted); }
+
+.links { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+
+.links a { display: inline-flex; align-items: center; gap: var(--space-2); }
+
+.contact { margin-top: var(--space-7); }
+
+.contact h2 { margin: 0 0 var(--space-2); color: var(--accent-strong); font-family: var(--font-display); font-size: var(--step-2); font-weight: 400; }
+
+.contact p { margin: 0 0 var(--space-2); }
+
+.contact a { color: var(--accent); font-weight: 700; }
+
+@media (max-width: 560px) {
+  .piece { padding: var(--space-4); }
+  .links { width: 100%; }
+  .links a { flex: 1 1 auto; justify-content: center; }
+}

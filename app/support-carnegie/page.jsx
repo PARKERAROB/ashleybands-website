@@ -51,6 +51,8 @@ export default function CarnegieGivingPage() {
           <h2>Other ways to help</h2>
           <p><a href={`mailto:${SPONSOR_CONTACT.email}?subject=Ashley%20Carnegie%20trip%20support`}>Discuss a larger gift, employer match, or in-kind support</a></p>
           <p><Link href="/fundraising">Support a current fundraiser</Link> · <Link href="/sponsors">Explore general band sponsorships</Link></p>
+          <h2>Share the story</h2>
+          <p><Link href="/carnegie-2027/media">Get the Carnegie media kit</Link>: the press release, briefs for businesses and donors, and handouts to print.</p>
         </section>
       </div>
     </main>

@@ -161,7 +161,7 @@ export default function HomePage() {
               {typeof giveAmount === "number" ? `Give $${giveAmount.toLocaleString("en-US")}` : "Continue to give"} <span aria-hidden="true">→</span>
             </Link>
             <p className="home-giving-trust">{BOOSTER_NONPROFIT_COPY}</p>
-            <div className="home-links"><Link href="/fundraising">Current fundraisers</Link><a href="mailto:robert.parker@nhcs.net?subject=Ashley%20Carnegie%20trip%20support">Larger gift or employer match</a></div>
+            <div className="home-links"><Link href="/fundraising">Current fundraisers</Link><Link href="/carnegie-2027/media">Media kit</Link><a href="mailto:robert.parker@nhcs.net?subject=Ashley%20Carnegie%20trip%20support">Larger gift or employer match</a></div>
             <p className="home-campaign-planning">Travel plans, final participation, price, approvals, and funding remain subject to confirmation.</p>
           </div>
         </div>
