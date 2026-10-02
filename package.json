@@ -27,7 +27,7 @@
     "test:attendance-workspace-prototype": "node --test scripts/attendance-workspace-prototype.test.mjs && npm run test:attendance && npm run test:attendance-program-live && npm run test:attendance-school-live",
     "test:assets-inventory-prototype": "node --test scripts/assets-inventory-prototype.test.mjs && npm run test:assets-sync && npm run test:operations-live",
     "test:assets-sync": "node --test scripts/sync-assets.test.mjs",
-    "test:audience": "node --env-file=.env.local --test scripts/audience-active-status.test.mjs",
+    "test:audience": "node --env-file=.env.local --test scripts/audience-active-status.test.mjs scripts/media-consent.test.mjs",
     "test:current-students-prototype": "node --test scripts/current-students-prototype.test.mjs",
     "test:current-students-live": "node --test scripts/current-students-live.test.mjs",
     "test:ensembles-memberships-prototype": "node --test scripts/ensembles-memberships-prototype.test.mjs",
