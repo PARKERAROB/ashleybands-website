@@ -153,3 +153,54 @@ test("guardian edits and onboarding family saves check the shared-person scope",
   assert.match(onboarding, /step === 3[\s\S]*scopeOnboardingGuardians\(authorization\.person\.id, studentId/);
   assert.ok(onboarding.indexOf("scopeOnboardingGuardians") < onboarding.indexOf('rpc("portal_save_onboarding_step"'));
 });
+
+test("business outreach email escapes family-entered text", async () => {
+  const { renderColdEmailHTML } = await import("../lib/businessOutreachEmail.js");
+  const html = renderColdEmailHTML({
+    businessName: "Shore <img src=x onerror=alert(1)>",
+    contactFirst: "<b>Pat</b>",
+    yesUrl: "https://example.test/y?a=1&b=\"2\"",
+    noUrl: "https://example.test/n"
+  });
+  assert.doesNotMatch(html, /<img|<b>/);
+  assert.match(html, /Shore &lt;img/);
+  assert.match(html, /a=1&amp;b=&quot;2&quot;/);
+});
+
+test("family-added businesses are bounded and marked family-sourced", () => {
+  const text = source("app/api/sponsors/prospects/route.js");
+  assert.match(text, /provenance: "family-sourced"/);
+  assert.match(text, /boundedText\(body\.business_name, 160\)/);
+  assert.match(text, /CONTROL_CHARACTERS/);
+});
+
+test("staff sign-in limits pair the address with the network and hide unknown addresses", () => {
+  const text = source("app/api/sponsors/staff-auth/route.js");
+  assert.match(text, /staff-auth:\$\{email\}:\$\{ip\}/);
+  assert.match(text, /staff-auth-email:\$\{email\}/);
+  assert.match(text, /verifyPin\(pin, data\?\.pin_hash \|\| unknownStaffPinHash\(\)\)/);
+  assert.match(source("scripts/seed-staff.mjs"), /\\d\{6,8\}/);
+});
+
+test("shared PIN routes share one network limit and one closed overall limit", () => {
+  const limiter = source("lib/rateLimit.js");
+  assert.match(limiter, /shared-pin:global/);
+  assert.match(limiter, /shared-pin:\$\{clientIp\(request\)\}/);
+  for (const route of ["app/api/attendance/access/route.js", "app/api/regiment-os/access/route.js"]) {
+    const text = source(route);
+    assert.match(text, /checkSharedPinLimit\(request\)/, route);
+    assert.ok(text.indexOf("checkSharedPinLimit") < text.indexOf("verifyPin("), route);
+  }
+});
+
+test("shared PIN cookies stop working after the PIN changes", async () => {
+  process.env.PORTAL_SESSION_SECRET = "test-secret";
+  process.env.ATTENDANCE_PIN_HASH = "hash-one";
+  const { createRegimentOsCookieValue, validateRegimentOsRequest } = await import("../lib/regimentOsAuth.js");
+  const cookie = createRegimentOsCookieValue();
+  const request = { cookies: { get: () => ({ value: cookie }) } };
+  assert.equal(validateRegimentOsRequest(request), true);
+  process.env.ATTENDANCE_PIN_HASH = "hash-two";
+  assert.equal(validateRegimentOsRequest(request), false);
+  assert.match(source("lib/attendanceAuth.js"), /payload\.pv === sharedPinVersion\(\)/);
+});

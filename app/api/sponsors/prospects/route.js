@@ -8,6 +8,14 @@ export const runtime = "nodejs";
 const PROSPECT_FIELDS =
   "id, status, contact_name, contact_email, contact_phone, business_address, relationship_note, contact_mode, lead_kind, contacted_at, dropped_off_at, follow_up_at, ask_again_at, committed_amount, committed_tier, sent_to_lead, sent_at, created_at, business:businesses(id, name_display, category)";
 
+const CONTROL_CHARACTERS = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/;
+
+// Trimmed family text with a length bound; null when it is too long or has control characters.
+function boundedText(value, max) {
+  const text = String(value || "").trim();
+  return text.length > max || CONTROL_CHARACTERS.test(text) ? null : text;
+}
+
 async function validateFamily(req) {
   const resolved = await resolveSponsorFamily(req);
   return resolved?.family || null;
@@ -44,12 +52,21 @@ export async function POST(req) {
   }
 
   const body = await req.json().catch(() => ({}));
-  const businessName = String(body.business_name || "").trim();
+  const fields = {
+    businessName: boundedText(body.business_name, 160),
+    contactName: boundedText(body.contact_name, 160),
+    contactEmail: boundedText(body.contact_email, 320),
+    contactPhone: boundedText(body.contact_phone, 50),
+    businessAddress: boundedText(body.business_address, 300),
+    relationshipNote: boundedText(body.relationship_note, 1000)
+  };
+  if (Object.values(fields).some((value) => value === null)) {
+    return NextResponse.json({ error: "One of these entries is too long. Shorten it and try again." }, { status: 400 });
+  }
+  const { businessName, contactEmail, contactPhone } = fields;
   if (!businessName) {
     return NextResponse.json({ error: "Business name is required" }, { status: 400 });
   }
-  const contactEmail = String(body.contact_email || "").trim();
-  const contactPhone = String(body.contact_phone || "").trim();
   if (!contactEmail && !contactPhone) {
     return NextResponse.json(
       { error: "Add an email or phone so we can reach this business." },
@@ -81,7 +98,7 @@ export async function POST(req) {
         .maybeSingle();
       if (existing) businessId = existing.id;
     }
-    if (!businessId) {
+    if (!businessId && !/[%_*\\]/.test(businessName)) {
       const { data: byName } = await supabaseAdmin
         .from("businesses")
         .select("id")
@@ -92,7 +109,7 @@ export async function POST(req) {
     if (!businessId) {
       const { data, error } = await supabaseAdmin
         .from("businesses")
-        .insert({ name_canonical: canonical, name_display: businessName })
+        .insert({ name_canonical: canonical, name_display: businessName, provenance: "family-sourced" })
         .select("id")
         .single();
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -105,11 +122,11 @@ export async function POST(req) {
   const insert = {
     family_id: fam.id,
     business_id: businessId,
-    contact_name: String(body.contact_name || "").trim() || null,
+    contact_name: fields.contactName || null,
     contact_email: contactEmail || null,
     contact_phone: contactPhone || null,
-    business_address: String(body.business_address || "").trim() || null,
-    relationship_note: String(body.relationship_note || "").trim() || null,
+    business_address: fields.businessAddress || null,
+    relationship_note: fields.relationshipNote || null,
     contact_mode: contactMode,
     lead_kind: "family_added",
     status: "pending"

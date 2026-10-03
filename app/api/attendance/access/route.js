@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { verifyPin } from "@/lib/sponsorAuth";
-import { checkRateLimit, clientIp } from "@/lib/rateLimit";
+import { checkSharedPinLimit } from "@/lib/rateLimit";
 import {
   clearAttendanceCookie,
   createAttendanceCookieValue,
@@ -15,12 +15,7 @@ export async function POST(request) {
   const pin = String(body.pin || "").trim();
   if (!pin) return NextResponse.json({ error: "Enter the attendance PIN." }, { status: 400 });
 
-  const limit = await checkRateLimit({
-    key: `attendance-pin:${clientIp(request)}`,
-    limit: 20,
-    windowMs: 15 * 60 * 1000
-  });
-  if (!limit.allowed) {
+  if (!(await checkSharedPinLimit(request))) {
     return NextResponse.json({ error: "Too many attempts. Wait a few minutes and try again." }, { status: 429 });
   }
 

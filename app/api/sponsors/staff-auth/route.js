@@ -1,11 +1,19 @@
 import crypto from "node:crypto";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { verifyPin } from "@/lib/sponsorAuth";
+import { hashPin, verifyPin } from "@/lib/sponsorAuth";
 import { checkRateLimit, clientIp } from "@/lib/rateLimit";
 import { createStaffCookieValue, setStaffCookie } from "@/lib/staffAuthCookie";
 import { privateJson, privateServerError } from "@/lib/privateResponse";
 
 export const runtime = "nodejs";
+
+// Compared against when the email has no staff account, so response time does not reveal which
+// addresses have one.
+let unknownPinHash;
+function unknownStaffPinHash() {
+  unknownPinHash ||= hashPin(crypto.randomUUID());
+  return unknownPinHash;
+}
 
 export async function POST(req) {
   const body = await req.json().catch(() => ({}));
@@ -15,10 +23,21 @@ export async function POST(req) {
     return privateJson({ error: "Email and PIN are required" }, 400);
   }
 
-  // Throttle PIN brute-force: 15 attempts / 15 min per email and per IP.
-  const limit = await checkRateLimit({ key: `staff-auth:${email}`, limit: 15, windowMs: 15 * 60 * 1000 });
-  const ipLimit = await checkRateLimit({ key: `staff-auth-ip:${clientIp(req)}`, limit: 30, windowMs: 15 * 60 * 1000 });
-  if (!limit.allowed || !ipLimit.allowed) {
+  // Throttle PIN guessing. The strict limit pairs the address with the network, so one
+  // stranger cannot lock a staff member out; a looser per-address ceiling still caps guessing
+  // spread across many networks.
+  const ip = clientIp(req);
+  const windowMs = 15 * 60 * 1000;
+  const limits = [
+    { key: `staff-auth:${email}:${ip}`, limit: 15, windowMs },
+    { key: `staff-auth-ip:${ip}`, limit: 30, windowMs },
+    { key: `staff-auth-email:${email}`, limit: 60, windowMs }
+  ];
+  let allowed = true;
+  for (const options of limits) {
+    if (!(await checkRateLimit(options)).allowed) { allowed = false; break; }
+  }
+  if (!allowed) {
     return privateJson({ error: "Too many attempts. Please wait a few minutes and try again." }, 429);
   }
   const { data } = await supabaseAdmin
@@ -26,7 +45,8 @@ export async function POST(req) {
     .select("id, email, pin_hash, session_token, display_name, role")
     .eq("email", email)
     .maybeSingle();
-  if (!data || !verifyPin(pin, data.pin_hash)) {
+  const pinMatches = verifyPin(pin, data?.pin_hash || unknownStaffPinHash());
+  if (!data || !pinMatches) {
     return privateJson({ error: "Email or PIN not recognized" }, 401);
   }
 

@@ -24,8 +24,8 @@ if (!["director", "sponsor_lead"].includes(role)) {
   console.error('role must be "director" or "sponsor_lead"');
   process.exit(1);
 }
-if (!/^\d{4,8}$/.test(pin)) {
-  console.error("pin must be 4-8 digits");
+if (!/^\d{6,8}$/.test(pin)) {
+  console.error("pin must be 6-8 digits");
   process.exit(1);
 }
 
