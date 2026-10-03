@@ -47,6 +47,10 @@ export async function POST(req) {
   if (!displayName || !/^\d{4}$/.test(pin)) {
     return bad("Family name and a 4-digit PIN are required.");
   }
+  // The name is matched with ilike, so pattern characters would match other families' names.
+  if (/[%_*\\]/.test(displayName)) {
+    return bad("Use letters, numbers and spaces in the family name.");
+  }
 
   // Throttle PIN guessing: 10 attempts / 15 min per family name, 30 / 15 min per IP.
   // 4-digit PINs are only safe behind a rate limit, which family-auth previously lacked.
@@ -85,7 +89,10 @@ export async function POST(req) {
       .insert(insert)
       .select("id, session_token, display_name")
       .single();
-    if (error) return bad(error.message, 500);
+    if (error) {
+      console.error("[family-auth] signup failed:", error.message);
+      return bad("Sign-up could not be completed. Try again.", 500);
+    }
     return issueSession(data);
   }
 

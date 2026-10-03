@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createCarnegiePaymentOrder } from "@/lib/carnegieTrip";
+import { CarnegiePaymentError, createCarnegiePaymentOrder } from "@/lib/carnegieTrip";
 import { isPaypalConfigured } from "@/lib/paypal";
 
 export const runtime = "nodejs";
@@ -11,6 +11,8 @@ export async function POST(request) {
     const result = await createCarnegiePaymentOrder(String(body.checkoutToken || ""));
     return NextResponse.json(result, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) {
-    return NextResponse.json({ error: error.message || "Could not start payment." }, { status: 409 });
+    if (error instanceof CarnegiePaymentError) return NextResponse.json({ error: error.message }, { status: 409 });
+    console.error("[carnegie-payment-create]", error?.message || error);
+    return NextResponse.json({ error: "Could not start payment. Please try again." }, { status: 409 });
   }
 }

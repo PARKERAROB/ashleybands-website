@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { PrivateResponse as NextResponse, privateServerError } from "@/lib/privateResponse";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveSponsorFamily, sponsorFunnelLive } from "@/lib/sponsorFamily";
 
@@ -24,6 +24,6 @@ export async function GET(req) {
     .ilike("name_display", `%${q}%`)
     .order("name_display", { ascending: true })
     .limit(8);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return privateServerError("sponsor-business-search", error);
   return NextResponse.json({ results: data || [] });
 }

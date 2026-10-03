@@ -10,6 +10,7 @@ import {
   recordCarnegieSubmission,
   validateCarnegieSubmission,
 } from "@/lib/carnegieTrip";
+import { isEligibleEnsemble } from "@/lib/carnegieTripConstants";
 
 export const runtime = "nodejs";
 
@@ -26,6 +27,13 @@ export async function POST(request) {
   let personId = null;
   let actor;
 
+  // A complete, signed submission is required before any roster lookup, so the form cannot be
+  // used to test whether a student is on the roster.
+  const fields = validateCarnegieSubmission(body);
+  if (fields.error) return privateJson({ error: fields.error }, 400);
+  const submissionKey = String(body.submissionKey || "").trim();
+  if (!submissionKey || submissionKey.length > 200) return privateJson({ error: "Reload the form and try again." }, 400);
+
   if (requestedStudentId) {
     if (!session?.personId) return privateJson({ error: "Sign in to submit for this student." }, 401);
     if (!await isPortalGuardianForStudent(session.personId, requestedStudentId)) {
@@ -33,7 +41,7 @@ export async function POST(request) {
     }
     const { data, error } = await supabaseAdmin.from("portal_students")
       .select("id,display_name,ensemble_2026,status").eq("id", requestedStudentId).eq("status", "active").maybeSingle();
-    if (error || !data) return privateJson({ error: "That student is not available for this form." }, 404);
+    if (error || !data || !isEligibleEnsemble(data.ensemble_2026)) return privateJson({ error: "That student is not available for this form." }, 404);
     student = data;
     source = "portal";
     personId = session.personId;
@@ -42,8 +50,8 @@ export async function POST(request) {
     const email = String(body.schoolEmail || "").trim().toLowerCase();
     const emailHash = crypto.createHash("sha256").update(email).digest("hex").slice(0, 20);
     const [ipLimit, identityLimit] = await Promise.all([
-      checkRateLimit({ key: `carnegie-commitment-ip:${clientIp(request)}`, limit: 80, windowMs: 15 * 60 * 1000 }),
-      checkRateLimit({ key: `carnegie-commitment-identity:${emailHash}`, limit: 8, windowMs: 15 * 60 * 1000 }),
+      checkRateLimit({ key: `carnegie-commitment-ip:${clientIp(request)}`, limit: 80, windowMs: 15 * 60 * 1000, failOpen: false }),
+      checkRateLimit({ key: `carnegie-commitment-identity:${emailHash}`, limit: 8, windowMs: 15 * 60 * 1000, failOpen: false }),
     ]);
     if (!ipLimit.allowed || !identityLimit.allowed) {
       return privateJson({ error: "Please wait a few minutes before trying again." }, 429);
@@ -61,11 +69,6 @@ export async function POST(request) {
     source = "public";
     actor = { type: "parent", id: null, name: body.guardianName || "Public Carnegie form" };
   }
-
-  const fields = validateCarnegieSubmission(body);
-  if (fields.error) return privateJson({ error: fields.error }, 400);
-  const submissionKey = String(body.submissionKey || "").trim();
-  if (!submissionKey || submissionKey.length > 200) return privateJson({ error: "Reload the form and try again." }, 400);
 
   try {
     const result = await recordCarnegieSubmission({

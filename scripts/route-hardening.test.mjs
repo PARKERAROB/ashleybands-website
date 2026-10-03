@@ -292,3 +292,78 @@ test("withdrawn students drop out of Band Ready and instrument agreements", () =
   assert.match(ready, /\.eq\("portal_students\.status", "active"\)/);
   assert.match(source("app/api/portal/instrument-request/route.js"), /portal_students!inner\(display_name,instrument_2026,status\)/);
 });
+
+test("unused diagnostic and expired agenda routes are retired", () => {
+  for (const path of [
+    "app/api/portal/email-config/route.js",
+    "app/api/day-1-agenda/route.js",
+    "app/day-1-agenda/page.jsx",
+    "lib/day1Agenda.js"
+  ]) assert.equal(exists(path), false, path);
+  assert.doesNotMatch(source("lib/routes.js"), /day-1-agenda/);
+});
+
+test("Carnegie commitments validate before the roster and only for eligible ensembles", async () => {
+  const { isEligibleEnsemble } = await import("../lib/carnegieTripConstants.js");
+  assert.equal(isEligibleEnsemble("Wind Ensemble"), true);
+  assert.equal(isEligibleEnsemble("Jazz Band"), false);
+  const text = source("app/api/carnegie-2027/commitment/route.js");
+  assert.ok(text.indexOf("validateCarnegieSubmission(body)") < text.indexOf("findCarnegieStudentFromPublicIdentity("));
+  assert.ok(text.indexOf("submissionKey.length > 200") < text.indexOf("findCarnegieStudentFromPublicIdentity("));
+  assert.match(text, /!isEligibleEnsemble\(data\.ensemble_2026\)/);
+  assert.equal((text.match(/failOpen: false/g) || []).length, 2);
+});
+
+test("concurrent funding refreshes share one verification", async () => {
+  const { singleFlight } = await import("../lib/carnegieFundingFreshness.mjs");
+  let runs = 0;
+  const once = singleFlight(async () => { runs += 1; await new Promise((resolve) => setTimeout(resolve, 5)); return runs; });
+  assert.deepEqual(await Promise.all([once(), once(), once()]), [1, 1, 1]);
+  assert.equal(await once(), 2);
+  assert.match(source("lib/carnegieFundingServer.js"), /currentCarnegieFunding\(cachedCarnegieFunding, verifyCarnegieFundingOnce\)/);
+});
+
+test("Carnegie payment start returns only family-facing messages", () => {
+  const route = source("app/api/carnegie-2027/payment/create/route.js");
+  assert.match(route, /error instanceof CarnegiePaymentError/);
+  assert.doesNotMatch(route, /error: error\.message \|\|/);
+  const trip = source("lib/carnegieTrip.js");
+  const create = trip.slice(trip.indexOf("export async function createCarnegiePaymentOrder"), trip.indexOf("export async function isPortalGuardianForStudent"));
+  assert.match(create, /throw new CarnegiePaymentError\("Could not start payment\. Please try again\."\);\n  \}\n\}/);
+});
+
+test("open letters and reported gifts are capped per student", () => {
+  const text = source("lib/carnegieLettersServer.js");
+  const letter = text.slice(text.indexOf("export async function createFamilyLetter"), text.indexOf("async function conditionalUpdate"));
+  assert.ok(letter.indexOf("OPEN_LETTER_LIMIT") > 0 && letter.indexOf("OPEN_LETTER_LIMIT") < letter.indexOf(".insert("));
+  const report = text.slice(text.indexOf("export async function createReportedGift"), text.indexOf("export async function staffReportedGiftQueue"));
+  assert.ok(report.indexOf("OPEN_REPORT_LIMIT") > 0 && report.indexOf("OPEN_REPORT_LIMIT") < report.indexOf(".insert("));
+});
+
+test("family sponsorship responses are private and hide database errors", () => {
+  for (const name of ["portal-dashboard", "prospects", "claim", "warmed-list", "business-search", "warm-email"]) {
+    const text = source(`app/api/sponsors/${name}/route.js`);
+    assert.match(text, /PrivateResponse as NextResponse/, name);
+    assert.doesNotMatch(text, /error: [A-Za-z.?]*\.message|String\(error\?\.message/, name);
+  }
+});
+
+test("legacy family names cannot contain pattern characters", () => {
+  const text = source("app/api/sponsors/family-auth/route.js");
+  assert.ok(text.indexOf("/[%_*\\\\]/.test(displayName)") < text.indexOf(".ilike("));
+  assert.doesNotMatch(text, /bad\(error\.message/);
+});
+
+test("new practice participants have a per-network budget", () => {
+  const text = source("app/api/practice-loop/[pieceSlug]/route.js");
+  assert.match(text, /practice-loop:\$\{piece\.key\}:new:\$\{clientIp\(request\)\}/);
+  assert.ok(text.indexOf(":new:") < text.indexOf(".upsert("));
+});
+
+test("newsletter signup keeps an existing contact's source", () => {
+  const text = source("lib/newsletter.js");
+  const fn = text.slice(text.indexOf("export async function requestCommunitySubscription"));
+  const payload = fn.slice(fn.indexOf("const payload = {"), fn.indexOf("};", fn.indexOf("const payload = {")));
+  assert.doesNotMatch(payload, /source:/);
+  assert.match(fn, /insert\(\{ \.\.\.payload, email, source: "community_signup" \}\)/);
+});

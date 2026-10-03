@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { PrivateResponse as NextResponse, privateServerError } from "@/lib/privateResponse";
 import { supabaseAdmin, canonicalName } from "@/lib/supabaseAdmin";
 import { resolveSponsorFamily, sponsorFunnelLive } from "@/lib/sponsorFamily";
 import { checkRateLimit } from "@/lib/rateLimit";
@@ -32,7 +32,7 @@ export async function GET(req) {
     .eq("family_id", fam.id)
     .order("created_at", { ascending: true });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return privateServerError("sponsor-prospects", error);
   return NextResponse.json({ family: { id: fam.id, display_name: fam.display_name }, prospects: data });
 }
 
@@ -112,7 +112,7 @@ export async function POST(req) {
         .insert({ name_canonical: canonical, name_display: businessName, provenance: "family-sourced" })
         .select("id")
         .single();
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      if (error) return privateServerError("sponsor-prospects", error);
       businessId = data.id;
     }
   }
@@ -137,6 +137,6 @@ export async function POST(req) {
     .select(PROSPECT_FIELDS)
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return privateServerError("sponsor-prospects", error);
   return NextResponse.json({ prospect: data });
 }

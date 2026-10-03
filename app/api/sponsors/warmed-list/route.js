@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { PrivateResponse as NextResponse, privateServerError } from "@/lib/privateResponse";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveSponsorFamily, sponsorFunnelLive } from "@/lib/sponsorFamily";
 
@@ -30,7 +30,7 @@ export async function GET(req) {
   if (q.length >= 2) query = query.ilike("name_display", `%${q}%`);
 
   const { data, error } = await query;
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return privateServerError("sponsor-warmed-list", error);
 
   // Round distance so we don't imply false precision in the family UI.
   const results = (data || []).map((b) => ({

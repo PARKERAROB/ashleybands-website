@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { PrivateResponse as NextResponse, privateServerError } from "@/lib/privateResponse";
 import crypto from "node:crypto";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveSponsorFamily, sponsorFunnelLive } from "@/lib/sponsorFamily";
@@ -90,7 +90,7 @@ export async function POST(req) {
     yes_url: yesUrl,
     no_url: noUrl
   });
-  if (insErr) return NextResponse.json({ error: insErr.message }, { status: 500 });
+  if (insErr) return privateServerError("sponsor-warm-email", insErr);
 
   const { error: modeError } = await supabaseAdmin.from("prospects")
     .update({ contact_mode: "warm_first" }).eq("id", prospect.id);

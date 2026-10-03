@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { PrivateResponse as NextResponse, privateServerError } from "@/lib/privateResponse";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveSponsorFamily, sponsorFunnelLive } from "@/lib/sponsorFamily";
 
@@ -49,7 +49,7 @@ export async function POST(req) {
     .is("claimed_by_family_id", null)
     .select("id, name_display, category, email, phone, contact_person, address, distance_mi, claimed_at, reclaim_at")
     .maybeSingle();
-  if (claimErr) return NextResponse.json({ error: claimErr.message }, { status: 500 });
+  if (claimErr) return privateServerError("sponsor-claim", claimErr);
   if (!claimed) {
     return NextResponse.json(
       { error: "That lead was just claimed by another family. Pick another." },
@@ -86,7 +86,7 @@ export async function POST(req) {
       .eq("id", existing.id)
       .select(CLAIMED_PROSPECT_FIELDS)
       .single();
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) return privateServerError("sponsor-claim", error);
     prospect = data;
   } else {
     const { data, error } = await supabaseAdmin
@@ -94,7 +94,7 @@ export async function POST(req) {
       .insert(prospectPayload)
       .select(CLAIMED_PROSPECT_FIELDS)
       .single();
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) return privateServerError("sponsor-claim", error);
     prospect = data;
   }
 

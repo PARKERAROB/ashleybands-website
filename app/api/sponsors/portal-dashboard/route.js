@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { PrivateResponse as NextResponse, privateServerError } from "@/lib/privateResponse";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { resolveSponsorFamily, sponsorFunnelLive } from "@/lib/sponsorFamily";
 import { signSponsorGiveToken } from "@/lib/sponsorGiveToken.mjs";
@@ -32,7 +32,7 @@ export async function GET(req) {
     students = await loadAuthorizedSponsorStudents(fam);
     studentLinks = await ensureSponsorStudentLinks(students);
   } catch (error) {
-    return NextResponse.json({ error: String(error?.message || error) }, { status: 500 });
+    return privateServerError("sponsor-portal-dashboard", error);
   }
   const studentIds = students.map((student) => student.id);
 
@@ -66,9 +66,9 @@ export async function GET(req) {
       : Promise.resolve({ data: [], error: null })
   ]);
 
-  if (pErr) return NextResponse.json({ error: pErr.message }, { status: 500 });
-  if (familyGiftResult.error) return NextResponse.json({ error: familyGiftResult.error.message }, { status: 500 });
-  if (studentGiftResult.error) return NextResponse.json({ error: studentGiftResult.error.message }, { status: 500 });
+  if (pErr) return privateServerError("sponsor-portal-dashboard", pErr);
+  if (familyGiftResult.error) return privateServerError("sponsor-portal-dashboard", familyGiftResult.error);
+  if (studentGiftResult.error) return privateServerError("sponsor-portal-dashboard", studentGiftResult.error);
 
   const businessIds = [...new Set((prospects || []).map((p) => p.business?.id).filter(Boolean))];
   const { data: warmRequests, error: warmError } = businessIds.length

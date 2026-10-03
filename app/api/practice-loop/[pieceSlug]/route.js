@@ -41,6 +41,27 @@ export async function POST(request, { params }) {
     if (!participantRate.allowed || !networkRate.allowed) {
       return json({ error: "Too many saves. Wait a moment and try again." }, 429);
     }
+    // Participant tokens are chosen by the browser, so new participants get their own
+    // classroom-sized budget per network; saves for an existing participant are unaffected.
+    const { data: existing, error: existingError } = await supabaseAdmin
+      .from("practice_loop_prototype_submissions")
+      .select("participant_token_hash")
+      .eq("piece_key", piece.key)
+      .eq("participant_token_hash", participantTokenHash)
+      .maybeSingle();
+    if (existingError) {
+      console.error("[practice-loop] lookup failed:", existingError.message);
+      return json({ error: "Your practice marks could not be saved. Try again." }, 503);
+    }
+    if (!existing) {
+      const newcomerRate = await checkRateLimit({
+        key: `practice-loop:${piece.key}:new:${clientIp(request)}`,
+        limit: 100,
+        windowMs: 10 * 60 * 1000,
+        failOpen: false,
+      });
+      if (!newcomerRate.allowed) return json({ error: "Too many new names from this network. Wait a few minutes and try again." }, 429);
+    }
     const updatedAt = new Date().toISOString();
     const { error } = await supabaseAdmin
       .from("practice_loop_prototype_submissions")
