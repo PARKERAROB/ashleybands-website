@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
 import { logAudit, staffActor } from "@/lib/auditLog";
-import { normalizeRehearsalCode, rehearsalDate } from "@/lib/ascendCheck.mjs";
+import { normalizeRehearsalCode } from "@/lib/ascendCheck.mjs";
+import { loadAscendDay } from "@/lib/ascendCheckServer";
 
 export const runtime = "nodejs";
 
@@ -10,42 +11,34 @@ const PRIVATE_HEADERS = { "Cache-Control": "private, no-store" };
 const json = (body, status = 200) => NextResponse.json(body, { status, headers: PRIVATE_HEADERS });
 const ROUTE = "/api/admin/ascend-check";
 
-// Staff view of student self checks for one rehearsal date (#172). Aggregation runs in the
-// browser from lib/ascendCheck.mjs so filters do not need another request.
+// Staff view of one rehearsal date plus the rehearsal code (#172). The code is only ever
+// returned here; the public read in app/api/ascend-check never includes it.
 export async function GET(request) {
   const authorization = await authorizeStaffRequest(request, STAFF_CAPABILITIES.ASCEND_CHECK_MANAGE);
   if (!authorization.ok) return json({ error: authorization.error }, authorization.status);
 
-  const asked = request.nextUrl.searchParams.get("date") || "";
-  const date = /^\d{4}-\d{2}-\d{2}$/.test(asked) ? asked : rehearsalDate();
-  const [rows, dates, setting] = await Promise.all([
-    supabaseAdmin.from("ascend_self_checks")
-      .select("drill_number,payload,updated_at")
-      .eq("rehearsal_date", date)
-      .order("drill_number"),
-    // ponytail: pulls every date's row stub; fine for one season, page it if it grows past a few thousand.
-    supabaseAdmin.from("ascend_self_checks").select("rehearsal_date").order("rehearsal_date", { ascending: false }),
-    supabaseAdmin.from("ascend_self_check_settings").select("rehearsal_code,updated_at").eq("id", 1).maybeSingle(),
-  ]);
-  const failed = rows.error || dates.error || setting.error;
-  if (failed) {
-    console.error("[ascend-check] staff load failed:", failed.message);
+  let day;
+  let setting;
+  try {
+    [day, setting] = await Promise.all([
+      loadAscendDay(request.nextUrl.searchParams.get("date")),
+      supabaseAdmin.from("ascend_self_check_settings").select("rehearsal_code,updated_at").eq("id", 1).maybeSingle(),
+    ]);
+    if (setting.error) throw new Error(setting.error.message);
+  } catch (error) {
+    console.error("[ascend-check] staff load failed:", error.message);
     return json({ error: "The self checks could not be loaded." }, 503);
   }
   void logAudit({
     actor: staffActor(authorization.staff),
     action: "ascend_check.view",
     table: "ascend_self_checks",
-    recordId: date,
-    changes: { submissions: rows.data.length },
+    recordId: day.date,
+    changes: { submissions: day.submissions.length },
     route: ROUTE,
   });
-  const counts = {};
-  for (const { rehearsal_date: d } of dates.data) counts[d] = (counts[d] || 0) + 1;
   return json({
-    date,
-    submissions: rows.data,
-    dates: Object.entries(counts).map(([value, count]) => ({ value, count })),
+    ...day,
     code: setting.data?.rehearsal_code || "",
     codeUpdatedAt: setting.data?.updated_at || null,
   });

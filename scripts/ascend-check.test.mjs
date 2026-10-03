@@ -87,3 +87,17 @@ test("tables are RLS-locked to the service role and the public route checks the 
   assert.match(route, /onConflict: "rehearsal_date,drill_number"/);
   assert.match(await read("app/api/admin/ascend-check/route.js"), /authorizeStaffRequest\(request, STAFF_CAPABILITIES.ASCEND_CHECK_MANAGE\)/);
 });
+
+test("public results read never selects or returns the rehearsal code and cannot change it", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const read = (p) => readFile(new URL(`../${p}`, import.meta.url), "utf8");
+  const server = await read("lib/ascendCheckServer.js");
+  assert.doesNotMatch(server, /rehearsal_code|ascend_self_check_settings/);
+  assert.match(server, /select\("drill_number,payload,updated_at"\)/);
+  const route = await read("app/api/ascend-check/route.js");
+  assert.match(route, /export async function GET\(request\) \{\n  const rate = await checkRateLimit/);
+  assert.match(route, /return json\(await loadAscendDay\(/);
+  assert.doesNotMatch(route, /export async function (PUT|PATCH|DELETE)/);
+  assert.doesNotMatch(await read("app/ascend-check/AscendResults.jsx"), /rehearsal ?code|\.code\b/i);
+  assert.doesNotMatch(await read("app/ascend-check/results/ResultsClient.jsx"), /admin|staffAuth/);
+});

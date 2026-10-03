@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Send } from "lucide-react";
 import { Button, Field, Notice, PageHeader } from "@/components/ui";
 import {
@@ -180,6 +181,7 @@ export default function AscendCheckClient() {
         <Send size={20} aria-hidden="true" /> {send.status === "sending" ? "Sending…" : `Send to staff (${rated} ${rated === 1 ? "zone" : "zones"})`}
       </Button>
     </section>
+    <p className={styles.muted}><Link href="/ascend-check/results">See everyone&apos;s results</Link></p>
   </main>;
 }
 

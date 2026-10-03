@@ -1,4 +1,4 @@
-/* Staff view of Ascend self checks (#172). Workspace template; tokens from app/tokens.css. */
+/* Ascend self check results (#172), public and staff. Tokens from app/tokens.css. */
 .page { padding: var(--space-5) var(--space-4) var(--space-8); background: var(--surface); color: var(--text); }
 .page > * { width: min(1100px, 100%); margin-inline: auto; }
 .page h2 { margin: var(--space-6) 0 var(--space-2); font: 400 var(--step-2)/1.15 var(--font-display); color: var(--garnet); }
@@ -29,3 +29,4 @@
 .detail { display: grid; gap: var(--space-2); margin-top: var(--space-3); }
 .detail ul { margin: var(--space-1) 0 0; padding-left: var(--space-5); font-size: var(--step--1); }
 .note { margin: var(--space-2) 0 0; white-space: pre-wrap; }
+.table th[scope="row"] { white-space: nowrap; }

@@ -1,6 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { loadAscendDay } from "@/lib/ascendCheckServer";
 import { checkRateLimit, clientIp } from "@/lib/rateLimit";
 import {
   MAX_BODY_BYTES,
@@ -78,4 +79,17 @@ export async function POST(request) {
     return json({ error: "Your self check could not be sent. Try again." }, 503);
   }
   return json({ ok: true, drillNumber, date, savedAt: updatedAt });
+}
+
+// Public read-only results (Rob, 2026-10-03: "we do not need to gate this"). Returns drill
+// numbers, ratings, checks and notes for one day; never the rehearsal code.
+export async function GET(request) {
+  const rate = await checkRateLimit({ key: `ascend-check:read:${clientIp(request)}`, limit: 600, windowMs: TEN_MINUTES });
+  if (!rate.allowed) return json({ error: "Too many refreshes. Wait a minute and try again." }, 429);
+  try {
+    return json(await loadAscendDay(request.nextUrl.searchParams.get("date")));
+  } catch (error) {
+    console.error("[ascend-check] public load failed:", error.message);
+    return json({ error: "The self checks could not be loaded." }, 503);
+  }
 }
