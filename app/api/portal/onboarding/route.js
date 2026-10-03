@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { authorizePortalStudentRequest } from "@/lib/portalAuthorization";
+import { authorizePortalStudentRequest, scopeOnboardingGuardians } from "@/lib/portalAuthorization";
 import { loadOnboardingRecord, ONBOARDING_FORM_VERSION } from "@/lib/onboarding";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { logAudit } from "@/lib/auditLog";
@@ -83,12 +83,19 @@ export async function PATCH(request) {
     return response({ error: "This save request is missing its confirmation key." }, 400);
   }
 
+  let payload = body.payload && typeof body.payload === "object" ? body.payload : {};
+  if (step === 3) {
+    const scoped = await scopeOnboardingGuardians(authorization.person.id, studentId, payload);
+    if (scoped.error) return response({ error: scoped.error }, 409);
+    payload = scoped.payload;
+  }
+
   const { data, error } = await supabaseAdmin.rpc("portal_save_onboarding_step", {
     p_actor_person_id: authorization.person.id,
     p_student_id: studentId,
     p_form_version: ONBOARDING_FORM_VERSION,
     p_step_number: step,
-    p_payload: body.payload && typeof body.payload === "object" ? body.payload : {},
+    p_payload: payload,
     p_idempotency_key: idempotencyKey,
   });
 

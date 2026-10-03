@@ -3,6 +3,8 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { sendPortalReviewAlert, sendPortalAccessGrantedEmail } from "@/lib/portalEmail";
 import { hashCode, MAX_CODE_ATTEMPTS } from "@/lib/portalTokens";
 import { PORTAL_TROUBLE_MESSAGE } from "@/lib/portalFamilyMessages";
+import { checkPortalCode } from "@/lib/portalCodeCheck.mjs";
+import { checkRateLimit, clientIp } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
 
@@ -29,6 +31,15 @@ async function confirmAccessRequest(request) {
     return NextResponse.json({ error: "Enter your email and the code we sent." }, { status: 400 });
   }
 
+  const windowMs = 15 * 60 * 1000;
+  const emailLimit = await checkRateLimit({ key: `portal-confirm:${email}`, limit: 30, windowMs, failOpen: false });
+  const ipLimit = emailLimit.allowed
+    ? await checkRateLimit({ key: `portal-confirm-ip:${clientIp(request)}`, limit: 240, windowMs, failOpen: false })
+    : emailLimit;
+  if (!emailLimit.allowed || !ipLimit.allowed) {
+    return NextResponse.json({ error: "Too many tries. Wait a few minutes, then request a new code." }, { status: 429 });
+  }
+
   // Codes aren't unique, so look up the latest active row for this email+purpose
   // and compare the email-salted hash.
   const { data: link, error: linkLookupError } = await supabaseAdmin
@@ -46,13 +57,15 @@ async function confirmAccessRequest(request) {
     return NextResponse.json({ error: BAD_CODE }, { status: 401 });
   }
 
-  if (link.token_hash !== hashCode(email, code)) {
-    const attempts = (link.code_attempts || 0) + 1;
-    const lock = attempts >= MAX_CODE_ATTEMPTS;
-    await supabaseAdmin
-      .from("portal_magic_links")
-      .update({ code_attempts: attempts, ...(lock ? { consumed_at: new Date().toISOString() } : {}) })
-      .eq("id", link.id);
+  const accepted = await checkPortalCode(supabaseAdmin, link, {
+    maxAttempts: MAX_CODE_ATTEMPTS,
+    matches: () => link.token_hash === hashCode(email, code),
+    consumePatch: {
+      ip_consumed: request.headers.get("x-forwarded-for") || null,
+      user_agent_consumed: request.headers.get("user-agent") || null
+    }
+  });
+  if (!accepted) {
     return NextResponse.json({ error: BAD_CODE }, { status: 401 });
   }
 
@@ -108,27 +121,17 @@ async function confirmAccessRequest(request) {
     .single();
   if (reviewError) return troubleResponse(`review item insert failed: ${reviewError.message}`);
 
-  const [{ error: linkUpdateError }, { error: accessUpdateError }] = await Promise.all([
-    supabaseAdmin
-      .from("portal_magic_links")
-      .update({
-        consumed_at: now,
-        ip_consumed: request.headers.get("x-forwarded-for") || null,
-        user_agent_consumed: request.headers.get("user-agent") || null
-      })
-      .eq("id", link.id),
-    supabaseAdmin
-      .from("portal_access_requests")
-      .update({
-        email_verified_at: now,
-        claimed_person_id: person.id,
-        status: granted ? "approved" : "email_verified",
-        review_item_id: reviewItem.id
-      })
-      .eq("id", accessRequest.id)
-  ]);
-  if (linkUpdateError || accessUpdateError) {
-    return troubleResponse(`finalize failed: ${(linkUpdateError || accessUpdateError)?.message}`);
+  const { error: accessUpdateError } = await supabaseAdmin
+    .from("portal_access_requests")
+    .update({
+      email_verified_at: now,
+      claimed_person_id: person.id,
+      status: granted ? "approved" : "email_verified",
+      review_item_id: reviewItem.id
+    })
+    .eq("id", accessRequest.id);
+  if (accessUpdateError) {
+    return troubleResponse(`finalize failed: ${accessUpdateError.message}`);
   }
 
   if (granted) {

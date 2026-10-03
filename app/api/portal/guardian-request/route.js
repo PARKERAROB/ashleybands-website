@@ -3,6 +3,8 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { sendPortalReviewAlert } from "@/lib/portalEmail";
 import { readPortalSession } from "@/lib/portalTokens";
 import { logAuditRequired } from "@/lib/auditLog";
+import { personWithinActorFamily } from "@/lib/portalAuthorization";
+import { isVerifiedContact } from "@/lib/portalPersonScope.mjs";
 
 export const runtime = "nodejs";
 
@@ -282,10 +284,21 @@ export async function PATCH(request) {
     .maybeSingle();
   const { data: contacts } = await supabaseAdmin
     .from("portal_contact_methods")
-    .select("id, contact_type, value_display")
+    .select("id, contact_type, value_display, value_normalized, verification_status, verified_at")
     .eq("person_id", guardianId)
     .in("contact_type", ["email", "phone"])
     .order("created_at", { ascending: true });
+
+  // A guardian's name and contacts are shared by every student they are linked to.
+  const nextContact = { phone: normalizePhone(phone), email: email.toLowerCase() };
+  const identityChanged = name !== (person?.display_name || "")
+    || ["phone", "email"].some((type) =>
+      nextContact[type] !== (contacts?.find((row) => row.contact_type === type)?.value_normalized || ""));
+  if (identityChanged && !(await personWithinActorFamily(session.personId, guardianId))) {
+    return NextResponse.json({
+      error: "This guardian is also connected to another student, so their name and contact details cannot be changed here. Email Mr. Parker for help."
+    }, { status: 403 });
+  }
 
   const oldValue = {
     name: person?.display_name || "",
@@ -329,7 +342,20 @@ export async function PATCH(request) {
   for (const [type, value] of [["phone", phone], ["email", email]]) {
     const normalized = type === "phone" ? normalizePhone(value) : value.toLowerCase();
     const existing = contacts?.find((row) => row.contact_type === type);
-    if (!value && existing) {
+    if (existing && isVerifiedContact(existing)) {
+      // Keep a verified contact (it is the guardian's own sign-in proof); add a changed value beside it.
+      if (!value || contacts.some((row) => row.contact_type === type && row.value_normalized === normalized)) continue;
+      const { error } = await supabaseAdmin.from("portal_contact_methods").insert({
+        person_id: guardianId,
+        contact_type: type,
+        value_display: value,
+        value_normalized: normalized,
+        verification_status: "unverified",
+        verification_source: "portal_family_edit",
+        source: "portal_family_edit"
+      });
+      if (error) return NextResponse.json({ error: `Could not add guardian ${type}.` }, { status: 500 });
+    } else if (!value && existing) {
       const { error } = await supabaseAdmin
         .from("portal_contact_methods")
         .update({
