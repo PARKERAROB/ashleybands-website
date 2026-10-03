@@ -122,7 +122,7 @@ async function findStudentMatch({ studentFirst, studentLast, studentGrade, stude
     .ilike("school_email", studentSchoolEmail)
     .limit(2);
 
-  // Parents write first names like "Riley (Vera)" or "Cassie" - compare every
+  // Parents write first names like "Alex (Sam)" or "Sam" - compare every
   // reasonable candidate form against both legal and preferred first names.
   const firstCandidates = firstNameCandidates(studentFirst);
   const gradeNorm = norm(studentGrade);

@@ -221,6 +221,7 @@ test("access requests that send a code are limited per address and network", () 
 test("public source text carries case labels instead of names", () => {
   assert.doesNotMatch(source("app/api/marching-band-signup/route.js"), /\([A-Z][a-z]+ [A-Z][a-z]+ \+ stragglers\)/);
   assert.doesNotMatch(source("docs/decisions/2026-06-23-portal-parent-changes-auto-approve.md"), /stuck requests \([A-Z][a-z]+→/);
+  assert.doesNotMatch(source("docs/decisions/2026-06-23-portal-parent-changes-auto-approve.md"), /the 7\/3 [A-Z][a-z]+ request/);
 });
 
 test("Band Ready summary sends are limited per student", () => {
