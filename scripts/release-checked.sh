@@ -25,7 +25,12 @@ phase() {
     echo "PASS  $label"
   else
     echo "FAIL  $label. Full local log: $log" >&2
-    tail -n 20 "$log" >&2
+    if [[ "${RELEASE_PUBLIC_OUTPUT:-0}" == 1 ]]; then
+      # Public runner output: show check labels only, never raw log text or details.
+      grep -E '^(PASS|FAIL|WARN)  |^not ok |^# (tests|pass|fail) ' "$log" | sed -E 's/ — .*$//' | tail -n 20 >&2 || true
+    else
+      tail -n 20 "$log" >&2
+    fi
     return 1
   fi
 }
