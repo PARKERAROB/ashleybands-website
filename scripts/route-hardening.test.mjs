@@ -204,3 +204,91 @@ test("shared PIN cookies stop working after the PIN changes", async () => {
   assert.equal(validateRegimentOsRequest(request), false);
   assert.match(source("lib/attendanceAuth.js"), /payload\.pv === sharedPinVersion\(\)/);
 });
+
+test("access requests that send a code are limited per address and network", () => {
+  const text = source("app/api/portal/request/route.js");
+  assert.match(text, /portal-request:\$\{requesterEmail\}[^\n]*failOpen: false/);
+  assert.match(text, /portal-request-ip:\$\{clientIp\(request\)\}[^\n]*failOpen: false/);
+  assert.ok(text.indexOf("portal-request:") < text.indexOf('.from("portal_access_requests")'));
+});
+
+test("public source text carries case labels instead of names", () => {
+  assert.doesNotMatch(source("app/api/marching-band-signup/route.js"), /\([A-Z][a-z]+ [A-Z][a-z]+ \+ stragglers\)/);
+  assert.doesNotMatch(source("docs/decisions/2026-06-23-portal-parent-changes-auto-approve.md"), /stuck requests \([A-Z][a-z]+→/);
+});
+
+test("Band Ready summary sends are limited per student", () => {
+  const text = source("app/api/portal/band-ready/route.js");
+  const post = text.slice(text.indexOf("export async function POST"));
+  assert.match(post, /band-ready-summary:\$\{studentId\}[^\n]*failOpen: false/);
+  assert.ok(post.indexOf("band-ready-summary") < post.indexOf("sendBandReadySummaryEmail("));
+});
+
+test("sponsorship student access falls back to the stored student only for legacy PIN families", () => {
+  assert.match(source("lib/sponsorStudentLinks.js"), /!studentIds\.length && !family\?\.portal_person_id && family\?\.portal_student_id/);
+  const gifts = source("lib/sponsorGifts.js");
+  assert.match(gifts, /family\?\.portal_person_id[\s\S]*relationship_status", "trusted"[\s\S]*if \(!trusted\) portalStudentId = null/);
+});
+
+test("family payments settle only on a completed capture", async () => {
+  const { paypalCaptureCompleted, hasPaypalTransmissionHeaders } = await import("../lib/paypal.js");
+  assert.equal(paypalCaptureCompleted({ status: "COMPLETED", captureStatus: "PENDING" }), false);
+  assert.equal(paypalCaptureCompleted({ status: "COMPLETED", captureStatus: "COMPLETED" }), true);
+  for (const route of ["app/api/billing/capture-order/route.js", "app/api/portal/clothing-order/capture/route.js"]) {
+    const text = source(route);
+    assert.match(text, /paypalCaptureCompleted\(detail\)/, route);
+    assert.doesNotMatch(text, /detail\.status !== "COMPLETED"/, route);
+  }
+  const headers = {
+    "paypal-auth-algo": "SHA256withRSA",
+    "paypal-cert-url": "https://api.paypal.com/v1/notifications/certs/CERT",
+    "paypal-transmission-id": "id",
+    "paypal-transmission-sig": "sig",
+    "paypal-transmission-time": "2026-10-03T08:00:00Z"
+  };
+  assert.equal(hasPaypalTransmissionHeaders(headers), true);
+  assert.equal(hasPaypalTransmissionHeaders({ ...headers, "paypal-cert-url": "https://paypal.com.example.test/cert" }), false);
+  assert.equal(hasPaypalTransmissionHeaders({ ...headers, "paypal-transmission-sig": null }), false);
+  const webhook = source("app/api/billing/webhook/route.js");
+  assert.ok(webhook.indexOf("hasPaypalTransmissionHeaders(headers)") < webhook.indexOf("verifyWebhookSignature({"));
+});
+
+test("fee capture rechecks the balance before taking money", () => {
+  const text = source("app/api/billing/capture-order/route.js");
+  assert.ok(text.indexOf("feeBalanceCents(payment.student_id, payment.category)") < text.indexOf("captureOrder(orderId)"));
+});
+
+test("clothing capture records failures and recovers an earlier capture", () => {
+  const text = source("app/api/portal/clothing-order/capture/route.js");
+  assert.match(text, /getOrder\(orderId\)/);
+  assert.match(text, /const \{ error \} = await supabaseAdmin\.from\("portal_clothing_orders"\)\.update/);
+  assert.match(text, /if \(error\) \{/);
+});
+
+test("refunds that do not match a payment are recorded for review", () => {
+  const text = source("app/api/billing/webhook/route.js");
+  assert.match(text, /action: "paypal_refund_unmatched"/);
+  assert.doesNotMatch(text, /throw new Error\("PayPal family refund does not match/);
+});
+
+test("one-click answers use exact roster lookups and one answer for every id", () => {
+  const text = source("app/api/confirm/route.js");
+  assert.doesNotMatch(text, /\.ilike\(/);
+  assert.match(text, /\.in\("school_email", emails\)/);
+  assert.match(text, /isKnownStudent\(studentId\)\)\) \{[\s\S]*?return Response\.json\(\{ ok: true \}\);/);
+});
+
+test("the public assistant is limited per network and per day and hides provider errors", () => {
+  const text = source("app/api/chat/route.js");
+  assert.match(text, /chat:\$\{clientIp\(request\)\}[^\n]*failOpen: false/);
+  assert.match(text, /chat:global:\$\{day\}[^\n]*failOpen: false/);
+  assert.ok(text.indexOf("chat:${clientIp") < text.indexOf("api.anthropic.com"));
+  assert.doesNotMatch(text, /message: detail|message: error\.message/);
+});
+
+test("withdrawn students drop out of Band Ready and instrument agreements", () => {
+  const ready = source("app/api/portal/band-ready/route.js");
+  assert.match(ready, /portal_students!inner\(/);
+  assert.match(ready, /\.eq\("portal_students\.status", "active"\)/);
+  assert.match(source("app/api/portal/instrument-request/route.js"), /portal_students!inner\(display_name,instrument_2026,status\)/);
+});

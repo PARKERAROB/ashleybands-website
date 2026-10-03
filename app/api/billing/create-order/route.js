@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { readPortalSession } from "@/lib/portalTokens";
-import { isTrustedGuardian, generateInvoiceId } from "@/lib/billing";
+import { feeBalanceCents, isTrustedGuardian, generateInvoiceId } from "@/lib/billing";
 import { createOrder, isPaypalConfigured } from "@/lib/paypal";
 
 export const runtime = "nodejs";
@@ -118,17 +118,9 @@ async function feeTarget(studentId, requestedCategory) {
     return { status: 409, error: feeCategories.length > 1 ? "Choose which fee this payment applies to." : "No active program fee was found for this payment." };
   }
   const paymentCategory = feeCategories[0];
-  const { data: completedPayments, error: paymentError } = await supabaseAdmin
-    .from("fee_payments")
-    .select("amount_cents")
-    .eq("student_id", studentId)
-    .eq("category", paymentCategory)
-    .eq("kind", "fee")
-    .eq("status", "completed");
-  if (paymentError) return { status: 503, error: "Could not verify the current fee balance." };
-  const chargedCents = (feeCharges || []).reduce((total, charge) => total + (Number(charge.amount_cents) || 0), 0);
-  const paidCents = (completedPayments || []).reduce((total, payment) => total + (Number(payment.amount_cents) || 0), 0);
-  return { paymentKind: "fee", paymentCategory, remainingCents: Math.max(chargedCents - paidCents, 0) };
+  const remainingCents = await feeBalanceCents(studentId, paymentCategory);
+  if (remainingCents === null) return { status: 503, error: "Could not verify the current fee balance." };
+  return { paymentKind: "fee", paymentCategory, remainingCents };
 }
 
 // Marching band goal contributions (#167). The goal is not a bill; the cap only stops a family

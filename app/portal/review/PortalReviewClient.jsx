@@ -726,6 +726,10 @@ function PayPalButton({ clientId, studentId, category, kind, amountRef, onPaid }
               setStatus("There was a problem completing your payment.");
               return;
             }
+            if (json.status === "pending") {
+              setStatus("PayPal is still processing this payment. Your balance will update when it clears.");
+              return;
+            }
             setStatus("Payment received — thank you!");
             if (onPaid) onPaid();
           },

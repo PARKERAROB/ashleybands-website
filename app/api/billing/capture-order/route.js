@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { readPortalSession } from "@/lib/portalTokens";
-import { isTrustedGuardian } from "@/lib/billing";
-import { amountToCents, captureOrder, extractCapture, centsToAmount } from "@/lib/paypal";
+import { feeBalanceCents, isTrustedGuardian } from "@/lib/billing";
+import { amountToCents, captureOrder, extractCapture, centsToAmount, paypalCaptureCompleted } from "@/lib/paypal";
 import { sendFeePaymentReceiptEmail } from "@/lib/portalEmail";
 
 export const runtime = "nodejs";
@@ -45,6 +45,23 @@ export async function POST(request) {
     return NextResponse.json({ status: "completed", invoiceId: payment.invoice_id });
   }
 
+  // Recheck the fee balance before taking money: another order may have paid it since this
+  // one started (two tabs or a double submit).
+  if (payment.kind === "fee") {
+    const remainingCents = await feeBalanceCents(payment.student_id, payment.category);
+    if (remainingCents === null) {
+      return NextResponse.json({ error: "Could not verify the current fee balance. Try again in a minute." }, { status: 503 });
+    }
+    if (Number(payment.amount_cents) > remainingCents) {
+      await supabaseAdmin
+        .from("fee_payments")
+        .update({ status: "failed", notes: "Not captured: the fee balance was already paid." })
+        .eq("id", payment.id)
+        .eq("status", "pending");
+      return NextResponse.json({ error: "This fee is already paid, so this payment was not taken." }, { status: 409 });
+    }
+  }
+
   let detail;
   try {
     const result = await captureOrder(orderId);
@@ -53,7 +70,11 @@ export async function POST(request) {
     return NextResponse.json({ error: "Could not capture payment." }, { status: 502 });
   }
 
-  if (detail.captureStatus !== "COMPLETED" && detail.status !== "COMPLETED") {
+  if (!paypalCaptureCompleted(detail)) {
+    // A PENDING capture stays pending here; the PayPal webhook settles it when it clears.
+    if (detail.captureStatus === "PENDING") {
+      return NextResponse.json({ status: "pending", invoiceId: payment.invoice_id }, { status: 202 });
+    }
     return NextResponse.json({ error: "Payment was not completed." }, { status: 402 });
   }
   if (

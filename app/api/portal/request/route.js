@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { sendPortalCodeEmail } from "@/lib/portalEmail";
 import { createNumericCode, hashCode } from "@/lib/portalTokens";
 import { PORTAL_TROUBLE_MESSAGE } from "@/lib/portalFamilyMessages";
+import { checkRateLimit, clientIp } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
 
@@ -31,6 +32,17 @@ export async function POST(request) {
   }
   if (!studentSchoolEmail.endsWith("@student.nhcs.net")) {
     return NextResponse.json({ error: "Enter the student's NHCS email ending in @student.nhcs.net." }, { status: 400 });
+  }
+
+  // Each request emails a code to the supplied address. Same budget as /api/portal/start:
+  // a per-address cap, plus a network ceiling high enough for Open House on the school network.
+  const windowMs = 15 * 60 * 1000;
+  const emailLimit = await checkRateLimit({ key: `portal-request:${requesterEmail}`, limit: 6, windowMs, failOpen: false });
+  const ipLimit = emailLimit.allowed
+    ? await checkRateLimit({ key: `portal-request-ip:${clientIp(request)}`, limit: 120, windowMs, failOpen: false })
+    : emailLimit;
+  if (!emailLimit.allowed || !ipLimit.allowed) {
+    return NextResponse.json({ error: "Too many requests. Wait a few minutes and try again." }, { status: 429 });
   }
 
   const match = await findStudentMatch({ studentFirst, studentLast, studentGrade, studentSchoolEmail });

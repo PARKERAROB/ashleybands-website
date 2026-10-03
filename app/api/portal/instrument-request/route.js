@@ -11,7 +11,7 @@ const SCHOOL_YEAR = "2026-2027";
 async function trustedStudent(personId, studentId) {
   const { data } = await supabaseAdmin
     .from("portal_student_people")
-    .select("student_id,assurance_level,role,portal_people!inner(person_type),portal_students(display_name,instrument_2026)")
+    .select("student_id,assurance_level,role,portal_people!inner(person_type),portal_students!inner(display_name,instrument_2026,status)")
     .eq("person_id", personId)
     .eq("student_id", studentId)
     .eq("relationship_status", "trusted")

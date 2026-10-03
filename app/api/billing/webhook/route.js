@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { amountToCents, extractCapture, getOrder, verifyWebhookSignature } from "@/lib/paypal";
+import { amountToCents, extractCapture, getOrder, hasPaypalTransmissionHeaders, verifyWebhookSignature } from "@/lib/paypal";
+import { logAuditRequired } from "@/lib/auditLog";
 import { confirmGift } from "@/lib/sponsorRecognition";
 import { paypalCaptureMatchesGift, webhookSettlementPlan } from "@/lib/sponsorGiftPolicy.mjs";
 
@@ -86,6 +87,9 @@ export async function POST(request) {
   };
 
   let verified = false;
+  if (!hasPaypalTransmissionHeaders(headers)) {
+    return NextResponse.json({ error: "Signature verification failed." }, { status: 401 });
+  }
   try {
     verified = await verifyWebhookSignature({ headers, body: event });
   } catch {
@@ -165,7 +169,23 @@ export async function POST(request) {
       if (error) throw new Error(error.message);
       if (payment) {
         if (amountToCents(resource.amount?.value) !== Number(payment.amount_cents) || resource.amount?.currency_code !== "USD") {
-          throw new Error("PayPal family refund does not match the full stored payment.");
+          // Partial or mismatched refunds are not settled automatically. Record them for staff
+          // review and acknowledge the event, so PayPal stops retrying.
+          await logAuditRequired({
+            actor: { type: "system", id: eventId || null, name: "PayPal webhook" },
+            action: "paypal_refund_unmatched",
+            table: "fee_payments",
+            recordId: payment.id,
+            changes: {
+              refund_id: String(resource.id || ""),
+              refund_cents: amountToCents(resource.amount?.value),
+              refund_currency: String(resource.amount?.currency_code || ""),
+              payment_cents: Number(payment.amount_cents),
+              needs_review: true
+            },
+            route: "/api/billing/webhook"
+          });
+          return NextResponse.json({ ok: true, needsReview: true });
         }
         const { error: settleError } = await supabaseAdmin.rpc("settle_online_fee_refund_with_audit", {
           p_payment_id: payment.id,

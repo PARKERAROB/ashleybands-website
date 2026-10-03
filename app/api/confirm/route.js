@@ -20,21 +20,19 @@ function familyError(reason, status) {
 }
 
 // The `s` value must resolve to a real roster student (by source_student_id or
-// school_email, exact match case-insensitive) before we accept a write from an
-// anonymous sender. Fails CLOSED (unlike the rate limiter): an unmatched id is
-// rejected, since this is what stops spam/poisoned rows from reaching the admin
-// dashboard. Two separate .eq() calls (via ilike-free exact match) rather than
-// a single interpolated .or() filter string, so a comma/wildcard in the
-// attacker-controlled studentId can't reshape the query.
+// school_email, exact match) before we accept a write from an anonymous sender.
+// Fails CLOSED (unlike the rate limiter): an unmatched id is never written, since
+// this is what stops spam/poisoned rows from reaching the admin dashboard. Both
+// lookups are exact .eq/.in filters, so no character in the attacker-controlled
+// studentId acts as a wildcard or reshapes the query.
 async function isKnownStudent(studentId) {
-  const normalized = studentId.trim().toLowerCase();
-  if (!normalized) return false;
-  // Escape ilike wildcards so a studentId of e.g. "%" can't match every row.
-  const escaped = normalized.replace(/[%_]/g, (c) => `\\${c}`);
+  const trimmed = studentId.trim();
+  if (!trimmed) return false;
+  const emails = [...new Set([trimmed, trimmed.toLowerCase()])];
 
   const [byId, byEmail] = await Promise.all([
-    supabaseAdmin.from("portal_students").select("id").eq("source_student_id", studentId).limit(1).maybeSingle(),
-    supabaseAdmin.from("portal_students").select("id").ilike("school_email", escaped).limit(1).maybeSingle()
+    supabaseAdmin.from("portal_students").select("id").eq("source_student_id", trimmed).limit(1).maybeSingle(),
+    supabaseAdmin.from("portal_students").select("id").in("school_email", emails).limit(1).maybeSingle()
   ]);
 
   return Boolean(byId.data) || Boolean(byEmail.data);
@@ -71,7 +69,9 @@ export async function POST(request) {
     }
 
     if (!(await isKnownStudent(studentId))) {
-      return familyError("unknown student id", 400);
+      // Same answer as a recorded response, so this link cannot test who is on the roster.
+      console.error("[confirm]", "unknown student id");
+      return Response.json({ ok: true });
     }
 
     const { url: supabaseUrl, key: supabaseKey } = getSupabaseEnv();

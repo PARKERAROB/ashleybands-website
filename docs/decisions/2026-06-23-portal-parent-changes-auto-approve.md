@@ -46,4 +46,4 @@ Implemented 2026-07-05 in `app/api/portal/request/confirm/route.js`:
   email says "follow up with the family" (a conversation, not an approval).
 - Matcher hardened (`app/api/portal/request/route.js`): parenthetical preferred names
   ("Riley (Vera)") now match — the 7/3 Chemburkar request scored "none" on exactly this.
-- Backfilled the two stuck requests (Pritchard→Caleigh, Chemburkar→Riley) as trusted.
+- Backfilled the two stuck requests (private case labels kept outside this repository) as trusted.

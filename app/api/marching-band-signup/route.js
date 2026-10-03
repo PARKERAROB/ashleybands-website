@@ -32,7 +32,7 @@ const REQUIRED_CHECKS = [
 ];
 
 // 2026 marching band Signing Day closed 2026-06-06 (see BDOS archives/2026-06-06-signing-day-close).
-// REOPENED 2026-06-06 for late/edge entrants (Charlie Bradshaw + stragglers). Re-close when done.
+// REOPENED 2026-06-06 for late/edge entrants (a few late entrants). Re-close when done.
 const SIGNUP_CLOSED = false;
 
 export async function POST(request) {

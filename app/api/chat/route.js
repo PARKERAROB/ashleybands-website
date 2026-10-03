@@ -1,6 +1,9 @@
 import { getSupabaseEnv } from "@/lib/supabaseEnv";
 import { supabaseHeaders } from "@/lib/supabaseRest";
 import { buildAssistantPrompt, cleanQuestion, MAX_QUESTION_LENGTH } from "@/lib/assistantPrompt.mjs";
+import { checkRateLimit, clientIp } from "@/lib/rateLimit";
+
+const UNAVAILABLE = "The Band Assistant is not available right now. Please try again later.";
 
 // Public files are read over HTTP because Vercel functions do not bundle /public.
 const SOURCE_TTL_MS = 5 * 60 * 1000;
@@ -19,10 +22,18 @@ async function loadSources(requestUrl) {
 export async function POST(request) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
-    return Response.json(
-      { error: { message: "API key not set. Add ANTHROPIC_API_KEY in Vercel Project Settings." } },
-      { status: 500 }
-    );
+    console.error("[chat] ANTHROPIC_API_KEY is not set.");
+    return Response.json({ error: { message: UNAVAILABLE } }, { status: 503 });
+  }
+
+  // Every question is a paid model call: cap each network and the whole day, closed on failure.
+  const day = new Date().toISOString().slice(0, 10);
+  const networkLimit = await checkRateLimit({ key: `chat:${clientIp(request)}`, limit: 20, windowMs: 10 * 60 * 1000, failOpen: false });
+  const dailyLimit = networkLimit.allowed
+    ? await checkRateLimit({ key: `chat:global:${day}`, limit: 2000, windowMs: 24 * 60 * 60 * 1000, failOpen: false })
+    : networkLimit;
+  if (!networkLimit.allowed || !dailyLimit.allowed) {
+    return Response.json({ error: { message: "The Band Assistant is busy. Please try again in a few minutes." } }, { status: 429 });
   }
 
   try {
@@ -55,8 +66,8 @@ export async function POST(request) {
 
     const data = await anthropicRes.json();
     if (!anthropicRes.ok) {
-      const detail = data?.error?.message || `Anthropic error ${anthropicRes.status}`;
-      return Response.json({ error: { message: detail } }, { status: anthropicRes.status });
+      console.error("[chat] provider error:", anthropicRes.status, data?.error?.type || "");
+      return Response.json({ error: { message: UNAVAILABLE } }, { status: 502 });
     }
 
     const raw = (data.content || []).map((block) => block.text || "").join("");
@@ -85,7 +96,8 @@ export async function POST(request) {
 
     return Response.json(data);
   } catch (error) {
-    return Response.json({ error: { message: error.message } }, { status: 500 });
+    console.error("[chat] request failed:", error?.message || error);
+    return Response.json({ error: { message: UNAVAILABLE } }, { status: 500 });
   }
 }
 

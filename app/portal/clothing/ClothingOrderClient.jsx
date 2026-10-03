@@ -100,6 +100,7 @@ export default function ClothingOrderClient() {
           const capture = await fetch("/api/portal/clothing-order/capture", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ orderId: data.orderID }) });
           const result = await capture.json().catch(() => ({}));
           if (!capture.ok) { setMessage(portalErrorText(capture, result, "Payment could not be confirmed.")); return; }
+          if (result.status === "pending") { setMessage("PayPal is still processing this payment. Email Mr. Parker if the order does not show as paid in a few days."); return; }
           setLines([]); setMessage("Paid and ordered. Your items will be distributed through the band after the bulk order arrives.");
         },
         onCancel: () => setMessage("Payment was cancelled; the order was not completed."),

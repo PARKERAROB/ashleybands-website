@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { readPortalSession } from "@/lib/portalTokens";
 import { sendBandReadySummaryEmail } from "@/lib/portalEmail";
 import { logAudit } from "@/lib/auditLog";
+import { checkRateLimit } from "@/lib/rateLimit";
 
 export const runtime = "nodejs";
 
@@ -77,8 +78,9 @@ async function loadState(personId, studentId) {
     .from("portal_student_people")
     .select(`
       student_id,
-      portal_students(
+      portal_students!inner(
         id,
+        status,
         display_name,
         school_email,
         portal_band_ready_progress(
@@ -95,7 +97,8 @@ async function loadState(personId, studentId) {
       )
     `)
     .eq("person_id", personId)
-    .eq("relationship_status", "trusted");
+    .eq("relationship_status", "trusted")
+    .eq("portal_students.status", "active");
   if (error) throw error;
 
   const linkedStudents = (links || []).map((link) => oneRelation(link.portal_students)).filter(Boolean);
@@ -233,6 +236,8 @@ export async function POST(request) {
   if (!state.student || state.student.id !== studentId) return NextResponse.json({ error: "Student access not found." }, { status: 403 });
   if (!state.readiness.finished) return NextResponse.json({ error: "Complete each Band Ready step before finishing." }, { status: 409 });
   if (state.row?.summary_email_sent_at) return NextResponse.json({ ok: true, alreadySent: true, recipients: state.row.summary_email_recipients || [] });
+  const summaryLimit = await checkRateLimit({ key: `band-ready-summary:${studentId}`, limit: 3, windowMs: 24 * 60 * 60 * 1000, failOpen: false });
+  if (!summaryLimit.allowed) return NextResponse.json({ error: "This summary was already sent recently." }, { status: 429 });
   const recipients = await recipientsFor(state, session.email);
   const items = summaryItems(state);
   const completedAt = new Date().toISOString();
