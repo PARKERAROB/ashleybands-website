@@ -342,8 +342,9 @@ export async function PATCH(request) {
   for (const [type, value] of [["phone", phone], ["email", email]]) {
     const normalized = type === "phone" ? normalizePhone(value) : value.toLowerCase();
     const existing = contacts?.find((row) => row.contact_type === type);
-    if (existing && isVerifiedContact(existing)) {
-      // Keep a verified contact (it is the guardian's own sign-in proof); add a changed value beside it.
+    if (existing && isVerifiedContact(existing) && guardianId !== session.personId) {
+      // Keep another guardian's verified contact (it is their own sign-in proof); add a changed
+      // value beside it. A guardian editing their own record still replaces it.
       if (!value || contacts.some((row) => row.contact_type === type && row.value_normalized === normalized)) continue;
       const { error } = await supabaseAdmin.from("portal_contact_methods").insert({
         person_id: guardianId,

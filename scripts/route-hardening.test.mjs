@@ -154,7 +154,7 @@ test("guardian edits and onboarding family saves check the shared-person scope",
   const patch = guardian.slice(guardian.indexOf("export async function PATCH"), guardian.indexOf("export async function DELETE"));
   assert.match(patch, /personWithinActorFamily\(session\.personId, guardianId\)/);
   assertBefore(patch, "personWithinActorFamily", '.from("portal_people")\n    .update');
-  assert.match(patch, /isVerifiedContact\(existing\)/);
+  assert.match(patch, /isVerifiedContact\(existing\) && guardianId !== session\.personId/);
   const onboarding = source("app/api/portal/onboarding/route.js");
   assert.match(onboarding, /step === 3[\s\S]*scopeOnboardingGuardians\(authorization\.person\.id, studentId/);
   assertBefore(onboarding, "scopeOnboardingGuardians", 'rpc("portal_save_onboarding_step"');
