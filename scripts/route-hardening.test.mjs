@@ -8,6 +8,12 @@ import { isVerifiedContact, personWithinActorStudents } from "../lib/portalPerso
 
 const source = (relativePath) => readFileSync(new URL(`../${relativePath}`, import.meta.url), "utf8");
 const exists = (relativePath) => existsSync(new URL(`../${relativePath}`, import.meta.url));
+// Both snippets are present and the first comes before the second.
+function assertBefore(text, first, second, label = first) {
+  const a = text.indexOf(first);
+  const b = text.indexOf(second);
+  assert.ok(a >= 0 && b >= 0 && a < b, label);
+}
 
 // In-memory stand-in for the PostgREST builder calls these helpers make. Every awaited
 // call yields to the event loop, so concurrent requests interleave as they would live.
@@ -147,11 +153,11 @@ test("guardian edits and onboarding family saves check the shared-person scope",
   const guardian = source("app/api/portal/guardian-request/route.js");
   const patch = guardian.slice(guardian.indexOf("export async function PATCH"), guardian.indexOf("export async function DELETE"));
   assert.match(patch, /personWithinActorFamily\(session\.personId, guardianId\)/);
-  assert.ok(patch.indexOf("personWithinActorFamily") < patch.indexOf('.from("portal_people")\n    .update'));
+  assertBefore(patch, "personWithinActorFamily", '.from("portal_people")\n    .update');
   assert.match(patch, /isVerifiedContact\(existing\)/);
   const onboarding = source("app/api/portal/onboarding/route.js");
   assert.match(onboarding, /step === 3[\s\S]*scopeOnboardingGuardians\(authorization\.person\.id, studentId/);
-  assert.ok(onboarding.indexOf("scopeOnboardingGuardians") < onboarding.indexOf('rpc("portal_save_onboarding_step"'));
+  assertBefore(onboarding, "scopeOnboardingGuardians", 'rpc("portal_save_onboarding_step"');
 });
 
 test("business outreach email escapes family-entered text", async () => {
@@ -189,7 +195,7 @@ test("shared PIN routes share one network limit and one closed overall limit", (
   for (const route of ["app/api/attendance/access/route.js", "app/api/regiment-os/access/route.js"]) {
     const text = source(route);
     assert.match(text, /checkSharedPinLimit\(request\)/, route);
-    assert.ok(text.indexOf("checkSharedPinLimit") < text.indexOf("verifyPin("), route);
+    assertBefore(text, "checkSharedPinLimit", "verifyPin(", route);
   }
 });
 
@@ -209,7 +215,7 @@ test("access requests that send a code are limited per address and network", () 
   const text = source("app/api/portal/request/route.js");
   assert.match(text, /portal-request:\$\{requesterEmail\}[^\n]*failOpen: false/);
   assert.match(text, /portal-request-ip:\$\{clientIp\(request\)\}[^\n]*failOpen: false/);
-  assert.ok(text.indexOf("portal-request:") < text.indexOf('.from("portal_access_requests")'));
+  assertBefore(text, "portal-request:", '.from("portal_access_requests")');
 });
 
 test("public source text carries case labels instead of names", () => {
@@ -221,7 +227,7 @@ test("Band Ready summary sends are limited per student", () => {
   const text = source("app/api/portal/band-ready/route.js");
   const post = text.slice(text.indexOf("export async function POST"));
   assert.match(post, /band-ready-summary:\$\{studentId\}[^\n]*failOpen: false/);
-  assert.ok(post.indexOf("band-ready-summary") < post.indexOf("sendBandReadySummaryEmail("));
+  assertBefore(post, "band-ready-summary", "sendBandReadySummaryEmail(");
 });
 
 test("sponsorship student access falls back to the stored student only for legacy PIN families", () => {
@@ -250,12 +256,12 @@ test("family payments settle only on a completed capture", async () => {
   assert.equal(hasPaypalTransmissionHeaders({ ...headers, "paypal-cert-url": "https://paypal.com.example.test/cert" }), false);
   assert.equal(hasPaypalTransmissionHeaders({ ...headers, "paypal-transmission-sig": null }), false);
   const webhook = source("app/api/billing/webhook/route.js");
-  assert.ok(webhook.indexOf("hasPaypalTransmissionHeaders(headers)") < webhook.indexOf("verifyWebhookSignature({"));
+  assertBefore(webhook, "hasPaypalTransmissionHeaders(headers)", "verifyWebhookSignature({");
 });
 
 test("fee capture rechecks the balance before taking money", () => {
   const text = source("app/api/billing/capture-order/route.js");
-  assert.ok(text.indexOf("feeBalanceCents(payment.student_id, payment.category)") < text.indexOf("captureOrder(orderId)"));
+  assertBefore(text, "feeBalanceCents(payment.student_id, payment.category)", "captureOrder(orderId)");
 });
 
 test("clothing capture records failures and recovers an earlier capture", () => {
@@ -282,7 +288,7 @@ test("the public assistant is limited per network and per day and hides provider
   const text = source("app/api/chat/route.js");
   assert.match(text, /chat:\$\{clientIp\(request\)\}[^\n]*failOpen: false/);
   assert.match(text, /chat:global:\$\{day\}[^\n]*failOpen: false/);
-  assert.ok(text.indexOf("chat:${clientIp") < text.indexOf("api.anthropic.com"));
+  assertBefore(text, "chat:${clientIp", "api.anthropic.com");
   assert.doesNotMatch(text, /message: detail|message: error\.message/);
 });
 
@@ -308,8 +314,8 @@ test("Carnegie commitments validate before the roster and only for eligible ense
   assert.equal(isEligibleEnsemble("Wind Ensemble"), true);
   assert.equal(isEligibleEnsemble("Jazz Band"), false);
   const text = source("app/api/carnegie-2027/commitment/route.js");
-  assert.ok(text.indexOf("validateCarnegieSubmission(body)") < text.indexOf("findCarnegieStudentFromPublicIdentity("));
-  assert.ok(text.indexOf("submissionKey.length > 200") < text.indexOf("findCarnegieStudentFromPublicIdentity("));
+  assertBefore(text, "validateCarnegieSubmission(body)", "findCarnegieStudentFromPublicIdentity(");
+  assertBefore(text, "submissionKey.length > 200", "findCarnegieStudentFromPublicIdentity(");
   assert.match(text, /!isEligibleEnsemble\(data\.ensemble_2026\)/);
   assert.equal((text.match(/failOpen: false/g) || []).length, 2);
 });
@@ -335,9 +341,9 @@ test("Carnegie payment start returns only family-facing messages", () => {
 test("open letters and reported gifts are capped per student", () => {
   const text = source("lib/carnegieLettersServer.js");
   const letter = text.slice(text.indexOf("export async function createFamilyLetter"), text.indexOf("async function conditionalUpdate"));
-  assert.ok(letter.indexOf("OPEN_LETTER_LIMIT") > 0 && letter.indexOf("OPEN_LETTER_LIMIT") < letter.indexOf(".insert("));
+  assertBefore(letter, "OPEN_LETTER_LIMIT", ".insert(");
   const report = text.slice(text.indexOf("export async function createReportedGift"), text.indexOf("export async function staffReportedGiftQueue"));
-  assert.ok(report.indexOf("OPEN_REPORT_LIMIT") > 0 && report.indexOf("OPEN_REPORT_LIMIT") < report.indexOf(".insert("));
+  assertBefore(report, "OPEN_REPORT_LIMIT", ".insert(");
 });
 
 test("family sponsorship responses are private and hide database errors", () => {
@@ -350,14 +356,14 @@ test("family sponsorship responses are private and hide database errors", () => 
 
 test("legacy family names cannot contain pattern characters", () => {
   const text = source("app/api/sponsors/family-auth/route.js");
-  assert.ok(text.indexOf("/[%_*\\\\]/.test(displayName)") < text.indexOf(".ilike("));
+  assertBefore(text, "/[%_*\\\\]/.test(displayName)", ".ilike(");
   assert.doesNotMatch(text, /bad\(error\.message/);
 });
 
 test("new practice participants have a per-network budget", () => {
   const text = source("app/api/practice-loop/[pieceSlug]/route.js");
   assert.match(text, /practice-loop:\$\{piece\.key\}:new:\$\{clientIp\(request\)\}/);
-  assert.ok(text.indexOf(":new:") < text.indexOf(".upsert("));
+  assertBefore(text, ":new:", ".upsert(");
 });
 
 test("newsletter signup keeps an existing contact's source", () => {
