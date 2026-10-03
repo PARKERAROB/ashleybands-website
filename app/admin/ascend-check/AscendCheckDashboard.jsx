@@ -55,7 +55,7 @@ function Dashboard({ session, signOut }) {
 
   return <main className={styles.page}>
     <PageHeader title="Ascend Self Checks" lede="What students say about each cleaning zone. Compare it with your own flags." />
-    <p className={styles.muted}>Anyone can see these results at <Link href="/ascend-check/results">ashleybands.com/ascend-check/results</Link>. Only this page shows or changes the code.</p>
+    <p className={styles.muted}>Staff flag zones and compare with the kids in the <Link href="/ascend-check/staff-room">Ascend Staff Room</Link> (no sign-in; do not share it with students). Only this page shows or changes the rehearsal code.</p>
 
     <section className={styles.panel} aria-labelledby="code-heading">
       <h2 id="code-heading">Rehearsal code</h2>

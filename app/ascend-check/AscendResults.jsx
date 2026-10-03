@@ -21,10 +21,12 @@ function Counts({ c }) {
   </span>;
 }
 
-// Read-only results (#172). Shared by the public /ascend-check/results page and the staff page.
+// Read-only student results (#172). Shared by the staff room Kids tab and the admin page.
 // fetcher(url) returns the parsed body, or null when the caller handled the response (e.g. sign-out).
-export default function AscendResults({ fetcher, endpoint }) {
-  const [date, setDate] = useState("");
+// Pass `date` to control the day from outside (the staff room shares one date across tabs).
+export default function AscendResults({ fetcher, endpoint, date: controlledDate }) {
+  const [ownDate, setDate] = useState("");
+  const date = controlledDate ?? ownDate;
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -38,13 +40,13 @@ export default function AscendResults({ fetcher, endpoint }) {
       const body = await fetcher(`${endpoint}${date ? `?date=${encodeURIComponent(date)}` : ""}`);
       if (!body) return;
       setData(body);
-      setDate(body.date);
+      if (controlledDate == null) setDate(body.date);
     } catch (loadError) {
       setError(loadError.message);
     } finally {
       setLoading(false);
     }
-  }, [fetcher, endpoint, date]);
+  }, [fetcher, endpoint, date, controlledDate]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => void load(), 0);
@@ -59,9 +61,9 @@ export default function AscendResults({ fetcher, endpoint }) {
 
   return <>
     <section className={styles.filters} aria-label="Filters">
-      <Field label="Rehearsal date">
+      {controlledDate == null ? <Field label="Rehearsal date">
         <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={styles.input} />
-      </Field>
+      </Field> : null}
       <Field label="Drill number" hint="A letter shows that whole section.">
         <input value={filters.drill} onChange={setFilter("drill")} placeholder="T or T3" autoComplete="off" className={styles.input} />
       </Field>
@@ -78,7 +80,7 @@ export default function AscendResults({ fetcher, endpoint }) {
         </select>
       </Field>
     </section>
-    {data?.dates?.length ? <p className={styles.muted}>Dates with checks: {data.dates.map((d) => <button type="button" key={d.value} className={styles.link} onClick={() => setDate(d.value)}>{d.value} ({d.count})</button>)}</p> : null}
+    {controlledDate == null && data?.dates?.length ? <p className={styles.muted}>Dates with checks: {data.dates.map((d) => <button type="button" key={d.value} className={styles.link} onClick={() => setDate(d.value)}>{d.value} ({d.count})</button>)}</p> : null}
 
     {error ? <Notice tone="error" title="The self checks did not load.">{error}</Notice> : null}
     {loading ? <p className={styles.muted}>Loading…</p> : null}

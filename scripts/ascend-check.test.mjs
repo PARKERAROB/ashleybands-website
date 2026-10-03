@@ -2,6 +2,9 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   ASCEND_ZONES,
+  compareAscend,
+  normalizeStaffFlag,
+  sectionalPriorities,
   aggregateAscend,
   normalizeAscendPayload,
   normalizeDrillNumber,
@@ -99,5 +102,63 @@ test("public results read never selects or returns the rehearsal code and cannot
   assert.match(route, /return json\(await loadAscendDay\(/);
   assert.doesNotMatch(route, /export async function (PUT|PATCH|DELETE)/);
   assert.doesNotMatch(await read("app/ascend-check/AscendResults.jsx"), /rehearsal ?code|\.code\b/i);
-  assert.doesNotMatch(await read("app/ascend-check/results/ResultsClient.jsx"), /admin|staffAuth/);
+});
+
+const flag = (over = {}) => ({ date: "2026-10-03", zone: "1-4", color: "red", area: "music", groups: ["Flutes"], note: " late ", name: " Mr.  Parker ", ...over });
+
+test("staff flags normalize and reject unknown values, long notes and missing names", () => {
+  assert.deepEqual(normalizeStaffFlag(flag({ groups: ["Horns", "Flutes", "Flutes"] })), {
+    rehearsal_date: "2026-10-03", zone: "1-4", color: "red", area: "music", groups: ["Flutes", "Horns"], note: "late", name: "Mr. Parker",
+  });
+  const bad = [
+    { zone: "99-100" }, { color: "blue" }, { area: "Music" }, { groups: [] }, { groups: ["Tubas"] },
+    { note: "x".repeat(501) }, { name: "" }, { name: "x".repeat(61) }, { date: "2026-02-30" }, { date: "today" },
+  ];
+  for (const over of bad) assert.throws(() => normalizeStaffFlag(flag(over)), JSON.stringify(over));
+});
+
+test("lunch report ranks each group's zones and compare marks Got it against staff problems", () => {
+  const flags = [
+    { id: "a", zone: "1-4", color: "red", area: "music", groups: ["Flutes", "Horns"] },
+    { id: "b", zone: "4-7", color: "yellow", area: "marching", groups: ["Flutes"] },
+    { id: "c", zone: "4-7", color: "green", area: "choreo", groups: ["Horns"] },
+  ];
+  const report = sectionalPriorities(flags);
+  assert.deepEqual(report.map((g) => [g.group, g.rows.map((r) => [r.zone.id, r.score])]), [
+    ["Flutes", [["1-4", 2], ["4-7", 1]]],
+    ["Horns", [["1-4", 2]]],
+  ]);
+  const kids = [
+    { payload: { zones: { "1-4": { rate: { music: "green" } }, "4-7": { rate: { choreo: "green", marching: "red" } } } } },
+    { payload: { zones: { "1-4": { rate: { music: "green" } } } } },
+  ];
+  const rows = compareAscend(flags, kids);
+  const cell = (zone, area) => rows.find((r) => r.zone.id === zone).areas.find((a) => a.area === area);
+  assert.equal(cell("1-4", "music").mismatch, 2);
+  assert.equal(cell("1-4", "music").worst, "red");
+  assert.equal(cell("4-7", "choreo").mismatch, 0, "Clean staff flag is not a mismatch");
+  assert.equal(cell("4-7", "marching").mismatch, 0, "Lost student is not a mismatch");
+  assert.equal(rows.find((r) => r.zone.id === "1-4").mismatch, 2);
+});
+
+test("staff flags table is RLS-locked and the route edits only this device's rows without leaking the hash", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const read = (p) => readFile(new URL(`../${p}`, import.meta.url), "utf8");
+  const sql = await read("supabase/migrations/202610030002_ascend_staff_flags.sql");
+  assert.match(sql, /alter table public.ascend_staff_flags enable row level security/);
+  assert.match(sql, /revoke all on table public.ascend_staff_flags from anon, authenticated/);
+  const route = await read("app/api/ascend-check/flags/route.js");
+  assert.equal((route.match(/\.eq\("device_hash", mine\)/g) || []).length, 2, "update and delete scope to the device");
+  assert.match(route, /const \{ device_hash: hash, \.\.\.rest \} = row/);
+  assert.equal((route.match(/await writeGuard\(request\)/g) || []).length, 3);
+  assert.match(route, /headers.get\("origin"\) !== new URL\(request.url\).origin/);
+});
+
+test("staff room is never linked from the student page and is noindex", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const read = (p) => readFile(new URL(`../${p}`, import.meta.url), "utf8");
+  const student = await read("app/ascend-check/AscendCheckClient.jsx");
+  assert.doesNotMatch(student, /staff-room|results|\/admin/);
+  assert.match(await read("app/ascend-check/staff-room/page.jsx"), /index: false/);
+  assert.match(await read("next.config.js"), /"\/ascend-check\/staff-room", headers: \[.*X-Robots-Tag/);
 });
