@@ -1,0 +1,31 @@
+/* Staff view of Ascend self checks (#172). Workspace template; tokens from app/tokens.css. */
+.page { padding: var(--space-5) var(--space-4) var(--space-8); background: var(--surface); color: var(--text); }
+.page > * { width: min(1100px, 100%); margin-inline: auto; }
+.page h2 { margin: var(--space-6) 0 var(--space-2); font: 400 var(--step-2)/1.15 var(--font-display); color: var(--garnet); }
+.page h3 { margin: 0 0 var(--space-1); font: 700 var(--step-0) var(--font-body); }
+.panel { margin-bottom: var(--space-3); padding: var(--space-4); background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-md); }
+.panel h2 { margin-top: 0; }
+.row { display: flex; flex-wrap: wrap; align-items: end; gap: var(--space-3); }
+.filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--space-3); margin-top: var(--space-4); }
+.input { width: 100%; min-height: var(--tap-target); padding: var(--space-2) var(--space-3); font: inherit; color: var(--text); background: var(--surface-raised); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); }
+.muted { color: var(--text-muted); font-size: var(--step--1); }
+.ok { color: var(--success); font-weight: 700; }
+.bad { color: var(--danger); font-weight: 700; }
+.link { margin-right: var(--space-2); padding: 0; font: inherit; color: var(--accent); text-decoration: underline; background: none; border: 0; cursor: pointer; }
+.summary { margin-top: var(--space-4); }
+.empty { padding: var(--space-4); color: var(--text-muted); background: var(--surface-sunken); border-radius: var(--radius-md); }
+.ranked { display: grid; gap: var(--space-2); padding-left: var(--space-5); }
+.ranked li { line-height: 1.6; }
+.counts { display: inline-flex; flex-wrap: wrap; gap: var(--space-1); }
+.counts span { padding: 1px var(--space-2); font-size: var(--step--1); font-weight: 700; border-radius: var(--radius-pill); font-variant-numeric: tabular-nums; }
+.counts [data-rating="red"] { background: var(--danger-soft); color: var(--danger); }
+.counts [data-rating="yellow"] { background: var(--warning-soft); color: var(--warning); }
+.counts [data-rating="green"] { background: var(--success-soft); color: var(--success); }
+.none { color: var(--text-muted); font-size: var(--step--1); }
+.tableWrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-md); }
+.table { width: 100%; border-collapse: collapse; background: var(--surface-raised); }
+.table th, .table td { padding: var(--space-2) var(--space-3); text-align: left; vertical-align: top; border-bottom: 1px solid var(--border); }
+.table thead th { font-size: var(--step--1); text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); }
+.detail { display: grid; gap: var(--space-2); margin-top: var(--space-3); }
+.detail ul { margin: var(--space-1) 0 0; padding-left: var(--space-5); font-size: var(--step--1); }
+.note { margin: var(--space-2) 0 0; white-space: pre-wrap; }
