@@ -58,6 +58,21 @@ test("active-program recipients win dedupe and newsletter opt-outs remain exclud
   assert.deepEqual(split.public.map((row) => row.email), ["friend@example.com"]);
 });
 
+test("member-edition contacts join the member audience once and honor opt-out", () => {
+  const split = splitNewsletterAudience({
+    memberRecipients: [{ student_id: "s1", email: "family@example.com" }],
+    contacts: [
+      { email: "staff@example.com", member_edition_opt_in: true, newsletter_opted_out: false },
+      { email: "family@example.com", member_edition_opt_in: true, newsletter_opted_out: false },
+      { email: "gone@example.com", member_edition_opt_in: true, newsletter_opted_out: true },
+      { email: "both@example.com", member_edition_opt_in: true, community_opt_in: true, newsletter_opted_out: false }
+    ]
+  });
+  assert.deepEqual(split.member.map((row) => row.email), ["family@example.com", "staff@example.com", "both@example.com"]);
+  assert.equal(split.member[1].student_id, undefined);
+  assert.deepEqual(split.public, []);
+});
+
 test("rendered email contains the edition, public archive, and per-recipient preference link", () => {
   const rendered = renderNewsletterEmail({
     issue: {
