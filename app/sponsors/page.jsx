@@ -1,8 +1,10 @@
+import Image from "next/image";
 import Link from "next/link";
 import PageHeader from "@/components/ui/PageHeader";
 import { ButtonLink } from "@/components/ui/Button";
 import LevelCard, { LevelGrid } from "@/components/ui/LevelCard";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { sponsorLogo } from "@/lib/carnegieSupporters.mjs";
 import styles from "./page.module.css";
 import {
   SPONSOR_CONTACT,
@@ -76,9 +78,16 @@ export default async function SponsorsHubPage() {
             These businesses are funding the Bands of Ashley. When you support them, you support our students.
           </p>
           <ul className={styles.sponsorList}>
-            {sponsors.map((name) => (
-              <li key={name}>{name}</li>
-            ))}
+            {sponsors.map((name) => {
+              const logo = sponsorLogo(name);
+              return logo ? (
+                <li key={name} className={styles.logoItem}>
+                  <Image className={styles.logo} src={logo.src} alt={name} width={logo.width} height={logo.height} />
+                </li>
+              ) : (
+                <li key={name}>{name}</li>
+              );
+            })}
           </ul>
         </section>
       ) : null}

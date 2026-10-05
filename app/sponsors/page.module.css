@@ -2,6 +2,7 @@
 .sponsorList {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 10px;
   padding: 0;
   list-style: none;
@@ -12,6 +13,20 @@
   border: 1px solid var(--line);
   border-radius: 18px;
   font-weight: 600;
+}
+
+.sponsorList .logoItem {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--paper-strong);
+}
+
+.logo {
+  display: block;
+  width: auto;
+  height: 80px;
+  max-width: 100%;
+  object-fit: contain;
 }
 
 .levels {

@@ -9,7 +9,7 @@ import NewsletterSignup from "@/components/NewsletterSignup";
 import CarnegieFunding from "@/components/CarnegieFunding";
 import { BOOSTER_NONPROFIT_COPY, CARNEGIE_GIVING_PATH, CARNEGIE_SUGGESTED_AMOUNTS } from "@/lib/sponsorCampaigns.mjs";
 import { getSiteData } from "@/lib/siteData";
-import { CARNEGIE_SUPPORTERS } from "@/lib/carnegieSupporters.mjs";
+import { CARNEGIE_SUPPORTERS, sponsorLogo } from "@/lib/carnegieSupporters.mjs";
 
 const PROMPTS = [
   "What's happening this week?",
@@ -100,12 +100,15 @@ export default function HomePage() {
           <h2 id="home-thanks-title">Thank you for helping get us there.</h2>
           <p>These supporters have made a gift to our Carnegie effort so far.</p>
           <ul className="home-thanks-names">
-            {CARNEGIE_SUPPORTERS.map((supporter) => (
-              <li key={supporter.name}>
-                <strong>{supporter.name}</strong>
-                {supporter.detail && <span>{supporter.detail}</span>}
-              </li>
-            ))}
+            {CARNEGIE_SUPPORTERS.map((supporter) => {
+              const logo = sponsorLogo(supporter.name);
+              return (
+                <li key={supporter.name}>
+                  {logo ? <Image className="home-thanks-logo" src={logo.src} alt={supporter.name} width={logo.width} height={logo.height} /> : <strong>{supporter.name}</strong>}
+                  {supporter.detail && <span>{supporter.detail}</span>}
+                </li>
+              );
+            })}
           </ul>
         </section>
       )}

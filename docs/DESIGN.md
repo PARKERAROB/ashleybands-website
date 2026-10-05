@@ -240,6 +240,11 @@ fluid type steps, and lucide icons size in `em` so they grow with the text. Garn
 tap targets at least 44px. Check with `npm run preview:shots -- /room/<slug> --viewports display,display4k,phone`.
 Wall-display announcement lists use `0.85em` so competition logistics fit beside each class plan. Phone lists keep the normal body size. Keep the plan, next-week list and week row at their existing larger sizes, and check all three class views for clipped text.
 
+**Sponsor logos** (#175). A business that sends a logo shows it in place of its name, in the homepage
+thank-you list and on `/sponsors`. Add a trimmed transparent file under `public/sponsors/logos/` and an
+entry in `SPONSOR_LOGOS` (`lib/carnegieSupporters.mjs`). Alt text is the business name. Logos are 80px
+tall on a light paper tile, so name-only entries in the same row stay tidy.
+
 ## Voice
 
 - Write for a parent who knows nothing about the band.
