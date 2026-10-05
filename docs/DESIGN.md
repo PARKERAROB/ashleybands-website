@@ -238,6 +238,7 @@ garnet or ink. Small headings (h3 and below) in bold Inter. Cinzel only where th
 1920x1080 or 3840x2160. Sizes scale from one viewport unit (`--u` in its CSS module) instead of the
 fluid type steps, and lucide icons size in `em` so they grow with the text. Garnet top bar, paper panels,
 tap targets at least 44px. Check with `npm run preview:shots -- /room/<slug> --viewports display,display4k,phone`.
+Wall-display announcement lists use `0.85em` so competition logistics fit beside each class plan. Phone lists keep the normal body size. Keep the plan, next-week list and week row at their existing larger sizes, and check all three class views for clipped text.
 
 ## Voice
 
