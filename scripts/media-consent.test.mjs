@@ -10,6 +10,7 @@ process.env.PORTAL_SESSION_SECRET = "media-consent-test-secret";
 const {
   isAutomatedAgent,
   latestAnswers,
+  lookupOrRecordConsent,
   mediaConsentToken,
   studentsByGuardianEmail,
   verifyMediaConsentToken,
@@ -86,7 +87,7 @@ test("route rejects bad tokens with the family error and never records for bots"
   const route = readFileSync("app/api/media-consent/route.js", "utf8");
   assert.match(route, /if \(!studentId\) return familyError\("invalid token", 400\)/);
   assert.match(route, /isAutomatedAgent\(userAgent\)\) return familyError/);
-  assert.match(route, /status !== "active"/);
+  assert.match(readFileSync("lib/mediaConsent.mjs", "utf8"), /status !== "active"/);
   assert.ok(isAutomatedAgent("Mozilla/5.0 HeadlessChrome/120"));
   assert.ok(isAutomatedAgent(""));
   assert.ok(!isAutomatedAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148"));
@@ -96,4 +97,55 @@ test("broadcasts without the placeholder are sent unchanged", () => {
   const dispatch = readFileSync("lib/broadcast.js", "utf8");
   assert.match(dispatch, /hasMediaConsentPlaceholder\(broadcast\.body_html\)/);
   assert.match(dispatch, /html: personal \? personal\.html : broadcast\.body_html/);
+});
+
+// Fake Supabase client: one portal student, records every insert.
+function fakeDb(student = { id: A, preferred_first: "Avery", status: "active" }) {
+  const inserts = [];
+  const db = {
+    from(table) {
+      const query = {
+        select: () => query,
+        eq: () => query,
+        maybeSingle: async () => ({ data: student, error: null }),
+        insert: async (row) => {
+          inserts.push({ table, row });
+          return { error: null };
+        },
+      };
+      return query;
+    },
+  };
+  return { db, inserts };
+}
+
+test("#177 opening the link (lookup with no answer) records nothing", async () => {
+  const { db, inserts } = fakeDb();
+  assert.deepEqual(await lookupOrRecordConsent(db, A), { firstName: "Avery" });
+  assert.equal(inserts.length, 0);
+});
+
+test("#177 a button press records one email_link answer", async () => {
+  const { db, inserts } = fakeDb();
+  const out = await lookupOrRecordConsent(db, A, { answer: "no", userAgent: "Mozilla/5.0 (iPhone)" });
+  assert.equal(out.firstName, "Avery");
+  assert.deepEqual(inserts, [{ table: "media_consent_responses", row: { student_id: A, answer: "no", source: "email_link", user_agent: "Mozilla/5.0 (iPhone)" } }]);
+});
+
+test("#177 inactive students are refused and nothing is recorded", async () => {
+  const { db, inserts } = fakeDb({ id: A, status: "inactive" });
+  assert.equal((await lookupOrRecordConsent(db, A, { answer: "yes" })).status, 400);
+  assert.equal(inserts.length, 0);
+});
+
+test("#177 the page only POSTs from a button press; GET lookup never writes", () => {
+  const client = readFileSync("app/media-consent/MediaConsentClient.jsx", "utf8");
+  const effect = client.slice(client.indexOf("useEffect(() =>"), client.indexOf("async function record("));
+  assert.ok(effect.length > 0 && !/POST|a: /.test(effect), "the load effect must not send an answer");
+  assert.match(client, /onClick=\{\(\) => record\(choice\.answer\)\}/);
+  assert.equal((client.match(/method: "POST"/g) || []).length, 1);
+  const route = readFileSync("app/api/media-consent/route.js", "utf8");
+  const getHandler = route.slice(route.indexOf("export async function GET"), route.indexOf("export async function POST"));
+  assert.match(getHandler, /lookupOrRecordConsent\(supabaseAdmin, studentId\)/, "GET passes no answer");
+  assert.doesNotMatch(getHandler, /insert|answer/);
 });

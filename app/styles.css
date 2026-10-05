@@ -746,6 +746,12 @@ h2 {
   margin: 0 auto;
 }
 
+.consent-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
 .lede {
   margin: 16px 0 32px;
   color: var(--muted);
