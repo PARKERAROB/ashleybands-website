@@ -1,7 +1,7 @@
 {
   "_readme": "Band room board (#154). Hand-edited source. Atlas updates weekly and redeploys. Per class, per weekday: plans.<Day>.fundamentals (warm-up, FSP, 101, theory) and plans.<Day>.rehearsal (pieces and spots). 3 to 5 short bullets each. Program items come from BandsofAHS data/calendar-events.jsonl. No student data. No em dashes.",
   "slug": "yf7ycrjwun2z",
-  "weekOf": "2026-09-28",
+  "weekOf": "2026-10-05",
   "tests": [
     {
       "date": "2026-09-28",
@@ -9,61 +9,61 @@
     },
     {
       "date": "2026-10-05",
-      "label": "Playing Test #7, 50 Progressives"
+      "label": "Week Six Tests"
     }
   ],
   "week": [
     {
       "day": "Mon",
-      "date": "2026-09-28",
+      "date": "2026-10-05",
       "program": [
-        "Due: Playing Test #6, 50 Progressives"
+        "Week Six Tests"
       ]
     },
     {
       "day": "Tue",
-      "date": "2026-09-29",
+      "date": "2026-10-06",
       "program": [
         "Marching rehearsal 4:00 to 7:00 PM"
       ]
     },
     {
       "day": "Wed",
-      "date": "2026-09-30",
+      "date": "2026-10-07",
       "program": []
     },
     {
       "day": "Thu",
-      "date": "2026-10-01",
+      "date": "2026-10-08",
       "program": [
+        "StarNews visit during Wind Ensemble",
         "Marching rehearsal 4:00 to 7:00 PM"
       ]
     },
     {
       "day": "Fri",
-      "date": "2026-10-02",
+      "date": "2026-10-09",
       "program": []
     }
   ],
   "nextWeek": {
-    "weekOf": "2026-10-05",
+    "weekOf": "2026-10-12",
     "program": [
-      "Mon Oct 5: Playing Test #7, 50 Progressives",
-      "Tue Oct 6 and Thu Oct 8: Marching rehearsal 4:00 to 7:00 PM",
-      "Sat Oct 10: White Oak competition."
+      "Tue Oct 13 and Thu Oct 15: Marching rehearsal 4:00 to 7:00 PM",
+      "Fri Oct 16: Homecoming game. Call time 5:00 PM; kickoff 7:00 PM.",
+      "Sat Oct 17: Pirate Classic (Topsail)."
     ]
   },
   "announcements": [
     "Marching band funding goals are being finalized. Get yours taken care of.",
-    "Need marching shoes or other gear? Take care of it now as we head into competition prep.",
-    "Saturday stadium rehearsal, Oct 3, 9:00 AM to 4:00 PM."
+    "Need marching shoes or other gear? Take care of it now as we head into competition prep."
   ],
   "classes": {
     "concert": {
       "plans": {
         "Mon": {
           "fundamentals": [
-            "50 Progressives",
+            "Week Six Tests",
             "FSP",
             "101"
           ],
@@ -90,15 +90,14 @@
         },
         "Wed": {
           "fundamentals": [
-            "Bellwork: rhythm randomizer; finish sheet",
-            "FSP: long tones and warm-up set",
-            "Circle of fourths: whole, half, quarter notes",
-            "Tetrachords; chorale",
-            "101: Rhythmic Rest Patterns"
+            "50 Progressives",
+            "FSP",
+            "101"
           ],
           "rehearsal": [
-            "Patrick on the Railway (Legends and Heroes, movement 1)",
-            "Salute to the Armed Forces: marches"
+            "Let Freedom Ring!",
+            "Legends and Heroes",
+            "Salute to the Armed Services"
           ]
         },
         "Thu": {
@@ -134,8 +133,8 @@
         "Fri": []
       },
       "keyDue": {
-        "text": "Add due items",
-        "date": ""
+        "text": "Week Six Tests",
+        "date": "2026-10-05"
       },
       "nextWeek": []
     },
@@ -143,17 +142,15 @@
       "plans": {
         "Mon": {
           "fundamentals": [
+            "Week Six Tests",
             "Pad and sticks: snare warm-up",
             "ABC in 3",
             "Truple"
           ],
           "rehearsal": [
-            "Let Freedom Ring!",
-            "Legends and Heroes",
-            "Salute to the Armed Services",
-            "Cenotaph",
-            "A Bernstein Tribute",
-            "The Entertainer"
+            "Let Freedom Ring!; Legends and Heroes",
+            "Salute to the Armed Services; Cenotaph",
+            "A Bernstein Tribute; The Entertainer"
           ]
         },
         "Tue": {
@@ -173,12 +170,17 @@
         },
         "Wed": {
           "fundamentals": [
-            "Bellwork: rhythm randomizer; finish rhythm sheet",
-            "40 rudiments: video study and breakdown"
+            "Pad and sticks: snare warm-up",
+            "ABC in 3",
+            "Truple"
           ],
           "rehearsal": [
-            "Cenotaph (Jack Stamp)",
-            "If time: Salute to the Armed Forces"
+            "Let Freedom Ring!",
+            "Legends and Heroes",
+            "Salute to the Armed Services",
+            "Cenotaph",
+            "A Bernstein Tribute",
+            "The Entertainer"
           ]
         },
         "Thu": {
@@ -220,8 +222,8 @@
         "Fri": []
       },
       "keyDue": {
-        "text": "Add due items",
-        "date": ""
+        "text": "Week Six Tests",
+        "date": "2026-10-05"
       },
       "nextWeek": []
     },
@@ -229,7 +231,7 @@
       "plans": {
         "Mon": {
           "fundamentals": [
-            "50 Progressives",
+            "Week Six Tests",
             "FSP",
             "101"
           ],
@@ -257,14 +259,14 @@
         },
         "Wed": {
           "fundamentals": [
-            "Bellwork: rhythm randomizer; finish sheet",
-            "FSP: long tones and warm-up set",
-            "Circle of fourths: whole, half, quarter notes",
-            "Tetrachords; chorale",
-            "101: Rhythmic Rest Patterns"
+            "50 Progressives",
+            "FSP",
+            "101"
           ],
           "rehearsal": [
+            "Salute to the Armed Services",
             "Cenotaph",
+            "A Bernstein Tribute",
             "The Entertainer"
           ]
         },
@@ -303,8 +305,8 @@
         "Fri": []
       },
       "keyDue": {
-        "text": "Add due items",
-        "date": ""
+        "text": "Week Six Tests",
+        "date": "2026-10-05"
       },
       "nextWeek": []
     }
