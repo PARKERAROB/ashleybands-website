@@ -57,6 +57,8 @@ export async function POST(req) {
     businessName: input.businessName,
     payerName: input.payerName,
     payerEmail: input.payerEmail,
+    shareWithFamily: input.shareWithFamily,
+    noteToStudent: input.noteToStudent,
     recordedBy: "business_online"
   });
   if (result.error) return NextResponse.json({ error: result.error }, { status: result.status || 400 });

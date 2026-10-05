@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { BOOSTER_NONPROFIT_COPY, CARNEGIE_CAMPAIGN, CARNEGIE_TERMS_VERSION, CARNEGIE_CHANGE_TERMS, CARNEGIE_SUGGESTED_AMOUNTS, carnegieGiftPrefill, carnegieStudentGiftLine } from "@/lib/sponsorCampaigns.mjs";
-import { sponsorThankYouLine } from "@/lib/sponsorGiftPolicy.mjs";
+import { NOTE_TO_STUDENT_MAX, sponsorThankYouLine } from "@/lib/sponsorGiftPolicy.mjs";
 import { SPONSOR_CONTACT, TIERS } from "@/lib/sponsorshipContent";
 
 const GENERAL_PURPOSE = "Supports the Ashley band program: instructional staff, transportation, scholarships and instruments.";
@@ -98,6 +98,9 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
   const [checkResult, setCheckResult] = useState(null);
   const [onlineResult, setOnlineResult] = useState(null);
   const [savingCheck, setSavingCheck] = useState(false);
+  // #176: shown only when a Carnegie gift is credited to a student.
+  const [shareWithFamily, setShareWithFamily] = useState(true);
+  const [noteToStudent, setNoteToStudent] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -131,6 +134,8 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
   const amountCents = Math.round(Number(amount) * 100);
   const amountValid = Number.isFinite(amountCents) && amountCents >= 500;
   const level = !carnegie && amountValid ? sponsorLevelForCents(amountCents) : null;
+  const studentFirst = carnegie ? String(studentName || "").trim().split(/\s+/)[0] : "";
+  const familyShare = studentFirst ? { share_with_family: shareWithFamily, note_to_student: noteToStudent } : {};
   const giftNoun = carnegie
     ? "gift for Ashley’s Carnegie trip"
     : level ? "sponsorship of the Bands of Ashley" : "gift to the Bands of Ashley";
@@ -166,7 +171,8 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
           business_name: businessName,
           amount_cents: amountCents,
           payer_name: payerName,
-          payer_email: payerEmail
+          payer_email: payerEmail,
+          ...familyShare
         })
       });
       const json = await res.json().catch(() => ({}));
@@ -302,6 +308,19 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
                 readOnly={Boolean(attributionToken) && !studentName}
               />
             </label>
+            {studentFirst ? (
+              <div className="give-family">
+                <label className="give-check">
+                  <input type="checkbox" checked={shareWithFamily} onChange={(e) => setShareWithFamily(e.target.checked)} />
+                  Share my name with {studentFirst}&apos;s family so they can thank me
+                </label>
+                <label className="give-label">
+                  A note for {studentFirst} (optional)
+                  <textarea value={noteToStudent} maxLength={NOTE_TO_STUDENT_MAX} rows={3} onChange={(e) => setNoteToStudent(e.target.value)} />
+                </label>
+                {!shareWithFamily && noteToStudent.trim() ? <p className="give-muted">Your note goes to {studentFirst}&apos;s family only if you share your name.</p> : null}
+              </div>
+            ) : null}
             {method === "check" ? (
               <label className="give-label">
                 Email (for your receipt)
@@ -351,6 +370,7 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
                 amountCents={amountCents}
                 payerName={payerName}
                 payerEmail={payerEmail}
+                familyShare={familyShare}
                 onError={setError}
                 onDone={setOnlineResult}
               />
@@ -365,14 +385,14 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
   );
 }
 
-function PayPalGive({ clientId, campaignCode, giftKind, attributionToken, businessName, amountCents, payerName, payerEmail, onError, onDone }) {
+function PayPalGive({ clientId, campaignCode, giftKind, attributionToken, businessName, amountCents, payerName, payerEmail, familyShare, onError, onDone }) {
   const ref = useRef(null);
   const requestKey = useRef("");
   const serverMessage = useRef("");
-  const dataRef = useRef({ campaignCode, giftKind, attributionToken, businessName, amountCents, payerName, payerEmail });
+  const dataRef = useRef({ campaignCode, giftKind, attributionToken, businessName, amountCents, payerName, payerEmail, familyShare });
   useEffect(() => {
-    dataRef.current = { campaignCode, giftKind, attributionToken, businessName, amountCents, payerName, payerEmail };
-  }, [campaignCode, giftKind, attributionToken, businessName, amountCents, payerName, payerEmail]);
+    dataRef.current = { campaignCode, giftKind, attributionToken, businessName, amountCents, payerName, payerEmail, familyShare };
+  }, [campaignCode, giftKind, attributionToken, businessName, amountCents, payerName, payerEmail, familyShare]);
 
   useEffect(() => {
     let cancelled = false;
@@ -398,7 +418,8 @@ function PayPalGive({ clientId, campaignCode, giftKind, attributionToken, busine
                 business_name: d.businessName,
                 amount_cents: d.amountCents,
                 payer_name: d.payerName,
-                payer_email: d.payerEmail
+                payer_email: d.payerEmail,
+                ...d.familyShare
               })
             });
             const json = await res.json().catch(() => ({}));
@@ -491,6 +512,20 @@ function Styles() {
         border: 1px solid var(--border-strong);
         border-radius: 8px;
         font-size: 15px;
+      }
+      .give-family { margin-top: 14px; }
+      .give-check { display: flex; align-items: flex-start; gap: 10px; min-height: 44px; font-weight: 600; font-size: var(--step--1); line-height: 1.4; }
+      .give-check input { width: 20px; height: 20px; margin: 1px 0 0; flex: none; accent-color: var(--garnet); }
+      .give-label textarea {
+        width: 100%;
+        box-sizing: border-box;
+        margin-top: 5px;
+        padding: 10px 12px;
+        border: 1px solid var(--border-strong);
+        border-radius: 8px;
+        font: inherit;
+        font-size: 15px;
+        resize: vertical;
       }
       .give-amounts {
         display: grid;

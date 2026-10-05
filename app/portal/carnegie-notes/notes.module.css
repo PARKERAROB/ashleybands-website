@@ -42,6 +42,7 @@
 .letterLinks a, .linkButton { color: var(--garnet); font-weight: 600; min-height: 32px; display: inline-flex; align-items: center; }
 .linkButton { background: none; border: 0; padding: 0; font: 600 14px Inter, sans-serif; text-decoration: underline; cursor: pointer; }
 .note { margin: 0; font-size: 13px; background: #fff4d6; border-radius: 8px; padding: 8px 10px; }
+.supporterNote { margin: 0; font-size: 14px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
 .status { font-weight: 600; white-space: nowrap; }
 .status_draft { font-weight: 600; color: #5f5752; white-space: nowrap; }
 .status_needs_review { font-weight: 600; color: #8a5a00; white-space: nowrap; }

@@ -50,6 +50,8 @@ export async function POST(req) {
     businessName: input.businessName,
     payerName: input.payerName,
     payerEmail: input.payerEmail,
+    shareWithFamily: input.shareWithFamily,
+    noteToStudent: input.noteToStudent,
     recordedBy: "business_check_pledge"
   });
   if (result.error) return NextResponse.json({ error: result.error }, { status: result.status || 400 });

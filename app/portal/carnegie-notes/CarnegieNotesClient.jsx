@@ -188,6 +188,8 @@ function StudentNotes({ student, reload }) {
 
       <ReportGift student={student} reload={reload} />
 
+      <Supporters student={student} />
+
       <section className={styles.card} aria-labelledby="letters-heading">
         <h2 id="letters-heading" className={styles.cardTitle}>My letters</h2>
         {student.letters.length ? (
@@ -259,6 +261,34 @@ function LetterRow({ letter, student, reload }) {
       {letter.status === "needs_review" ? <p className={styles.hint}>Email and print open after band staff approve the letter. You can text your link any time.</p> : null}
       {error ? <p className={styles.error} role="alert">{error}</p> : null}
     </li>
+  );
+}
+
+const shortDate = (value) => (value ? new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "");
+
+// #176: who gave to this student's notes and what they said. Name, date and note only.
+function Supporters({ student }) {
+  const supporters = student.supporters || [];
+  return (
+    <section className={styles.card} aria-labelledby="supporters-heading">
+      <h2 id="supporters-heading" className={styles.cardTitle}>Thank your supporters</h2>
+      {supporters.length ? (
+        <>
+          <p className={styles.muted}>These people gave to {student.firstName}&apos;s notes. A quick thank-you from {student.firstName} goes a long way.</p>
+          <ul className={styles.letters}>
+            {supporters.map((gift, index) => (
+              <li key={`${gift.name}-${gift.date}-${index}`} className={styles.letterRow}>
+                <div className={styles.letterMain}>
+                  <span className={styles.letterWho}>{gift.name}</span>
+                  <span className={styles.muted}>{shortDate(gift.date)}</span>
+                </div>
+                {gift.note ? <p className={styles.supporterNote}>&ldquo;{gift.note}&rdquo;</p> : null}
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : <p className={styles.muted}>When someone gives through {student.firstName}&apos;s link, their name shows up here so you can thank them.</p>}
+    </section>
   );
 }
 

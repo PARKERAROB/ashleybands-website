@@ -48,7 +48,9 @@ test("public gift input requires a reusable request key and valid bounded fields
       requestKey: REQUEST_KEY,
       businessName: "Example Business",
       payerName: "Pat Person",
-      payerEmail: "pat@example.com"
+      payerEmail: "pat@example.com",
+      shareWithFamily: true,
+      noteToStudent: ""
     }
   );
   assert.throws(

@@ -5,6 +5,7 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import * as letters from "../lib/carnegieLetters.mjs";
 import { ROLE_CAPABILITIES, STAFF_CAPABILITIES } from "../lib/staffCapabilities.js";
+import { familyShareInput, NOTE_TO_STUDENT_MAX } from "../lib/sponsorGiftPolicy.mjs";
 
 // Carnegie student letters, path A (#106). Pure rules plus static boundary checks.
 // The end-to-end HTTP proof against an isolated local database is carnegie-letters-e2e.test.mjs.
@@ -392,4 +393,45 @@ test("notes family rule admits legacy guardians but not legacy student records (
   const server = readFileSync(new URL("../lib/carnegieLettersServer.js", import.meta.url), "utf8");
   assert.doesNotMatch(server, /trustedStudentIds/, "notes no longer uses billing's stricter rule");
   assert.match(server, /\.eq\("relationship_status", "trusted"\)[\s\S]*\.eq\("portal_students\.status", "active"\)/);
+});
+
+// ---- Who gave (#176) -------------------------------------------------------------------------
+const OURS = "00000000-0000-4000-8000-000000000001";
+const THEIRS = "00000000-0000-4000-8000-000000000002";
+const supporterGift = (over) => ({
+  portal_student_id: OURS, status: "confirmed", share_with_family: true, business_name: "Example Shop",
+  payer_name: "Pat Example", payer_email: "pat@example.com", amount_cents: 5000, paypal_order_id: "ORDER", note_to_student: "Go get it.",
+  confirmed_at: "2026-10-04T12:00:00Z", created_at: "2026-10-04T11:00:00Z", ...over
+});
+
+test("families see only their own students' shared, confirmed supporters", () => {
+  const rows = letters.familySupporters([
+    supporterGift(),
+    supporterGift({ portal_student_id: THEIRS, business_name: "Other Family Donor" }),
+    supporterGift({ share_with_family: false, business_name: "Private Donor" }),
+    supporterGift({ status: "pending", business_name: "Pending Donor" })
+  ], [OURS]);
+  assert.deepEqual(rows.map((row) => row.name), ["Example Shop"]);
+});
+
+test("the family payload carries name, date and note only, never amounts, emails or payment ids", () => {
+  const [row] = letters.familySupporters([supporterGift()], [OURS]);
+  assert.deepEqual(Object.keys(row).sort(), ["date", "name", "note", "portal_student_id"]);
+  assert.equal(row.date, "2026-10-04T12:00:00Z");
+  assert.doesNotMatch(letters.SUPPORTER_FIELDS, /email|address|paypal|capture|invoice|amount|phone/);
+  const server = read("lib/carnegieLettersServer.js");
+  assert.match(server, /\.eq\("share_with_family", true\)/);
+  assert.match(server, /supporters: supporters\.filter\(\(gift\) => gift\.portal_student_id === student\.id\)\.map\(\(\{ name, date, note \}\) => \(\{ name, date, note \}\)\)/);
+});
+
+test("blank donor names show as A supporter", () => {
+  const [row] = letters.familySupporters([supporterGift({ business_name: " ", payer_name: "" })], [OURS]);
+  assert.equal(row.name, "A supporter");
+});
+
+test("give form sharing defaults on and the note is capped plain text", () => {
+  assert.deepEqual(familyShareInput({}), { shareWithFamily: true, noteToStudent: "" });
+  assert.equal(familyShareInput({ share_with_family: false }).shareWithFamily, false);
+  assert.equal(familyShareInput({ note_to_student: "  Proud of you\u0007!\n " }).noteToStudent, "Proud of you!");
+  assert.throws(() => familyShareInput({ note_to_student: "x".repeat(NOTE_TO_STUDENT_MAX + 1) }), /500 characters/);
 });
