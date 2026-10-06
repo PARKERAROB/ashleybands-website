@@ -429,6 +429,17 @@ test("blank donor names show as A supporter", () => {
   assert.equal(row.name, "A supporter");
 });
 
+test("a donor who typed the student's own name shows by payer name (#179)", () => {
+  const names = new Map([[OURS, "Sam Student"]]);
+  const rows = letters.familySupporters([
+    supporterGift({ business_name: " sam  STUDENT ", payer_name: "Pat Example" }),
+    supporterGift({ business_name: "Sam Student Family", payer_name: "Lee Example" }),
+    supporterGift({ business_name: "Sam Student", payer_name: "" })
+  ], [OURS], names);
+  assert.deepEqual(rows.map((row) => row.name), ["Pat Example", "Sam Student Family", "A supporter"]);
+  assert.equal(letters.familySupporters([supporterGift({ business_name: "Sam Student" })], [OURS])[0].name, "Sam Student");
+});
+
 test("give form sharing defaults on and the note is capped plain text", () => {
   assert.deepEqual(familyShareInput({}), { shareWithFamily: true, noteToStudent: "" });
   assert.equal(familyShareInput({ share_with_family: false }).shareWithFamily, false);
