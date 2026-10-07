@@ -1,6 +1,8 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { bandsofAHSDataDir } from "./lib/workspace-paths.mjs";
+import { countMarchers, fillCounts } from "./lib/roster-counts.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
@@ -50,6 +52,15 @@ function readRepoSource(relativePath) {
   }
   return readFileSync(fullPath, "utf8");
 }
+
+// Marcher count comes from the roster, never typed text (#186). BandsofAHS is only present on
+// the Mac, so the count is carried to the hosted build in content/roster-counts.json; --check fails
+// when that file no longer matches students.csv.
+const countsPath = path.join(root, "content", "roster-counts.json");
+const rosterPath = path.join(bandsofAHSDataDir, "students.csv");
+const committedCounts = existsSync(countsPath) ? JSON.parse(readFileSync(countsPath, "utf8")) : null;
+const rosterCounts = existsSync(rosterPath) ? { marchers2026: countMarchers(readFileSync(rosterPath, "utf8")) } : committedCounts;
+if (!rosterCounts) throw new Error("No roster: BandsofAHS students.csv and content/roster-counts.json are both missing");
 
 function section(markdown, heading) {
   const lines = markdown.split("\n");
@@ -106,7 +117,7 @@ const pages = [
     audience: "Families and students",
     source: sources.marchingBand,
     category: "Current information",
-    body: cleanGoogleSiteDraft(readRepoSource(sources.marchingBand))
+    body: cleanGoogleSiteDraft(fillCounts(readRepoSource(sources.marchingBand), rosterCounts))
   },
   {
     slug: "marching-band-funding",
@@ -115,7 +126,7 @@ const pages = [
     audience: "Families",
     source: sources.marchingFunding,
     category: "Current information",
-    body: cleanGoogleSiteDraft(readRepoSource(sources.marchingFunding))
+    body: cleanGoogleSiteDraft(fillCounts(readRepoSource(sources.marchingFunding), rosterCounts))
   },
   {
     slug: "instaraise-fundraiser",
@@ -293,9 +304,11 @@ const chatbotKnowledge = [
 ].join("\n").replace(/\n{3,}/g, "\n\n");
 
 const chatbotCurrent = existsSync(chatbotPath) && readFileSync(chatbotPath, "utf8") === chatbotKnowledge;
+const countsCurrent = JSON.stringify(committedCounts) === JSON.stringify(rosterCounts);
 
 if (CHECK) {
-  if (!siteDataCurrent || !chatbotCurrent) {
+  if (!siteDataCurrent || !chatbotCurrent || !countsCurrent) {
+    if (!countsCurrent) console.error(`Roster count drift: ${countsPath} says ${committedCounts?.marchers2026}, students.csv says ${rosterCounts.marchers2026}`);
     if (!siteDataCurrent) console.error(`Public content projection drift: ${siteDataPath}`);
     if (!chatbotCurrent) console.error(`Chatbot projection drift: ${chatbotPath}`);
     process.exit(1);
@@ -308,5 +321,6 @@ mkdirSync(contentDir, { recursive: true });
 mkdirSync(publicDir, { recursive: true });
 writeFileSync(siteDataPath, JSON.stringify(siteData, null, 2));
 writeFileSync(chatbotPath, chatbotKnowledge);
+writeFileSync(countsPath, JSON.stringify(rosterCounts, null, 2) + "\n");
 
 console.log(`Built public site content from ${pkaRoot}`);

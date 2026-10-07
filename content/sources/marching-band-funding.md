@@ -6,9 +6,9 @@ These are the real numbers. The season costs far more than any one family is ask
 
 ## What We Are Asking This Year
 
-**60 students** are marching with the Screaming Eagle Regiment in 2026.
+**{{marchers}} students** are marching with the Screaming Eagle Regiment in 2026.
 
-Our funding goal is **$500 per student**, which is **$30,000 total**.
+Our funding goal is **$500 per student**, which is **{{marchers*500}} total**.
 
 - **This is a goal, not a bill.** No student pays a required fee to march.
 - The $500 covers the costs due up front: custom music, drill, instructional staff, uniforms, and equipment.
@@ -21,13 +21,13 @@ A full competitive season costs roughly **$42,000 to $47,000** to operate.
 
 NHCS has covered transportation for the past two seasons, and we expect that to continue. If it does, the shared funding goal for the band is closer to **$35,000 to $41,000**.
 
-With 60 students marching, that works out to:
+With {{marchers}} students marching, that works out to:
 
-| | Total | Per student (60) |
+| | Total | Per student ({{marchers}}) |
 | --- | --- | --- |
-| Full true cost of the season | $42,000 - $47,000 | about $700 - $785 |
-| Shared band goal (NHCS covers transport) | $35,000 - $41,000 | about $585 - $685 |
-| **What we ask each family to help meet** | **$30,000** | **$500** |
+| Full true cost of the season | $42,000 - $47,000 | about {{per:42000}} - {{per:47000}} |
+| Shared band goal (NHCS covers transport) | $35,000 - $41,000 | about {{per:35000}} - {{per:41000}} |
+| **What we ask each family to help meet** | **{{marchers*500}}** | **$500** |
 
 The $500 ask is below the real per-student cost. We close the rest together.
 
@@ -83,7 +83,7 @@ Sign-up is closed. If your student has not reached $500 yet, there are a few way
 
 The family portal shows what has been recorded for your student. If something you turned in is not showing, tell Mr. Parker.
 
-On top of that, **we ask every family to pursue sponsorships regardless** of how they meet their $500. If every family reaches 5 businesses, that is about 300 local connections, every one tied personally to a student. The more sponsors we have, the less any family pays.
+On top of that, **we ask every family to pursue sponsorships regardless** of how they meet their $500. If every family reaches 5 businesses, that is about {{marchers*5}} local connections, every one tied personally to a student. The more sponsors we have, the less any family pays.
 
 ## Separate: Student Clothing
 
