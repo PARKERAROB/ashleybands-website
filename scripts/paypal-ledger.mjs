@@ -17,12 +17,12 @@ import { loadBandWebsiteEnv } from "./lib/workspace-paths.mjs";
 const API = "https://api-m.paypal.com";
 const HEADER = ["Date", "Payer", "Student", "Category", "Gross", "Fee", "Net", "Type", "PayPal transaction ID", "Invoice ID"];
 
-// PayPal T-codes we expect; anything else prints its raw code.
-const TYPES = {
-  T0006: "Payment received", T0011: "Payment received", T0013: "Donation received",
-  T0000: "Payment received", T0001: "Payment sent", T0003: "Purchase", T0007: "Purchase",
-  T0400: "Transfer to bank", T0403: "Transfer to bank", T1107: "Refund", T1106: "Reversal"
-};
+// Direction comes from the sign; transfers and refunds keep their own label.
+export function typeOf(code = "", amount = 0) {
+  if (code.startsWith("T04")) return "Transfer to bank";
+  if (code.startsWith("T11")) return "Refund";
+  return Number(amount) >= 0 ? "Money in" : "Money out";
+}
 
 const money = v => (v == null ? "" : Number(v).toFixed(2));
 const usDate = iso => {
@@ -45,7 +45,7 @@ export function toRow(detail, portal) {
     money(t.transaction_amount?.value),
     money(t.fee_amount?.value),
     money(Number(t.transaction_amount?.value || 0) + Number(t.fee_amount?.value || 0)),
-    TYPES[t.transaction_event_code] || t.transaction_event_code,
+    typeOf(t.transaction_event_code, t.transaction_amount?.value),
     t.transaction_id,
     t.invoice_id || ""
   ];
@@ -128,9 +128,11 @@ function selftest() {
     transaction_info: { transaction_id: "CAP1", transaction_event_code: "T0006", transaction_initiation_date: "2026-06-19T14:00:00+0000", transaction_amount: { value: "250.00" }, fee_amount: { value: "-9.22" }, invoice_id: "AB-1" },
     payer_info: { payer_name: { alternate_full_name: "Someone" } }
   }, portal);
-  assert.ok(row.join("|") === "6/19/2026|Family (band website)|Hill, Cyrus|marching_band_2026|250.00|-9.22|240.78|Payment received|CAP1|AB-1", row.join("|"));
+  assert.ok(row.join("|") === "6/19/2026|Family (band website)|Hill, Cyrus|marching_band_2026|250.00|-9.22|240.78|Money in|CAP1|AB-1", row.join("|"));
   const w = windows("2026-05-01", new Date("2026-07-15T00:00:00Z"));
   assert.ok(w.length === 3 && w[0][0] === "2026-05-01T00:00:00Z" && w[2][1] === "2026-07-15T00:00:00Z", JSON.stringify(w));
+  assert.equal(typeOf("T0006", "-144.86"), "Money out");
+  assert.equal(typeOf("T0403", "-2700.00"), "Transfer to bank");
   console.log("paypal-ledger selftest OK");
 }
 
