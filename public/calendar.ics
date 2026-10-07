@@ -137,8 +137,9 @@ SUMMARY:White Oak competition
 DTSTART;TZID=America/New_York:20261010T080000
 DTEND;TZID=America/New_York:20261011T000000
 LOCATION:White Oak HS
-DESCRIPTION:Schedule will be released once it is communicated by the compe
- tition host.
+DESCRIPTION:Call time 8:00 a.m. Buses depart Ashley at 12:30 p.m. Ashley p
+ erforms at 4:30 p.m.\; awards at 9:00 p.m. White Oak High School\, 1001 P
+ iney Green Road\, Jacksonville.
 END:VEVENT
 BEGIN:VEVENT
 UID:evt-0016-program@ashleybands.com
@@ -163,8 +164,9 @@ SUMMARY:Pirate Classic (Topsail)
 DTSTART;TZID=America/New_York:20261017T080000
 DTEND;TZID=America/New_York:20261018T000000
 LOCATION:Topsail HS
-DESCRIPTION:Schedule will be released once it is communicated by the compe
- tition host.
+DESCRIPTION:Ashley performs at 1:45 p.m.\; awards at 8:30 p.m. Topsail Hig
+ h School\, 245 N St. Johns Church Rd\, Hampstead. Call time and departure
+  will be announced.
 END:VEVENT
 BEGIN:VEVENT
 UID:evt-0018-program@ashleybands.com
@@ -185,7 +187,7 @@ END:VEVENT
 BEGIN:VEVENT
 UID:evt-0020-program@ashleybands.com
 DTSTAMP:20260610T000000Z
-SUMMARY:Football Home vs W. Brunswick
+SUMMARY:Football Home vs W. Brunswick - SENIOR NIGHT
 DTSTART;TZID=America/New_York:20261023T190000
 DTEND;TZID=America/New_York:20261023T220000
 LOCATION:AHS
@@ -507,5 +509,41 @@ DTEND;TZID=America/New_York:20261008T153000
 LOCATION:Ashley High School band room
 DESCRIPTION:StarNews will film and interview students during Wind Ensemble
  .
+END:VEVENT
+BEGIN:VEVENT
+UID:evt-0124-program@ashleybands.com
+DTSTAMP:20260610T000000Z
+SUMMARY:Homecoming Pep Rally
+DTSTART;TZID=America/New_York:20261012T140000
+DTEND;TZID=America/New_York:20261012T153000
+LOCATION:AHS football field
+DESCRIPTION:The band performs at the Homecoming pep rally during 4th block
+ .
+END:VEVENT
+BEGIN:VEVENT
+UID:evt-0125-program@ashleybands.com
+DTSTAMP:20260610T000000Z
+SUMMARY:Homecoming Parade
+DTSTART;TZID=America/New_York:20261016T180000
+DTEND;TZID=America/New_York:20261016T184500
+LOCATION:AHS\, behind the school outside the stadium
+DESCRIPTION:The band marches in the Homecoming parade on campus before the
+  game.
+END:VEVENT
+BEGIN:VEVENT
+UID:evt-0126-program@ashleybands.com
+DTSTAMP:20260610T000000Z
+SUMMARY:Guard Practice
+DTSTART;TZID=America/New_York:20261007T160000
+DTEND;TZID=America/New_York:20261007T173000
+LOCATION:AHS
+END:VEVENT
+BEGIN:VEVENT
+UID:evt-0127-program@ashleybands.com
+DTSTAMP:20260610T000000Z
+SUMMARY:Guard Practice
+DTSTART;TZID=America/New_York:20261021T160000
+DTEND;TZID=America/New_York:20261021T173000
+LOCATION:AHS
 END:VEVENT
 END:VCALENDAR

@@ -470,6 +470,16 @@
   "description": null
  },
  {
+  "id": "evt-0126",
+  "title": "Guard Practice",
+  "start": "2026-10-07T16:00",
+  "end": "2026-10-07T17:30",
+  "all_day": false,
+  "category": "MB-Rehearsal",
+  "location": "AHS",
+  "description": null
+ },
+ {
   "id": "evt-0123",
   "title": "StarNews visit - Wind Ensemble",
   "start": "2026-10-08T13:45",
@@ -497,7 +507,17 @@
   "all_day": false,
   "category": "MB-Competition",
   "location": "White Oak HS",
-  "description": "Schedule will be released once it is communicated by the competition host."
+  "description": "Call time 8:00 a.m. Buses depart Ashley at 12:30 p.m. Ashley performs at 4:30 p.m.; awards at 9:00 p.m. White Oak High School, 1001 Piney Green Road, Jacksonville."
+ },
+ {
+  "id": "evt-0124",
+  "title": "Homecoming Pep Rally",
+  "start": "2026-10-12T14:00",
+  "end": "2026-10-12T15:30",
+  "all_day": false,
+  "category": "School",
+  "location": "AHS football field",
+  "description": "The band performs at the Homecoming pep rally during 4th block."
  },
  {
   "id": "evt-0108",
@@ -530,6 +550,16 @@
   "description": null
  },
  {
+  "id": "evt-0125",
+  "title": "Homecoming Parade",
+  "start": "2026-10-16T18:00",
+  "end": "2026-10-16T18:45",
+  "all_day": false,
+  "category": "MB-Event",
+  "location": "AHS, behind the school outside the stadium",
+  "description": "The band marches in the Homecoming parade on campus before the game."
+ },
+ {
   "id": "evt-0016",
   "title": "Football Home vs NHHS - HOMECOMING",
   "start": "2026-10-16T19:00",
@@ -557,7 +587,7 @@
   "all_day": false,
   "category": "MB-Competition",
   "location": "Topsail HS",
-  "description": "Schedule will be released once it is communicated by the competition host."
+  "description": "Ashley performs at 1:45 p.m.; awards at 8:30 p.m. Topsail High School, 245 N St. Johns Church Rd, Hampstead. Call time and departure will be announced."
  },
  {
   "id": "evt-0018",
@@ -567,6 +597,16 @@
   "all_day": true,
   "category": "MB-Event",
   "location": "Hoggard HS",
+  "description": null
+ },
+ {
+  "id": "evt-0127",
+  "title": "Guard Practice",
+  "start": "2026-10-21T16:00",
+  "end": "2026-10-21T17:30",
+  "all_day": false,
+  "category": "MB-Rehearsal",
+  "location": "AHS",
   "description": null
  },
  {
@@ -591,7 +631,7 @@
  },
  {
   "id": "evt-0020",
-  "title": "Football Home vs W. Brunswick",
+  "title": "Football Home vs W. Brunswick - SENIOR NIGHT",
   "start": "2026-10-23T19:00",
   "end": "2026-10-23T22:00",
   "all_day": false,
