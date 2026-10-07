@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "paypal:ledger": "bash scripts/runtime.sh node scripts/paypal-ledger.mjs",
     "dev": "bash scripts/runtime.sh node scripts/local-dev-server.mjs",
     "preview:shots": "bash scripts/runtime.sh node scripts/preview-shots.mjs",
     "test:local-preview": "node --test scripts/local-write-guard.test.mjs",
