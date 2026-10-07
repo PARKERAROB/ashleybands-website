@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import test from "node:test";
-import { CARNEGIE_SUPPORTERS, CARNEGIE_SUPPORTER_FIELDS, sponsorLogo } from "../lib/carnegieSupporters.mjs";
+import { CARNEGIE_SUPPORTERS, CARNEGIE_SUPPORTER_FIELDS, MARCHING_SPONSORS, sponsorLogo } from "../lib/carnegieSupporters.mjs";
 
 test("the supporter list is names only", () => {
   assert.ok(CARNEGIE_SUPPORTERS.length > 0);
@@ -47,4 +47,19 @@ test("both pages render logos with the business name as alt text", () => {
   assert.match(home, /alt=\{supporter\.name\}/);
   assert.match(sponsors, /sponsorLogo\(name\)/);
   assert.match(sponsors, /alt=\{name\}/);
+});
+
+test("the sponsors page shows marching and Carnegie business lists, names only, no overlap (#185)", () => {
+  assert.ok(MARCHING_SPONSORS.length > 0);
+  for (const sponsor of MARCHING_SPONSORS) {
+    for (const key of Object.keys(sponsor)) assert.ok(CARNEGIE_SUPPORTER_FIELDS.includes(key), `unexpected field ${key}`);
+    for (const value of Object.values(sponsor)) assert.doesNotMatch(value, /\$|\d{2,}|@|—/);
+  }
+  const carnegie = new Set(CARNEGIE_SUPPORTERS.map((s) => s.name));
+  assert.equal(new Set(MARCHING_SPONSORS.map((s) => s.name)).size, MARCHING_SPONSORS.length);
+  for (const s of MARCHING_SPONSORS) assert.ok(!carnegie.has(s.name), `${s.name} is listed under both funds`);
+  const page = readFileSync(new URL("../app/sponsors/page.jsx", import.meta.url), "utf8");
+  assert.doesNotMatch(page, /sponsor_public_listing|supabaseAdmin/);
+  assert.match(page, /MARCHING_SPONSORS/);
+  assert.match(page, /CARNEGIE_SUPPORTERS/);
 });

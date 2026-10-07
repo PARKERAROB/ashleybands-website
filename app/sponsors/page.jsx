@@ -3,8 +3,7 @@ import Link from "next/link";
 import PageHeader from "@/components/ui/PageHeader";
 import { ButtonLink } from "@/components/ui/Button";
 import LevelCard, { LevelGrid } from "@/components/ui/LevelCard";
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { sponsorLogo } from "@/lib/carnegieSupporters.mjs";
+import { CARNEGIE_SUPPORTERS, MARCHING_SPONSORS, sponsorLogo } from "@/lib/carnegieSupporters.mjs";
 import styles from "./page.module.css";
 import {
   SPONSOR_CONTACT,
@@ -23,34 +22,24 @@ export const metadata = {
     "Become a Screaming Eagle Sponsor. Tier sponsorships and Adopt-an-Instrument capital giving for the Bands of Ashley High School."
 };
 
-// Sponsors auto-publish here the day a gift is confirmed (build-spec §6 Lane A.2). Reads the
-// walled sponsor_public_listing view (names + tier only). Resilient: any error or a dark
-// funnel just hides the section. ISR-cached so the page stays fast.
-export const revalidate = 300;
-
-async function fetchListedSponsors() {
-  try {
-    const { data, error } = await supabaseAdmin
-      .from("sponsor_public_listing")
-      .select("gift_id, name_display, tier, gift_year")
-      .order("name_display", { ascending: true });
-    if (error || !data) return [];
-    const seen = new Set();
-    const names = [];
-    for (const row of data) {
-      const key = (row.name_display || "").trim().toLowerCase();
-      if (!key || seen.has(key)) continue;
-      seen.add(key);
-      names.push(row.name_display.trim());
-    }
-    return names;
-  } catch {
-    return [];
-  }
+function SponsorNames({ list }) {
+  return (
+    <ul className={styles.sponsorList}>
+      {list.map(({ name, detail }) => {
+        const logo = sponsorLogo(name);
+        return logo ? (
+          <li key={name} className={styles.logoItem}>
+            <Image className={styles.logo} src={logo.src} alt={name} width={logo.width} height={logo.height} />
+          </li>
+        ) : (
+          <li key={name}>{detail ? `${name}, ${detail}` : name}</li>
+        );
+      })}
+    </ul>
+  );
 }
 
-export default async function SponsorsHubPage() {
-  const sponsors = await fetchListedSponsors();
+export default function SponsorsHubPage() {
   return (
     <main className="sponsors-page">
       <PageHeader
@@ -70,27 +59,17 @@ export default async function SponsorsHubPage() {
         <p>Giving to the Carnegie Hall trip? <Link href="/support-carnegie">Give to the Carnegie trip</Link>. The options below support the year-round band program.</p>
       </PageHeader>
 
-      {sponsors.length ? (
-        <section className="sponsors-section" id="our-sponsors">
-          <p className="eyebrow">Thank you</p>
-          <h2>Our Sponsors</h2>
-          <p>
-            These businesses are funding the Bands of Ashley. When you support them, you support our students.
-          </p>
-          <ul className={styles.sponsorList}>
-            {sponsors.map((name) => {
-              const logo = sponsorLogo(name);
-              return logo ? (
-                <li key={name} className={styles.logoItem}>
-                  <Image className={styles.logo} src={logo.src} alt={name} width={logo.width} height={logo.height} />
-                </li>
-              ) : (
-                <li key={name}>{name}</li>
-              );
-            })}
-          </ul>
-        </section>
-      ) : null}
+      <section className="sponsors-section" id="our-sponsors">
+        <p className="eyebrow">Thank you</p>
+        <h2>Our Sponsors</h2>
+        <p>
+          These businesses are funding the Bands of Ashley. When you support them, you support our students.
+        </p>
+        <h3>Marching Band</h3>
+        <SponsorNames list={MARCHING_SPONSORS} />
+        <h3>Carnegie Hall Trip</h3>
+        <SponsorNames list={CARNEGIE_SUPPORTERS} />
+      </section>
 
       <section className="sponsors-section" id="tiers">
         <p className="eyebrow">Path 1</p>
