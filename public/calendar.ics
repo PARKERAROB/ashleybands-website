@@ -137,9 +137,10 @@ SUMMARY:White Oak competition
 DTSTART;TZID=America/New_York:20261010T080000
 DTEND;TZID=America/New_York:20261011T000000
 LOCATION:White Oak HS
-DESCRIPTION:Call time 8:00 a.m. Buses depart Ashley at 12:30 p.m. Ashley p
- erforms at 4:30 p.m.\; awards at 9:00 p.m. White Oak High School\, 1001 P
- iney Green Road\, Jacksonville.
+DESCRIPTION:Call time 8:00 a.m. in the band room. Rehearsal 8:30-11:30 a.m
+ .\; load out\, lunch and dress 11:30 a.m.-12:30 p.m. Buses depart Ashley 
+ at 12:30 p.m. Ashley performs at 4:30 p.m.\; awards at 9:00 p.m. White Oa
+ k High School\, 1001 Piney Green Road\, Jacksonville.
 END:VEVENT
 BEGIN:VEVENT
 UID:evt-0016-program@ashleybands.com
