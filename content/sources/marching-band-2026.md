@@ -25,7 +25,7 @@ The full competitive season costs roughly **$42,000 to $47,000** to operate. Tha
 
 NHCS has covered transportation for the past two seasons, and we expect that to continue. If it does, the shared funding goal for the band is closer to **$35,000 to $41,000**.
 
-On a band of about 70 students, that is roughly **$600 to $670 per student** in true cost, or about **$500 to $585 per student** as the shared goal.
+With 60 students marching, that is roughly **$700 to $785 per student** in true cost, or about **$585 to $685 per student** as the shared goal.
 
 No student pays a required individual fee. We ask each family to help meet a **$500 funding goal**. See [how we fund the season](/info/marching-band-funding) for the full breakdown and the ways to meet it.
 
