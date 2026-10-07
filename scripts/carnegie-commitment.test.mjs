@@ -171,3 +171,18 @@ test("public family packet and downloadable PDF carry the same decision anchors"
   assert.match(page, /carnegie-hall-2027-family-meeting-packet\.pdf/);
   assert.ok(existsSync(new URL("../public/downloads/carnegie-hall-2027-family-meeting-packet.pdf", import.meta.url)));
 });
+
+test("Carnegie yes/no stays a staff-only, audited field (#187)", () => {
+  const migration = read("supabase/migrations/202610070001_carnegie_roster_flag.sql");
+  const route = read("app/api/admin/carnegie-2027/route.js");
+  const workspace = read("app/admin/carnegie-2027/CarnegieTripWorkspace.jsx");
+  assert.match(migration, /add column if not exists carnegie_roster boolean not null default false/);
+  assert.match(migration, /-- provenance:/);
+  assert.doesNotMatch(migration, /grant|update public\.carnegie_trip_staff_tracking set/i);
+  assert.match(route, /typeof value !== "boolean"/);
+  assert.match(route, /changes: \{ carnegie_roster: value \}/);
+  assert.match(workspace, /label="Carnegie yes"/);
+  for (const path of ["app/api/carnegie-2027/me/route.js", "app/api/carnegie-2027/commitment/route.js", "app/api/portal/me/route.js"]) {
+    assert.doesNotMatch(read(path), /carnegie_roster|carnegie_trip_staff_tracking/);
+  }
+});

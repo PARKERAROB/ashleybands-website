@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
 import { logAudit, logAuditRequired, staffActor } from "@/lib/auditLog";
-import { loadCarnegieDashboard, recordCarnegieSubmission, validateCarnegieSubmission } from "@/lib/carnegieTrip";
+import { defaultCarnegieEligibility, loadCarnegieDashboard, recordCarnegieSubmission, validateCarnegieSubmission } from "@/lib/carnegieTrip";
 import { CARNEGIE_DEPOSIT_CATEGORY } from "@/lib/carnegieTripConstants";
 import { refundCapture } from "@/lib/paypal";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
@@ -138,9 +138,43 @@ export async function POST(request) {
   }
 }
 
+async function setCarnegieRoster(request, studentId, value) {
+  if (!studentId || typeof value !== "boolean") return privateJson({ error: "Choose a student and yes or no." }, 400);
+  const authorization = await authorizeWorkspace(request, STAFF_CAPABILITIES.FORMS_MANAGE, studentId);
+  if (!authorization.ok) return privateJson({ error: authorization.error }, authorization.status);
+  const { data: student } = await supabaseAdmin.from("portal_students").select("id,ensemble_2026").eq("id", studentId).maybeSingle();
+  if (!student) return privateJson({ error: "Student not found." }, 404);
+  // A student with no tracking row gets the same defaults the sheet already shows, then the flag.
+  const { error: insertError } = await supabaseAdmin.from("carnegie_trip_staff_tracking").upsert({
+    student_id: studentId,
+    eligibility_status: defaultCarnegieEligibility(student.ensemble_2026),
+    updated_by_staff_id: authorization.staff.id,
+  }, { onConflict: "student_id", ignoreDuplicates: true });
+  const { error } = insertError ? { error: insertError } : await supabaseAdmin.from("carnegie_trip_staff_tracking").update({
+    carnegie_roster: value,
+    updated_by_staff_id: authorization.staff.id,
+    updated_at: new Date().toISOString(),
+  }).eq("student_id", studentId);
+  if (error) return privateJson({ error: "Could not update Carnegie yes/no." }, 500);
+  try {
+    await logAuditRequired({
+      actor: staffActor(authorization.staff),
+      action: "update",
+      table: "carnegie_trip_staff_tracking",
+      recordId: studentId,
+      changes: { carnegie_roster: value },
+      route: "/api/admin/carnegie-2027",
+    });
+  } catch {
+    return privateJson({ error: "Carnegie yes/no changed, but its audit record needs review." }, 503);
+  }
+  return privateJson({ ok: true, carnegieRoster: value });
+}
+
 export async function PATCH(request) {
   const body = await request.json().catch(() => ({}));
   const studentId = String(body.studentId || "");
+  if ("carnegieRoster" in body) return setCarnegieRoster(request, studentId, body.carnegieRoster);
   const eligibilityStatus = String(body.eligibilityStatus || "");
   const followUpStatus = String(body.followUpStatus || "");
   if (!studentId || !TRACKING_FIELDS.eligibilityStatus.has(eligibilityStatus) || !TRACKING_FIELDS.followUpStatus.has(followUpStatus)) {

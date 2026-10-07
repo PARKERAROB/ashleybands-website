@@ -83,13 +83,13 @@ function CarnegieTripWorkspaceContent() {
   }, [data]);
 
   function downloadCsv() {
-    const columns = ["Student","Ensemble","Response","Agreement version","Source","Submitted","Guardian","Email","Phone","Maximum amount","Deposit choice","Help offered","Deposit","Follow-up","Eligibility","Staff note"];
+    const columns = ["Student","Ensemble","Response","Agreement version","Source","Submitted","Guardian","Email","Phone","Maximum amount","Deposit choice","Help offered","Deposit","Follow-up","Eligibility","Staff note","Carnegie"];
     const quote = (input) => `"${String(input ?? "").replaceAll('"','""')}"`;
     const lines = rows.map((row) => [
       row.student.display_name, row.student.ensemble_2026, carnegieResponseLabel(row.submission?.response, row.submission?.agreement_version), row.submission?.agreement_version || "", sourceLabels[row.submission?.source] || "",
       row.submission?.created_at || "", row.contact.name, row.contact.email, row.contact.phone,
       carnegieAmountBandLabel(row.submission?.maximum_family_amount_band, row.submission?.agreement_version), carnegieDepositChoiceLabel(row.submission?.deposit_choice, row.submission?.agreement_version, row.submission?.response), (row.submission?.help_options || []).map((value) => CARNEGIE_HELP_OPTIONS.find((item) => item.value === value)?.label || value).join("; "),
-      depositLabels[row.depositStatus], followUpLabels[row.tracking.follow_up_status], eligibilityLabels[row.tracking.eligibility_status], row.tracking.staff_note,
+      depositLabels[row.depositStatus], followUpLabels[row.tracking.follow_up_status], eligibilityLabels[row.tracking.eligibility_status], row.tracking.staff_note, row.tracking.carnegie_roster ? "Yes" : "No",
     ].map(quote).join(","));
     const blob = new Blob([[columns.map(quote).join(","), ...lines].join("\n")], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -106,6 +106,7 @@ function CarnegieTripWorkspaceContent() {
       </header>
 
       <section className={styles.metrics} aria-label="Commitment summary">
+        <Metric label="Carnegie yes" value={data.carnegieRosterYes ?? 0} note="Staff roster" />
         <Metric label="Serious yes" value={metrics.yes} />
         <Metric label="$50 received" value={metrics.paid} note={money(metrics.collected)} />
         <Metric label="Cannot pay $50 now" value={metrics.unableNow} />
@@ -144,6 +145,7 @@ function TripRow({ row, onChanged, setMessage }) {
   const [eligibilityStatus, setEligibilityStatus] = useState(row.tracking.eligibility_status);
   const [followUpStatus, setFollowUpStatus] = useState(row.tracking.follow_up_status);
   const [staffNote, setStaffNote] = useState(row.tracking.staff_note || "");
+  const [carnegieRoster, setCarnegieRoster] = useState(Boolean(row.tracking.carnegie_roster));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -153,6 +155,15 @@ function TripRow({ row, onChanged, setMessage }) {
     const body = await response.json().catch(() => ({})); setBusy(false);
     if (!response.ok) { setError(body.error || "Could not save."); return; }
     setMessage(`Follow-up saved for ${row.student.display_name}.`); onChanged();
+  }
+
+  async function saveRoster(value) {
+    setBusy(true); setError("");
+    const response = await fetch("/api/admin/carnegie-2027", { method:"PATCH", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ studentId:row.student.id, carnegieRoster:value }) });
+    const body = await response.json().catch(() => ({})); setBusy(false);
+    if (!response.ok) { setError(body.error || "Could not save."); return; }
+    setCarnegieRoster(value);
+    setMessage(`Carnegie ${value ? "yes" : "no"} saved for ${row.student.display_name}.`); onChanged();
   }
 
   async function refund() {
@@ -170,7 +181,7 @@ function TripRow({ row, onChanged, setMessage }) {
     <td>{row.submission ? <><strong>{carnegieResponseLabel(row.submission.response, row.submission.agreement_version)}</strong><span>{sourceLabels[row.submission.source]} · {displayDate(row.submission.created_at)}</span>{row.submission.source === "staff_verbal" ? <em>Unsigned verbal record</em> : <em>Signed family response</em>}</> : <em>No response</em>}</td>
     <td><strong className={`${styles.status} ${styles[row.depositStatus]}`}>{depositLabels[row.depositStatus]}</strong>{row.completedPayment ? <><span>{money(row.completedPayment.amount_cents)} · {row.completedPayment.method}</span><span>{displayDate(row.completedPayment.received_at || row.completedPayment.created_at)}</span><button type="button" className={styles.danger} disabled={busy} onClick={refund}>Refund through PayPal</button></> : row.charge ? <span>{money(row.charge.amount_cents)} active ledger charge</span> : null}</td>
     <td><strong>{row.contact.name || "No guardian listed"}</strong><span>{row.contact.email || "No email"}</span><span>{row.contact.phone || "No phone"}</span>{row.submission ? <details><summary>All form inputs</summary><p><b>Agreement:</b> {row.submission.agreement_version}</p><p><b>Maximum:</b> {carnegieAmountBandLabel(row.submission.maximum_family_amount_band, row.submission.agreement_version) || "Not applicable"}</p><p><b>Deposit choice:</b> {carnegieDepositChoiceLabel(row.submission.deposit_choice, row.submission.agreement_version, row.submission.response)}</p><p><b>Help:</b> {help.join("; ") || "None selected"}</p><p><b>Guardian signature:</b> {row.submission.guardian_signature || "Verbal - not signed"}</p><p><b>Student signature:</b> {row.submission.student_signature || "Verbal - not signed"}</p>{row.submission.note ? <p><b>Submission note:</b> {row.submission.note}</p> : null}</details> : null}</td>
-    <td><label>Eligibility<select value={eligibilityStatus} onChange={(event) => setEligibilityStatus(event.target.value)}>{Object.entries(eligibilityLabels).map(([value,label]) => <option value={value} key={value}>{label}</option>)}</select></label><label>Follow-up<select value={followUpStatus} onChange={(event) => setFollowUpStatus(event.target.value)}>{Object.entries(followUpLabels).map(([value,label]) => <option value={value} key={value}>{label}</option>)}</select></label><label>Staff note<textarea value={staffNote} onChange={(event) => setStaffNote(event.target.value)} rows="2" /></label><button type="button" disabled={busy} onClick={saveTracking}>{busy ? "Saving…" : "Save follow-up"}</button>{error ? <small className={styles.inlineError}>{error}</small> : null}</td>
+    <td><label>Carnegie<select value={carnegieRoster ? "yes" : "no"} disabled={busy} onChange={(event) => saveRoster(event.target.value === "yes")}><option value="no">No</option><option value="yes">Yes</option></select></label><label>Eligibility<select value={eligibilityStatus} onChange={(event) => setEligibilityStatus(event.target.value)}>{Object.entries(eligibilityLabels).map(([value,label]) => <option value={value} key={value}>{label}</option>)}</select></label><label>Follow-up<select value={followUpStatus} onChange={(event) => setFollowUpStatus(event.target.value)}>{Object.entries(followUpLabels).map(([value,label]) => <option value={value} key={value}>{label}</option>)}</select></label><label>Staff note<textarea value={staffNote} onChange={(event) => setStaffNote(event.target.value)} rows="2" /></label><button type="button" disabled={busy} onClick={saveTracking}>{busy ? "Saving…" : "Save follow-up"}</button>{error ? <small className={styles.inlineError}>{error}</small> : null}</td>
   </tr>;
 }
 

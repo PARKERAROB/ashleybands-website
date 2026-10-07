@@ -65,6 +65,7 @@
     "setup:checkout": "bash scripts/runtime.sh bash scripts/setup-checkout.sh",
     "test:carnegie-workspace": "node --test scripts/carnegie-workspace.test.mjs",
     "test:carnegie-workspace:http": "node --test scripts/carnegie-workspace-http.test.mjs",
+    "test:carnegie-roster:http": "node --test scripts/carnegie-roster-http.test.mjs",
     "test:percussion-preferences": "node --test scripts/percussion-preferences.test.mjs",
     "test:carnegie-letters": "node --test scripts/carnegie-letters.test.mjs",
     "test:carnegie-letters:e2e": "node --test --test-timeout=240000 scripts/carnegie-letters-e2e.test.mjs"
