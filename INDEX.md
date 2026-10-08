@@ -87,3 +87,9 @@ listed projection contract explicitly brings in a safe subset.
 - Signed links, email block and readout helpers: `lib/mediaConsent.mjs`; per-recipient dispatch in `lib/broadcast.js` when a body contains `{{media_consent}}` on its own line.
 - Family page and write path: `app/media-consent/`, `app/api/media-consent/route.js`.
 - Dry-run counts, preview copies and results: `node --env-file=.env.local scripts/media-consent.mjs dry-run|preview|results`. Tests: `scripts/media-consent.test.mjs` (in `npm run test:audience`).
+
+## Contact suppression (#188)
+
+- Opt-out list: `supabase/migrations/202610070002_contact_suppressions.sql` (`contact_suppressions`, service role only). Rows come from the private contacts graph via the private BandsofAHS sync script; no contacts data in this repo.
+- Check: `lib/contactSuppression.js` `dropSuppressed`, called in `resolveAudience` (preview reports `suppressedCount`) and in `sendPortalEmail`, the only Resend call. Lookup failure fails the send.
+- Tests: `scripts/contact-suppression.test.mjs` (in `npm run test:audience`), including a scan that fails on any provider call outside `lib/portalEmail.js`.

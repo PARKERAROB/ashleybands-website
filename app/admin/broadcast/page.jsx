@@ -334,7 +334,8 @@ export default function BroadcastPage() {
             <p style={{ fontSize: 15, fontWeight: 600 }}>
               {preview.count} recipient{preview.count === 1 ? "" : "s"}{" "}
               <span style={muted}>
-                ({preview.coveredStudentCount} of {preview.studentCount} students reached)
+                ({preview.coveredStudentCount} of {preview.studentCount} students reached
+                {preview.suppressedCount ? `; ${preview.suppressedCount} opted out, not sent` : ""})
               </span>
             </p>
             {preview.sample?.length > 0 && (
