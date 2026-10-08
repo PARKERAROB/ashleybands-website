@@ -92,4 +92,5 @@ listed projection contract explicitly brings in a safe subset.
 
 - Opt-out list: `supabase/migrations/202610070002_contact_suppressions.sql` (`contact_suppressions`, service role only). Rows come from the private contacts graph via the private BandsofAHS sync script; no contacts data in this repo.
 - Check: `lib/contactSuppression.js` `dropSuppressed`, called in `resolveAudience` (preview reports `suppressedCount`) and in `sendPortalEmail`, the only Resend call. Lookup failure fails the send.
-- Tests: `scripts/contact-suppression.test.mjs` (in `npm run test:audience`), including a scan that fails on any provider call outside `lib/portalEmail.js`.
+- Exemption (#190): only `sendPortalCodeEmail` and `sendFeePaymentReceiptEmail` pass `requestedByRecipient: true`; every other send stays filtered. Send-time skips count as `skipped` in broadcast and sponsor outreach.
+- Tests: `scripts/contact-suppression.test.mjs` and `scripts/contact-suppression-send.test.mjs` (in `npm run test:audience`), including a scan that fails on any provider call outside `lib/portalEmail.js`.

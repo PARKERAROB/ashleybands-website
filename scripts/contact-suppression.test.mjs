@@ -126,3 +126,24 @@ test("each named send path routes through the helper", () => {
   assert.match(read("app/api/admin/broadcast/send/route.js"), /from "@\/lib\/broadcast"/, "send route dispatches via lib/broadcast");
   assert.match(read("app/api/admin/broadcast/send/route.js"), /resolveAudience\(/, "send route resolves a filtered audience");
 });
+
+// #190: the opt-out bypass is pinned to the two self-requested emails by name.
+test("requestedByRecipient appears only in the sign-in code and receipt sends", () => {
+  const files = ["app", "lib", "scripts", "components"].flatMap(sourceFiles).filter((file) => /requestedByRecipient/.test(read(file)));
+  assert.deepEqual(files, ["lib/portalEmail.js"], "no other file may pass the bypass flag");
+  const email = read("lib/portalEmail.js");
+  const fnOf = (index) => [...email.slice(0, index).matchAll(/function (\w+)\(/g)].pop()[1];
+  const uses = [...email.matchAll(/requestedByRecipient: true/g)].map((m) => fnOf(m.index));
+  assert.deepEqual(uses.sort(), ["sendFeePaymentReceiptEmail", "sendPortalCodeEmail"]);
+  assert.match(email, /requestedByRecipient = false/, "the default stays filtered");
+  assert.match(email, /requestedByRecipient === true \?/, "only an explicit true bypasses");
+});
+
+test("broadcast and sponsor outreach count send-time skips as skipped", () => {
+  for (const file of ["lib/broadcast.js", "lib/businessOutreachSend.js"]) {
+    const source = read(file);
+    assert.match(source, /const update = sendFailureUpdate\(err\);/, file);
+    assert.match(source, /if \(update\.send_status === "skipped"\) skipped \+= 1;\s*else failed \+= 1;/, file);
+    assert.match(source, /return \{ sent, failed, skipped, remaining/, file);
+  }
+});
