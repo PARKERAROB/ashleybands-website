@@ -356,6 +356,9 @@ test("expected gifts are validated, pending only, and never read by a total (#11
   assert.equal(letters.pendingExpectedCents([{ status: "expected", amount_cents: 200000 }, { status: "confirmed", amount_cents: 5 }, { status: "cancelled", amount_cents: 7 }]), 200000);
   assert.deepEqual(letters.expectedConfirmation({ status: "expected", amount_cents: 200000, method: "employer_platform" }, { amount: "1990", method: "check" }), { amountCents: 199000, method: "check", adjusted: true });
   assert.throws(() => letters.expectedConfirmation({ status: "cancelled", amount_cents: 1, method: "cash" }, {}), /already/);
+  // An employer-platform or other method would withhold the public Carnegie total.
+  assert.throws(() => letters.expectedConfirmation({ status: "expected", amount_cents: 200000, method: "employer_platform" }, {}), /Check or Cash/);
+  assert.throws(() => letters.expectedConfirmation({ status: "expected", amount_cents: 200000, method: "check" }, { method: "other" }), /Check or Cash/);
   const readers = gitGrepFiles(["carnegie_expected_gifts"], ["app", "lib", "components", "scripts", "supabase"]);
   const allowed = new Set(["lib/carnegieLettersServer.js", "supabase/migrations/202609240003_carnegie_expected_gifts.sql", "scripts/carnegie-letters.test.mjs", "scripts/carnegie-letters-e2e.test.mjs", "scripts/security-boundary.test.mjs"]);
   for (const file of readers) assert.ok(allowed.has(file) || file.startsWith("app/api/admin/carnegie-expected-gifts/"), `${file} must not read expected gifts`);

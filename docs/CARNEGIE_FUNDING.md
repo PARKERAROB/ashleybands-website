@@ -12,7 +12,8 @@ trip expenses. Transfers between accounts and vendor payments are not new fundra
 `fee_payments` in the `carnegie_2027` category namespace and `sponsor_gifts` designated
 `carnegie-2027`. Family credits and adjustments are not money received. Offline cash/check
 payments require a recorded receipt date; staff confirmation of a check is not bank clearance.
-Other offline methods require reconciliation before a total is published. General sponsorships
+Other offline methods require reconciliation before a total is published, so confirming an
+expected gift requires check or cash (#193). General sponsorships
 remain excluded even when attributed to a student.
 
 PayPal capture reads must match ledger capture ID, invoice, USD amount, and completed/refund status.
