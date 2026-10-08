@@ -123,6 +123,8 @@ test("guardian contact lookups are batched for a large current audience", async 
             result = { data: [{ id: "active-1" }], error: null };
           } else if (table === "portal_student_people") {
             result = { data: people, error: null };
+          } else if (table === "contact_suppressions") {
+            result = { data: [], error: null };
           } else if (table === "portal_contact_methods") {
             const ids = filters.find(([op, field]) => op === "in" && field === "person_id")?.[2] || [];
             contactBatchSizes.push(ids.length);

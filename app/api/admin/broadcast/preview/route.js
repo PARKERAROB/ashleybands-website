@@ -19,15 +19,16 @@ export async function POST(req) {
     await logAuditRequired({
       actor: staffActor(authorization.staff),
       action: "preview_broadcast_audience",
-      table: "portal_students,portal_student_people,portal_contact_methods",
+      table: "portal_students,portal_student_people,portal_contact_methods,contact_suppressions",
       recordId: directStudentId || `audience:${audience.studentCount}`,
       route: "/api/admin/broadcast/preview",
-      changes: { direct_student_id: directStudentId || null, recipient_axis: recipientAxis, recipient_count: audience.count },
+      changes: { direct_student_id: directStudentId || null, recipient_axis: recipientAxis, recipient_count: audience.count, suppressed_count: audience.suppressedCount },
     });
     return privateJson({
       count: audience.count,
       studentCount: audience.studentCount,
       coveredStudentCount: audience.coveredStudentCount,
+      suppressedCount: audience.suppressedCount,
       sample: audience.recipients.slice(0, 10).map((row) => row.email),
       confirmationToken: createAudienceConfirmation({ staffId: authorization.staff.id, audienceFilter, recipientAxis, recipients: audience.recipients }),
     });
