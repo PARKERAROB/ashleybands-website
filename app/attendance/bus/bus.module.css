@@ -1,0 +1,87 @@
+.legs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.legs button {
+  min-height: var(--tap-target);
+  border: 1px solid var(--text-on-accent-muted);
+  border-radius: var(--radius-sm);
+  color: var(--text-on-accent);
+  background: transparent;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.legs .legActive {
+  border-color: var(--gold);
+  color: var(--ink);
+  background: var(--gold);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.chip {
+  min-height: var(--tap-target);
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  color: var(--text);
+  background: var(--surface-sunken);
+  font: inherit;
+  font-size: var(--step--1);
+  cursor: pointer;
+}
+
+.chip strong { font-size: var(--step-0); }
+.chipMissing { border-color: var(--danger); color: var(--danger); background: var(--danger-soft); }
+.chipDone { border-color: var(--success); color: var(--success); background: var(--success-soft); }
+.chipActive { outline: 3px solid var(--accent); outline-offset: 1px; }
+
+.missing {
+  max-width: 920px;
+  margin: var(--space-3) auto 0;
+  padding: 0 var(--space-4);
+  font-size: var(--step--1);
+}
+
+.missing p { margin: 0; }
+.allIn { color: var(--success); font-weight: 800; }
+
+.search {
+  max-width: 920px;
+  margin: var(--space-3) auto 0;
+  padding: 0 var(--space-4);
+}
+
+.marked { border-color: var(--success); background: var(--success-soft); }
+
+.rides {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+}
+
+.ride {
+  min-height: var(--tap-target);
+  padding: var(--space-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  background: var(--surface-raised);
+  font: inherit;
+  font-size: var(--step--1);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.ride:disabled { cursor: wait; opacity: 0.58; }
+.rideSelected { border-color: var(--success); color: var(--text-on-accent); background: var(--success); }

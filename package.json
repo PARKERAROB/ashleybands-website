@@ -22,7 +22,7 @@
     "test:portal-mirror": "node --test scripts/portal-mirror-plan.test.mjs",
     "assets:sync": "node scripts/sync-assets.mjs",
     "lint:provenance": "node scripts/provenance-lint.mjs",
-    "test:attendance": "node --test scripts/attendance-events.test.mjs",
+    "test:attendance": "node --test scripts/attendance-events.test.mjs scripts/attendance-bus.test.mjs",
     "test:attendance-program-live": "node --test scripts/attendance-program-live.test.mjs",
     "test:attendance-school-live": "node --test scripts/school-attendance-live.test.mjs",
     "test:attendance-workspace-prototype": "node --test scripts/attendance-workspace-prototype.test.mjs && npm run test:attendance && npm run test:attendance-program-live && npm run test:attendance-school-live",

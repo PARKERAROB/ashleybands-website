@@ -11,9 +11,11 @@ import {
   attendanceAuditTables,
   completeAttendanceEvent,
   getAttendanceSheet,
+  getBusChecks,
   prepareAttendanceEvent,
   saveApprovedAttendanceException,
   updateAttendanceObservation,
+  updateBusCheck,
   updateStaffAttendance
 } from "@/lib/attendance";
 import { shouldAutoPrepareAttendanceOccurrence } from "@/lib/attendanceEvents.mjs";
@@ -80,7 +82,8 @@ async function authorize(request, capability, occurrenceKey, { allowSharedPin = 
 }
 
 export async function GET(request) {
-  const occurrenceKey = new URL(request.url).searchParams.get("occurrence") || undefined;
+  const searchParams = new URL(request.url).searchParams;
+  const occurrenceKey = searchParams.get("occurrence") || undefined;
   const access = await authorize(request, STAFF_CAPABILITIES.ATTENDANCE_EVENTS_READ, occurrenceKey, {
     allowSharedPin: true
   });
@@ -120,6 +123,7 @@ export async function GET(request) {
     if (occurrenceKey && access.authorization.staff && staffUsesAssignedScopes(access.authorization.staff)) {
       sheet.occurrences = sheet.occurrences.filter((event) => event.occurrenceKey === occurrenceKey);
     }
+    if (searchParams.get("bus")) sheet.busChecks = await getBusChecks(sheet.event.id);
     await logAudit({
       actor: access.session.actor,
       action: "attendance.sheet.read",
@@ -128,7 +132,8 @@ export async function GET(request) {
         occurrence_key: sheet.event.occurrenceKey,
         row_count: sheet.students.length,
         staff_row_count: sheet.staff.length,
-        exception_count: sheet.exceptions.length
+        exception_count: sheet.exceptions.length,
+        bus_check_count: sheet.busChecks?.length ?? null
       },
       route: "/api/attendance"
     });
@@ -222,6 +227,27 @@ export async function PATCH(request) {
 
     const studentId = String(body.studentId || "").trim();
     if (!studentId) return json({ error: "Choose a student." }, 400);
+    if (body.bus) {
+      const result = await updateBusCheck({
+        occurrenceKey,
+        studentId,
+        leg: String(body.bus.leg || ""),
+        ride: body.bus.ride ? String(body.bus.ride) : null
+      });
+      await logAudit({
+        actor: access.session.actor,
+        action: "attendance.bus.updated",
+        table: "attendance_bus_checks,portal_students,attendance_events",
+        recordId: result.student.id,
+        changes: {
+          occurrence_key: result.event.occurrenceKey,
+          leg: result.check.leg,
+          ride: result.check.ride
+        },
+        route: "/api/attendance"
+      });
+      return json(result.check);
+    }
     if (body.exception) {
       const result = await saveApprovedAttendanceException({
         occurrenceKey,

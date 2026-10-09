@@ -773,7 +773,7 @@ export default function AttendanceClient({ initialOccurrenceKey = "", initialStu
   );
 }
 
-function AttendanceGate({ onOpen }) {
+export function AttendanceGate({ onOpen, title = "Program Attendance" }) {
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -802,7 +802,7 @@ function AttendanceGate({ onOpen }) {
     <main className={`${styles.shell} ${styles.gateShell}`}>
       <form className={styles.gate} onSubmit={submit}>
         <p className={styles.eyebrow}>Ashley Bands · Private leadership tool</p>
-        <h1>Program Attendance</h1>
+        <h1>{title}</h1>
         <p>Use the established attendance PIN to open the shared event roster.</p>
         <label htmlFor="attendance-pin">Attendance PIN</label>
         <input
