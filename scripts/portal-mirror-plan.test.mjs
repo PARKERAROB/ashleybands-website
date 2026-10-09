@@ -8,6 +8,7 @@ import {
   plannedPersonUpdate,
   plannedRelationshipUpdate,
   plannedStudentUpdate,
+  rowsByColumnShape,
   staffNotesVisibleToFamilies,
   withdrawnSchoolEmailContacts
 } from "./lib/portal-mirror-plan.mjs";
@@ -67,6 +68,19 @@ test("approved family preferred name and participation are kept", () => {
     overlayFields(rosterStudent, planned).sort(),
     ["band_period_2026", "display_name", "instrument_2026", "preferred_first"].sort()
   );
+});
+
+test("rows with different columns upsert in separate batches so none is nulled", () => {
+  const overlay = familyOverlay([{ student_id: "uuid-a", field_name: "participation_bundle", status: "approved" }]);
+  const withOverlay = plannedStudentUpdate(rosterStudent, { ...hostedStudent, band_period_2026: "2" }, overlay);
+  const plain = plannedStudentUpdate({ ...rosterStudent, source_student_id: "student-b" }, { ...hostedStudent, id: "uuid-b" }, none);
+  const batches = rowsByColumnShape([withOverlay, plain]);
+  assert.equal(batches.length, 2);
+  for (const batch of batches) {
+    const shape = Object.keys(batch[0]).sort().join(",");
+    assert.ok(batch.every((row) => Object.keys(row).sort().join(",") === shape));
+  }
+  assert.equal(rowsByColumnShape([plain, { ...plain }]).length, 1);
 });
 
 test("pending or rejected family requests do not protect a field", () => {

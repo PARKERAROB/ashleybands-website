@@ -24,6 +24,7 @@ import {
   plannedPersonUpdate,
   plannedRelationshipUpdate,
   plannedStudentUpdate,
+  rowsByColumnShape,
   staffNotesVisibleToFamilies,
   withdrawnSchoolEmailContacts
 } from "./lib/portal-mirror-plan.mjs";
@@ -155,6 +156,8 @@ const portalStudents = students.map((row) => {
     instrument_2026: row.instrument || null,
     marching_2026: row.marching_2026 || null,
     mb_role_2026: row.mb_role_2026 || null,
+    // Roster-owned marching part (BandsofAHS students.csv mb_part_2026, #195).
+    marching_assignment_2026: row.mb_part_2026 || null,
     // Rob 2026-08-18: the canonical @student.nhcs.net address is the narrow
     // contact-value exception so every student can request a portal code.
     school_email: row.school_email || null,
@@ -640,10 +643,12 @@ async function finishSyncRun(id, status, fields) {
 
 async function upsert(table, rows, onConflict) {
   if (!rows.length) return;
-  const { error } = await supabase
-    .from(table)
-    .upsert(rows, { onConflict });
-  if (error) throw new Error(`${table} upsert failed: ${error.message}`);
+  for (const batch of rowsByColumnShape(rows)) {
+    const { error } = await supabase
+      .from(table)
+      .upsert(batch, { onConflict });
+    if (error) throw new Error(`${table} upsert failed: ${error.message}`);
+  }
   console.log(`upserted ${rows.length} ${table}`);
 }
 

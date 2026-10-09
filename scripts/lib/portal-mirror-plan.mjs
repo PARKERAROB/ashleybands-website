@@ -55,6 +55,13 @@ export function plannedStudentUpdate(row, existing, overlay) {
   return planned;
 }
 
+// A batch upsert sends the union of its rows' columns and writes NULL where a
+// row lacks one, so a column carried only by overlay rows would be cleared on
+// every other row (#195). Upsert each column shape separately.
+export function rowsByColumnShape(rows) {
+  return [...Map.groupBy(rows, (row) => Object.keys(row).sort().join(",")).values()];
+}
+
 export function plannedPersonUpdate(row, existing, overlay) {
   const planned = { ...row };
   if (overlay.personName.has(existing.id)) {
