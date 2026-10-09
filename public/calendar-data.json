@@ -503,11 +503,11 @@
   "id": "evt-0015",
   "title": "White Oak competition",
   "start": "2026-10-10T08:00",
-  "end": "2026-10-11T00:00",
+  "end": "2026-10-10T19:00",
   "all_day": false,
   "category": "MB-Competition",
-  "location": "White Oak HS",
-  "description": "Call time 8:00 a.m. in the band room. Rehearsal 8:30-11:30 a.m.; load out, lunch and dress 11:30 a.m.-12:30 p.m. Buses depart Ashley at 12:30 p.m. Ashley performs at 4:30 p.m.; awards at 9:00 p.m. White Oak High School, 1001 Piney Green Road, Jacksonville."
+  "location": "White Oak HS (indoors, gym)",
+  "description": "Moved indoors. Call time 8:00 a.m. in the band room. Rehearsal 8:00-10:15 a.m.; dress, pack and load until 11:30 a.m. Buses depart Ashley at 11:30 a.m. Ashley performs at 3:00 p.m. in the White Oak gym; awards at 4:00 p.m. Back at Ashley about 7:00 p.m. White Oak High School, 1001 Piney Green Road, Jacksonville."
  },
  {
   "id": "evt-0124",
