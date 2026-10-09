@@ -205,3 +205,20 @@ test("the director report keeps plans and actual departures visibly separate", (
   assert.match(report.details.join("\n"), /APPROVED EARLY DEPARTURE/);
   assert.match(report.details.join("\n"), /STAFF LATE: Alex Director/);
 });
+
+test("marching section comes from the roster role; percussion splits by marching assignment (#198)", async () => {
+  const { attendanceSectionForStudent } = await import("../lib/marchingBandOrder.js");
+  assert.equal(attendanceSectionForStudent({
+    mb_role_2026: "Color Guard", role_snapshot: "Dance and Flag",
+    marching_assignment_2026: "Dance and Flag", instrument_2026: "Bassoon"
+  }), "Color Guard");
+  assert.equal(attendanceSectionForStudent({
+    mb_role_2026: "Percussion", role_snapshot: "Percussion",
+    marching_assignment_2026: "Bass Drum 4", instrument_2026: "Percussion"
+  }), "Battery Percussion");
+  assert.equal(attendanceSectionForStudent({
+    mb_role_2026: "Percussion", role_snapshot: "Percussion",
+    marching_assignment_2026: "Marimba 1", instrument_2026: "Snare"
+  }), "Front Ensemble");
+  assert.equal(attendanceSectionForStudent({ role_snapshot: "Trumpet" }), "Trumpet");
+});
