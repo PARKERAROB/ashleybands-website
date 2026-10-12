@@ -89,6 +89,12 @@ listed projection contract explicitly brings in a safe subset.
 - Family page and write path: `app/media-consent/`, `app/api/media-consent/route.js`.
 - Dry-run counts, preview copies and results: `node --env-file=.env.local scripts/media-consent.mjs dry-run|preview|results`. Tests: `scripts/media-consent.test.mjs` (in `npm run test:audience`).
 
+## Carnegie link card, broadcast block and portal card (#200, #204)
+
+- Card PNG: `app/support/[code]/carnegie/card.png/route.js`. Public, first name only, no amounts, noindex, 404 for unknown or inactive codes. The QR encodes `carnegieStudentFullUrl` (`lib/carnegieLetters.mjs`), the same link Music Notes shows.
+- Broadcast block: `lib/carnegieLink.mjs`; per-recipient dispatch in `lib/broadcast.js` when a body contains `{{carnegie_link}}` on its own line. One block per linked active student with an active code; a fallback line otherwise. Reads codes only; never creates them. Tests: `scripts/carnegie-link.test.mjs` (in `npm run test:audience`).
+- Portal home card: `NotesHomeCard` in `app/portal/carnegie-notes/CarnegieNotesClient.jsx`, shown above the workspace by `app/portal/review/PortalReviewClient.jsx` only when the notes gate is `on`.
+
 ## Contact suppression (#188)
 
 - Opt-out list: `supabase/migrations/202610070002_contact_suppressions.sql` (`contact_suppressions`, service role only). Rows come from the private contacts graph via the private BandsofAHS sync script; no contacts data in this repo.

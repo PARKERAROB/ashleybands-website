@@ -114,3 +114,4 @@
 .sendButton { min-height: 44px; padding: 0 14px; background: #fff; border: 1.5px solid var(--garnet); border-radius: 10px; color: var(--garnet-dark); font: 700 14px Inter, sans-serif; display: inline-flex; align-items: center; text-decoration: none; cursor: pointer; }
 .sentRow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px; color: #4a4340; }
 .chipButton { min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid #cfc6b3; background: #fff; font: 600 13px Inter, sans-serif; color: var(--garnet-dark); cursor: pointer; text-transform: capitalize; }
+.homeCard { max-width: 560px; }

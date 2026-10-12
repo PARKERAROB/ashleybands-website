@@ -3490,6 +3490,14 @@ h2 {
   background: #fff;
   box-shadow: 0 16px 40px rgba(24, 34, 48, 0.06);
 }
+/* Music Notes card above the workspace, first thing after sign-in (#204). */
+.portal-music-notes {
+  margin-bottom: var(--portal-space-4);
+  padding: var(--portal-space-6);
+  border: 1px solid var(--portal-line);
+  border-radius: 12px;
+  background: #fff;
+}
 .portal-profile-rail {
   min-width: 0;
   padding: var(--portal-space-8) var(--portal-space-6);

@@ -95,7 +95,7 @@ test("route rejects bad tokens with the family error and never records for bots"
 
 test("broadcasts without the placeholder are sent unchanged", () => {
   const dispatch = readFileSync("lib/broadcast.js", "utf8");
-  assert.match(dispatch, /hasMediaConsentPlaceholder\(broadcast\.body_html\)/);
+  assert.match(dispatch, /hasPersonalPlaceholder\(broadcast\.body_html\)/);
   assert.match(dispatch, /html: personal \? personal\.html : broadcast\.body_html/);
 });
 

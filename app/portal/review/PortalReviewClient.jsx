@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import InstrumentRequestSection from "./InstrumentRequestSection";
 import PortalSectionIcon from "./PortalSectionIcon";
 import PortalErrorMessage from "../PortalErrorMessage";
+import { NotesHomeCard } from "../carnegie-notes/CarnegieNotesClient";
 import { PORTAL_SIGNED_OUT_MESSAGE, PORTAL_TROUBLE_MESSAGE, portalErrorText } from "@/lib/portalFamilyMessages";
 import {
   BAND_PERIOD_OPTIONS,
@@ -90,6 +91,7 @@ export default function PortalReviewClient({ carnegieNotesOpen = false }) {
   const [state, setState] = useState({ status: "loading", message: "Opening your profile..." });
   const [profile, setProfile] = useState(null);
   const [selectedStudentId, setSelectedStudentId] = useState("");
+  const [notesStudents, setNotesStudents] = useState([]);
 
   async function loadProfile() {
     let res;
@@ -128,8 +130,21 @@ export default function PortalReviewClient({ carnegieNotesOpen = false }) {
     };
   }, []);
 
+  // Music Notes card first (#204), only when the notes gate is open. A failed load shows no card.
+  const signedIn = Boolean(profile);
+  useEffect(() => {
+    if (!carnegieNotesOpen || !signedIn) return undefined;
+    let cancelled = false;
+    fetch("/api/portal/carnegie-notes", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : {}))
+      .then((json) => { if (!cancelled) setNotesStudents(json.students || []); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [carnegieNotesOpen, signedIn]);
+
   const students = profile?.students || [];
   const selectedStudent = students.find((student) => student.id === selectedStudentId) || students[0] || null;
+  const notesStudent = selectedStudent ? notesStudents.find((student) => student.id === selectedStudent.id) || null : null;
 
   return (
     <main className="portal-shell portal-review-shell">
@@ -185,6 +200,8 @@ export default function PortalReviewClient({ carnegieNotesOpen = false }) {
               </div>
             ) : null}
 
+            {notesStudent ? <MusicNotesSection student={notesStudent} /> : null}
+
             <div className="portal-family-workspace">
               <StudentRail
                 key={selectedStudent.id}
@@ -213,6 +230,16 @@ export default function PortalReviewClient({ carnegieNotesOpen = false }) {
         ) : null}
       </section>
     </main>
+  );
+}
+
+function MusicNotesSection({ student }) {
+  return (
+    <section className="portal-music-notes" aria-labelledby="portal-music-notes-heading">
+      <p className="eyebrow">Carnegie Hall 2027</p>
+      <h2 id="portal-music-notes-heading">{student.firstName}&apos;s Music Notes</h2>
+      <NotesHomeCard student={student} />
+    </section>
   );
 }
 

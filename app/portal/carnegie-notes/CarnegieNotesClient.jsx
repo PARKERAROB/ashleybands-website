@@ -8,12 +8,12 @@ import CarnegieBandProgress from "@/components/CarnegieBandProgress";
 import {
   LETTER_STATUS_LABELS,
   NOTES_GOAL_CENTS,
-  PUBLIC_SITE,
   REPORTED_GIFT_ENVELOPE_LINE,
   REPORTED_GIFT_STATUS_LABELS,
   pendingNotesLine,
   TRIP_ESTIMATE_LINE,
   carnegieShareText,
+  carnegieStudentFullUrl,
   letterIsPrintable,
   letterMailto,
   letterSendActions,
@@ -127,10 +127,30 @@ export default function CarnegieNotesClient({ previewMode = false }) {
   );
 }
 
-function StudentNotes({ student, reload }) {
+// Amount toward the goal and the chart. Shared with the portal home card (#204).
+export function NotesProgress({ student, children }) {
+  return (
+    <section className={styles.card} aria-labelledby="notes-heading">
+      <h2 id="notes-heading" className={styles.srOnly}>Music notes</h2>
+      <div className={styles.amountRow}>
+        <span className={styles.amount}>{dollars(student.notesCents)}</span>
+        <span className={styles.of}>of my {dollars(NOTES_GOAL_CENTS)}</span>
+      </div>
+      <NotesChart className={styles.chart} confirmedCents={student.notesCents} pendingCents={student.pendingCents} />
+      <p className={student.notesCents >= NOTES_GOAL_CENTS ? styles.filled : styles.muted}>{notesStatusLine(student.notesCents)}</p>
+      {student.pendingCents ? (
+        <p className={styles.pendingLine}><span className={styles.pendingSwatch} aria-hidden="true" />{pendingNotesLine(student.pendingCents)}</p>
+      ) : null}
+      {children}
+    </section>
+  );
+}
+
+// The student's link with QR, Copy link and Text my link. Nothing when there is no link.
+export function NotesLinkCard({ student }) {
   const [copied, setCopied] = useState(false);
-  const full = student.link ? `https://${PUBLIC_SITE}${student.link.path}` : "";
-  const printable = student.letters.filter(letterIsPrintable);
+  if (!student.link) return null;
+  const full = carnegieStudentFullUrl(linkCode(student));
 
   async function copy() {
     try {
@@ -143,38 +163,48 @@ function StudentNotes({ student, reload }) {
   }
 
   return (
-    <div className={styles.stack}>
-      <section className={styles.card} aria-labelledby="notes-heading">
-        <h2 id="notes-heading" className={styles.srOnly}>Music notes</h2>
-        <div className={styles.amountRow}>
-          <span className={styles.amount}>{dollars(student.notesCents)}</span>
-          <span className={styles.of}>of my {dollars(NOTES_GOAL_CENTS)}</span>
+    <section className={styles.linkCard} aria-labelledby="link-heading">
+      <div className={styles.qr}><QRCodeSVG value={full} size={88} level="M" marginSize={1} /></div>
+      <div className={styles.linkBody}>
+        <h2 id="link-heading" className={styles.linkLabel}>My Carnegie link</h2>
+        <p className={styles.linkUrl}>{student.link.readable}</p>
+        <div className={styles.linkButtons}>
+          <button type="button" className={styles.gold} onClick={copy}>{copied ? "Copied" : "Copy link"}</button>
+          <ShareTextButton code={linkCode(student)} className={styles.goldOutline} label="Text my link" />
         </div>
-        <NotesChart className={styles.chart} confirmedCents={student.notesCents} pendingCents={student.pendingCents} />
-        <p className={student.notesCents >= NOTES_GOAL_CENTS ? styles.filled : styles.muted}>{notesStatusLine(student.notesCents)}</p>
-        {student.pendingCents ? (
-          <p className={styles.pendingLine}><span className={styles.pendingSwatch} aria-hidden="true" />{pendingNotesLine(student.pendingCents)}</p>
-        ) : null}
+        <span className={styles.srOnly} aria-live="polite">{copied ? "Link copied" : ""}</span>
+      </div>
+    </section>
+  );
+}
+
+// The Family Portal home card (#204): progress, link and QR, and the two next steps.
+export function NotesHomeCard({ student }) {
+  return (
+    <div className={`${styles.stack} ${styles.homeCard}`}>
+      <NotesProgress student={student} />
+      <NotesLinkCard student={student} />
+      <div className={styles.actions}>
+        <Link className={styles.outline} href={`/portal/carnegie-notes/letter?student=${student.id}`}>Write a letter</Link>
+        <Link className={styles.outline} href="/portal/carnegie-notes">All my Music Notes</Link>
+      </div>
+    </div>
+  );
+}
+
+function StudentNotes({ student, reload }) {
+  const printable = student.letters.filter(letterIsPrintable);
+
+  return (
+    <div className={styles.stack}>
+      <NotesProgress student={student}>
         <dl className={styles.lines}>
           <div><dt>Deposit paid</dt><dd>{student.depositPaidCents ? dollars(student.depositPaidCents) : "Not recorded yet"}</dd></div>
           <div><dt>Raised through my notes</dt><dd>{dollars(student.notesCents)}</dd></div>
         </dl>
-      </section>
+      </NotesProgress>
 
-      {student.link ? (
-        <section className={styles.linkCard} aria-labelledby="link-heading">
-          <div className={styles.qr}><QRCodeSVG value={full} size={88} level="M" marginSize={1} /></div>
-          <div className={styles.linkBody}>
-            <h2 id="link-heading" className={styles.linkLabel}>My Carnegie link</h2>
-            <p className={styles.linkUrl}>{student.link.readable}</p>
-            <div className={styles.linkButtons}>
-              <button type="button" className={styles.gold} onClick={copy}>{copied ? "Copied" : "Copy link"}</button>
-              <ShareTextButton code={linkCode(student)} className={styles.goldOutline} label="Text my link" />
-            </div>
-            <span className={styles.srOnly} aria-live="polite">{copied ? "Link copied" : ""}</span>
-          </div>
-        </section>
-      ) : null}
+      <NotesLinkCard student={student} />
 
       <div className={styles.actions}>
         <Link className={styles.outline} href={`/portal/carnegie-notes/letter?student=${student.id}`}>Write a letter</Link>
