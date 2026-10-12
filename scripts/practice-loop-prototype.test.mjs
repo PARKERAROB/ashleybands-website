@@ -251,3 +251,12 @@ test("prototype storage is private and dashboard reads are authorized and audite
   assert.match(managementMigration, /removed_at/i);
   assert.match(managementMigration, /revoke all on function[^;]+public, anon, authenticated/is);
 });
+
+test("Let Freedom Ring! keeps Rob's rehearsal map through measure 107", async () => {
+  const piece = getPracticePiece("let-freedom-ring");
+  const ranges = practiceRanges(piece);
+  assert.deepEqual(ranges.map(({ start }) => start), [1, 5, 13, 21, 31, 38, 49, 57, 67, 73, 83, 87, 93, 102]);
+  assert.equal(ranges.at(-1).end, 107);
+  const page = await readFile(new URL("../app/practice/let-freedom-ring/page.jsx", import.meta.url), "utf8");
+  assert.match(page, /pieceSlug="let-freedom-ring"/);
+});
