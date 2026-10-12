@@ -142,6 +142,16 @@ export default function RoomBoard({ slug, initialData }) {
                   <BookOpen size="1em" aria-hidden="true" /> Fundamentals and Lesson
                 </h3>
                 <List items={plan.fundamentals} empty="Add fundamentals" className={styles.planList} />
+                {data.practice?.url ? (
+                  <div className={styles.qrPanel}>
+                    <QRCodeSVG value={data.practice.url} size={220} marginSize={2} bgColor="#ffffff" fgColor="#000000" className={styles.qr} title={data.practice.url} />
+                    <p className={styles.qrUrl}>
+                      <QrCode size="1em" aria-hidden="true" /> {data.practice.label || "Practice Loop"}
+                      <br />
+                      {data.practice.url.replace(/^https?:\/\//, "")}
+                    </p>
+                  </div>
+                ) : null}
               </div>
               <div>
                 <h3 className={styles.partTitle}>
@@ -168,17 +178,6 @@ export default function RoomBoard({ slug, initialData }) {
             </h2>
             <List items={[...(data.nextWeek?.program || []), ...(cls.nextWeek || [])]} empty="Add next week." />
           </section>
-          {data.practice?.url ? (
-            <section className={`${styles.panel} ${styles.qrPanel}`}>
-              <QRCodeSVG value={data.practice.url} size={220} marginSize={2} bgColor="#ffffff" fgColor="#000000" className={styles.qr} title={data.practice.url} />
-              <div>
-                <h2>
-                  <QrCode size="1em" aria-hidden="true" /> {data.practice.label || "Practice Loop"}
-                </h2>
-                <p className={styles.qrUrl}>{data.practice.url.replace(/^https?:\/\//, "")}</p>
-              </div>
-            </section>
-          ) : null}
         </div>
       </div>
 
