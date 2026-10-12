@@ -117,7 +117,7 @@ export default async function CarnegieLetterPacketPage({ params }) {
           <p className={styles.ownText}>{text.meaning}</p>
           <p className={styles.ownText}>{text.help}</p>
         </div>
-        <p className={styles.body}>Would you help me fill my music notes? My part of the team goal is <strong>$500</strong>, and every $5 or $10 note makes a difference. Every gift goes to the band&apos;s Carnegie campaign and lowers the trip cost for all of us.</p>
+        <p className={styles.body}>Would you help me fill my music notes? My part of the team goal is <strong>$2,500</strong>, and every $25 or $50 note makes a difference. Every gift goes to the band&apos;s Carnegie campaign and lowers the trip cost for all of us.</p>
         <p className={styles.body}>{text.closing}</p>
         <p className={styles.body}>{text.signoff}<br /><span className={styles.signature}>{name}</span></p>
         <footer className={styles.frontFoot}>
@@ -152,7 +152,7 @@ export default async function CarnegieLetterPacketPage({ params }) {
             <p className={styles.studentLabel}>Student:<br /><span className={styles.studentName}>{name}</span></p>
           </div>
           <div className={styles.backRight}>
-            <p className={styles.goal}>Goal: <span>$500</span></p>
+            <p className={styles.goal}>Goal: <span>$2,500</span></p>
             <NotesChart blank className={styles.chart} />
           </div>
         </div>

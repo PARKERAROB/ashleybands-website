@@ -1,4 +1,4 @@
-import { NOTES_CHART_GEOMETRY as G, notesChartSummary } from "@/lib/carnegieLetters.mjs";
+import { NOTES_CHART_GEOMETRY as G, NOTES_GOAL_CENTS, notesChartSummary } from "@/lib/carnegieLetters.mjs";
 
 // "Fill my Music Notes" chart (#106): two beamed eighth notes made of 62 $5 and $10 squares.
 // Filled squares come only from confirmed Carnegie gifts credited to the student. `blank` draws
@@ -17,8 +17,8 @@ export default function NotesChart({ confirmedCents = 0, pendingCents = 0, blank
   const summary = notesChartSummary(blank ? 0 : confirmedCents, blank ? 0 : pendingCents);
   const pendingText = summary.pendingCount ? ` ${summary.pendingCount} more waiting for staff to confirm.` : "";
   const label = title || (blank
-    ? "Music notes chart: 62 notes of $5 and $10, $500 in all."
-    : `${dollars(confirmedCents)} of $500 in music notes. ${summary.filledCount} of ${summary.total} notes filled.${pendingText}`);
+    ? `Music notes chart: 62 notes of $25 and $50, ${dollars(NOTES_GOAL_CENTS)} in all.`
+    : `${dollars(confirmedCents)} of ${dollars(NOTES_GOAL_CENTS)} in music notes. ${summary.filledCount} of ${summary.total} notes filled.${pendingText}`);
   const { beam } = G;
   return (
     <svg className={className} viewBox={`0 0 ${G.width} ${G.height}`} role="img" aria-label={label} xmlns="http://www.w3.org/2000/svg">

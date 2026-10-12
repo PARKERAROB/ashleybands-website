@@ -38,39 +38,39 @@ const NEW_SURFACES = [
 const ENTRY_POINTS = NEW_SURFACES.filter((file) => /(page\.jsx|route\.js)$/.test(file));
 
 // ---- Chart fill rule -------------------------------------------------------------------------
-test("the chart has 62 squares of $5 and $10 totaling $500, shaped as the approved notes", () => {
+test("the chart has 62 squares of $25 and $50 totaling $2,500, shaped as the approved notes", () => {
   const squares = letters.notesChartSquares(0);
   assert.equal(squares.length, 62);
-  assert.equal(squares.reduce((sum, square) => sum + square.value, 0), 500);
-  assert.ok(squares.every((square) => square.value === 5 || square.value === 10));
+  assert.equal(squares.reduce((sum, square) => sum + square.value, 0), 2500);
+  assert.ok(squares.every((square) => square.value === 25 || square.value === 50));
   const byGroup = (group) => squares.filter((square) => square.group === group);
   assert.equal(byGroup("headL").length, 16);
   assert.equal(byGroup("headR").length, 16);
-  assert.equal(byGroup("headL").reduce((s, q) => s + q.value, 0) + byGroup("headR").reduce((s, q) => s + q.value, 0), 260);
+  assert.equal(byGroup("headL").reduce((s, q) => s + q.value, 0) + byGroup("headR").reduce((s, q) => s + q.value, 0), 1300);
   assert.equal(byGroup("stemL").length + byGroup("stemR").length + byGroup("beamLow").length + byGroup("beamHigh").length, 30);
-  assert.equal(letters.NOTES_GOAL_CENTS, 50_000);
+  assert.equal(letters.NOTES_GOAL_CENTS, 250_000);
 });
 
 test("squares fill in order only from the confirmed amount", () => {
   assert.equal(letters.notesChartSummary(0).filledCount, 0);
-  assert.equal(letters.notesChartSummary(499).filledCount, 0, "under $5 fills nothing");
-  assert.equal(letters.notesChartSummary(500).filledCount, 1);
-  assert.equal(letters.notesChartSummary(700).filledCents, 500, "$7 fills one $5 square");
-  const ten = letters.notesChartSquares(1000);
-  assert.deepEqual(ten.filter((s) => s.filled).map((s) => s.index), [0, 1]);
-  // A $10 square that does not fit is skipped; a later $5 square still fills.
-  const twenty = letters.notesChartSquares(2000);
-  assert.deepEqual(twenty.filter((s) => s.filled).map((s) => s.value), [5, 5, 5, 5]);
-  assert.equal(letters.notesChartSummary(2000).filledCents, 2000);
-  for (let dollars = 0; dollars <= 500; dollars += 5) {
+  assert.equal(letters.notesChartSummary(2499).filledCount, 0, "under $25 fills nothing");
+  assert.equal(letters.notesChartSummary(2500).filledCount, 1);
+  assert.equal(letters.notesChartSummary(3500).filledCents, 2500, "$35 fills one $25 square");
+  const fifty = letters.notesChartSquares(5000);
+  assert.deepEqual(fifty.filter((s) => s.filled).map((s) => s.index), [0, 1]);
+  // A $50 square that does not fit is skipped; a later $25 square still fills.
+  const hundred = letters.notesChartSquares(10_000);
+  assert.deepEqual(hundred.filter((s) => s.filled).map((s) => s.value), [25, 25, 25, 25]);
+  assert.equal(letters.notesChartSummary(10_000).filledCents, 10_000);
+  for (let dollars = 0; dollars <= 2500; dollars += 25) {
     const summary = letters.notesChartSummary(dollars * 100);
     assert.ok(summary.filledCents <= dollars * 100, `never overfills at $${dollars}`);
-    assert.ok(dollars * 100 - summary.filledCents <= 1000, `leaves at most one note's gap at $${dollars}`);
+    assert.ok(dollars * 100 - summary.filledCents <= 5000, `leaves at most one note's gap at $${dollars}`);
   }
-  assert.equal(letters.notesChartSummary(50_000).filledCount, 62);
-  assert.equal(letters.notesChartSummary(90_000).filledCount, 62, "above $500 every square is filled");
-  assert.equal(letters.notesChartSummary(50_000).complete, true);
-  assert.equal(letters.notesChartSummary(49_999).complete, false);
+  assert.equal(letters.notesChartSummary(250_000).filledCount, 62);
+  assert.equal(letters.notesChartSummary(450_000).filledCount, 62, "above $2,500 every square is filled");
+  assert.equal(letters.notesChartSummary(250_000).complete, true);
+  assert.equal(letters.notesChartSummary(249_999).complete, false);
 });
 
 test("pending reported gifts never fill a square and change no confirmed figure", () => {
@@ -88,12 +88,12 @@ test("pending reported gifts never fill a square and change no confirmed figure"
 // ---- Wording rules ---------------------------------------------------------------------------
 test("student wording follows the director's rules", () => {
   assert.equal(letters.TRIP_ESTIMATE_LINE, "Estimated trip cost: $2,500 per student. Everything the band raises brings that down for everyone.");
-  assert.equal(letters.notesStatusLine(50_000), "You filled your notes! Keep going: every extra note helps a bandmate get there.");
-  assert.equal(letters.notesStatusLine(70_000), letters.NOTES_FILLED_LINE);
-  assert.notEqual(letters.notesStatusLine(49_900), letters.NOTES_FILLED_LINE);
+  assert.equal(letters.notesStatusLine(250_000), "You filled your notes! Keep going: every extra note helps a bandmate get there.");
+  assert.equal(letters.notesStatusLine(300_000), letters.NOTES_FILLED_LINE);
+  assert.notEqual(letters.notesStatusLine(249_900), letters.NOTES_FILLED_LINE);
   assert.equal(letters.CAMPAIGN_GIFT_LINE, "Every gift goes to the band's Carnegie campaign and lowers the trip cost for every student who goes.");
   const composed = letters.composeCarnegieLetter({ recipientType: "someone_i_know", recipientName: "Aunt Lee", meaningText: "m", helpText: "h", firstName: "Alex Sample", code: "abcDEF123456" });
-  assert.equal(composed.ask, "Would you help me fill my music notes? My part of the team goal is $500, and every $5 or $10 note makes a difference. Every gift goes to the band's Carnegie campaign and lowers the trip cost for all of us.");
+  assert.equal(composed.ask, "Would you help me fill my music notes? My part of the team goal is $2,500, and every $25 or $50 note makes a difference. Every gift goes to the band's Carnegie campaign and lowers the trip cost for all of us.");
   assert.equal(composed.signature, "Alex", "first name only");
     assert.match(composed.payLine, /Carnegie · Alex/);
   assert.equal(letters.CARNEGIE_CHECK_PAYEE, "Ashley High School Band Boosters", "director's payee wording");
