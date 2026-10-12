@@ -260,3 +260,15 @@ test("Let Freedom Ring! keeps Rob's rehearsal map through measure 107", async ()
   const page = await readFile(new URL("../app/practice/let-freedom-ring/page.jsx", import.meta.url), "utf8");
   assert.match(page, /pieceSlug="let-freedom-ring"/);
 });
+
+test("Salute to the Armed Services keeps each service, its roll-off and the coda", async () => {
+  const ranges = practiceRanges(getPracticePiece("salute-to-the-armed-services"));
+  assert.deepEqual(ranges.map(({ start }) => start), [
+    1, 5, 13, 21, 29, 37, 43, 51, 59, 67, 75, 81, 89, 97, 105, 113,
+    119, 127, 135, 143, 151, 157, 165, 173, 181, 189, 195, 203, 211, 219, 225,
+  ]);
+  ranges.slice(0, -1).forEach((range, index) => assert.equal(range.end + 1, ranges[index + 1].start));
+  assert.equal(ranges.at(-1).end, 232);
+  const page = await readFile(new URL("../app/practice/salute-to-the-armed-services/page.jsx", import.meta.url), "utf8");
+  assert.match(page, /pieceSlug="salute-to-the-armed-services"/);
+});
