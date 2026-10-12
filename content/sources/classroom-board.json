@@ -1,7 +1,7 @@
 {
   "_readme": "Band room board (#154). Hand-edited source. Atlas updates weekly and redeploys. Per class, per weekday: plans.<Day>.fundamentals (warm-up, FSP, 101, theory) and plans.<Day>.rehearsal (pieces and spots). 3 to 5 short bullets each. Program items come from BandsofAHS data/calendar-events.jsonl. No student data. No em dashes.",
   "slug": "yf7ycrjwun2z",
-  "weekOf": "2026-10-05",
+  "weekOf": "2026-10-12",
   "tests": [
     {
       "date": "2026-09-28",
@@ -15,51 +15,52 @@
   "week": [
     {
       "day": "Mon",
-      "date": "2026-10-05",
+      "date": "2026-10-12",
       "program": [
-        "Week Six Tests"
+        "Homecoming pep rally, 4th block. 1st and 2nd block marchers: band room at C lunch (1:26 PM)."
       ]
     },
     {
       "day": "Tue",
-      "date": "2026-10-06",
+      "date": "2026-10-13",
       "program": [
         "Marching rehearsal 4:00 to 7:00 PM"
       ]
     },
     {
       "day": "Wed",
-      "date": "2026-10-07",
+      "date": "2026-10-14",
       "program": []
     },
     {
       "day": "Thu",
-      "date": "2026-10-08",
+      "date": "2026-10-15",
       "program": [
-        "StarNews visit during Wind Ensemble",
         "Marching rehearsal 4:00 to 7:00 PM"
       ]
     },
     {
       "day": "Fri",
-      "date": "2026-10-09",
+      "date": "2026-10-16",
       "program": [
-        "All-County interest form deadline."
+        "Homecoming game. Call time 5:00 PM, parade 6:00 PM, kickoff 7:00 PM."
       ]
     }
   ],
   "nextWeek": {
-    "weekOf": "2026-10-12",
+    "weekOf": "2026-10-19",
     "program": [
-      "Tue Oct 13 and Thu Oct 15: Marching rehearsal 4:00 to 7:00 PM",
-      "Fri Oct 16: Homecoming game. Call time 5:00 PM; kickoff 7:00 PM.",
-      "Sat Oct 17: Pirate Classic (Topsail)."
+      "Sat Oct 17: Pirate Classic (Topsail). Ashley performs 1:45 PM. Call time to come.",
+      "Tue Oct 20: NHCS Marching Band Showcase at Hoggard",
+      "Thu Oct 22: Fall Concert, 7:00 PM",
+      "Fri Oct 23: Senior Night game. Call time 5:00 PM; kickoff 7:00 PM."
     ]
   },
   "announcements": [
+    "TODAY: Homecoming pep rally. If you march and have Mr. Parker 1st or 2nd block, come to the band room at C lunch (1:26 PM). C lunch? Grab your food and come right down.",
+    "Fri Oct 16: Homecoming. Call 5:00 PM, parade 6:00 PM, kickoff 7:00 PM.",
     "Marching band funding goals are being finalized. Get yours taken care of.",
     "Need marching shoes or other gear? Take care of it now as we head into competition prep.",
-    "Sat Oct 10: White Oak is INDOORS. Call 8:00 AM, band room. Buses leave 11:30. Perform 3:00 PM. Home about 7:00 PM.",
     "ECU All-District Workshop, Sat Dec 12. Practice your All-District audition with ECU faculty. Grades 9 and 10 in the morning, 11 and 12 in the afternoon. $20, register online by Nov 29. Only 12 spots per instrument per level. music.ecu.edu/ecu-all-district-workshop"
   ],
   "classes": {
@@ -67,14 +68,12 @@
       "plans": {
         "Mon": {
           "fundamentals": [
-            "Week Six Tests",
-            "FSP",
-            "101"
+            "Warm-up by section"
           ],
           "rehearsal": [
-            "Let Freedom Ring!",
-            "Legends and Heroes",
-            "Salute to the Armed Services"
+            "Sectionals: find the exact measures that need work",
+            "Mark them on the Practice Loop: ashleybands.com/practice/legends-and-heroes",
+            "One entry per section is fine. Put every name on it."
           ]
         },
         "Tue": {
@@ -137,8 +136,8 @@
         "Fri": []
       },
       "keyDue": {
-        "text": "Week Six Tests",
-        "date": "2026-10-05"
+        "text": "Fall Concert",
+        "date": "2026-10-22"
       },
       "nextWeek": []
     },
@@ -146,12 +145,10 @@
       "plans": {
         "Mon": {
           "fundamentals": [
-            "Week Six Tests",
-            "Pad and sticks: snare warm-up",
-            "ABC in 3",
-            "Truple"
+            "Full concert setup. We are timing it."
           ],
           "rehearsal": [
+            "Run-throughs:",
             "Let Freedom Ring!; Legends and Heroes",
             "Salute to the Armed Services; Cenotaph",
             "A Bernstein Tribute; The Entertainer"
@@ -226,8 +223,8 @@
         "Fri": []
       },
       "keyDue": {
-        "text": "Week Six Tests",
-        "date": "2026-10-05"
+        "text": "Fall Concert",
+        "date": "2026-10-22"
       },
       "nextWeek": []
     },
@@ -235,15 +232,10 @@
       "plans": {
         "Mon": {
           "fundamentals": [
-            "Week Six Tests",
-            "FSP",
-            "101"
+            "Homecoming pep rally"
           ],
           "rehearsal": [
-            "Salute to the Armed Services",
-            "Cenotaph",
-            "A Bernstein Tribute",
-            "The Entertainer"
+            "Band on the football field at 2:00 PM"
           ]
         },
         "Tue": {
@@ -309,8 +301,8 @@
         "Fri": []
       },
       "keyDue": {
-        "text": "Week Six Tests",
-        "date": "2026-10-05"
+        "text": "Fall Concert",
+        "date": "2026-10-22"
       },
       "nextWeek": []
     }
