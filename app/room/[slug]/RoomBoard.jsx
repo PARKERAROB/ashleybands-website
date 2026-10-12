@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import { CalendarDays, CalendarRange, ClipboardCheck, Music, BookOpen, ListOrdered, Megaphone, Music4, NotebookPen } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
+import { CalendarDays, CalendarRange, ClipboardCheck, Music, BookOpen, ListOrdered, Megaphone, Music4, NotebookPen, QrCode } from "lucide-react";
 import { CLASS_BLOCKS, TIME_ZONE, nextOnOrAfter, schoolClock, selectBlock, shortDate } from "@/lib/classroomBoard.mjs";
 import styles from "./page.module.css";
 
@@ -167,6 +168,15 @@ export default function RoomBoard({ slug, initialData }) {
             </h2>
             <List items={[...(data.nextWeek?.program || []), ...(cls.nextWeek || [])]} empty="Add next week." />
           </section>
+          {data.practice?.url ? (
+            <section className={styles.panel}>
+              <h2>
+                <QrCode size="1em" aria-hidden="true" /> {data.practice.label || "Practice Loop"}
+              </h2>
+              <QRCodeSVG value={data.practice.url} size={220} marginSize={2} bgColor="#ffffff" fgColor="#000000" className={styles.qr} title={data.practice.url} />
+              <p className={styles.qrUrl}>{data.practice.url.replace(/^https?:\/\//, "")}</p>
+            </section>
+          ) : null}
         </div>
       </div>
 

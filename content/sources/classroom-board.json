@@ -74,7 +74,7 @@
           ],
           "rehearsal": [
             "Sectionals: find the exact measures that need work",
-            "Mark them on the Practice Loop: ashleybands.com/practice/legends-and-heroes",
+            "Scan the Practice Loop QR code, pick your piece, and mark it",
             "One entry per section is fine. Put every name on it."
           ]
         },
@@ -315,5 +315,9 @@
       "time": "7:00 PM",
       "label": "Fall Concert"
     }
-  ]
+  ],
+  "practice": {
+    "label": "Practice Loop: scan, pick your piece",
+    "url": "https://ashleybands.com/practice"
+  }
 }

@@ -320,3 +320,6 @@
     font-size: 1em;
   }
 }
+
+.qr { display: block; width: 100%; max-width: 220px; height: auto; margin: 0 auto; border-radius: 8px; }
+.qrUrl { margin: 8px 0 0; text-align: center; font-weight: 700; }
