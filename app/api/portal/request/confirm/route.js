@@ -5,6 +5,7 @@ import { hashCode, MAX_CODE_ATTEMPTS } from "@/lib/portalTokens";
 import { PORTAL_TROUBLE_MESSAGE } from "@/lib/portalFamilyMessages";
 import { checkPortalCode } from "@/lib/portalCodeCheck.mjs";
 import { checkRateLimit, clientIp } from "@/lib/rateLimit";
+import { findPersonByEmail } from "@/lib/portalPersonByEmail.mjs";
 
 export const runtime = "nodejs";
 
@@ -80,7 +81,9 @@ async function confirmAccessRequest(request) {
 
   const now = new Date().toISOString();
   const person = await upsertClaimedPerson(accessRequest);
-  const contact = await upsertVerifiedEmail(person.id, accessRequest, now);
+  const contact = person.contactId
+    ? await markEmailVerified(person.contactId, now)
+    : await upsertVerifiedEmail(person.id, accessRequest, now);
 
   // No approval gate (Rob 2026-06-23, extended 2026-07-05): a verified email that
   // matched a roster student gets a TRUSTED link immediately. The review queue is
@@ -189,6 +192,13 @@ async function upsertClaimedPerson(accessRequest) {
     if (studentLinkError) throw studentLinkError;
     if (studentLink?.person_id) return { id: studentLink.person_id };
   }
+  // Reuse the person this email already signs in as, so the new link shows up at
+  // sign-in instead of on a fresh copy nobody signs in to.
+  const requesterType = accessRequest.requester_type === "student" ? "student" : "guardian";
+  const existing = await findPersonByEmail(supabaseAdmin, accessRequest.guardian_email.toLowerCase());
+  if (existing && existing.personType === requesterType) {
+    return { id: existing.personId, contactId: existing.contactId };
+  }
   const sourcePersonKey = `access-request:${accessRequest.id}`;
   const { data, error } = await supabaseAdmin
     .from("portal_people")
@@ -201,6 +211,17 @@ async function upsertClaimedPerson(accessRequest) {
       source: "portal_access_request",
       source_row_hash: accessRequest.id
     }, { onConflict: "source_person_key" })
+    .select("id")
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+async function markEmailVerified(contactId, now) {
+  const { data, error } = await supabaseAdmin
+    .from("portal_contact_methods")
+    .update({ verification_status: "verified_email_code", verified_at: now })
+    .eq("id", contactId)
     .select("id")
     .single();
   if (error) throw error;
@@ -234,7 +255,16 @@ async function upsertVerifiedEmail(personId, accessRequest, now) {
 
 async function upsertStudentRelationship(accessRequest, personId, relationshipStatus) {
   if (!accessRequest.claimed_student_id) return;
-  await supabaseAdmin
+  // A reused person may already hold this link; keep its roster provenance.
+  const { data: current, error: currentError } = await supabaseAdmin
+    .from("portal_student_people")
+    .select("relationship_status")
+    .eq("student_id", accessRequest.claimed_student_id)
+    .eq("person_id", personId)
+    .maybeSingle();
+  if (currentError) throw currentError;
+  if (current?.relationship_status === "trusted") return;
+  const { error } = await supabaseAdmin
     .from("portal_student_people")
     .upsert({
       student_id: accessRequest.claimed_student_id,
@@ -249,6 +279,7 @@ async function upsertStudentRelationship(accessRequest, personId, relationshipSt
       assured_at: new Date().toISOString(),
       assured_by: "portal_email_code"
     }, { onConflict: "student_id,person_id" });
+  if (error) throw error;
 }
 
 function splitName(name) {

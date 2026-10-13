@@ -20,6 +20,7 @@
     "content:build": "node scripts/build-public-content.mjs",
     "portal:sync": "node scripts/sync-portal-csv.mjs",
     "test:portal-mirror": "node --test scripts/portal-mirror-plan.test.mjs",
+    "test:portal-identity": "node --test scripts/portal-person-by-email.test.mjs",
     "assets:sync": "node scripts/sync-assets.mjs",
     "lint:provenance": "node scripts/provenance-lint.mjs",
     "test:attendance": "node --test scripts/attendance-events.test.mjs scripts/attendance-bus.test.mjs",

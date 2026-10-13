@@ -41,6 +41,7 @@ jobs:
           npm run test:newsletter
           npm run test:security
           npm run test:local-preview
+          npm run test:portal-identity
       - name: Build
         # Dummy values only. The build must not need secrets; nothing here reaches a real service.
         run: npx next build

@@ -5,6 +5,7 @@ import { readPortalSession } from "@/lib/portalTokens";
 import { logAuditRequired } from "@/lib/auditLog";
 import { personWithinActorFamily } from "@/lib/portalAuthorization";
 import { isVerifiedContact } from "@/lib/portalPersonScope.mjs";
+import { findPersonByEmail } from "@/lib/portalPersonByEmail.mjs";
 
 export const runtime = "nodejs";
 
@@ -62,14 +63,8 @@ export async function POST(request) {
   // 1) Resolve an existing person by email, then phone (avoid duplicates).
   let personId = null;
   if (emailNorm) {
-    const { data: cm } = await supabaseAdmin
-      .from("portal_contact_methods")
-      .select("person_id")
-      .eq("contact_type", "email")
-      .eq("value_normalized", emailNorm)
-      .limit(1)
-      .maybeSingle();
-    if (cm) personId = cm.person_id;
+    const found = await findPersonByEmail(supabaseAdmin, emailNorm).catch(() => null);
+    if (found) personId = found.personId;
   }
   if (!personId && phoneNorm) {
     const { data: cm } = await supabaseAdmin

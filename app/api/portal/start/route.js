@@ -4,6 +4,7 @@ import { sendPortalCodeEmail } from "@/lib/portalEmail";
 import { createNumericCode, hashCode } from "@/lib/portalTokens";
 import { checkRateLimit, clientIp } from "@/lib/rateLimit";
 import { PORTAL_TROUBLE_MESSAGE } from "@/lib/portalFamilyMessages";
+import { findPersonByEmail } from "@/lib/portalPersonByEmail.mjs";
 
 export const runtime = "nodejs";
 
@@ -26,23 +27,18 @@ export async function POST(request) {
     return NextResponse.json({ ok: true, status: "sent_if_known" });
   }
 
-  const { data: contacts, error } = await supabaseAdmin
-    .from("portal_contact_methods")
-    .select("id, person_id, value_normalized")
-    .eq("contact_type", "email")
-    .eq("value_normalized", email)
-    .not("verification_status", "in", "(hard_bounce,replaced,superseded)");
-
-  if (error) {
+  let contact;
+  try {
+    contact = await findPersonByEmail(supabaseAdmin, email);
+  } catch (error) {
     console.error("[portal-start] contact lookup failed:", error.message);
     return NextResponse.json({ error: PORTAL_TROUBLE_MESSAGE }, { status: 500 });
   }
 
-  if (!contacts?.length) {
+  if (!contact) {
     return NextResponse.json({ ok: true, status: "sent_if_known" });
   }
 
-  const contact = contacts[0];
   const code = createNumericCode();
   const now = new Date().toISOString();
   const expiresAt = new Date(Date.now() + CODE_MINUTES * 60 * 1000).toISOString();
@@ -59,7 +55,7 @@ export async function POST(request) {
   const { error: insertError } = await supabaseAdmin
     .from("portal_magic_links")
     .insert({
-      contact_method_id: contact.id,
+      contact_method_id: contact.contactId,
       token_hash: hashCode(email, code),
       purpose: "known_contact_login",
       email,
