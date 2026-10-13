@@ -147,3 +147,45 @@ test("broadcast and sponsor outreach count send-time skips as skipped", () => {
     assert.match(source, /return \{ sent, failed, skipped, remaining/, file);
   }
 });
+
+// #209: any app/api or lib file that returns an address list (an `emails`,
+// `addresses` or `bcc` key) must filter through dropSuppressed or
+// resolveAudience, itself or via a lib module it imports that does.
+// ponytail: key-name heuristic plus one import hop; a list returned under another key name slips past.
+const ADDRESS_LIST = /[{,]\s*(emails|addresses|bcc)\s*[:,}]/;
+const GUARD = /\b(dropSuppressed\w*|resolveAudience\w*)\(/;
+const ADDRESS_LIST_EXEMPT = new Map([
+  ["app/api/portal/me/route.js", "a family reading its own contact record"],
+  ["app/api/admin/students/route.js", "one student's contact record in the staff roster view"],
+  ["lib/currentStudents.js", "roster record loader; its export route filters"],
+]);
+const stripComments = (source) => source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
+
+function unguardedAddressSources(files, readFile) {
+  const guarded = (file) => GUARD.test(stripComments(readFile(file) || ""));
+  return files.filter((file) => {
+    const source = stripComments(readFile(file));
+    if (!ADDRESS_LIST.test(source) || ADDRESS_LIST_EXEMPT.has(file) || GUARD.test(source)) return false;
+    const imports = [...source.matchAll(/from\s+["'](?:@\/lib\/|\.\/|\.\.\/lib\/)([\w.-]+?)(?:\.m?js)?["']/g)].map((m) => m[1]);
+    return !imports.some((name) => ["js", "mjs"].some((ext) => {
+      const file = `lib/${name}.${ext}`;
+      try { return guarded(file); } catch { return false; }
+    }));
+  });
+}
+
+test("every route or lib that returns recipient addresses goes through the suppression check", () => {
+  const files = ["app/api", "lib"].flatMap(sourceFiles);
+  assert.deepEqual(unguardedAddressSources(files, read), [], "route the list through resolveAudience or dropSuppressed");
+  for (const file of ADDRESS_LIST_EXEMPT.keys()) assert.ok(ADDRESS_LIST.test(stripComments(read(file))), `${file} exemption is stale`);
+});
+
+test("a planted address-returning route outside the guard fails the scan", () => {
+  const planted = "app/api/admin/planted/route.js";
+  const sources = {
+    [planted]: 'import { supabaseAdmin } from "@/lib/supabaseAdmin";\nexport async function POST() { const rows = []; return Response.json({ emails: rows.map((r) => r.email) }); }',
+    "app/api/admin/planted-ok/route.js": 'import { dropSuppressed } from "@/lib/contactSuppression";\nexport async function POST() { const { kept } = await dropSuppressed([], null); return Response.json({ emails: kept }); }',
+  };
+  const readPlanted = (file) => sources[file] ?? read(file);
+  assert.deepEqual(unguardedAddressSources(Object.keys(sources), readPlanted), [planted]);
+});

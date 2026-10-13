@@ -154,7 +154,7 @@ function AuthenticatedWorkspace({ session, signOut, initialView, initialStudentI
     if (!body.emails?.length) { setNotice("No matching email addresses are available."); return; }
     await navigator.clipboard?.writeText(body.emails.join(", "));
     const label = audience === "students" ? "student" : audience === "guardians" ? "guardian" : "student + guardian";
-    setNotice(`${body.emails.length} ${label} emails copied.`);
+    setNotice(`${body.emails.length} ${label} emails copied.${body.suppressedCount ? ` ${body.suppressedCount} opted out, left off.` : ""}`);
   }
 
   const latestClassSync = data.sections.map((section) => section.lastSyncedAt).filter(Boolean).sort().at(-1);

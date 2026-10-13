@@ -40,6 +40,7 @@ export default function BroadcastPage() {
   const [preview, setPreview] = useState(null); // { count, studentCount, sample }
   const [previewing, setPreviewing] = useState(false);
   const [sending, setSending] = useState(false);
+  const [copying, setCopying] = useState(false);
   const [msg, setMsg] = useState("");
   const [directStudent, setDirectStudent] = useState("");
   const [directStudentName, setDirectStudentName] = useState("");
@@ -143,6 +144,28 @@ export default function BroadcastPage() {
       setPreview(data);
     } finally {
       setPreviewing(false);
+    }
+  }
+
+  // #209: same audience as the preview, opt-outs removed, for an Outlook Bcc.
+  async function copyAddresses() {
+    setCopying(true);
+    setMsg("");
+    try {
+      const res = await fetch("/api/admin/broadcast/copy-addresses", {
+        method: "POST",
+        headers: authHeaders(session),
+        body: JSON.stringify({ audienceFilter, recipientAxis: axis, directStudentId: directStudent })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { setMsg(data.error || "The addresses could not be copied."); return; }
+      if (!data.addresses?.length) { setMsg("No addresses in this audience."); return; }
+      await navigator.clipboard.writeText(data.addresses.join("; "));
+      setMsg(`${data.count} addresses copied for Bcc.${data.suppressedCount ? ` ${data.suppressedCount} opted out, left off.` : ""}`);
+    } catch {
+      setMsg("The addresses could not be copied to the clipboard.");
+    } finally {
+      setCopying(false);
     }
   }
 
@@ -344,9 +367,14 @@ export default function BroadcastPage() {
                 {preview.count > preview.sample.length ? " …" : ""}
               </p>
             )}
-            <button type="button" onClick={send} disabled={!canSend} style={canSend ? btnPrimary : btnDisabled}>
-              {sending ? "Sending…" : `Send to ${preview.count}`}
-            </button>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
+              <button type="button" onClick={send} disabled={!canSend} style={canSend ? btnPrimary : btnDisabled}>
+                {sending ? "Sending…" : `Send to ${preview.count}`}
+              </button>
+              <button type="button" onClick={copyAddresses} disabled={copying || !preview.count} style={{ ...btnSecondary, marginTop: 12 }}>
+                {copying ? "Copying…" : "Copy addresses"}
+              </button>
+            </div>
           </div>
         )}
       </section>

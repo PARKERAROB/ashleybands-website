@@ -225,6 +225,8 @@ function LiveWorkspace({
     return body;
   }
 
+  const optedOut = (result) => (result.suppressedCount ? ` ${result.suppressedCount} opted out, left off.` : "");
+
   async function copyEmails(axis) {
     const chosen = students.filter((student) => selectedIds.includes(student.id));
     try {
@@ -232,7 +234,7 @@ function LiveWorkspace({
       if (!result.emails.length) { setNotice("No matching emails are available in the selected rows."); return; }
       await navigator.clipboard?.writeText(result.emails.join(", "));
       const label = axis === "student" ? "student" : axis === "guardian" ? "guardian" : "student + guardian";
-      setNotice(`${result.emails.length} ${label} emails copied.`);
+      setNotice(`${result.emails.length} ${label} emails copied.${optedOut(result)}`);
     } catch (error) {
       setNotice(error.message);
     }
@@ -243,7 +245,7 @@ function LiveWorkspace({
       const result = await requestContactAction([student.id], { axis: "both" });
       if (!result.emails.length) { setNotice(`No student or guardian email is available for ${student.displayName}.`); return; }
       await navigator.clipboard?.writeText(result.emails.join(", "));
-      setNotice(`${result.emails.length} student + guardian emails copied for ${student.displayName}.`);
+      setNotice(`${result.emails.length} student + guardian emails copied for ${student.displayName}.${optedOut(result)}`);
     } catch (error) {
       setNotice(error.message);
     }
@@ -260,7 +262,7 @@ function LiveWorkspace({
       anchor.download = result.filename;
       anchor.click();
       URL.revokeObjectURL(url);
-      setNotice(`${result.count} contact rows exported.`);
+      setNotice(`${result.count} contact rows exported.${result.suppressedCount ? ` ${result.suppressedCount} opted-out emails left blank.` : ""}`);
     } catch (error) {
       setNotice(error.message);
     }

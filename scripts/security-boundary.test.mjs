@@ -271,6 +271,7 @@ test("legacy private admin routes use the central capability contract", () => {
     ["app/api/admin/data-inventory/route.js", ["SYSTEM_DATA_INVENTORY_READ"]],
     ["app/api/admin/broadcast/route.js", ["COMMUNICATIONS_READ"]],
     ["app/api/admin/broadcast/preview/route.js", ["COMMUNICATIONS_READ"]],
+    ["app/api/admin/broadcast/copy-addresses/route.js", ["COMMUNICATIONS_READ", "CONTACTS_EXPORT"]],
     ["app/api/admin/broadcast/send/route.js", ["COMMUNICATIONS_SEND"]],
     ["app/api/admin/newsletter/route.js", ["COMMUNICATIONS_READ", "COMMUNICATIONS_WRITE"]],
     ["app/api/admin/newsletter/preview/route.js", ["COMMUNICATIONS_READ"]],

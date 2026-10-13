@@ -26,18 +26,19 @@ export async function POST(request) {
     await logAuditRequired({
       actor: staffActor(authorization.staff),
       action: "contact_export",
-      table: "portal_students,portal_student_people,portal_contact_methods",
+      table: "portal_students,portal_student_people,portal_contact_methods,contact_suppressions",
       recordId: `${result.studentCount}:${audience}`,
       changes: {
         requestedStudentCount: studentIds.length,
         subjectStudentIds: result.subjectStudentIds,
         audience,
         emailCount: result.emails.length,
+        suppressedCount: result.suppressedCount,
       },
       route: "/api/admin/program-memberships/contacts",
     });
     return NextResponse.json(
-      { emails: result.emails, studentCount: result.studentCount },
+      { emails: result.emails, studentCount: result.studentCount, suppressedCount: result.suppressedCount },
       { headers: { "Cache-Control": "private, no-store" } },
     );
   } catch (error) {
