@@ -24,18 +24,9 @@ inventing commands or paths. Do not import an uninstalled environment helper.
 1. Complete the issue's focused checks and integrate the intended files into `main`.
 2. Refresh generated projections before committing. Preserve unrelated working-tree changes;
    use a separate checkout with its own installed dependencies if necessary.
-3. Commit substantive work as Atlas. For an authorized production release, create the narrow
-   compatibility commit required by the verified Vercel author identity:
-
-   ```sh
-   git -c user.name=parkerarob -c user.email=robert.parker@nhcs.net commit --allow-empty -m "Authorize production release (#ISSUE)" -m "Checked: <one line: what was actually verified before authorizing>"
-   ```
-
-   Replace ISSUE with the owning issue number. The `Checked:` trailer is required: readiness refuses
-   an authorization commit without one, so the authorize pairing is evidence of review rather than a
-   reflex (workshop#121). Say what you looked at, e.g. `Checked: preview route readback, calendar
-   projection diff, no person data in the change`. This is already covered by standing publication
-   authority; it does not reattribute the substantive work. Do not do this for investigate-only work.
+3. Commit substantive work as Atlas. After verification passes, the wrapper adds and pushes the
+   empty Rob-authored commit Vercel's author identity requires; it does not reattribute the work.
+   — Rob, 2026-10-14: the manual authorization commit and `Checked:` gate were removed.
 4. Push `main`, then run `npm run release:checked`. `npm run deploy:checked` is the same path.
 
 The wrapper acquires a project-wide lock across checkouts on this Mac, checks readiness and freshly
