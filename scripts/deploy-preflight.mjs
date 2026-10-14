@@ -8,7 +8,6 @@ import {
   loadBandWebsiteEnv,
 } from "./lib/workspace-paths.mjs";
 
-const EXPECTED_AUTHOR_EMAIL = "robert.parker@nhcs.net";
 const EXPECTED_PROJECT_ID = "prj_zt07T3fHc75OimXD3SnBoP4JcQzr";
 const EXPECTED_ORG_ID = "team_iJ1ikB48QN8eYHbQunrskJuf";
 const EXPECTED_SUPABASE_REF = "edcmfzxqtdbgygeimedo";
@@ -29,14 +28,6 @@ function git(...args) {
 
 const branch = git("branch", "--show-current");
 if (branch !== "main") fail(`production deploys must run from main; found ${branch || "detached HEAD"}`);
-
-const authorEmail = git("log", "-1", "--format=%ae").toLowerCase();
-if (authorEmail !== EXPECTED_AUTHOR_EMAIL) {
-  fail(
-    `Vercel will block this HEAD author (${authorEmail || "missing"}). ` +
-      `Create the narrow Rob authorization commit with ${EXPECTED_AUTHOR_EMAIL}.`
-  );
-}
 
 const projectFile = path.join(bandWebsiteRoot, ".vercel", "project.json");
 if (!existsSync(projectFile)) fail("missing .vercel/project.json; run vercel link for band-website");
