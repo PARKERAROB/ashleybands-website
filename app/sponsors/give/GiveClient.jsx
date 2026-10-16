@@ -101,6 +101,11 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
   // #176: shown only when a Carnegie gift is credited to a student.
   const [shareWithFamily, setShareWithFamily] = useState(true);
   const [noteToStudent, setNoteToStudent] = useState("");
+  // #211: "Give online" is a toggle that is already on, so a tap must never look dead.
+  const [onlineNudge, setOnlineNudge] = useState(false);
+  const amountRef = useRef(null);
+  const nameRef = useRef(null);
+  const payRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -133,6 +138,18 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
   const amountCents = Math.round(Number(amount) * 100);
   const amountValid = Number.isFinite(amountCents) && amountCents >= 500;
+  const onlineReady = amountValid && Boolean(businessName.trim());
+
+  function chooseOnline() {
+    setMethod("online");
+    if (onlineReady) {
+      setOnlineNudge(false);
+      payRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    setOnlineNudge(true);
+    (amountValid ? nameRef : amountRef).current?.focus();
+  }
   const level = !carnegie && amountValid ? sponsorLevelForCents(amountCents) : null;
   const studentFirst = carnegie ? String(studentName || "").trim().split(/\s+/)[0] : "";
   const familyShare = studentFirst ? { share_with_family: shareWithFamily, note_to_student: noteToStudent } : {};
@@ -283,7 +300,7 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
             <div className="give-grid">
               <label className="give-label">
                 {carnegie ? "Or enter another amount (USD)" : "Gift amount (USD)"}
-                <input type="number" min="5" step="1" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Any amount, $5 or more" />
+                <input ref={amountRef} type="number" min="5" step="1" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Any amount, $5 or more" />
               </label>
               {method === "check" ? (
                 <label className="give-label">
@@ -302,6 +319,7 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
             <label className="give-label">
               Your name or business name
               <input
+                ref={nameRef}
                 value={businessName}
                 onChange={(e) => setBusinessName(e.target.value)}
                 placeholder="Individual, family, or business"
@@ -336,7 +354,7 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
                 className={`give-tab ${method === "online" ? "on" : ""}`}
                 disabled={!onlineAvailable}
                 aria-pressed={method === "online"}
-                onClick={() => setMethod("online")}
+                onClick={chooseOnline}
               >
                 Give online
               </button>
@@ -349,6 +367,9 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
                 Pay by check
               </button>
             </div>
+            {method === "online" && onlineNudge && !onlineReady ? (
+              <p className="give-error" role="alert">{amountValid ? "Enter your name" : "Choose an amount of at least $5"}, then the PayPal buttons appear below.</p>
+            ) : null}
 
             {!onlineAvailable ? <p className="give-muted">Online trip giving is temporarily unavailable. You can give by check or contact Mr. Parker.</p> : null}
             {carnegie ? <p className="give-muted">{CARNEGIE_CHANGE_TERMS} <a href="#about-your-gift">What your gift supports</a>.</p> : null}
@@ -359,8 +380,8 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
               <button type="button" className="give-btn give-btn-primary" disabled={savingCheck} onClick={submitCheck}>
                 {savingCheck ? "Saving…" : "Get check instructions"}
               </button>
-            ) : clientId && amountValid && businessName.trim() ? (
-              <PayPalGive
+            ) : clientId && onlineReady ? (
+              <div ref={payRef}><PayPalGive
                 clientId={clientId}
                 key={`${campaignCode}:${giftKind}`}
                 campaignCode={campaignCode}
@@ -373,7 +394,7 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
                 familyShare={familyShare}
                 onError={setError}
                 onDone={setOnlineResult}
-              />
+              /></div>
             ) : (
               <p className="give-muted">Enter your name and an amount of at least $5 to give online, or choose Pay by check.</p>
             )}
