@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 
-function fixture(mode = '') {
+function fixture(mode = '', extraEnv = {}) {
   const root = mkdtempSync(path.join(tmpdir(), 'release-test-'));
   const scripts = path.join(root, 'scripts');
   const bin = path.join(root, 'bin');
@@ -23,18 +23,22 @@ if(command==='node' && args.includes('release-ready')) {
  const count=trace.split('node scripts/release-ready.mjs').length-1;
  if(process.env.MODE==='early' || (process.env.MODE==='remote' && count===2)) process.exit(1);
 }
-if(command==='npm' && args.includes('verify:release') && process.env.MODE==='suite')process.exit(1);
+if(command==='npm' && args.includes('verify:release') && process.env.MODE==='suite'){console.log('PASS  calendar projections');console.log('FAIL  hosted portal mirror — private detail');console.log('raw private diagnostic');process.exit(1);}
 `;
   for (const command of ['node', 'git', 'npm', 'npx']) writeFileSync(path.join(bin, command), stub, {mode:0o755});
   writeFileSync(path.join(bin,'package.json'),'{"type":"module"}');
   const state=path.join(root,'state');
   if(mode==='locked') mkdirSync(path.join(state,'ashleybands-release','production.lock'),{recursive:true});
-  const result=spawnSync('bash',[path.join(scripts,'release-checked.sh')],{env:{...process.env,PATH:`${bin}:${process.env.PATH}`,XDG_STATE_HOME:state,TRACE:path.join(root,'trace'),MODE:mode},encoding:'utf8',timeout:10000});
+  const result=spawnSync('bash',[path.join(scripts,'release-checked.sh')],{env:{...process.env,...extraEnv,PATH:`${bin}:${process.env.PATH}`,XDG_STATE_HOME:state,TRACE:path.join(root,'trace'),MODE:mode},encoding:'utf8',timeout:10000});
   const trace=existsSync(path.join(root,'trace'))?readFileSync(path.join(root,'trace'),'utf8'):'';
   const locked=existsSync(path.join(state,'ashleybands-release','production.lock'));
   rmSync(root,{recursive:true,force:true});
   return {result,trace,locked};
 }
+test('public runner output keeps check labels and withholds raw log text',()=>{
+ const {result}=fixture('suite',{RELEASE_PUBLIC_OUTPUT:'1'});assert.equal(result.status,1);assert.match(result.stderr,/FAIL  hosted portal mirror\n/);assert.match(result.stderr,/PASS  calendar projections/);assert.doesNotMatch(result.stderr,/private detail|raw private diagnostic/);
+ const local=fixture('suite');assert.match(local.result.stderr,/raw private diagnostic/);
+});
 test('readiness failure skips the expensive suite and deployment, and releases lock',()=>{
  const {result,trace,locked}=fixture('early');assert.equal(result.status,1);assert.doesNotMatch(trace,/verify:release|npx/);assert.equal(locked,false);
 });
