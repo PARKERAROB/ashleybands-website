@@ -48,7 +48,8 @@ test("two configured events on one date remain distinct", () => {
 
 test("the authoritative projection provides camp, rehearsal, football, competition, and concert sessions independently", () => {
   const occurrences = configuredAttendanceOccurrences(projectedCalendar);
-  assert.equal(occurrences.length, 36);
+  assert.equal(occurrences.length, 38);
+  assert.ok(occurrences.some((event) => event.occurrenceKey === "evt-0017:2026-10-17"));
   assert.deepEqual(
     occurrences
       .filter((event) => ["2026-08-25", "2026-08-27", "2026-08-28"].includes(event.localDate))
