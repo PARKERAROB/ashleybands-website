@@ -266,6 +266,7 @@ function CarnegieCommitmentSection({ student, notesOpen }) {
       </div>
       <Link className="portal-action-link" href={`/portal/carnegie-2027?studentId=${encodeURIComponent(student.id)}`}>Open Carnegie commitment</Link>
       {notesOpen ? <Link className="portal-action-link" href="/portal/carnegie-notes">My Carnegie Notes and letters</Link> : null}
+      <Link className="portal-action-link" href="/info/carnegie-questions">Carnegie questions and answers</Link>
     </section>
   );
 }
@@ -295,6 +296,7 @@ function FamilyResources({ studentId, notesOpen }) {
       <strong>Family resources</strong>
       <Link href={`/portal/band-ready?studentId=${encodeURIComponent(studentId)}`}>Band Ready checklist</Link>
       <Link href={`/portal/carnegie-2027?studentId=${encodeURIComponent(studentId)}`}>Carnegie Hall commitment</Link>
+      <Link href="/info/carnegie-questions">Carnegie questions and answers</Link>
       {notesOpen ? <Link href="/portal/carnegie-notes">My Carnegie Notes and letters</Link> : null}
       <Link href={`/portal/clothing?studentId=${encodeURIComponent(studentId)}`}>Open House clothing order</Link>
       <Link href="/portal/sponsorship">Business sponsorship</Link>

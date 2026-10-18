@@ -18,6 +18,7 @@ const pkaRoot = process.env.PKA_ROOT
 const sources = {
   facts: "facts/bandsofahs-facts.md",
   carnegie: "content/sources/carnegie-2027.md",
+  carnegieQuestions: "content/sources/carnegie-questions.md",
   boosters: "content/sources/boosters.md",
   assistantOverview: "content/sources/assistant-overview.md",
   requiredItems: "knowledge/student-required-items.md",
@@ -91,6 +92,15 @@ const pages = [
     source: sources.carnegie,
     category: "Current information",
     body: readRepoSource(sources.carnegie).trim()
+  },
+  {
+    slug: "carnegie-questions",
+    title: "Carnegie Hall 2027: Your Questions",
+    summary: "Chaperones, family tickets, payments and deadlines, and rooming.",
+    audience: "Families",
+    source: sources.carnegieQuestions,
+    category: "Current information",
+    body: readRepoSource(sources.carnegieQuestions).trim()
   },
   {
     slug: "2026-2027-band-information",
