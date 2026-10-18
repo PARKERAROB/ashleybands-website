@@ -174,9 +174,12 @@ BEGIN:VEVENT
 UID:evt-0018-program@ashleybands.com
 DTSTAMP:20260610T000000Z
 SUMMARY:NHCS Marching Band Showcase
-DTSTART;VALUE=DATE:20261020
-DTEND;VALUE=DATE:20261021
+DTSTART;TZID=America/New_York:20261020T160000
+DTEND;TZID=America/New_York:20261020T210000
 LOCATION:Hoggard HS
+DESCRIPTION:Call 4:00 p.m. at Ashley. Buses leave at 5:00 p.m. The show st
+ arts at 7:00 p.m. at Hoggard High School. We expect to be back at Ashley 
+ about 9:00 p.m.
 END:VEVENT
 BEGIN:VEVENT
 UID:evt-0019-program@ashleybands.com

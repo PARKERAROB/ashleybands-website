@@ -592,12 +592,12 @@
  {
   "id": "evt-0018",
   "title": "NHCS Marching Band Showcase",
-  "start": "2026-10-20",
-  "end": null,
-  "all_day": true,
+  "start": "2026-10-20T16:00",
+  "end": "2026-10-20T21:00",
+  "all_day": false,
   "category": "MB-Event",
   "location": "Hoggard HS",
-  "description": null
+  "description": "Call 4:00 p.m. at Ashley. Buses leave at 5:00 p.m. The show starts at 7:00 p.m. at Hoggard High School. We expect to be back at Ashley about 9:00 p.m."
  },
  {
   "id": "evt-0127",
