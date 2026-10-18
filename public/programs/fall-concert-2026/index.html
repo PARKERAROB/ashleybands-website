@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2026 Fall Concert | The Bands of Ashley High School</title>
+  <meta name="description" content="Program for the Fall Concert of the Bands of Ashley High School, Thursday, October 22, 2026, at the Minnie Evans Arts Center." />
+  <style>
+    :root {
+      --red: #b50000;
+      --dark: #1a1a1a;
+      --mid: #444;
+      --light: #f8f6f2;
+      --white: #ffffff;
+      --accent: #8b0000;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: var(--light);
+      color: var(--dark);
+      line-height: 1.7;
+    }
+
+    a { color: var(--red); }
+
+    /* ── Header ── */
+    .hero {
+      background: var(--dark);
+      color: var(--white);
+      text-align: center;
+      padding: 4rem 2rem 3rem;
+      border-bottom: 6px solid var(--red);
+    }
+    .hero .eyebrow {
+      font-family: 'Arial', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #ccc;
+      margin-bottom: 1rem;
+    }
+    .hero h1 {
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      font-weight: normal;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+    .hero h2 {
+      font-size: clamp(1rem, 3vw, 1.5rem);
+      font-weight: normal;
+      color: #ccc;
+      margin-bottom: 2rem;
+    }
+    .hero .meta {
+      font-family: 'Arial', sans-serif;
+      font-size: 1rem;
+      color: #bbb;
+      line-height: 2;
+    }
+    .hero .staff {
+      margin-top: 1.5rem;
+      font-style: italic;
+      font-size: 0.95rem;
+      color: #aaa;
+    }
+
+    /* ── Sections ── */
+    .section {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 3.5rem 2rem;
+      border-bottom: 1px solid #ddd;
+    }
+    .section:last-child { border-bottom: none; }
+
+    .section-label {
+      font-family: 'Arial', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 0.4rem;
+    }
+    .section h2 {
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-weight: normal;
+      border-bottom: 2px solid var(--red);
+      padding-bottom: 0.5rem;
+      margin-bottom: 2rem;
+    }
+
+    /* ── Piece blocks ── */
+    .piece { margin-bottom: 2.5rem; }
+    .piece:last-child { margin-bottom: 0; }
+    .piece h3 {
+      font-size: 1.25rem;
+      font-weight: normal;
+      margin-bottom: 0.2rem;
+    }
+    .piece .subtitle {
+      font-size: 1rem;
+      color: #555;
+      margin-bottom: 0.2rem;
+      font-style: italic;
+    }
+    .piece .composer {
+      font-family: 'Arial', sans-serif;
+      font-size: 0.85rem;
+      color: var(--mid);
+      margin-bottom: 0.8rem;
+      letter-spacing: 0.03em;
+    }
+    .piece p { font-size: 0.95rem; color: #333; }
+    .piece p + p { margin-top: 0.75rem; }
+    .piece .credit {
+      font-family: 'Arial', sans-serif;
+      font-size: 0.8rem;
+      color: #666;
+    }
+
+    /* ── Personnel ── */
+    .personnel-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1.5rem 2rem;
+      justify-items: center;
+      text-align: center;
+    }
+    .personnel-grid .section-group { width: 100%; }
+    .section-group h4 {
+      font-family: 'Arial', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 0.4rem;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 0.2rem;
+    }
+    .section-group ul {
+      list-style: none;
+      font-size: 0.9rem;
+      line-height: 1.9;
+    }
+
+    /* ── Percussion interlude ── */
+    .interlude {
+      background: var(--dark);
+      color: var(--white);
+      padding: 3.5rem 2rem;
+    }
+    .interlude .section { padding: 0; border-bottom: none; }
+    .interlude .section-label { color: #e09090; }
+    .interlude h2 { color: var(--white); border-bottom-color: #888; }
+    .interlude .ensemble-item {
+      margin-bottom: 2rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid #333;
+    }
+    .interlude .ensemble-item h3 {
+      font-size: 1.2rem;
+      font-weight: normal;
+      color: var(--white);
+      margin-bottom: 0.15rem;
+    }
+    .interlude .ensemble-item .composer {
+      font-family: 'Arial', sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      color: #aaa;
+    }
+    .interlude h4 {
+      font-family: 'Arial', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #e09090;
+      margin-bottom: 0.6rem;
+    }
+    .interlude .names {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 0 1.5rem;
+      font-size: 0.9rem;
+      line-height: 1.9;
+      color: #e0d8cc;
+    }
+
+    /* ── Thanks / support / coming up ── */
+    .thanks { list-style: none; font-size: 0.95rem; line-height: 2; }
+    .support-item { margin-bottom: 2rem; }
+    .support-item:last-child { margin-bottom: 0; }
+    .support-item h3 {
+      font-size: 1.15rem;
+      font-weight: normal;
+      margin-bottom: 0.3rem;
+    }
+    .support-item p { font-size: 0.95rem; color: #333; }
+    .support-item .raised {
+      font-size: 1.6rem;
+      color: var(--red);
+      line-height: 1.3;
+    }
+    .donate-btn {
+      display: inline-block;
+      margin-top: 0.8rem;
+      background: var(--red);
+      color: var(--white);
+      text-decoration: none;
+      padding: 0.7rem 1.4rem;
+      min-height: 44px;
+      font-family: 'Arial', sans-serif;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+    }
+    .donate-btn:hover { background: var(--accent); }
+    .coming { list-style: none; font-size: 0.95rem; line-height: 2; }
+    .coming strong { font-weight: normal; color: var(--red); font-family: 'Arial', sans-serif; font-size: 0.85rem; letter-spacing: 0.04em; }
+
+    /* ── Footer ── */
+    footer {
+      background: var(--dark);
+      color: #888;
+      text-align: center;
+      padding: 2rem;
+      font-family: 'Arial', sans-serif;
+      font-size: 0.8rem;
+    }
+
+    /* ── Dividers ── */
+    .photo-divider {
+      position: relative;
+      min-height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      overflow: hidden;
+    }
+    .photo-divider .divider-text {
+      position: relative;
+      z-index: 1;
+      color: var(--white);
+      padding: 2rem;
+    }
+    .photo-divider .divider-text .eyebrow {
+      font-family: 'Arial', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #ddd;
+      margin-bottom: 0.6rem;
+    }
+    .photo-divider .divider-text h2 {
+      font-size: clamp(1.6rem, 4vw, 2.8rem);
+      font-weight: normal;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.4rem;
+    }
+    .photo-divider .divider-text p { font-style: italic; color: #ccc; font-size: 1rem; }
+
+    .divider-marching { background: linear-gradient(135deg, #2d1515 0%, #4a1515 50%, #1a0a0a 100%); }
+    .divider-concert-band { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%); }
+    .divider-wind-ensemble { background: linear-gradient(135deg, #0d1b2a 0%, #1b2838 50%, #0a1628 100%); }
+    .divider-combined { background: linear-gradient(135deg, #1a0a0a 0%, #4a1515 45%, #0f3460 100%); }
+
+    /* ── Mobile ── */
+    @media (max-width: 600px) {
+      .photo-divider { min-height: 200px; }
+      .section { padding: 2.5rem 1rem; }
+      .interlude { padding: 2.5rem 1rem; }
+      .hero { padding: 3rem 1rem 2rem; }
+    }
+
+    /* ── Print ── */
+    @media print {
+      .hero, .interlude, .photo-divider { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     HERO / HEADER
+════════════════════════════════════════════ -->
+<header class="hero">
+  <p class="eyebrow">Eugene Ashley High School</p>
+  <h1>Fall Concert</h1>
+  <h2>The Bands of Ashley High School</h2>
+  <div class="meta">
+    Thursday, October 22, 2026 &nbsp;|&nbsp; 7:00 PM<br>
+    Minnie Evans Arts Center
+  </div>
+  <div class="staff">
+    Robert A. Parker, Director of Bands<br>
+    Mike Perez, Principal
+  </div>
+</header>
+
+<main>
+
+<!-- ══════════════════════════════════════════
+     PART I · MARCHING BAND
+════════════════════════════════════════════ -->
+<div class="photo-divider divider-marching">
+  <div class="divider-text">
+    <p class="eyebrow">Part I</p>
+    <h2>Marching Band</h2>
+  </div>
+</div>
+
+<section class="section">
+  <p class="section-label">Part I</p>
+  <h2>Marching Band</h2>
+
+  <div class="piece">
+    <h3>Ascend</h3>
+    <p class="subtitle">The 2026 marching show</p>
+    <p class="composer">Michael Miller and Neal Bright</p>
+    <p><em>Ascend</em> retells the myth of Icarus: the thrill of flight, the fall into the sea, and then a new ending where Icarus rises again. It is a story about perseverance and hope.</p>
+    <p class="credit">Music published by Synced Up Designs.</p>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     PART II · CONCERT BAND
+════════════════════════════════════════════ -->
+<div class="photo-divider divider-concert-band">
+  <div class="divider-text">
+    <p class="eyebrow">Part II</p>
+    <h2>Concert Band</h2>
+    <p>Robert A. Parker, conductor</p>
+  </div>
+</div>
+
+<section class="section">
+  <p class="section-label">Part II</p>
+  <h2>Concert Band</h2>
+
+  <div class="piece">
+    <h3>Let Freedom Ring!</h3>
+    <p class="composer">arr. Paul Jennings</p>
+  </div>
+
+  <div class="piece">
+    <h3>Legends and Heroes</h3>
+    <p class="subtitle">American Folksong Suite No. 1 &nbsp;·&nbsp; I. Patrick on the Railway</p>
+    <p class="composer">Pierre La Plante</p>
+    <p>The North Carolina Central District Bandmasters Association commissioned this suite, published in 2003. Tonight the Concert Band plays the first movement.</p>
+  </div>
+</section>
+
+<section class="section">
+  <h2>Concert Band Personnel</h2>
+  <div class="personnel-grid">
+    <div class="section-group">
+      <h4>Flute</h4>
+      <ul>
+        <li>Amelia W.</li>
+        <li>Brennaugh C.</li>
+        <li>Caleigh P.</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <h4>Clarinet</h4>
+      <ul>
+        <li>Adan T.</li>
+        <li>Bryson M.</li>
+        <li>Caitlyn M.</li>
+        <li>Cassi C.</li>
+        <li>Kaelyn L.</li>
+        <li>Ramey S.</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <h4>Bass Clarinet</h4>
+      <ul>
+        <li>Max B.</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <h4>Alto Saxophone</h4>
+      <ul>
+        <li>Gio L.</li>
+        <li>Sawyer M.</li>
+        <li>Wyatt P.</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <h4>Tenor Saxophone</h4>
+      <ul>
+        <li>Charles M.</li>
+        <li>Kaiden T.</li>
+        <li>Spencer H.</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <h4>Trumpet</h4>
+      <ul>
+        <li>Deacon F.</li>
+        <li>Ethan C.</li>
+        <li>Jericho W.</li>
+        <li>Madison M.</li>
+        <li>Weston P.</li>
+        <li>Zeke G.</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <h4>Horn</h4>
+      <ul>
+        <li>Lily C.</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <h4>Trombone</h4>
+      <ul>
+        <li>Avery E.</li>
+        <li>Benjamin A.</li>
+        <li>Cameron B.</li>
+        <li>Carly B.</li>
+        <li>Dixon G.</li>
+        <li>Louis N.</li>
+        <li>Paxton S.</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <h4>Euphonium</h4>
+      <ul>
+        <li>Keen F.</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <h4>Tuba</h4>
+      <ul>
+        <li>Mike G.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     PART III · PERCUSSION ENSEMBLE
+════════════════════════════════════════════ -->
+<div class="interlude">
+  <section class="section">
+    <p class="section-label">Part III</p>
+    <h2>Percussion Ensemble</h2>
+
+    <div class="ensemble-item">
+      <h3>G-Force</h3>
+      <p class="composer">John H. Beck</p>
+    </div>
+
+    <div class="ensemble-item">
+      <h3>Ensemble Uno</h3>
+      <p class="composer">Murray Houllif</p>
+    </div>
+
+    <h4>Percussion</h4>
+    <ul class="names">
+      <li>Alec L.</li>
+      <li>Brandon P.</li>
+      <li>Brooklyn T.</li>
+      <li>Caleb P.</li>
+      <li>Carter T.</li>
+      <li>Cooper L.</li>
+      <li>Cooper W.</li>
+      <li>Eli S.</li>
+      <li>Emma B.</li>
+      <li>Evan H.</li>
+      <li>Gage J.</li>
+      <li>JT D.</li>
+      <li>Kaidyn S.</li>
+      <li>Katelyn N.</li>
+      <li>Liam W.</li>
+      <li>Mackenzie S.</li>
+      <li>Max M.</li>
+      <li>Mimi D.</li>
+      <li>Nathan A.</li>
+      <li>Thomas J.</li>
+      <li>Xavier E.</li>
+    </ul>
+  </section>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     PART IV · WIND ENSEMBLE
+════════════════════════════════════════════ -->
+<div class="photo-divider divider-wind-ensemble">
+  <div class="divider-text">
+    <p class="eyebrow">Part IV</p>
+    <h2>Wind Ensemble</h2>
+    <p>Robert A. Parker, conductor</p>
+  </div>
+</div>
+
+<section class="section">
+  <p class="section-label">Part IV</p>
+  <h2>Wind Ensemble</h2>
+
+  <div class="piece">
+    <h3>Cenotaph</h3>
+    <p class="subtitle">Fanfare for Band</p>
+    <p class="composer">Jack Stamp</p>
+    <p>A cenotaph is a monument to a person who is buried somewhere else. Jack Stamp wrote this fanfare in 1992 for the Southern California All-State Band.</p>
+  </div>
+
+  <div class="piece">
+    <h3>The Entertainer</h3>
+    <p class="composer">Scott Joplin &nbsp;/&nbsp; arr. Bill Holcombe and Carson Rothrock</p>
+    <p>Scott Joplin published this rag in 1902. It found a huge new audience when it became the heart of the soundtrack for the 1973 film <em>The Sting</em>.</p>
+  </div>
+
+  <div class="piece">
+    <h3>A Bernstein Tribute</h3>
+    <p class="composer">Leonard Bernstein &nbsp;/&nbsp; adapted by Clare Grundman</p>
+    <p>Clare Grundman's 1991 medley visits three of Leonard Bernstein's stage works: <em>West Side Story</em> (Prologue, Somewhere, Scherzo and Mambo), <em>On the Town</em> (The Great Lover, Times Square: 1944 and Lonely Town), and the overture to <em>Candide</em>.</p>
+  </div>
+</section>
+
+<section class="section">
+  <h2>Wind Ensemble Personnel</h2>
+  <div class="personnel-grid">
+    <div class="section-group">
+      <h4>Flute</h4>
+      <ul>
+        <li>Alin P.</li>
+        <li>Ashley H.</li>
+        <li>Sky L.</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <h4>Oboe</h4>
+      <ul>
+        <li>Claire C.</li>
+        <li>Hyeyul U.</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <h4>Bassoon</h4>
+      <ul>
+        <li>Adam B.</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <h4>Clarinet</h4>
+      <ul>
+        <li>Caleb C.</li>
+        <li>Monét H.</li>
+        <li>Noah M.</li>
+        <li>Ruby B.</li>
+        <li>Seth D.</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <h4>Bass Clarinet</h4>
+      <ul>
+        <li>Elliot H.</li>
+        <li>Ivy V.</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <h4>Alto Saxophone</h4>
+      <ul>
+        <li>Ashton C.</li>
+        <li>Mael F.</li>
+        <li>Matthew H.</li>
+        <li>Tyler S.</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <h4>Tenor Saxophone</h4>
+      <ul>
+        <li>Brady C.</li>
+        <li>Cyrus H.</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <h4>Baritone Saxophone</h4>
+      <ul>
+        <li>Cam D.</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <h4>Trumpet</h4>
+      <ul>
+        <li>Aidan B.</li>
+        <li>Emma R.</li>
+        <li>Jay B.</li>
+        <li>Mason L.</li>
+        <li>Nate C.</li>
+        <li>Robbe S.</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <h4>Horn</h4>
+      <ul>
+        <li>Charlie B.</li>
+        <li>Justin N.</li>
+        <li>Parker C.</li>
+        <li>PJ H.</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <h4>Trombone</h4>
+      <ul>
+        <li>Chris F.</li>
+        <li>Dan G.</li>
+        <li>Ella R.</li>
+        <li>Noah P.</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <h4>Euphonium</h4>
+      <ul>
+        <li>Ava B.</li>
+        <li>Lyla F.</li>
+      </ul>
+    </div>
+    <div class="section-group">
+      <h4>Tuba</h4>
+      <ul>
+        <li>Ian K.</li>
+        <li>Kade R.</li>
+        <li>Piper W.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     PART V · COMBINED BANDS
+════════════════════════════════════════════ -->
+<div class="photo-divider divider-combined">
+  <div class="divider-text">
+    <p class="eyebrow">Part V</p>
+    <h2>Combined Bands</h2>
+    <p>Robert A. Parker, conductor</p>
+  </div>
+</div>
+
+<section class="section">
+  <p class="section-label">Part V</p>
+  <h2>Concert Band and Wind Ensemble</h2>
+
+  <div class="piece">
+    <h3>Salute to the Armed Services</h3>
+    <p class="composer">arr. Jeremy S. Martin</p>
+    <p>This medley honors each branch of the U.S. military with its service song. It includes <em>Semper Supra</em>, the song of the U.S. Space Force.</p>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     THANK YOU
+════════════════════════════════════════════ -->
+<section class="section">
+  <h2>Thank You</h2>
+  <ul class="thanks">
+    <li>Ashley Band Boosters and Hannah Hales</li>
+    <li>Ashley High School administration</li>
+    <li>Karola Luttringhaus and the Minnie Evans Arts Center</li>
+    <li>Robin Clayton</li>
+    <li>Jessica Meade, Murray Middle School</li>
+    <li>Mattie Pennington, Myrtle Grove Middle School</li>
+    <li>Jeff and Shar Rifkin</li>
+    <li>Mike Aycock, Carnegie Hall 2027</li>
+    <li>Our parent volunteers</li>
+  </ul>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     SUPPORT THE BAND
+════════════════════════════════════════════ -->
+<section class="section">
+  <h2>Support the Band</h2>
+
+  <div class="support-item">
+    <h3>Carnegie Hall 2027</h3>
+    <p class="raised" id="carnegie-raised" hidden></p>
+    <p>Help the band get to New York to perform at Carnegie Hall in 2027.</p>
+    <a class="donate-btn" href="https://ashleybands.com/support-carnegie">Give to the trip</a>
+  </div>
+
+  <div class="support-item">
+    <h3>Holiday Raffle</h3>
+    <p>The drawing is at the Winter Concert on Tuesday, December 8. Have a prize to donate? Offer it online.</p>
+    <a class="donate-btn" href="https://ashleybands.com/raffle">Donate a prize</a>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════
+     COMING UP
+════════════════════════════════════════════ -->
+<section class="section">
+  <h2>Coming Up</h2>
+  <ul class="coming">
+    <li><strong>Fri, Oct 23</strong> &nbsp; Senior Night</li>
+    <li><strong>Sat, Oct 24</strong> &nbsp; Pirate Nation Invitational</li>
+    <li><strong>Tue, Dec 8</strong> &nbsp; Winter Concert, 7:00 PM</li>
+  </ul>
+  <p style="margin-top:1rem; font-size:0.9rem;"><a href="https://ashleybands.com/calendar">See the full band calendar</a></p>
+</section>
+
+</main>
+
+<!-- ══════════════════════════════════════════
+     FOOTER
+════════════════════════════════════════════ -->
+<footer>
+  <p>The Bands of Ashley High School &nbsp;|&nbsp; Wilmington, NC</p>
+  <p style="margin-top:0.5rem;">Eugene Ashley High School &nbsp;|&nbsp; Robert A. Parker, Director of Bands</p>
+  <p style="margin-top:0.5rem;"><a href="https://ashleybands.com" style="color:#bbb;">ashleybands.com</a></p>
+</footer>
+
+<script>
+  // Live Carnegie total. On any failure the line stays hidden and the rest still reads.
+  fetch("/api/carnegie-2027/funding", { cache: "no-store" })
+    .then(function (res) { return res.ok ? res.json() : null; })
+    .then(function (data) {
+      if (!data || !Number.isFinite(data.netCents)) return;
+      var el = document.getElementById("carnegie-raised");
+      el.textContent = "$" + Math.floor(data.netCents / 100).toLocaleString("en-US") + " raised so far";
+      el.hidden = false;
+    })
+    .catch(function () {});
+</script>
+
+</body>
+</html>

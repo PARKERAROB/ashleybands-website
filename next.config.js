@@ -24,6 +24,10 @@ const nextConfig = {
       }
     ];
   },
+  async rewrites() {
+    // Static concert program at a clean URL (the QR code on the printed sheet points here).
+    return [{ source: "/programs/fall-concert-2026", destination: "/programs/fall-concert-2026/index.html" }];
+  },
   async redirects() {
     return [
       {
