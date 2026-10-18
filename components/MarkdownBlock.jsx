@@ -1,3 +1,8 @@
+// Linkable headings: "### How does rooming work?" -> #how-does-rooming-work
+function anchorId(text) {
+  return String(text).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
 function inline(text) {
   const parts = String(text).split(
     /(\*\*\[.*?\]\(.*?\)\*\*|\*\*[^*]+\*\*|`[^`]+`|\[.*?\]\(.*?\))/g
@@ -106,9 +111,9 @@ export default function MarkdownBlock({ markdown }) {
     }
     flushList();
     if (line.startsWith("### ")) {
-      blocks.push(<h3 key={blocks.length}>{inline(line.slice(4))}</h3>);
+      blocks.push(<h3 key={blocks.length} id={anchorId(line.slice(4))}>{inline(line.slice(4))}</h3>);
     } else if (line.startsWith("## ")) {
-      blocks.push(<h2 key={blocks.length}>{inline(line.slice(3))}</h2>);
+      blocks.push(<h2 key={blocks.length} id={anchorId(line.slice(3))}>{inline(line.slice(3))}</h2>);
     } else if (line.startsWith("# ")) {
       blocks.push(<h1 key={blocks.length}>{inline(line.slice(2))}</h1>);
     } else {
