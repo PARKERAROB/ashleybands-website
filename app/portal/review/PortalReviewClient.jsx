@@ -217,7 +217,7 @@ export default function PortalReviewClient({ carnegieNotesOpen = false }) {
                 <InstrumentRequestSection student={selectedStudent} />
                 <UniformSection student={selectedStudent} />
                 <BillingSection studentId={selectedStudent.id} studentName={selectedStudent.displayName} />
-                <FamilyResources studentId={selectedStudent.id} notesOpen={carnegieNotesOpen} />
+                <FamilyResources studentId={selectedStudent.id} notesOpen={carnegieNotesOpen} senior={selectedStudent.grade === "12th Grade"} />
               </div>
             </div>
           </>
@@ -289,7 +289,7 @@ function OnboardingSection({ student }) {
   );
 }
 
-function FamilyResources({ studentId, notesOpen }) {
+function FamilyResources({ studentId, notesOpen, senior }) {
   return (
     <nav className="portal-family-resources" aria-label="Family resources">
       <strong>Family resources</strong>
@@ -300,6 +300,7 @@ function FamilyResources({ studentId, notesOpen }) {
       <Link href="/portal/sponsorship">Business sponsorship</Link>
       <Link href="/info/marching-band-2026">Marching Band information</Link>
       <Link href="/calendar">Band calendar</Link>
+      {senior ? <Link href="/portal/senior-night">Senior Night form (seniors sign in with their own school email)</Link> : null}
       <Link href="/info/the-band-folder">The Band Folder</Link>
       <Link href="/assistant">Ask the Band Assistant</Link>
     </nav>

@@ -58,7 +58,7 @@
     "integration:sync": "node scripts/integration.mjs sync",
     "deploy:preflight": "node scripts/deploy-preflight.mjs",
     "verify:change": "npm run test:workflow && npm run test:security && npm run test:portal-mirror && npm run test:local-preview && npm run test:public-content && npm run lint && npm run lint:integration && npm run lint:provenance",
-    "verify:release": "npm run test:percussion-preferences && npm run test:workflow && npm run test:hardening && npm run test:public-content && npm run deploy:preflight && node scripts/integration.mjs sync --deploy && npm run lint && npm run lint:integration && npm run lint:provenance && npm run lint:operations && npm run lint:carnegie && npm run test:audience && npm run test:sponsorship && npm run test:newsletter && npm run test:carnegie && npm run test:practice-loop && npm run test:ascend-check && npm run test:onboarding-live && npm run test:memberships-live && npm run test:attendance && npm run test:attendance-program-live && npm run test:attendance-school-live && npm run test:assets-inventory-prototype && npm run test:operations-completion && npm run test:security:live && npm run lint:sponsorship && npm run lint:newsletter && npm run build",
+    "verify:release": "npm run test:percussion-preferences && npm run test:senior-night && npm run test:workflow && npm run test:hardening && npm run test:public-content && npm run deploy:preflight && node scripts/integration.mjs sync --deploy && npm run lint && npm run lint:integration && npm run lint:provenance && npm run lint:operations && npm run lint:carnegie && npm run test:audience && npm run test:sponsorship && npm run test:newsletter && npm run test:carnegie && npm run test:practice-loop && npm run test:ascend-check && npm run test:onboarding-live && npm run test:memberships-live && npm run test:attendance && npm run test:attendance-program-live && npm run test:attendance-school-live && npm run test:assets-inventory-prototype && npm run test:operations-completion && npm run test:security:live && npm run lint:sponsorship && npm run lint:newsletter && npm run build",
     "verify:live": "node scripts/verify-live.mjs",
     "release:checked": "bash scripts/runtime.sh bash scripts/release-checked.sh",
     "deploy:checked": "npm run release:checked",
@@ -68,6 +68,7 @@
     "test:carnegie-workspace:http": "node --test scripts/carnegie-workspace-http.test.mjs",
     "test:carnegie-roster:http": "node --test scripts/carnegie-roster-http.test.mjs",
     "test:percussion-preferences": "node --test scripts/percussion-preferences.test.mjs",
+    "test:senior-night": "node --test scripts/senior-night.test.mjs",
     "test:carnegie-letters": "node --test scripts/carnegie-letters.test.mjs",
     "test:carnegie-letters:e2e": "node --test --test-timeout=240000 scripts/carnegie-letters-e2e.test.mjs"
   },
