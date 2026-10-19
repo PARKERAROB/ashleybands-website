@@ -14,6 +14,22 @@
     {
       "date": "2026-10-14",
       "label": "Theory Test #2"
+    },
+    {
+      "date": "2026-10-19",
+      "label": "Concert check in class"
+    },
+    {
+      "date": "2026-10-20",
+      "label": "Concert check in class"
+    },
+    {
+      "date": "2026-10-21",
+      "label": "Concert check in class"
+    },
+    {
+      "date": "2026-10-22",
+      "label": "Concert check in class"
     }
   ],
   "week": [
@@ -40,6 +56,7 @@
       "day": "Thu",
       "date": "2026-10-22",
       "program": [
+        "All band students: come to 4th period today.",
         "Fall Concert at Minnie Evans Arts Center. Call 6:00 PM, concert 7:00 PM. All black."
       ]
     },
@@ -47,6 +64,7 @@
       "day": "Fri",
       "date": "2026-10-23",
       "program": [
+        "Need to make something up? Come during 1st or 2nd period.",
         "Senior Night game vs West Brunswick. Call 5:00 PM, kickoff 7:00 PM. Pack the trailer after the game."
       ]
     }
@@ -61,6 +79,7 @@
   },
   "announcements": [
     "Pirate Classic: 1st Color Guard; 2nd Drum Major and General Effect; 3rd Percussion, Music and Overall in Class 2A.",
+    "Thu Oct 22: all band students come to 4th period.",
     "Seniors: fill out the Senior Night form in the Family Portal so the announcer gets your name right.",
     "Thu Oct 22: Fall Concert. Call 6:00 PM. All black: no athletic wear, jeans or tennis shoes.",
     "Sat Oct 24: Corinth Holders. Arrive 8:00 AM ready to board; buses leave 8:30 AM. We pack the trailer Friday after the game.",
@@ -124,7 +143,11 @@
             "FSP",
             "101"
           ],
-          "rehearsal": []
+          "rehearsal": [
+            "Review the concert",
+            "Get ready for the Senior Night game",
+            "Stand tunes"
+          ]
         }
       },
       "due": {
@@ -208,7 +231,11 @@
             "ABC in 3",
             "Truple"
           ],
-          "rehearsal": []
+          "rehearsal": [
+            "Review the concert",
+            "Get ready for the Senior Night game",
+            "Stand tunes"
+          ]
         }
       },
       "due": {
@@ -284,7 +311,11 @@
             "FSP",
             "101"
           ],
-          "rehearsal": []
+          "rehearsal": [
+            "Review the concert",
+            "Get ready for the Senior Night game",
+            "Stand tunes"
+          ]
         }
       },
       "due": {
