@@ -212,8 +212,10 @@ SUMMARY:Pirate Nation Invitational (Corinth Holders)
 DTSTART;TZID=America/New_York:20261024T080000
 DTEND;TZID=America/New_York:20261025T000000
 LOCATION:Corinth Holders HS
-DESCRIPTION:Schedule will be released once it is communicated by the compe
- tition host.
+DESCRIPTION:Call 8:00 a.m. at Ashley\, ready to board\; buses leave at 8:3
+ 0 a.m. Ashley performs at 1:45 p.m. Finals run in the evening\, with awar
+ ds at 9:00 p.m.\; we expect to be back at Ashley about 12:30 a.m. Corinth
+  Holders High School\, 6875 Applewhite Rd\, Wendell.
 END:VEVENT
 BEGIN:VEVENT
 UID:evt-0022-program@ashleybands.com
