@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>2026 Fall Concert | Slideshow</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Georgia', serif; cursor: none; }
+
+    .slide {
+      position: absolute; inset: 0; display: none;
+      flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; color: #fff; padding: 5vh 6vw;
+      background: #0a0a0a;
+    }
+    .slide.active { display: flex; }
+    .slide.row { flex-direction: row; gap: 6vw; }
+
+    .cb       { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%); }
+    .perc     { background: linear-gradient(135deg, #0a0a0a 0%, #1f1f1f 50%, #0a0a0a 100%); }
+    .combined { background: linear-gradient(135deg, #1a0a0a 0%, #4a1515 45%, #0f3460 100%); }
+    .carnegie { background: linear-gradient(135deg, #2d1515 0%, #4a1515 50%, #1a0a0a 100%); }
+    .we       { background: linear-gradient(135deg, #0d1b2a 0%, #1b2838 50%, #0a1628 100%); }
+
+    .eyebrow {
+      font-family: 'Arial', sans-serif; font-size: 2vw; letter-spacing: 0.28em;
+      text-transform: uppercase; color: #ccc; margin-bottom: 2vh;
+    }
+    .rule { display: block; width: 8vw; height: 0.5vh; background: #b50000; margin: 3vh auto; }
+    .title { font-size: 7.5vw; font-weight: normal; line-height: 1.05; letter-spacing: 0.02em; }
+    .subtitle { font-size: 3vw; font-style: italic; color: #ddd; margin-top: 1vh; }
+    .composer { font-family: 'Arial', sans-serif; font-size: 2.4vw; color: #ccc; letter-spacing: 0.05em; }
+    .meta { font-family: 'Arial', sans-serif; font-size: 2vw; color: #bbb; line-height: 1.9; margin-top: 3vh; }
+
+    .qr { display: flex; flex-direction: column; align-items: center; gap: 2vh; }
+    .qr svg { width: 24vw; max-width: 46vh; height: auto; display: block; border-radius: 0.6vw; }
+    .qr span { font-family: 'Arial', sans-serif; font-size: 1.5vw; letter-spacing: 0.18em; text-transform: uppercase; color: #ccc; }
+    .qr small { font-family: 'Arial', sans-serif; font-size: 1.3vw; color: #999; letter-spacing: 0.02em; }
+
+    .side { text-align: right; max-width: 52vw; }
+    .side .rule { margin-right: 0; }
+    .raised { font-size: 6vw; color: #fff; line-height: 1.1; margin-top: 2vh; }
+    .raised-label { font-family: 'Arial', sans-serif; font-size: 1.8vw; color: #ccc; letter-spacing: 0.1em; text-transform: uppercase; }
+
+    .list { list-style: none; font-size: 2.3vw; line-height: 1.75; color: #e8e2d8; }
+    .cols { display: flex; gap: 6vw; align-items: flex-start; text-align: left; }
+    .cols h2 { font-family: 'Arial', sans-serif; font-weight: normal; font-size: 1.7vw; letter-spacing: 0.22em; text-transform: uppercase; color: #e09090; margin-bottom: 2vh; }
+    .cols .list { font-size: 2.2vw; }
+    .cols .list b { font-family: 'Arial', sans-serif; font-weight: normal; color: #e09090; font-size: 1.8vw; letter-spacing: 0.04em; margin-right: 1vw; }
+
+    #counter { position: fixed; bottom: 1.5vh; right: 1.5vw; font-family: 'Arial', sans-serif; font-size: 1vw; color: rgba(255,255,255,0.18); }
+  </style>
+</head>
+<body>
+
+<!-- Welcome: up while the audience arrives -->
+<section class="slide row active">
+  <div class="side">
+    <p class="eyebrow">Eugene Ashley High School</p>
+    <h1 class="title" style="font-size:6.5vw;">Fall Concert</h1>
+    <span class="rule"></span>
+    <p class="subtitle">The Bands of Ashley High School</p>
+    <p class="meta">Thursday, October 22, 2026 &nbsp;·&nbsp; 7:00 PM<br>Minnie Evans Arts Center<br>Robert A. Parker, Director of Bands</p>
+  </div>
+  <div class="qr"><svg role="img" aria-label="QR code" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 37 37" shape-rendering="crispEdges"><path fill="#ffffff" d="M0 0h37v37H0z"/><path stroke="#000000" d="M2 2.5h7m1 0h3m1 0h2m2 0h8m2 0h7M2 3.5h1m5 0h1m1 0h4m1 0h1m4 0h1m3 0h3m1 0h1m5 0h1M2 4.5h1m1 0h3m1 0h1m4 0h1m3 0h3m4 0h1m1 0h1m1 0h1m1 0h3m1 0h1M2 5.5h1m1 0h3m1 0h1m1 0h1m2 0h1m2 0h3m3 0h1m5 0h1m1 0h3m1 0h1M2 6.5h1m1 0h3m1 0h1m2 0h1m4 0h1m5 0h2m2 0h1m1 0h1m1 0h3m1 0h1M2 7.5h1m5 0h1m4 0h3m3 0h4m1 0h1m3 0h1m5 0h1M2 8.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M10 9.5h1m1 0h2m5 0h2m1 0h1m1 0h1M2 10.5h1m1 0h2m1 0h3m2 0h3m1 0h1m2 0h3m1 0h1m4 0h1m2 0h1m1 0h2M2 11.5h1m6 0h2m7 0h1m1 0h3m2 0h1m2 0h2m1 0h2m1 0h1M2 12.5h1m2 0h5m2 0h1m1 0h1m1 0h1m1 0h2m2 0h1m1 0h2m2 0h4m1 0h2M2 13.5h2m1 0h1m3 0h4m1 0h4m2 0h1m1 0h1m3 0h1m1 0h2m1 0h1m2 0h1M5 14.5h4m1 0h4m3 0h1m2 0h2m1 0h1m1 0h1m1 0h1m1 0h3m1 0h2M2 15.5h1m3 0h2m2 0h2m2 0h2m2 0h1m1 0h1m3 0h1m1 0h1m2 0h1m3 0h1M2 16.5h3m3 0h8m1 0h2m1 0h1m2 0h2m1 0h1m1 0h3m1 0h1M2 17.5h1m4 0h1m5 0h2m1 0h1m1 0h1m2 0h3m3 0h2m1 0h3M2 18.5h4m1 0h2m1 0h2m3 0h3m3 0h5m1 0h2m1 0h3M2 19.5h2m1 0h3m1 0h4m4 0h1m1 0h1m4 0h5m1 0h2m1 0h2M2 20.5h3m1 0h1m1 0h1m3 0h1m1 0h6m2 0h2m2 0h5m1 0h1M3 21.5h1m7 0h2m1 0h5m2 0h2m2 0h1m1 0h1m2 0h1m2 0h1M2 22.5h3m2 0h2m2 0h1m4 0h2m2 0h2m2 0h2m5 0h3M2 23.5h1m2 0h1m1 0h1m1 0h2m2 0h1m1 0h1m1 0h1m1 0h2m2 0h3m2 0h2m2 0h1m1 0h1M6 24.5h3m1 0h1m2 0h4m1 0h1m1 0h1m1 0h1m2 0h2m1 0h1m4 0h2M3 25.5h1m1 0h2m2 0h3m1 0h2m3 0h1m1 0h2m3 0h1m3 0h1m1 0h1m1 0h2M2 26.5h1m1 0h2m2 0h2m2 0h1m1 0h4m1 0h1m2 0h1m1 0h1m1 0h5m2 0h2M10 27.5h2m1 0h2m1 0h6m3 0h2m3 0h2m1 0h1M2 28.5h7m1 0h1m2 0h1m4 0h1m2 0h1m2 0h3m1 0h1m1 0h1M2 29.5h1m5 0h1m1 0h1m1 0h2m1 0h2m5 0h1m2 0h2m3 0h4M2 30.5h1m1 0h3m1 0h1m2 0h3m5 0h1m2 0h1m1 0h7m1 0h2M2 31.5h1m1 0h3m1 0h1m1 0h2m1 0h1m1 0h1m4 0h1m1 0h5m2 0h1m1 0h4M2 32.5h1m1 0h3m1 0h1m1 0h3m1 0h1m5 0h1m3 0h1m1 0h4m2 0h1M2 33.5h1m5 0h1m4 0h2m1 0h4m1 0h2m2 0h3m1 0h2m3 0h1M2 34.5h7m1 0h3m1 0h1m1 0h2m1 0h2m2 0h1m1 0h1m1 0h2m1 0h1m1 0h1"/></svg><span>Scan for the program</span><small>ashleybands.com/programs/fall-concert-2026</small></div>
+</section>
+
+<section class="slide cb">
+  <p class="eyebrow">Concert Band</p>
+  <h1 class="title">Let Freedom Ring!</h1>
+  <span class="rule"></span>
+  <p class="composer">arr. Paul Jennings</p>
+</section>
+
+<section class="slide cb">
+  <p class="eyebrow">Concert Band</p>
+  <h1 class="title">Legends and Heroes</h1>
+  <p class="subtitle">I. Patrick on the Railway</p>
+  <span class="rule"></span>
+  <p class="composer">Pierre La Plante</p>
+</section>
+
+<section class="slide perc">
+  <p class="eyebrow">Percussion Ensemble</p>
+  <h1 class="title">Ensemble Uno</h1>
+  <span class="rule"></span>
+  <p class="composer">Murray Houllif</p>
+</section>
+
+<section class="slide perc">
+  <p class="eyebrow">Percussion Ensemble</p>
+  <h1 class="title">G-Force</h1>
+  <span class="rule"></span>
+  <p class="composer">John H. Beck</p>
+</section>
+
+<section class="slide combined">
+  <p class="eyebrow">Combined Symphonic Band</p>
+  <h1 class="title" style="font-size:6.5vw;">Salute to the<br>Armed Services</h1>
+  <span class="rule"></span>
+  <p class="composer">arr. Jeremy S. Martin</p>
+</section>
+
+<section class="slide row carnegie">
+  <div class="side">
+    <p class="eyebrow">Carnegie Hall 2027</p>
+    <h1 class="title" style="font-size:6vw;">Carnegie Hall<br>Discussion</h1>
+    <span class="rule"></span>
+    <div id="raised-wrap" hidden>
+      <p class="raised" id="raised"></p>
+      <p class="raised-label">raised so far</p>
+    </div>
+  </div>
+  <div class="qr"><svg role="img" aria-label="QR code" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 33 33" shape-rendering="crispEdges"><path fill="#ffffff" d="M0 0h33v33H0z"/><path stroke="#000000" d="M2 2.5h7m2 0h1m6 0h5m1 0h7M2 3.5h1m5 0h1m2 0h1m1 0h1m2 0h2m4 0h1m1 0h1m5 0h1M2 4.5h1m1 0h3m1 0h1m1 0h1m5 0h1m1 0h1m2 0h2m1 0h1m1 0h3m1 0h1M2 5.5h1m1 0h3m1 0h1m1 0h7m2 0h3m2 0h1m1 0h3m1 0h1M2 6.5h1m1 0h3m1 0h1m1 0h4m4 0h5m1 0h1m1 0h3m1 0h1M2 7.5h1m5 0h1m1 0h2m2 0h4m1 0h1m2 0h1m1 0h1m5 0h1M2 8.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M10 9.5h1m3 0h1m1 0h1m4 0h1M2 10.5h1m1 0h5m2 0h1m1 0h1m1 0h5m4 0h5M4 11.5h1m1 0h1m2 0h2m2 0h1m1 0h1m2 0h1m2 0h6m3 0h1M2 12.5h1m1 0h5m2 0h2m1 0h1m2 0h4m5 0h1M4 13.5h1m2 0h1m2 0h3m1 0h1m1 0h2m3 0h2m2 0h1m1 0h1m1 0h1M4 14.5h1m3 0h1m2 0h2m1 0h4m1 0h1m1 0h1m5 0h2M2 15.5h1m1 0h1m1 0h1m3 0h1m1 0h3m3 0h1m2 0h1m2 0h3m3 0h1M2 16.5h3m1 0h1m1 0h1m1 0h3m3 0h3m3 0h3m1 0h3M2 17.5h1m2 0h1m7 0h1m2 0h1m4 0h1m7 0h1M2 18.5h2m2 0h1m1 0h3m1 0h1m4 0h1m1 0h1m2 0h1m4 0h2M2 19.5h1m1 0h1m2 0h1m1 0h1m1 0h3m1 0h1m2 0h1m2 0h6m1 0h1m1 0h1M2 20.5h1m3 0h4m1 0h2m1 0h5m1 0h1m2 0h1m1 0h1m2 0h1M2 21.5h1m1 0h2m1 0h1m2 0h1m4 0h1m1 0h2m1 0h1m1 0h3m1 0h1m2 0h1M2 22.5h1m1 0h1m1 0h1m1 0h2m1 0h1m1 0h1m2 0h1m2 0h1m2 0h5m1 0h3M10 23.5h1m1 0h2m8 0h1m3 0h5M2 24.5h7m2 0h4m2 0h1m2 0h3m1 0h1m1 0h3M2 25.5h1m5 0h1m1 0h1m1 0h1m1 0h1m1 0h3m1 0h3m3 0h1m2 0h1M2 26.5h1m1 0h3m1 0h1m1 0h2m1 0h2m2 0h3m2 0h5m1 0h3M2 27.5h1m1 0h3m1 0h1m1 0h2m3 0h2m1 0h3m1 0h1m2 0h1m1 0h4M2 28.5h1m1 0h3m1 0h1m1 0h1m1 0h1m2 0h1m1 0h1m1 0h1m1 0h9M2 29.5h1m5 0h1m5 0h2m6 0h2m1 0h3m1 0h1M2 30.5h7m1 0h1m1 0h3m1 0h4m1 0h1m4 0h1m1 0h1"/></svg><span>Give to the trip</span><small>ashleybands.com/support-carnegie</small></div>
+</section>
+
+<section class="slide we">
+  <p class="eyebrow">Wind Ensemble</p>
+  <h1 class="title">Cenotaph</h1>
+  <p class="subtitle">Fanfare for Band</p>
+  <span class="rule"></span>
+  <p class="composer">Jack Stamp</p>
+</section>
+
+<section class="slide we">
+  <p class="eyebrow">Wind Ensemble</p>
+  <h1 class="title">The Entertainer</h1>
+  <span class="rule"></span>
+  <p class="composer">Scott Joplin &nbsp;/&nbsp; arr. Bill Holcombe and Carson Rothrock</p>
+</section>
+
+<section class="slide we">
+  <p class="eyebrow">Wind Ensemble</p>
+  <h1 class="title">A Bernstein Tribute</h1>
+  <span class="rule"></span>
+  <p class="composer">Leonard Bernstein &nbsp;/&nbsp; adapted by Clare Grundman</p>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Thank You</p>
+  <ul class="list" style="font-size:2.1vw; line-height:1.65;">
+    <li>Ashley Band Boosters and Hannah Hales</li>
+    <li>Ashley High School administration</li>
+    <li>Karola Luttringhaus and the Minnie Evans Arts Center</li>
+    <li>Robin Clayton</li>
+    <li>Jessica Meade, Murray Middle School</li>
+    <li>Mattie Pennington, Myrtle Grove Middle School</li>
+    <li>Jeff and Shar Rifkin</li>
+    <li>Mike Aycock, Carnegie Hall 2027</li>
+    <li>Our parent volunteers</li>
+  </ul>
+</section>
+
+<section class="slide row">
+  <div class="cols">
+    <div>
+      <h2>Coming Up</h2>
+      <ul class="list">
+        <li><b>Fri, Oct 23</b>Senior Night</li>
+        <li><b>Sat, Oct 24</b>Pirate Nation Invitational</li>
+        <li><b>Tue, Dec 8</b>Winter Concert, 7:00 PM</li>
+      </ul>
+      <h2 style="margin-top:5vh;">Holiday Raffle</h2>
+      <ul class="list">
+        <li>Drawing at the Winter Concert, Dec 8.</li>
+        <li>Have a prize to donate? Scan the code.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="qr"><svg role="img" aria-label="QR code" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 33 33" shape-rendering="crispEdges"><path fill="#ffffff" d="M0 0h33v33H0z"/><path stroke="#000000" d="M2 2.5h7m2 0h7m1 0h4m1 0h7M2 3.5h1m5 0h1m2 0h1m1 0h6m3 0h1m1 0h1m5 0h1M2 4.5h1m1 0h3m1 0h1m1 0h6m1 0h1m3 0h2m1 0h1m1 0h3m1 0h1M2 5.5h1m1 0h3m1 0h1m1 0h3m3 0h2m1 0h3m2 0h1m1 0h3m1 0h1M2 6.5h1m1 0h3m1 0h1m1 0h2m5 0h6m1 0h1m1 0h3m1 0h1M2 7.5h1m5 0h1m1 0h1m1 0h2m5 0h1m2 0h1m1 0h1m5 0h1M2 8.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M10 9.5h5m1 0h1m1 0h1m2 0h1M2 10.5h1m1 0h5m2 0h4m3 0h2m4 0h5M2 11.5h3m1 0h2m2 0h2m2 0h4m3 0h6m3 0h1M3 12.5h6m3 0h9m5 0h1M2 13.5h1m4 0h1m3 0h3m1 0h1m1 0h1m2 0h3m2 0h1m1 0h1m1 0h1M5 14.5h2m1 0h1m1 0h1m1 0h3m1 0h2m1 0h1m1 0h1m5 0h2M2 15.5h1m1 0h1m4 0h2m1 0h2m3 0h2m1 0h2m2 0h3m3 0h1M2 16.5h1m1 0h2m2 0h1m1 0h5m5 0h1m1 0h3m1 0h3M2 17.5h2m3 0h1m1 0h2m2 0h2m1 0h1m1 0h1m2 0h1m7 0h1M2 18.5h1m1 0h1m1 0h1m1 0h1m1 0h2m1 0h1m4 0h2m2 0h1m4 0h2M2 19.5h1m1 0h2m1 0h1m1 0h3m1 0h1m1 0h3m2 0h7m1 0h1m1 0h1M2 20.5h1m2 0h2m1 0h2m1 0h3m1 0h5m3 0h1m1 0h1m2 0h1M2 21.5h1m2 0h1m1 0h1m1 0h1m1 0h5m1 0h1m2 0h1m1 0h3m1 0h1m2 0h1M2 22.5h1m1 0h3m1 0h2m2 0h1m3 0h2m1 0h1m2 0h5m1 0h3M10 23.5h3m1 0h1m2 0h2m1 0h1m1 0h1m3 0h5M2 24.5h7m2 0h2m1 0h1m4 0h1m1 0h2m1 0h1m1 0h3M2 25.5h1m5 0h1m1 0h2m1 0h2m1 0h1m1 0h1m1 0h3m3 0h1m2 0h2M2 26.5h1m1 0h3m1 0h1m1 0h1m3 0h1m4 0h1m2 0h5m1 0h1m1 0h1M2 27.5h1m1 0h3m1 0h1m1 0h1m4 0h3m1 0h2m1 0h1m2 0h1m1 0h2M2 28.5h1m1 0h3m1 0h1m1 0h3m3 0h3m2 0h9M2 29.5h1m5 0h1m3 0h2m3 0h2m1 0h1m1 0h2m1 0h3m1 0h1M2 30.5h7m1 0h3m1 0h4m1 0h1m1 0h1m4 0h1m1 0h1"/></svg><span>Donate a prize</span><small>ashleybands.com/raffle</small></div>
+</section>
+
+<div id="counter"></div>
+
+<script>
+  // Arrow keys, space, Page Up/Down (presentation clickers) or a click advance. F toggles full screen.
+  var slides = document.querySelectorAll('.slide');
+  var counter = document.getElementById('counter');
+  var current = 0;
+  function go(n) {
+    current = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach(function (s, i) { s.classList.toggle('active', i === current); });
+    counter.textContent = (current + 1) + ' / ' + slides.length;
+  }
+  document.addEventListener('keydown', function (e) {
+    if (['ArrowRight', 'ArrowDown', ' ', 'PageDown', 'Enter'].indexOf(e.key) > -1) { e.preventDefault(); go(current + 1); }
+    else if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace'].indexOf(e.key) > -1) { e.preventDefault(); go(current - 1); }
+    else if (e.key === 'Home') go(0);
+    else if (e.key === 'End') go(slides.length - 1);
+    else if (e.key === 'f' || e.key === 'F') {
+      if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen();
+    }
+  });
+  document.addEventListener('click', function () { go(current + 1); });
+  go(0);
+
+  // Live Carnegie total. Works when opened from ashleybands.com; offline the number stays hidden.
+  function loadTotal() {
+    fetch('/api/carnegie-2027/funding', { cache: 'no-store' })
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (data) {
+        if (!data || !Number.isFinite(data.netCents)) return;
+        document.getElementById('raised').textContent = '$' + Math.floor(data.netCents / 100).toLocaleString('en-US');
+        document.getElementById('raised-wrap').hidden = false;
+      })
+      .catch(function () {});
+  }
+  loadTotal();
+  setInterval(loadTotal, 5 * 60 * 1000);
+</script>
+</body>
+</html>
