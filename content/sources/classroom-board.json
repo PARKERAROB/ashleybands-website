@@ -1,7 +1,7 @@
 {
   "_readme": "Band room board (#154). Hand-edited source. Atlas updates weekly and redeploys. Per class, per weekday: plans.<Day>.fundamentals (warm-up, FSP, 101, theory) and plans.<Day>.rehearsal (pieces and spots). 3 to 5 short bullets each. Program items come from BandsofAHS data/calendar-events.jsonl. No student data. No em dashes.",
   "slug": "yf7ycrjwun2z",
-  "weekOf": "2026-10-12",
+  "weekOf": "2026-10-19",
   "tests": [
     {
       "date": "2026-09-28",
@@ -19,54 +19,52 @@
   "week": [
     {
       "day": "Mon",
-      "date": "2026-10-12",
-      "program": [
-        "Homecoming pep rally, 4th block. All marching band students: band room at C lunch (1:26 PM)."
-      ]
+      "date": "2026-10-19",
+      "program": []
     },
     {
       "day": "Tue",
-      "date": "2026-10-13",
+      "date": "2026-10-20",
       "program": [
-        "PSAT in the morning for students signed up",
-        "Marching rehearsal 4:00 to 7:00 PM"
+        "NHCS Marching Band Showcase at Hoggard. Call 4:00 PM, buses 5:00 PM, show 7:00 PM, back about 9:00 PM."
       ]
     },
     {
       "day": "Wed",
-      "date": "2026-10-14",
-      "program": []
+      "date": "2026-10-21",
+      "program": [
+        "Guard practice 4:00 to 5:30 PM"
+      ]
     },
     {
       "day": "Thu",
-      "date": "2026-10-15",
+      "date": "2026-10-22",
       "program": [
-        "Marching rehearsal 4:00 to 7:00 PM"
+        "Fall Concert at Minnie Evans Arts Center. Call 6:00 PM, concert 7:00 PM. All black."
       ]
     },
     {
       "day": "Fri",
-      "date": "2026-10-16",
+      "date": "2026-10-23",
       "program": [
-        "Homecoming game. Call time 5:00 PM, parade 6:00 PM, kickoff 7:00 PM."
+        "Senior Night game vs West Brunswick. Call 5:00 PM, kickoff 7:00 PM. Pack the trailer after the game."
       ]
     }
   ],
   "nextWeek": {
-    "weekOf": "2026-10-19",
+    "weekOf": "2026-10-26",
     "program": [
-      "Sat Oct 17: Pirate Classic (Topsail). Ashley performs 1:45 PM. Call time to come.",
-      "Tue Oct 20: NHCS Marching Band Showcase at Hoggard",
-      "Thu Oct 22: Fall Concert, 7:00 PM",
-      "Fri Oct 23: Senior Night game. Call time 5:00 PM; kickoff 7:00 PM."
+      "Sat Oct 24: Pirate Nation Invitational at Corinth Holders. Arrive 8:00 AM ready to board, buses 8:30 AM, perform 1:45 PM, back about 12:30 AM.",
+      "Mon Oct 26: Teacher workday, no school",
+      "Fri Oct 30: Away game at Hoggard. Details to come."
     ]
   },
   "announcements": [
-    "TODAY: Homecoming pep rally. All marching band students: come to the band room at C lunch (1:26 PM). C lunch? Grab your food and come right down.",
-    "Taking the PSAT tomorrow (Tue Oct 13)? Tell Mr. Parker today.",
-    "Fri Oct 16: Homecoming. Call 5:00 PM, parade 6:00 PM, kickoff 7:00 PM.",
+    "Pirate Classic: 1st Color Guard; 2nd Drum Major and General Effect; 3rd Percussion, Music and Overall in Class 2A.",
+    "Seniors: fill out the Senior Night form in the Family Portal so the announcer gets your name right.",
+    "Thu Oct 22: Fall Concert. Call 6:00 PM. All black: no athletic wear, jeans or tennis shoes.",
+    "Sat Oct 24: Corinth Holders. Arrive 8:00 AM ready to board; buses leave 8:30 AM. We pack the trailer Friday after the game.",
     "Marching band funding goals are being finalized. Get yours taken care of.",
-    "Need marching shoes or other gear? Take care of it now as we head into competition prep.",
     "ECU All-District Workshop, Sat Dec 12. Practice your All-District audition with ECU faculty. Grades 9 and 10 in the morning, 11 and 12 in the afternoon. $20, register online by Nov 29. Only 12 spots per instrument per level. music.ecu.edu/ecu-all-district-workshop"
   ],
   "classes": {
@@ -74,12 +72,14 @@
       "plans": {
         "Mon": {
           "fundamentals": [
-            "Warm-up by section"
+            "50 Progressives",
+            "FSP",
+            "101"
           ],
           "rehearsal": [
-            "Sectionals: find the exact measures that need work",
-            "Scan the Practice Loop QR code, pick your piece, and mark it",
-            "One entry per section is fine. Put every name on it."
+            "Let Freedom Ring!",
+            "Legends and Heroes",
+            "Salute to the Armed Services"
           ]
         },
         "Tue": {
@@ -89,17 +89,16 @@
             "101"
           ],
           "rehearsal": [
-            "Marching sectionals: second half of the show",
-            "Drumline break",
-            "Blow It Up",
-            "Start Again",
-            "Evanescence",
-            "Concert band players: concert piece work"
+            "Let Freedom Ring!",
+            "Legends and Heroes",
+            "Salute to the Armed Services"
           ]
         },
         "Wed": {
           "fundamentals": [
-            "Theory Test #2"
+            "50 Progressives",
+            "FSP",
+            "101"
           ],
           "rehearsal": [
             "Let Freedom Ring!",
@@ -125,11 +124,7 @@
             "FSP",
             "101"
           ],
-          "rehearsal": [
-            "Let Freedom Ring!",
-            "Legends and Heroes",
-            "Salute to the Armed Services"
-          ]
+          "rehearsal": []
         }
       },
       "due": {
@@ -149,13 +144,17 @@
       "plans": {
         "Mon": {
           "fundamentals": [
-            "Full concert setup. We are timing it."
+            "Pad and sticks: snare warm-up",
+            "ABC in 3",
+            "Truple"
           ],
           "rehearsal": [
-            "Run-throughs:",
-            "Let Freedom Ring!; Legends and Heroes",
-            "Salute to the Armed Services; Cenotaph",
-            "A Bernstein Tribute; The Entertainer"
+            "Let Freedom Ring!",
+            "Legends and Heroes",
+            "Salute to the Armed Services",
+            "Cenotaph",
+            "A Bernstein Tribute",
+            "The Entertainer"
           ]
         },
         "Tue": {
@@ -165,17 +164,19 @@
             "Truple"
           ],
           "rehearsal": [
-            "Marching sectionals: second half of the show",
-            "Drumline break",
-            "Blow It Up",
-            "Start Again",
-            "Evanescence",
-            "Concert band players: concert piece work"
+            "Let Freedom Ring!",
+            "Legends and Heroes",
+            "Salute to the Armed Services",
+            "Cenotaph",
+            "A Bernstein Tribute",
+            "The Entertainer"
           ]
         },
         "Wed": {
           "fundamentals": [
-            "Theory Test #2"
+            "Pad and sticks: snare warm-up",
+            "ABC in 3",
+            "Truple"
           ],
           "rehearsal": [
             "Let Freedom Ring!",
@@ -207,14 +208,7 @@
             "ABC in 3",
             "Truple"
           ],
-          "rehearsal": [
-            "Let Freedom Ring!",
-            "Legends and Heroes",
-            "Salute to the Armed Services",
-            "Cenotaph",
-            "A Bernstein Tribute",
-            "The Entertainer"
-          ]
+          "rehearsal": []
         }
       },
       "due": {
@@ -234,10 +228,15 @@
       "plans": {
         "Mon": {
           "fundamentals": [
-            "Homecoming pep rally"
+            "50 Progressives",
+            "FSP",
+            "101"
           ],
           "rehearsal": [
-            "Band on the football field at 2:00 PM"
+            "Salute to the Armed Services",
+            "Cenotaph",
+            "A Bernstein Tribute",
+            "The Entertainer"
           ]
         },
         "Tue": {
@@ -247,17 +246,17 @@
             "101"
           ],
           "rehearsal": [
-            "Marching sectionals: second half of the show",
-            "Drumline break",
-            "Blow It Up",
-            "Start Again",
-            "Evanescence",
-            "Concert band players: concert piece work"
+            "Salute to the Armed Services",
+            "Cenotaph",
+            "A Bernstein Tribute",
+            "The Entertainer"
           ]
         },
         "Wed": {
           "fundamentals": [
-            "Theory Test #2"
+            "50 Progressives",
+            "FSP",
+            "101"
           ],
           "rehearsal": [
             "Salute to the Armed Services",
@@ -285,12 +284,7 @@
             "FSP",
             "101"
           ],
-          "rehearsal": [
-            "Salute to the Armed Services",
-            "Cenotaph",
-            "A Bernstein Tribute",
-            "The Entertainer"
-          ]
+          "rehearsal": []
         }
       },
       "due": {
@@ -313,9 +307,5 @@
       "time": "7:00 PM",
       "label": "Fall Concert"
     }
-  ],
-  "practice": {
-    "label": "Practice Loop",
-    "url": "https://ashleybands.com/practice"
-  }
+  ]
 }
