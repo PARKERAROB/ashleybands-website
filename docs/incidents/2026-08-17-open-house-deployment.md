@@ -62,6 +62,9 @@ pulled sensitive-value file.
 
 ## Remaining exposure
 
+Superseded 2026-10-21: the Nano limit recurred and the project moved to Pro with Micro compute. See
+[2026-10-21 database memory and Disk IO outage](2026-10-21-database-memory-swap.md).
+
 The software now detects an unhealthy Supabase REST service and prevents publication into that state,
 but it cannot replenish a Nano Disk IO budget. Capacity remains a hosting decision. If throttling
 recurs during ordinary family use, the production compute size needs review. Security Advisor also
