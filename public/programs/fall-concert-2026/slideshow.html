@@ -9,14 +9,15 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    /* Brand kit values from app/tokens.css (docs/DESIGN.md): garnet panels, gold labels, paper text. */
+    /* Brand kit values from app/tokens.css (docs/DESIGN.md). Light paper slides: the hall is lit, so dark fills wash out. */
     :root {
       --ink: #191716;
+      --paper: #f7f3e8;
       --paper-strong: #fffaf0;
       --garnet: #7b1829;
       --garnet-dark: #4f101c;
       --gold: #c5a028;
-      --text-on-accent-muted: #eadfd2;
+      --gold-text: #7d6134;
       --font-display: 'DM Serif Display', Georgia, serif;
       --font-body: 'Inter', Arial, Helvetica, sans-serif;
       --font-wordmark: 'Cinzel', Georgia, serif;
@@ -29,49 +30,46 @@
     .slide {
       position: absolute; top: 0; left: 0; right: 0; height: 66.667vh; display: none;
       flex-direction: column; align-items: center; justify-content: center;
-      text-align: center; color: var(--paper-strong); padding: 3vh 6vw;
-      background: linear-gradient(160deg, var(--garnet) 0%, var(--garnet-dark) 55%, var(--ink) 100%);
-      border-bottom: 0.5vh solid var(--gold);
+      text-align: center; color: var(--ink); padding: 3vh 6vw;
+      background: linear-gradient(180deg, var(--paper-strong) 0%, var(--paper) 100%);
+      border-top: 1vh solid var(--garnet); border-bottom: 1vh solid var(--gold);
     }
     .slide.active { display: flex; }
     .slide.row { flex-direction: row; gap: 6vw; }
 
-    .perc     { background: linear-gradient(160deg, var(--garnet-dark) 0%, var(--ink) 70%); }
-    .combined { background: linear-gradient(160deg, var(--garnet) 0%, var(--garnet-dark) 100%); }
-    .we       { background: linear-gradient(160deg, var(--ink) 0%, var(--garnet-dark) 100%); }
 
     .eyebrow {
       font-family: var(--font-body); font-weight: 600; font-size: 1.7vw; letter-spacing: 0.24em;
-      text-transform: uppercase; color: var(--gold); margin-bottom: 2vh;
+      text-transform: uppercase; color: var(--gold-text); margin-bottom: 2vh;
     }
     .rule { display: block; width: 8vw; height: 0.5vh; background: var(--gold); margin: 3vh auto; }
-    .title { font-family: var(--font-display); font-size: 7.5vw; font-weight: normal; line-height: 1.05; }
-    .subtitle { font-family: var(--font-display); font-size: 3vw; font-style: italic; color: var(--text-on-accent-muted); margin-top: 1vh; }
-    .wordmark { font-family: var(--font-wordmark); font-weight: 700; font-size: 2.4vw; letter-spacing: 0.04em; color: var(--paper-strong); }
-    .composer { font-family: var(--font-body); font-size: 2.2vw; color: var(--text-on-accent-muted); }
-    .meta { font-family: var(--font-body); font-size: 1.8vw; color: var(--text-on-accent-muted); line-height: 1.9; margin-top: 3vh; }
-    .logo { width: 5vw; height: auto; display: block; margin: 0 0 1.5vh auto; }
+    .title { font-family: var(--font-display); color: var(--garnet); font-size: 7.5vw; font-weight: normal; line-height: 1.05; }
+    .subtitle { font-family: var(--font-display); font-size: 3vw; font-style: italic; color: var(--garnet-dark); margin-top: 1vh; }
+    .wordmark { font-family: var(--font-wordmark); font-weight: 700; font-size: 2.4vw; letter-spacing: 0.04em; color: var(--garnet-dark); }
+    .composer { font-family: var(--font-body); font-weight: 500; font-size: 2.2vw; color: var(--ink); }
+    .meta { font-family: var(--font-body); font-weight: 500; font-size: 1.8vw; color: var(--ink); line-height: 1.9; margin-top: 3vh; }
+    .logo { width: 5vw; height: auto; display: block; margin: 0 0 1.5vh auto; filter: invert(1); }
     .welcome .rule { margin: 2vh 0 2vh auto; }
     .welcome .meta { margin-top: 1.5vh; }
 
     .qr { display: flex; flex-direction: column; align-items: center; gap: 2vh; }
-    .qr svg { width: 24vw; max-width: 40vh; height: auto; display: block; border-radius: 0.6vw; border: 0.4vw solid var(--paper-strong); }
-    .qr span { font-family: var(--font-body); font-weight: 600; font-size: 1.4vw; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); }
-    .qr small { font-family: var(--font-body); font-size: 1.2vw; color: var(--text-on-accent-muted); }
+    .qr svg { width: 24vw; max-width: 40vh; height: auto; display: block; border-radius: 0.6vw; border: 0.2vw solid var(--ink); }
+    .qr span { font-family: var(--font-body); font-weight: 600; font-size: 1.4vw; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold-text); }
+    .qr small { font-family: var(--font-body); font-weight: 500; font-size: 1.2vw; color: var(--ink); }
 
     .side { text-align: right; max-width: 52vw; }
     .side .rule { margin-right: 0; }
-    .raised { font-family: var(--font-display); font-size: 6vw; color: var(--paper-strong); line-height: 1.1; margin-top: 2vh; }
-    .raised-label { font-family: var(--font-body); font-weight: 600; font-size: 1.6vw; color: var(--gold); letter-spacing: 0.1em; text-transform: uppercase; }
+    .raised { font-family: var(--font-display); font-size: 6vw; color: var(--garnet); line-height: 1.1; margin-top: 2vh; }
+    .raised-label { font-family: var(--font-body); font-weight: 600; font-size: 1.6vw; color: var(--gold-text); letter-spacing: 0.1em; text-transform: uppercase; }
 
-    .list { list-style: none; font-family: var(--font-body); font-size: 2.2vw; line-height: 1.75; color: var(--paper-strong); }
+    .list { list-style: none; font-family: var(--font-body); font-size: 2.2vw; line-height: 1.75; color: var(--ink); }
     .list li { break-inside: avoid; white-space: nowrap; }
     .cols { display: flex; gap: 6vw; align-items: flex-start; text-align: left; }
-    .cols h2 { font-family: var(--font-body); font-weight: 600; font-size: 1.6vw; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin-bottom: 2vh; }
+    .cols h2 { font-family: var(--font-body); font-weight: 600; font-size: 1.6vw; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold-text); margin-bottom: 2vh; }
     .cols .list { font-size: 2.1vw; }
-    .cols .list b { font-weight: 600; color: var(--gold); font-size: 1.8vw; margin-right: 1vw; }
+    .cols .list b { font-weight: 600; color: var(--garnet); font-size: 1.8vw; margin-right: 1vw; }
 
-    #counter { position: fixed; top: 63vh; right: 1.5vw; font-family: var(--font-body); font-size: 1vw; color: rgba(255,250,240,0.2); }
+    #counter { position: fixed; top: 63vh; right: 1.5vw; font-family: var(--font-body); font-size: 1vw; color: rgba(25,23,22,0.25); }
   </style>
 </head>
 <body>
@@ -87,6 +85,13 @@
     <p class="meta">Thursday, October 22, 2026 &nbsp;·&nbsp; 7:00 PM<br>Minnie Evans Arts Center<br>Robert A. Parker, Director of Bands</p>
   </div>
   <div class="qr"><svg role="img" aria-label="QR code" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 37 37" shape-rendering="crispEdges"><path fill="#ffffff" d="M0 0h37v37H0z"/><path stroke="#000000" d="M2 2.5h7m1 0h3m1 0h2m2 0h8m2 0h7M2 3.5h1m5 0h1m1 0h4m1 0h1m4 0h1m3 0h3m1 0h1m5 0h1M2 4.5h1m1 0h3m1 0h1m4 0h1m3 0h3m4 0h1m1 0h1m1 0h1m1 0h3m1 0h1M2 5.5h1m1 0h3m1 0h1m1 0h1m2 0h1m2 0h3m3 0h1m5 0h1m1 0h3m1 0h1M2 6.5h1m1 0h3m1 0h1m2 0h1m4 0h1m5 0h2m2 0h1m1 0h1m1 0h3m1 0h1M2 7.5h1m5 0h1m4 0h3m3 0h4m1 0h1m3 0h1m5 0h1M2 8.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M10 9.5h1m1 0h2m5 0h2m1 0h1m1 0h1M2 10.5h1m1 0h2m1 0h3m2 0h3m1 0h1m2 0h3m1 0h1m4 0h1m2 0h1m1 0h2M2 11.5h1m6 0h2m7 0h1m1 0h3m2 0h1m2 0h2m1 0h2m1 0h1M2 12.5h1m2 0h5m2 0h1m1 0h1m1 0h1m1 0h2m2 0h1m1 0h2m2 0h4m1 0h2M2 13.5h2m1 0h1m3 0h4m1 0h4m2 0h1m1 0h1m3 0h1m1 0h2m1 0h1m2 0h1M5 14.5h4m1 0h4m3 0h1m2 0h2m1 0h1m1 0h1m1 0h1m1 0h3m1 0h2M2 15.5h1m3 0h2m2 0h2m2 0h2m2 0h1m1 0h1m3 0h1m1 0h1m2 0h1m3 0h1M2 16.5h3m3 0h8m1 0h2m1 0h1m2 0h2m1 0h1m1 0h3m1 0h1M2 17.5h1m4 0h1m5 0h2m1 0h1m1 0h1m2 0h3m3 0h2m1 0h3M2 18.5h4m1 0h2m1 0h2m3 0h3m3 0h5m1 0h2m1 0h3M2 19.5h2m1 0h3m1 0h4m4 0h1m1 0h1m4 0h5m1 0h2m1 0h2M2 20.5h3m1 0h1m1 0h1m3 0h1m1 0h6m2 0h2m2 0h5m1 0h1M3 21.5h1m7 0h2m1 0h5m2 0h2m2 0h1m1 0h1m2 0h1m2 0h1M2 22.5h3m2 0h2m2 0h1m4 0h2m2 0h2m2 0h2m5 0h3M2 23.5h1m2 0h1m1 0h1m1 0h2m2 0h1m1 0h1m1 0h1m1 0h2m2 0h3m2 0h2m2 0h1m1 0h1M6 24.5h3m1 0h1m2 0h4m1 0h1m1 0h1m1 0h1m2 0h2m1 0h1m4 0h2M3 25.5h1m1 0h2m2 0h3m1 0h2m3 0h1m1 0h2m3 0h1m3 0h1m1 0h1m1 0h2M2 26.5h1m1 0h2m2 0h2m2 0h1m1 0h4m1 0h1m2 0h1m1 0h1m1 0h5m2 0h2M10 27.5h2m1 0h2m1 0h6m3 0h2m3 0h2m1 0h1M2 28.5h7m1 0h1m2 0h1m4 0h1m2 0h1m2 0h3m1 0h1m1 0h1M2 29.5h1m5 0h1m1 0h1m1 0h2m1 0h2m5 0h1m2 0h2m3 0h4M2 30.5h1m1 0h3m1 0h1m2 0h3m5 0h1m2 0h1m1 0h7m1 0h2M2 31.5h1m1 0h3m1 0h1m1 0h2m1 0h1m1 0h1m4 0h1m1 0h5m2 0h1m1 0h4M2 32.5h1m1 0h3m1 0h1m1 0h3m1 0h1m5 0h1m3 0h1m1 0h4m2 0h1M2 33.5h1m5 0h1m4 0h2m1 0h4m1 0h2m2 0h3m1 0h2m3 0h1M2 34.5h7m1 0h3m1 0h1m1 0h2m1 0h2m2 0h1m1 0h1m1 0h2m1 0h1m1 0h1"/></svg><span>Scan for the program</span><small>ashleybands.com/programs/fall-concert-2026</small></div>
+</section>
+
+<section class="slide combined">
+  <p class="eyebrow">Combined Symphonic Band</p>
+  <h1 class="title" style="font-size:6.5vw;">The Star-Spangled Banner</h1>
+  <span class="rule"></span>
+  <p class="composer">John Stafford Smith &nbsp;/&nbsp; arr. Jack Stamp</p>
 </section>
 
 <section class="slide cb">
@@ -144,6 +149,13 @@
   <p class="subtitle">Fanfare for Band</p>
   <span class="rule"></span>
   <p class="composer">Jack Stamp</p>
+</section>
+
+<section class="slide we">
+  <p class="eyebrow">Wind Ensemble</p>
+  <h1 class="title">Down a Country Lane</h1>
+  <span class="rule"></span>
+  <p class="composer">Aaron Copland &nbsp;/&nbsp; arr. Merlin Patterson</p>
 </section>
 
 <section class="slide we">
