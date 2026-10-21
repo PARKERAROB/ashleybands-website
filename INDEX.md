@@ -105,7 +105,7 @@ listed projection contract explicitly brings in a safe subset.
 
 ## All-County meals (#221)
 
-- Price, meals (dinner can be turned off), deadline, invoice, staff counts and CSV: `lib/allCountyMeals.mjs`. Change `MEAL_PRICE_CENTS` there; saved orders keep their price until the director saves again.
+- Price, meals (Tuesday dinner is off: lunches only, Rob 2026-10-21), deadline, invoice, staff counts and CSV: `lib/allCountyMeals.mjs`. Change `MEAL_PRICE_CENTS` there; saved orders keep their price until the director saves again.
 - Director page and edit link: `app/all-county/meals/` (unlisted, noindex), write path `app/api/all-county/meals/route.js` (rate limited, fails closed, honeypot), server helpers `lib/allCountyMealsServer.js`. Edit tokens are stored hashed; "get a new link" replaces the old one.
 - Storage: `supabase/migrations/202610210001_allcounty_meal_signups.sql` (one row per director per school, student names only, service role only, `source = 'director_form'`).
 - Staff: `app/admin/all-county-meals/`, `app/api/admin/all-county-meals/route.js` (`allcounty_meals.read`/`.write`, audited). Tests: `npm run test:allcounty-meals`.

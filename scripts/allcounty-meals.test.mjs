@@ -6,6 +6,7 @@ import {
   MEALS, MEAL_PRICE_CENTS, buildInvoice, cleanSignup, invoiceEmail, invoiceMeals, paymentStatus, signupsOpen, staffSummary, summaryCsv, SIGNUP_DEADLINE,
 } from "../lib/allCountyMeals.mjs";
 
+const ALL_ON = MEALS.map((meal) => ({ ...meal, offered: true }));
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const body = {
   director_name: " Example  Director ", school: "Example Middle School", director_email: "Director@Example.org",
@@ -17,7 +18,7 @@ const body = {
 };
 
 test("a director's form is trimmed, lowercased, sorted and closed to bad input", () => {
-  const { value } = cleanSignup(body);
+  const { value } = cleanSignup(body, { meals: ALL_ON });
   assert.equal(value.director_name, "Example Director");
   assert.equal(value.director_email, "director@example.org");
   assert.deepEqual(value.students.map((s) => s.name), ["Student One", "Student Two"]);
@@ -34,8 +35,10 @@ test("a director's form is trimmed, lowercased, sorted and closed to bad input",
   assert.ok(cleanSignup([]).error);
 });
 
-test("dinner can be turned off: new orders cannot pick it", () => {
-  const noDinner = MEALS.map((meal) => (meal.key === "tue_dinner" ? { ...meal, offered: false } : meal));
+test("lunches only: dinner is turned off, so new orders cannot pick it", () => {
+  assert.deepEqual(MEALS.filter((meal) => meal.offered).map((meal) => meal.key), ["mon_lunch", "tue_lunch"]);
+  assert.match(cleanSignup(body).error, /not available/);
+  const noDinner = MEALS;
   assert.match(cleanSignup(body, { meals: noDinner }).error, /not available/);
   const ok = cleanSignup({ ...body, students: [{ name: "A", meals: ["mon_lunch"] }] }, { meals: noDinner });
   assert.deepEqual(ok.value.students[0].meals, ["mon_lunch"]);
@@ -44,7 +47,7 @@ test("dinner can be turned off: new orders cannot pick it", () => {
 });
 
 test("invoice total equals meals times price, with a count per meal", () => {
-  const { value } = cleanSignup(body);
+  const { value } = cleanSignup(body, { meals: ALL_ON });
   const invoice = buildInvoice(value.students, 800);
   assert.deepEqual(invoice.counts, { mon_lunch: 1, tue_lunch: 2, tue_dinner: 1 });
   assert.equal(invoice.totalMeals, 4);
@@ -54,7 +57,7 @@ test("invoice total equals meals times price, with a count per meal", () => {
 
 test("the price constant drives new invoices", () => {
   assert.equal(MEAL_PRICE_CENTS, 800);
-  const { value } = cleanSignup(body);
+  const { value } = cleanSignup(body, { meals: ALL_ON });
   assert.equal(buildInvoice(value.students).totalCents, 4 * MEAL_PRICE_CENTS);
   assert.equal(buildInvoice(value.students, 950).totalCents, 3800);
   const api = read("app/api/all-county/meals/route.js");
@@ -82,7 +85,9 @@ test("staff counts add up across schools and use each order's saved price", () =
   const csv = summaryCsv(summary);
   assert.equal(csv.trim().split("\r\n").length, 4);
   assert.match(csv, /^School,Director,Director email,Student,Mon 11\/23 lunch/);
-  assert.match(csv, /A School,D1,a@x.org,Y,,,Yes,1,9.00,Invoiced/);
+  assert.match(csv, /A School,D1,a@x.org,Y,,,Yes,1,9.00,Invoiced/, "a turned-off meal still exports when it was ordered");
+  const lunchOnly = summaryCsv(staffSummary([rows[0]]));
+  assert.doesNotMatch(lunchOnly, /dinner/, "no dinner column when nobody ordered it");
 });
 
 test("payment status shows what is still owed", () => {
