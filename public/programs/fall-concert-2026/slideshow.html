@@ -9,10 +9,11 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font-family: 'Georgia', serif; cursor: none; }
 
+    /* Slides fill the top two-thirds; the bottom third stays black so people on stage don't block text. */
     .slide {
-      position: absolute; inset: 0; display: none;
+      position: absolute; top: 0; left: 0; right: 0; height: 66.667vh; display: none;
       flex-direction: column; align-items: center; justify-content: center;
-      text-align: center; color: #fff; padding: 5vh 6vw;
+      text-align: center; color: #fff; padding: 3vh 6vw;
       background: #0a0a0a;
     }
     .slide.active { display: flex; }
@@ -35,7 +36,7 @@
     .meta { font-family: 'Arial', sans-serif; font-size: 2vw; color: #bbb; line-height: 1.9; margin-top: 3vh; }
 
     .qr { display: flex; flex-direction: column; align-items: center; gap: 2vh; }
-    .qr svg { width: 24vw; max-width: 46vh; height: auto; display: block; border-radius: 0.6vw; }
+    .qr svg { width: 24vw; max-width: 40vh; height: auto; display: block; border-radius: 0.6vw; }
     .qr span { font-family: 'Arial', sans-serif; font-size: 1.5vw; letter-spacing: 0.18em; text-transform: uppercase; color: #ccc; }
     .qr small { font-family: 'Arial', sans-serif; font-size: 1.3vw; color: #999; letter-spacing: 0.02em; }
 
@@ -45,12 +46,13 @@
     .raised-label { font-family: 'Arial', sans-serif; font-size: 1.8vw; color: #ccc; letter-spacing: 0.1em; text-transform: uppercase; }
 
     .list { list-style: none; font-size: 2.3vw; line-height: 1.75; color: #e8e2d8; }
+    .list li { break-inside: avoid; white-space: nowrap; }
     .cols { display: flex; gap: 6vw; align-items: flex-start; text-align: left; }
     .cols h2 { font-family: 'Arial', sans-serif; font-weight: normal; font-size: 1.7vw; letter-spacing: 0.22em; text-transform: uppercase; color: #e09090; margin-bottom: 2vh; }
     .cols .list { font-size: 2.2vw; }
     .cols .list b { font-family: 'Arial', sans-serif; font-weight: normal; color: #e09090; font-size: 1.8vw; letter-spacing: 0.04em; margin-right: 1vw; }
 
-    #counter { position: fixed; bottom: 1.5vh; right: 1.5vw; font-family: 'Arial', sans-serif; font-size: 1vw; color: rgba(255,255,255,0.18); }
+    #counter { position: fixed; top: 63vh; right: 1.5vw; font-family: 'Arial', sans-serif; font-size: 1vw; color: rgba(255,255,255,0.18); }
   </style>
 </head>
 <body>
@@ -140,7 +142,7 @@
 
 <section class="slide">
   <p class="eyebrow">Thank You</p>
-  <ul class="list" style="font-size:2.1vw; line-height:1.65;">
+  <ul class="list" style="font-size:1.75vw; line-height:1.65; columns:2; column-gap:4vw; text-align:left;">
     <li>Ashley Band Boosters and Hannah Hales</li>
     <li>Ashley High School administration</li>
     <li>Karola Luttringhaus and the Minnie Evans Arts Center</li>
