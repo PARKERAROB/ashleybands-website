@@ -1,0 +1,242 @@
+.page {
+  display: grid;
+  gap: var(--space-7);
+}
+
+.section {
+  display: grid;
+  gap: var(--space-4);
+  max-width: 760px;
+}
+
+.section h2 {
+  margin: 0;
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: var(--step-3);
+  font-weight: 400;
+}
+
+.section p {
+  margin: 0;
+}
+
+.facts {
+  margin: 0;
+  padding-left: var(--space-5);
+  display: grid;
+  gap: var(--space-2);
+  font-weight: 600;
+}
+
+.stack,
+.form {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.hint,
+.help,
+.running {
+  color: var(--text-muted);
+  font-size: var(--step--1);
+}
+
+.students {
+  margin: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  display: grid;
+  gap: var(--space-3);
+}
+
+.students legend {
+  padding: 0 var(--space-2);
+  font-weight: 700;
+}
+
+.studentList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.studentRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-2) var(--space-3);
+  align-items: center;
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border);
+}
+
+.nameLabel input {
+  width: 100%;
+  min-height: var(--tap-target);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.mealChecks {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+}
+
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-target);
+  font-size: var(--step--1);
+}
+
+.check input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--accent);
+}
+
+.remove {
+  grid-column: 2;
+  grid-row: 1;
+  display: inline-grid;
+  place-items: center;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.remove:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.invoice {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+}
+
+.invoice p {
+  margin: 0;
+}
+
+.invoiceHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.invoiceHead h3 {
+  margin: 0;
+  font-size: var(--step-1);
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--step--1);
+}
+
+.table th,
+.table td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.table thead th {
+  border-bottom: 2px solid var(--border-strong);
+}
+
+.table tfoot th,
+.table tfoot td {
+  border-top: 2px solid var(--border-strong);
+  border-bottom: 0;
+  font-weight: 700;
+}
+
+.table .end {
+  text-align: right;
+}
+
+.total {
+  font-weight: 700;
+  font-size: var(--step-1);
+}
+
+.editLink {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--accent-soft);
+}
+
+.linkText {
+  overflow-wrap: anywhere;
+  font-size: var(--step--1);
+}
+
+.lost summary {
+  cursor: pointer;
+  font-weight: 600;
+  min-height: var(--tap-target);
+  display: flex;
+  align-items: center;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.trap {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+@media print {
+  .actions,
+  .lost,
+  .editLink button {
+    display: none;
+  }
+}

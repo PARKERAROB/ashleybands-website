@@ -7,6 +7,7 @@ import { staffHasCapability, staffScopeAllows, STAFF_CAPABILITIES } from "../lib
 const PRIVATE_OPERATIONAL_TABLES = [
   "students",
   "raffle_prize_offers",
+  "allcounty_meal_signups",
   "guardians",
   "student_guardians",
   "marching_band_signup_2026",

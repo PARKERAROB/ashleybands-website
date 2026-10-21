@@ -102,3 +102,10 @@ listed projection contract explicitly brings in a safe subset.
 - Exemption (#190): only `sendPortalCodeEmail` and `sendFeePaymentReceiptEmail` pass `requestedByRecipient: true`; every other send stays filtered. Send-time skips count as `skipped` in broadcast and sponsor outreach.
 - Tests: `scripts/contact-suppression.test.mjs` and `scripts/contact-suppression-send.test.mjs` (in `npm run test:audience`), including a scan that fails on any provider call outside `lib/portalEmail.js`.
 - Staff address exports (#209): `current-students/export` (copy and CSV, via `dropSuppressedFromStudents`), `program-memberships/contacts` and the composer's "Copy addresses" (`app/api/admin/broadcast/copy-addresses`, `resolveAudienceAddresses` in `lib/audience.js`) drop opted-out addresses, report `suppressedCount`, fail on lookup error, and write an `audit_log` row with counts only. A scan in `scripts/contact-suppression.test.mjs` fails any app/api or lib file returning an `emails`/`addresses`/`bcc` list outside the check; route tests in `scripts/audience-copy.test.mjs`.
+
+## All-County meals (#221)
+
+- Price, meals (dinner can be turned off), deadline, invoice, staff counts and CSV: `lib/allCountyMeals.mjs`. Change `MEAL_PRICE_CENTS` there; saved orders keep their price until the director saves again.
+- Director page and edit link: `app/all-county/meals/` (unlisted, noindex), write path `app/api/all-county/meals/route.js` (rate limited, fails closed, honeypot), server helpers `lib/allCountyMealsServer.js`. Edit tokens are stored hashed; "get a new link" replaces the old one.
+- Storage: `supabase/migrations/202610210001_allcounty_meal_signups.sql` (one row per director per school, student names only, service role only, `source = 'director_form'`).
+- Staff: `app/admin/all-county-meals/`, `app/api/admin/all-county-meals/route.js` (`allcounty_meals.read`/`.write`, audited). Tests: `npm run test:allcounty-meals`.
