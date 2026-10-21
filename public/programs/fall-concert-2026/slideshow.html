@@ -33,6 +33,7 @@
       text-align: center; color: var(--ink); padding: 3vh 6vw;
       background: linear-gradient(180deg, var(--paper-strong) 0%, var(--paper) 100%);
       border-top: 1vh solid var(--garnet); border-bottom: 1vh solid var(--gold);
+      overflow: hidden;
     }
     .slide.active { display: flex; }
     .slide.row { flex-direction: row; gap: 6vw; }
@@ -48,7 +49,6 @@
     .wordmark { font-family: var(--font-wordmark); font-weight: 700; font-size: 2.4vw; letter-spacing: 0.04em; color: var(--garnet-dark); }
     .composer { font-family: var(--font-body); font-weight: 500; font-size: 2.2vw; color: var(--ink); }
     .meta { font-family: var(--font-body); font-weight: 500; font-size: 1.8vw; color: var(--ink); line-height: 1.9; margin-top: 3vh; }
-    .logo { width: 5vw; height: auto; display: block; margin: 0 0 1.5vh auto; filter: invert(1); }
     .welcome .rule { margin: 2vh 0 2vh auto; }
     .welcome .meta { margin-top: 1.5vh; }
 
@@ -69,6 +69,42 @@
     .cols .list { font-size: 2.1vw; }
     .cols .list b { font-weight: 600; color: var(--garnet); font-size: 1.8vw; margin-right: 1vw; }
 
+    /* Motion: a soft glow drifts behind each slide, and content rises in when a slide appears. */
+    .slide::before, .slide::after {
+      content: ""; position: absolute; width: 60vw; height: 60vw; border-radius: 50%;
+      filter: blur(6vw); opacity: 0.16; pointer-events: none; z-index: 0;
+    }
+    .slide::before { background: var(--gold); top: -30vw; left: -18vw; animation: drift-a 26s ease-in-out infinite alternate; }
+    .slide::after  { background: var(--garnet); bottom: -38vw; right: -20vw; opacity: 0.09; animation: drift-b 32s ease-in-out infinite alternate; }
+    .slide > * { position: relative; z-index: 1; }
+    @keyframes drift-a { to { transform: translate(22vw, 6vw) scale(1.15); } }
+    @keyframes drift-b { to { transform: translate(-24vw, -4vw) scale(0.9); } }
+
+    .slide.active > :not(.side):not(.cols),
+    .slide.active .side > *,
+    .slide.active .cols h2,
+    .slide.active .cols li { animation: rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+    .slide.active > :nth-child(2), .slide.active .side > :nth-child(2) { animation-delay: 0.12s; }
+    .slide.active > :nth-child(3), .slide.active .side > :nth-child(3) { animation-delay: 0.24s; }
+    .slide.active > :nth-child(4), .slide.active .side > :nth-child(4) { animation-delay: 0.36s; }
+    .slide.active > :nth-child(5), .slide.active .side > :nth-child(5) { animation-delay: 0.48s; }
+    .slide.active > .qr { animation-delay: 0.5s; }
+    .slide.active .list li:nth-child(2) { animation-delay: 0.1s; }
+    .slide.active .list li:nth-child(3) { animation-delay: 0.2s; }
+    .slide.active .list li:nth-child(4) { animation-delay: 0.3s; }
+    .slide.active .list li:nth-child(5) { animation-delay: 0.4s; }
+    .slide.active .list li:nth-child(6) { animation-delay: 0.5s; }
+    .slide.active .list li:nth-child(7) { animation-delay: 0.6s; }
+    .slide.active .list li:nth-child(8) { animation-delay: 0.7s; }
+    .slide.active .rule { animation: draw 1s cubic-bezier(0.6, 0, 0.2, 1) 0.35s both; }
+    .slide.active .side .rule { transform-origin: right; }
+    @keyframes rise { from { opacity: 0; transform: translateY(3vh); } }
+    @keyframes draw { from { transform: scaleX(0); } }
+
+    @media (prefers-reduced-motion: reduce) {
+      .slide::before, .slide::after, .slide.active * { animation: none !important; }
+    }
+
     #counter { position: fixed; top: 63vh; right: 1.5vw; font-family: var(--font-body); font-size: 1vw; color: rgba(25,23,22,0.25); }
   </style>
 </head>
@@ -77,7 +113,6 @@
 <!-- Welcome: up while the audience arrives -->
 <section class="slide row welcome active">
   <div class="side">
-    <img class="logo" src="/bandsofahslogo.png" alt="">
     <p class="eyebrow">Eugene Ashley High School</p>
     <h1 class="title" style="font-size:6.5vw;">Fall Concert</h1>
     <span class="rule"></span>
@@ -212,10 +247,28 @@
   var slides = document.querySelectorAll('.slide');
   var counter = document.getElementById('counter');
   var current = 0;
+  var raisedDollars = 0;
+  var calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function go(n) {
     current = Math.max(0, Math.min(slides.length - 1, n));
     slides.forEach(function (s, i) { s.classList.toggle('active', i === current); });
     counter.textContent = (current + 1) + ' / ' + slides.length;
+    if (slides[current].querySelector('#raised')) countUp();
+  }
+
+  // The Carnegie total counts up from zero each time its slide appears.
+  function countUp() {
+    var el = document.getElementById('raised');
+    if (!raisedDollars || calm) return;
+    var start = null, target = raisedDollars;
+    function step(t) {
+      if (start === null) start = t;
+      var k = Math.min(1, (t - start) / 2200);
+      var eased = 1 - Math.pow(1 - k, 3);
+      el.textContent = '$' + Math.round(target * eased).toLocaleString('en-US');
+      if (k < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
   }
   document.addEventListener('keydown', function (e) {
     if (['ArrowRight', 'ArrowDown', ' ', 'PageDown', 'Enter'].indexOf(e.key) > -1) { e.preventDefault(); go(current + 1); }
@@ -235,7 +288,8 @@
       .then(function (res) { return res.ok ? res.json() : null; })
       .then(function (data) {
         if (!data || !Number.isFinite(data.netCents)) return;
-        document.getElementById('raised').textContent = '$' + Math.floor(data.netCents / 100).toLocaleString('en-US');
+        raisedDollars = Math.floor(data.netCents / 100);
+        document.getElementById('raised').textContent = '$' + raisedDollars.toLocaleString('en-US');
         document.getElementById('raised-wrap').hidden = false;
       })
       .catch(function () {});
