@@ -3,7 +3,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
-  MEALS, MEAL_PRICE_CENTS, buildInvoice, cleanSignup, invoiceEmail, invoiceMeals, paymentStatus, signupsOpen, staffSummary, summaryCsv, SIGNUP_DEADLINE,
+  MEALS, MEAL_PRICE_CENTS, buildInvoice, captureMatchesPayment, isAllCountyInvoiceId, onlineSurchargeCents, cleanSignup, invoiceEmail, invoiceMeals, paymentStatus, signupsOpen, staffSummary, summaryCsv, SIGNUP_DEADLINE,
 } from "../lib/allCountyMeals.mjs";
 
 const ALL_ON = MEALS.map((meal) => ({ ...meal, offered: true }));
@@ -94,6 +94,56 @@ test("payment status shows what is still owed", () => {
   assert.equal(paymentStatus(1600, null).label, "Invoiced");
   assert.equal(paymentStatus(1600, 800).label, "Owes $8");
   assert.equal(paymentStatus(1600, 2400).status, "overpaid");
+});
+
+test("the online surcharge covers PayPal's fee so the boosters net the full amount", () => {
+  assert.equal(onlineSurchargeCents(0), 0);
+  assert.equal(onlineSurchargeCents(4000), 196);
+  for (const due of [800, 1600, 4000, 5600, 24000, 160000]) {
+    const gross = due + onlineSurchargeCents(due);
+    const net = gross - Math.round(gross * 0.0349) - 49;
+    assert.ok(net >= due && net <= due + 1, `due ${due} nets ${net}`);
+  }
+});
+
+test("online payments count toward the invoice and show in staff totals", () => {
+  assert.deepEqual(paymentStatus(4000, null, 4000), { status: "paid", label: "Paid", dueCents: 0 });
+  assert.equal(paymentStatus(4000, 800, 1600).label, "Owes $16");
+  const summary = staffSummary(
+    [{ id: "s", school: "S", director_name: "D", director_email: "d@x.org", students: [{ name: "A", meals: ["mon_lunch", "tue_lunch"] }], price_cents: 800, paid_cents: null, updated_at: "2026-10-21" }],
+    MEALS,
+    [{ signup_id: "s", meal_cents: 1600, surcharge_cents: 129 }, { signup_id: "other", meal_cents: 800, surcharge_cents: 80 }],
+  );
+  assert.equal(summary.schools[0].payment.status, "paid");
+  assert.equal(summary.totals.paidCents, 1600);
+  assert.equal(summary.totals.surchargeCents, 129);
+});
+
+test("a PayPal capture settles only when it matches the stored payment", () => {
+  const payment = { id: "p1", invoice_id: "AB-ACM-ABC123", meal_cents: 4000, surcharge_cents: 196 };
+  const capture = { captureStatus: "COMPLETED", invoiceId: "AB-ACM-ABC123", customId: "p1", currencyCode: "USD", amountValue: "41.96" };
+  assert.equal(captureMatchesPayment(capture, payment), true);
+  for (const patch of [{ captureStatus: "PENDING" }, { invoiceId: "AB-ACM-OTHER" }, { customId: "p2" }, { currencyCode: "CAD" }, { amountValue: "40.00" }]) {
+    assert.equal(captureMatchesPayment({ ...capture, ...patch }, payment), false, JSON.stringify(patch));
+  }
+  assert.equal(isAllCountyInvoiceId("AB-ACM-ABC123"), true);
+  assert.equal(isAllCountyInvoiceId("AB-SP-123"), false);
+  const pay = read("app/api/all-county/meals/pay/route.js");
+  assert.match(pay, /failOpen: false/);
+  assert.match(pay, /captureMatchesPayment\(detail, payment\)/);
+  assert.doesNotMatch(pay, /meal_cents: (body|Number\(body)/, "the amount never comes from the browser");
+  const webhook = read("app/api/billing/webhook/route.js");
+  assert.ok(webhook.indexOf("isAllCountyInvoiceId(invoiceId)") < webhook.indexOf('plan?.ledger === "family"'), "All-County invoices never reach the family fee ledger");
+  const migration = read("supabase/migrations/202610210002_allcounty_meal_payments.sql");
+  assert.match(migration, /revoke all privileges on table public\.allcounty_meal_payments from anon, authenticated/);
+});
+
+test("the invoice email names the Monday handoff and the online fee", () => {
+  const invoice = buildInvoice([{ name: "A", meals: ["mon_lunch", "tue_lunch"] }], 800);
+  const message = invoiceEmail({ signup: { director_name: "D", school: "S", director_email: "d@x.org" }, invoice, editUrl: "https://x/e" });
+  assert.match(message.text, /when you arrive Monday, November 23/);
+  assert.match(message.text, /\$1\.09 processing fee \(\$17\.09 total\)/);
+  assert.doesNotMatch(invoiceEmail({ signup: { director_name: "D", school: "S" }, invoice, editUrl: "x", dueCents: 0 }).text, /processing fee/);
 });
 
 test("CSV cells cannot run as spreadsheet formulas", () => {

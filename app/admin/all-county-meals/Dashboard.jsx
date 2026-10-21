@@ -86,7 +86,7 @@ function Orders({ session, signOut }) {
             </ul>
             <p className={styles.muted}>
               {data.totals.schools} {data.totals.schools === 1 ? "school" : "schools"}, {data.totals.students} students, {data.totals.meals} meals at {formatCents(data.priceCents)}.
-              Invoiced {formatCents(data.totals.invoicedCents)}. Received {formatCents(data.totals.paidCents)}.
+              Invoiced {formatCents(data.totals.invoicedCents)}. Received {formatCents(data.totals.paidCents)}, including {formatCents(data.totals.onlineCents)} online (plus {formatCents(data.totals.surchargeCents)} in online fees).
               Deadline {new Date(data.deadline).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}.
             </p>
             <div className={styles.actions}>
@@ -109,7 +109,7 @@ function Orders({ session, signOut }) {
 }
 
 function School({ school, meals, onSave }) {
-  const [amount, setAmount] = useState(((school.paidCents ?? school.totalCents) / 100).toFixed(2));
+  const [amount, setAmount] = useState(((school.paidCents ?? Math.max(school.totalCents - school.onlineCents, 0)) / 100).toFixed(2));
   const [method, setMethod] = useState(school.paidMethod || "check");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -139,16 +139,16 @@ function School({ school, meals, onSave }) {
       </header>
       <p className={styles.muted}>{school.director} · {school.email} · updated {new Date(school.updatedAt).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}</p>
       <p><strong>{meals.map((meal) => `${meal.label}: ${school.counts[meal.key]}`).join(" · ")}</strong></p>
-      <p><strong>Invoice: {school.totalMeals} meals × {formatCents(school.priceCents)} = {formatCents(school.totalCents)}</strong>{school.paidCents != null ? ` · Received ${formatCents(school.paidCents)} (${school.paidMethod})` : ""}</p>
+      <p><strong>Invoice: {school.totalMeals} meals × {formatCents(school.priceCents)} = {formatCents(school.totalCents)}</strong>{school.paidCents != null ? ` · Check/cash ${formatCents(school.paidCents)} (${school.paidMethod})` : ""}{school.onlineCents ? ` · Paid online ${formatCents(school.onlineCents)} (+${formatCents(school.surchargeCents)} fee)` : ""}</p>
       <details>
         <summary className={styles.summary}>{school.students.length} {school.students.length === 1 ? "student" : "students"}</summary>
         <DataTable label={`${school.school} students`} columns={columns} rows={rows} rowKey="name" empty="No students on this order." />
       </details>
       <form className={styles.pay} onSubmit={(event) => { event.preventDefault(); save({ paid_cents: Math.round(Number(amount) * 100), paid_method: method }); }}>
-        <label>Amount received <input value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" size={8} /></label>
+        <label>Check/cash received <input value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" size={8} /></label>
         <label>Paid by <select value={method} onChange={(e) => setMethod(e.target.value)}><option value="check">Check</option><option value="cash">Cash</option><option value="mixed">Check and cash</option></select></label>
-        <Button type="submit" variant="secondary" disabled={busy}>{school.paidCents != null ? "Update payment" : "Mark paid"}</Button>
-        {school.paidCents != null ? <Button type="button" variant="quiet" disabled={busy} onClick={() => save({ paid_cents: null })}>Clear payment</Button> : null}
+        <Button type="submit" variant="secondary" disabled={busy}>{school.paidCents != null ? "Update check/cash" : "Record check/cash"}</Button>
+        {school.paidCents != null ? <Button type="button" variant="quiet" disabled={busy} onClick={() => save({ paid_cents: null })}>Clear check/cash</Button> : null}
       </form>
       {error ? <Notice tone="error" title={error} role="alert" /> : null}
     </article>

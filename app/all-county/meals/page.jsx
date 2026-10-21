@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { MoneyLine, Notice, PageHeader } from "@/components/ui";
 import { MEAL_PAYEE, MEAL_PRICE_CENTS, SIGNUP_DEADLINE_LABEL, formatCents, offeredMeals, signupsOpen } from "@/lib/allCountyMeals.mjs";
+import { onlinePaymentAvailable } from "@/lib/allCountyMealsServer";
 import MealOrderForm from "./MealOrderForm";
 import styles from "./meals.module.css";
 
@@ -16,6 +17,7 @@ export const dynamic = "force-dynamic";
 // Director-facing order page (#221). Shared by direct link only; not in the sitemap.
 export default function AllCountyMealsPage() {
   const open = signupsOpen();
+  const paypalClientId = onlinePaymentAvailable() ? process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID : "";
   const closedMessage = `Orders closed ${SIGNUP_DEADLINE_LABEL}. Please email Mr. Parker at robert.parker@nhcs.net.`;
   return (
     <main className={`narrow-page ${styles.page}`}>
@@ -36,7 +38,7 @@ export default function AllCountyMealsPage() {
           purpose="All-County meal"
           amount={`${formatCents(MEAL_PRICE_CENTS)} per meal`}
           receiver={MEAL_PAYEE}
-          receipt="Collect from your students ahead of time. Give the Band Boosters one check or cash payment for your school. No paying at the table."
+          receipt="Collect from your students ahead of time. Give the Band Boosters one check or cash payment for your school when you arrive Monday, November 23. You can also pay online from your invoice for a small processing fee. No paying at the table."
         />
         <Notice tone="deadline" title={`Orders and changes close ${SIGNUP_DEADLINE_LABEL}.`}>
           <p>You get an invoice on screen and by email. Its private link lets you add or remove students until then.</p>
@@ -46,7 +48,7 @@ export default function AllCountyMealsPage() {
       <section className={styles.section} aria-labelledby="meals-order">
         <h2 id="meals-order">Your order</h2>
         <Suspense fallback={<p role="status">Loading the order form…</p>}>
-          <MealOrderForm open={open} closedMessage={closedMessage} />
+          <MealOrderForm open={open} closedMessage={closedMessage} paypalClientId={paypalClientId} />
         </Suspense>
       </section>
 

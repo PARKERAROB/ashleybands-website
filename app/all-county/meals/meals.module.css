@@ -208,6 +208,28 @@
   font-size: var(--step--1);
 }
 
+.payOnline {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+}
+
+.payOnline h3 {
+  margin: 0;
+  font-size: var(--step-1);
+}
+
+.payOnline p {
+  margin: 0;
+}
+
+.paypal {
+  max-width: 420px;
+}
+
 .lost summary {
   cursor: pointer;
   font-weight: 600;
@@ -236,6 +258,7 @@
 @media print {
   .actions,
   .lost,
+  .payOnline,
   .editLink button {
     display: none;
   }

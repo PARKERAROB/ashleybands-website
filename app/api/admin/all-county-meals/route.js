@@ -3,7 +3,7 @@ import { logAudit, staffActor } from "@/lib/auditLog";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { PRIVATE_RESPONSE_HEADERS, privateJson } from "@/lib/privateResponse";
 import { EVENT_KEY, MEALS, MEAL_PRICE_CENTS, SIGNUP_DEADLINE, staffSummary, summaryCsv } from "@/lib/allCountyMeals.mjs";
-import { STAFF_FIELDS, TABLE } from "@/lib/allCountyMealsServer";
+import { PAYMENTS, STAFF_FIELDS, TABLE } from "@/lib/allCountyMealsServer";
 
 export const runtime = "nodejs";
 const ROUTE = "/api/admin/all-county-meals";
@@ -13,9 +13,12 @@ const ROUTE = "/api/admin/all-county-meals";
 export async function GET(request) {
   const auth = await authorizeStaffRequest(request, STAFF_CAPABILITIES.ALLCOUNTY_MEALS_READ);
   if (!auth.ok) return privateJson({ error: auth.error }, auth.status);
-  const { data, error } = await supabaseAdmin.from(TABLE).select(STAFF_FIELDS).eq("event_key", EVENT_KEY);
-  if (error) return privateJson({ error: "Meal orders could not be loaded. Please try again." }, 503);
-  const summary = staffSummary(data);
+  const [{ data, error }, { data: payments, error: paymentError }] = await Promise.all([
+    supabaseAdmin.from(TABLE).select(STAFF_FIELDS).eq("event_key", EVENT_KEY),
+    supabaseAdmin.from(PAYMENTS).select("signup_id,meal_cents,surcharge_cents").eq("status", "completed"),
+  ]);
+  if (error || paymentError) return privateJson({ error: "Meal orders could not be loaded. Please try again." }, 503);
+  const summary = staffSummary(data, MEALS, payments);
   const csv = new URL(request.url).searchParams.get("format") === "csv";
   await logAudit({ actor: staffActor(auth.staff), action: csv ? "allcounty_meals.export" : "allcounty_meals.view", table: TABLE, recordId: EVENT_KEY, changes: { schools: summary.totals.schools, students: summary.totals.students }, route: ROUTE });
   if (csv) {
@@ -24,7 +27,8 @@ export async function GET(request) {
   return privateJson({ ...summary, meals: MEALS, priceCents: MEAL_PRICE_CENTS, deadline: SIGNUP_DEADLINE });
 }
 
-// Record or clear a school's payment. paid_cents null clears it.
+// Record or clear a school's check or cash payment. paid_cents null clears it. Online
+// payments are settled from PayPal and are not edited here.
 export async function POST(request) {
   const auth = await authorizeStaffRequest(request, STAFF_CAPABILITIES.ALLCOUNTY_MEALS_WRITE);
   if (!auth.ok) return privateJson({ error: auth.error }, auth.status);

@@ -2,7 +2,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { checkRateLimit, clientIp } from "@/lib/rateLimit";
 import { privateJson } from "@/lib/privateResponse";
 import { EVENT_KEY, MEAL_PRICE_CENTS, SIGNUP_DEADLINE_LABEL, buildInvoice, cleanSignup, signupsOpen } from "@/lib/allCountyMeals.mjs";
-import { TABLE, directorView, editUrl, emailInvoice, findByEmail, findByToken, findExisting, newEditToken } from "@/lib/allCountyMealsServer";
+import { TABLE, directorView, editUrl, emailInvoice, findByEmail, findByToken, findExisting, newEditToken, onlinePaidCents } from "@/lib/allCountyMealsServer";
 
 export const runtime = "nodejs";
 
@@ -38,7 +38,7 @@ export async function POST(request) {
 async function load(body) {
   const row = await findByToken(body.token);
   if (!row) return privateJson({ error: "That edit link is not valid. Ask for a new one below." }, 404);
-  return privateJson({ ...directorView(row), open: signupsOpen() });
+  return privateJson({ ...directorView(row, await onlinePaidCents(row.id)), open: signupsOpen() });
 }
 
 async function create(request, body) {
@@ -72,8 +72,9 @@ async function update(request, body) {
     .eq("id", current.id).select("id,director_name,director_email,school,students,price_cents,updated_at").single();
   if (error?.code === "23505") return duplicate();
   if (error) throw error;
-  const emailed = await emailInvoice(row, editUrl(request, body.token));
-  return privateJson({ ...directorView(row), open: true, editToken: body.token, emailed });
+  const online = await onlinePaidCents(row.id);
+  const emailed = await emailInvoice(row, editUrl(request, body.token), online);
+  return privateJson({ ...directorView(row, online), open: true, editToken: body.token, emailed });
 }
 
 // Sends a fresh edit link for each order under this email. The old link stops working.
@@ -87,7 +88,7 @@ async function resend(request, body) {
       const { token, hash } = newEditToken();
       const { error } = await supabaseAdmin.from(TABLE).update({ edit_token_hash: hash }).eq("id", row.id);
       if (error) throw error;
-      await emailInvoice(row, editUrl(request, token));
+      await emailInvoice(row, editUrl(request, token), await onlinePaidCents(row.id));
     }
   }
   return privateJson({ ok: true, message: "If we have an order under that email, a new edit link is on its way. Check your inbox in a few minutes." });

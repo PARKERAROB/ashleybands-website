@@ -4,8 +4,40 @@ import { amountToCents, extractCapture, getOrder, hasPaypalTransmissionHeaders, 
 import { logAuditRequired } from "@/lib/auditLog";
 import { confirmGift } from "@/lib/sponsorRecognition";
 import { paypalCaptureMatchesGift, webhookSettlementPlan } from "@/lib/sponsorGiftPolicy.mjs";
+import { isAllCountyInvoiceId } from "@/lib/allCountyMeals.mjs";
+import { PAYMENTS as ALLCOUNTY_PAYMENTS, captureMatchesPayment, settlePayment } from "@/lib/allCountyMealsServer";
 
 export const runtime = "nodejs";
+
+// All-County meals online payments (#221) have their own ledger. A completed capture is
+// re-read from PayPal and settled only if it matches; a refund is recorded for staff review.
+async function settleAllCountyEvent(eventType, resource, eventId) {
+  const invoiceId = String(resource.invoice_id || "");
+  const { data: payment, error } = await supabaseAdmin.from(ALLCOUNTY_PAYMENTS)
+    .select("id,signup_id,invoice_id,meal_cents,surcharge_cents,status,paypal_order_id")
+    .eq("invoice_id", invoiceId).maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!payment) throw new Error("All-County payment not found for PayPal invoice.");
+  if (eventType === "PAYMENT.CAPTURE.COMPLETED") {
+    const orderId = resource.supplementary_data?.related_ids?.order_id || payment.paypal_order_id;
+    if (!orderId) throw new Error("PayPal order id is missing from All-County capture.");
+    const capture = extractCapture(await getOrder(orderId));
+    if (!captureMatchesPayment(capture, payment)) throw new Error("PayPal All-County capture does not match the stored payment.");
+    await settlePayment(payment, capture.captureId);
+    return;
+  }
+  if (eventType === "PAYMENT.CAPTURE.REFUNDED" || eventType === "PAYMENT.CAPTURE.REVERSED") {
+    await supabaseAdmin.from(ALLCOUNTY_PAYMENTS).update({ status: "refunded" }).eq("id", payment.id).eq("status", "completed");
+    await logAuditRequired({
+      actor: { type: "system", id: eventId || null, name: "PayPal webhook" },
+      action: "allcounty_meals.online_refund",
+      table: ALLCOUNTY_PAYMENTS,
+      recordId: payment.id,
+      changes: { refund_cents: amountToCents(resource.amount?.value), meal_cents: payment.meal_cents, surcharge_cents: payment.surcharge_cents, needs_review: true },
+      route: "/api/billing/webhook",
+    });
+  }
+}
 
 function siteOrigin(request) {
   return process.env.NEXT_PUBLIC_SITE_ORIGIN || new URL(request.url).origin;
@@ -124,7 +156,9 @@ export async function POST(request) {
   try {
     const invoiceId = String(resource.invoice_id || "");
     const plan = webhookSettlementPlan(event.event_type, invoiceId);
-    if (plan?.ledger === "sponsor" && plan.status === "confirmed") {
+    if (plan && isAllCountyInvoiceId(invoiceId)) {
+      await settleAllCountyEvent(event.event_type, resource, eventId);
+    } else if (plan?.ledger === "sponsor" && plan.status === "confirmed") {
       await settleSponsorCapture(resource, request);
     } else if (plan?.ledger === "sponsor" && plan.status === "refunded") {
       await refundSponsorGift(resource);

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Plus, X } from "lucide-react";
 import { Button, Field, Notice, StatusChip } from "@/components/ui";
-import { MEALS, MEAL_PAYEE, SCHOOL_SUGGESTIONS, formatCents, invoiceMeals, offeredMeals } from "@/lib/allCountyMeals.mjs";
+import { MEALS, MEAL_PAYEE, PAYMENT_HANDOFF, SCHOOL_SUGGESTIONS, formatCents, invoiceMeals, offeredMeals } from "@/lib/allCountyMeals.mjs";
 import styles from "./meals.module.css";
 
 const OPEN_MEALS = offeredMeals();
@@ -19,7 +19,7 @@ async function post(payload) {
   return body;
 }
 
-export default function MealOrderForm({ open = true, closedMessage = "" }) {
+export default function MealOrderForm({ open = true, closedMessage = "", paypalClientId = "" }) {
   const params = useSearchParams();
   const linkToken = params.get("edit") || "";
   const [token, setToken] = useState(linkToken);
@@ -96,7 +96,11 @@ export default function MealOrderForm({ open = true, closedMessage = "" }) {
             <p>Your order is saved. Print this page or copy the edit link below.</p>
           </Notice>
         ) : null}
-        <Invoice signup={saved.signup} invoice={saved.invoice} editToken={token} />
+        <Invoice signup={saved.signup} invoice={saved.invoice} payment={saved.payment} editToken={token} />
+        {paypalClientId && token && saved.payment?.dueCents > 0
+          ? <PayOnline token={token} payment={saved.payment} clientId={paypalClientId} onPaid={(result) => setSaved((current) => ({ ...current, ...result, emailed: undefined, paidNow: true }))} />
+          : null}
+        {saved.paidNow ? <Notice tone="success" title="Payment received. Thank you." role="status"><p>PayPal emails your receipt. The Band Boosters see the payment on their list.</p></Notice> : null}
         {open && saved.open !== false
           ? <p><Button variant="secondary" onClick={() => setEditing(true)}>Add or remove students</Button></p>
           : <Notice tone="archived" title={closedMessage || "Changes are closed."} />}
@@ -165,7 +169,9 @@ export default function MealOrderForm({ open = true, closedMessage = "" }) {
   );
 }
 
-function Invoice({ signup, invoice, editToken }) {
+function Invoice({ signup, invoice, payment, editToken }) {
+  const online = payment?.onlineCents || 0;
+  const due = payment ? payment.dueCents : invoice.totalCents;
   const shown = invoiceMeals(invoice, MEALS);
   const [copied, setCopied] = useState(false);
   const editLink = typeof window === "undefined" ? "" : `${window.location.origin}/all-county/meals?edit=${encodeURIComponent(editToken)}`;
@@ -173,7 +179,9 @@ function Invoice({ signup, invoice, editToken }) {
     <article className={styles.invoice} aria-labelledby="invoice-title">
       <header className={styles.invoiceHead}>
         <h3 id="invoice-title">Invoice: {signup.school}</h3>
-        <StatusChip status="needed">Payment due to the Band Boosters</StatusChip>
+        {due > 0 || invoice.totalCents === 0
+          ? <StatusChip status="needed">{online ? `${formatCents(due)} still due` : "Payment due to the Band Boosters"}</StatusChip>
+          : <StatusChip status="done">Paid online</StatusChip>}
       </header>
       <p>Director: {signup.director_name} ({signup.director_email})</p>
       <div className={styles.tableWrap} role="region" aria-label="Invoice lines" tabIndex={0}>
@@ -205,7 +213,8 @@ function Invoice({ signup, invoice, editToken }) {
         </table>
       </div>
       <p className={styles.total}>Total: {invoice.totalMeals} {invoice.totalMeals === 1 ? "meal" : "meals"} × {formatCents(invoice.priceCents)} = {formatCents(invoice.totalCents)}</p>
-      <p>Collect from your students and give the Band Boosters one check or cash payment for {signup.school}. Make checks payable to {MEAL_PAYEE}, memo &ldquo;All-County meals, {signup.school}.&rdquo;</p>
+      {online ? <p><strong>Paid online: {formatCents(online)}. Still due: {formatCents(due)}.</strong></p> : null}
+      {due > 0 ? <p>Collect from your students and give the Band Boosters one check or cash payment for {signup.school} {PAYMENT_HANDOFF}. Make checks payable to {MEAL_PAYEE}, memo &ldquo;All-County meals, {signup.school}.&rdquo;</p> : null}
       {editToken ? (
         <div className={styles.editLink}>
           <p><strong>Your private edit link.</strong> Keep it to add or remove students later. Do not share it.</p>
@@ -214,6 +223,65 @@ function Invoice({ signup, invoice, editToken }) {
         </div>
       ) : null}
     </article>
+  );
+}
+
+let paypalSdkPromise = null;
+function loadPaypalSdk(clientId) {
+  if (window.paypal) return Promise.resolve(window.paypal);
+  if (paypalSdkPromise) return paypalSdkPromise;
+  paypalSdkPromise = new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=USD`;
+    script.onload = () => resolve(window.paypal);
+    script.onerror = () => { paypalSdkPromise = null; reject(new Error("Could not load PayPal.")); };
+    document.body.appendChild(script);
+  });
+  return paypalSdkPromise;
+}
+
+// Optional online payment of what is still due, plus a fee that covers PayPal's charge.
+function PayOnline({ token, payment, clientId, onPaid }) {
+  const ref = useRef(null);
+  const [error, setError] = useState("");
+  const serverMessage = useRef("");
+  const paidRef = useRef(onPaid);
+  useEffect(() => { paidRef.current = onPaid; }, [onPaid]);
+
+  useEffect(() => {
+    let cancelled = false;
+    let buttons;
+    loadPaypalSdk(clientId).then((paypal) => {
+      if (cancelled || !ref.current) return;
+      buttons = paypal.Buttons({
+        createOrder: async () => {
+          setError("");
+          serverMessage.current = "";
+          const response = await fetch("/api/all-county/meals/pay", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "start", token }) });
+          const body = await response.json().catch(() => ({}));
+          if (!response.ok) { serverMessage.current = body.error || ""; throw new Error(body.error || "Could not start the payment."); }
+          return body.orderId;
+        },
+        onApprove: async (data) => {
+          const response = await fetch("/api/all-county/meals/pay", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "capture", token, orderId: data.orderID }) });
+          const body = await response.json().catch(() => ({}));
+          if (!response.ok) { setError(body.error || "We couldn't confirm this payment. Please don't pay again. Email Mr. Parker."); return; }
+          paidRef.current(body);
+        },
+        onError: () => setError(serverMessage.current || "PayPal didn't finish. You have not been charged. Try again, or pay by check or cash."),
+      });
+      buttons.render(ref.current);
+    }).catch(() => setError("Could not load PayPal. Please pay by check or cash."));
+    return () => { cancelled = true; if (buttons?.close) buttons.close(); };
+  }, [clientId, token, payment.dueCents]);
+
+  return (
+    <section className={styles.payOnline} aria-labelledby="pay-online-title">
+      <h3 id="pay-online-title">Or pay online</h3>
+      <p>Pay by card or PayPal. Online payment adds a {formatCents(payment.surchargeCents)} processing fee to cover PayPal&apos;s charge, so you pay {formatCents(payment.dueCents + payment.surchargeCents)}. Check or cash has no fee.</p>
+      {error ? <Notice tone="error" title={error} role="alert" /> : null}
+      <div ref={ref} className={styles.paypal} />
+    </section>
   );
 }
 
