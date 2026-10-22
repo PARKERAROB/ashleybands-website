@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { BOOSTER_NONPROFIT_COPY, CARNEGIE_CAMPAIGN, CARNEGIE_TERMS_VERSION, CARNEGIE_CHANGE_TERMS, CARNEGIE_SUGGESTED_AMOUNTS, carnegieGiftPrefill, carnegieStudentGiftLine } from "@/lib/sponsorCampaigns.mjs";
+import { BOOSTER_NONPROFIT_COPY, CARNEGIE_CAMPAIGN, CARNEGIE_TERMS_VERSION, CARNEGIE_CHANGE_TERMS, CARNEGIE_SUGGESTED_AMOUNTS, FAMILY_PAYMENT, FAMILY_PAYMENT_TAX_LINE, carnegieGiftPrefill, carnegieStudentGiftLine } from "@/lib/sponsorCampaigns.mjs";
 import { NOTE_TO_STUDENT_MAX, sponsorThankYouLine } from "@/lib/sponsorGiftPolicy.mjs";
 import { SPONSOR_CONTACT, TIERS } from "@/lib/sponsorshipContent";
 
@@ -152,8 +152,11 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
   }
   const level = !carnegie && amountValid ? sponsorLevelForCents(amountCents) : null;
   const studentFirst = carnegie ? String(studentName || "").trim().split(/\s+/)[0] : "";
-  const familyShare = studentFirst ? { share_with_family: shareWithFamily, note_to_student: noteToStudent } : {};
-  const giftNoun = carnegie
+  const familyPayment = carnegie && Boolean(studentFirst) && giftKind === FAMILY_PAYMENT;
+  const familyShare = studentFirst && !familyPayment ? { share_with_family: shareWithFamily, note_to_student: noteToStudent } : {};
+  const giftNoun = familyPayment
+    ? `payment toward ${studentFirst}’s Carnegie trip`
+    : carnegie
     ? "gift for Ashley’s Carnegie trip"
     : level ? "sponsorship of the Bands of Ashley" : "gift to the Bands of Ashley";
 
@@ -256,7 +259,7 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
               <li>Memo line: <strong>{checkResult.memo}</strong></li>
             </ul>
             <p className="give-muted">{checkResult.note}</p>
-            <p className="give-muted">We&apos;ll send your tax receipt as soon as it arrives. Thank you.</p>
+            <p className="give-muted">{familyPayment ? "We'll send your payment receipt as soon as it arrives. Thank you." : "We'll send your tax receipt as soon as it arrives. Thank you."}</p>
             <button type="button" className="give-btn" onClick={copyCheckInstructions}>Copy instructions</button>
             {copyStatus ? <p className="give-muted" role="status">{copyStatus}</p> : null}
             <p className="give-muted">Questions? <a href={`mailto:${SPONSOR_CONTACT.email}`}>{SPONSOR_CONTACT.email}</a></p>
@@ -287,6 +290,7 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
               <legend>How would you like to help?</legend>
               <label><input type="radio" name="gift-kind" value="donation" checked={giftKind === "donation"} onChange={() => setGiftKind("donation")} /> Personal donation</label>
               <label><input type="radio" name="gift-kind" value="sponsorship" checked={giftKind === "sponsorship"} onChange={() => setGiftKind("sponsorship")} /> Business sponsorship</label>
+              {studentFirst ? <label><input type="radio" name="gift-kind" value={FAMILY_PAYMENT} checked={giftKind === FAMILY_PAYMENT} onChange={() => setGiftKind(FAMILY_PAYMENT)} /> Our family&apos;s payment toward {studentFirst}&apos;s trip</label> : null}
             </fieldset> : null}
             {carnegie ? (
               <div className="give-amounts" role="group" aria-label="Suggested gift amounts">
@@ -326,7 +330,8 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
                 readOnly={Boolean(attributionToken) && !studentName}
               />
             </label>
-            {studentFirst ? (
+            {familyPayment ? <p className="give-muted">This counts toward {studentFirst}&apos;s share of the trip and shows in {studentFirst}&apos;s music notes after any PayPal fee. Check or cash has no fee.</p> : null}
+            {studentFirst && !familyPayment ? (
               <div className="give-family">
                 <label className="give-check">
                   <input type="checkbox" checked={shareWithFamily} onChange={(e) => setShareWithFamily(e.target.checked)} />
@@ -372,8 +377,8 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
             ) : null}
 
             {!onlineAvailable ? <p className="give-muted">Online trip giving is temporarily unavailable. You can give by check or contact Mr. Parker.</p> : null}
-            {carnegie ? <p className="give-muted">{CARNEGIE_CHANGE_TERMS} <a href="#about-your-gift">What your gift supports</a>.</p> : null}
-            {carnegie ? <p className="give-muted">{BOOSTER_NONPROFIT_COPY}</p> : null}
+            {carnegie && !familyPayment ? <p className="give-muted">{CARNEGIE_CHANGE_TERMS} <a href="#about-your-gift">What your gift supports</a>.</p> : null}
+            {carnegie ? <p className="give-muted">{familyPayment ? FAMILY_PAYMENT_TAX_LINE : BOOSTER_NONPROFIT_COPY}</p> : null}
             {error ? <p className="give-error" role="alert">{error}</p> : null}
 
             {method === "check" ? (
