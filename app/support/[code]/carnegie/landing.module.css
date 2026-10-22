@@ -12,6 +12,7 @@
 .row { display: flex; justify-content: space-between; gap: 10px; font-size: var(--step--1); }
 .row span { color: var(--text-muted); }
 .chart { width: 100%; max-width: 460px; height: auto; align-self: center; display: block; }
+.netNote { margin: 0; font-size: var(--step--1); color: var(--text-muted); }
 .give { scroll-margin-top: 16px; }
 .more { margin: 0; font-size: var(--step--1); }
 .more a { color: var(--garnet); font-weight: 600; }

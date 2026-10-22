@@ -19,6 +19,8 @@ import {
   letterSendActions,
   smsHref,
   notesStatusLine,
+  notesDollars,
+  NOTES_NET_LINE,
   recipientTypeLabel
 } from "@/lib/carnegieLetters.mjs";
 import styles from "./notes.module.css";
@@ -133,11 +135,11 @@ export function NotesProgress({ student, children }) {
     <section className={styles.card} aria-labelledby="notes-heading">
       <h2 id="notes-heading" className={styles.srOnly}>Music notes</h2>
       <div className={styles.amountRow}>
-        <span className={styles.amount}>{dollars(student.notesCents)}</span>
+        <span className={styles.amount}>{notesDollars(student.notesCents)}</span>
         <span className={styles.of}>of my {dollars(NOTES_GOAL_CENTS)}</span>
       </div>
       <NotesChart className={styles.chart} confirmedCents={student.notesCents} pendingCents={student.pendingCents} />
-      <p className={student.notesCents >= NOTES_GOAL_CENTS ? styles.filled : styles.muted}>{notesStatusLine(student.notesCents)}</p>
+      <p className={student.notesCents >= NOTES_GOAL_CENTS ? styles.filled : styles.muted}>{notesStatusLine(student.notesCents)} {NOTES_NET_LINE}</p>
       {student.pendingCents ? (
         <p className={styles.pendingLine}><span className={styles.pendingSwatch} aria-hidden="true" />{pendingNotesLine(student.pendingCents)}</p>
       ) : null}
@@ -200,7 +202,7 @@ function StudentNotes({ student, reload }) {
       <NotesProgress student={student}>
         <dl className={styles.lines}>
           <div><dt>Deposit paid</dt><dd>{student.depositPaidCents ? dollars(student.depositPaidCents) : "Not recorded yet"}</dd></div>
-          <div><dt>Raised through my notes</dt><dd>{dollars(student.notesCents)}</dd></div>
+          <div><dt>Raised through my notes</dt><dd>{notesDollars(student.notesCents)}</dd></div>
         </dl>
       </NotesProgress>
 

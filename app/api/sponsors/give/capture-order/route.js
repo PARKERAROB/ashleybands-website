@@ -5,7 +5,7 @@ import { sponsorOnlineGiveLive } from "@/lib/sponsorFamily";
 import { amountToCents, captureOrder, extractCapture } from "@/lib/paypal";
 import { confirmGift, dollars } from "@/lib/sponsorRecognition";
 import { checkRateLimit, clientIp } from "@/lib/rateLimit";
-import { paypalCaptureMatchesGift } from "@/lib/sponsorGiftPolicy.mjs";
+import { paypalCaptureMatchesGift, captureFeeCents } from "@/lib/sponsorGiftPolicy.mjs";
 
 export const runtime = "nodejs";
 
@@ -100,7 +100,8 @@ export async function POST(req) {
     .update({
       paypal_capture_id: capture.captureId,
       payer_email: verifiedEmail,
-      payer_name: verifiedName
+      payer_name: verifiedName,
+      ...(captureFeeCents(capture) != null ? { paypal_fee_cents: captureFeeCents(capture) } : {})
     })
     .eq("id", gift.id);
   if (updateError) {

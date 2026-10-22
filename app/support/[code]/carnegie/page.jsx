@@ -6,7 +6,7 @@ import { signSponsorStudentGiveToken } from "@/lib/sponsorGiveToken.mjs";
 import { resolveSponsorStudentCode } from "@/lib/sponsorStudentLinks";
 import { CARNEGIE_CAMPAIGN, CARNEGIE_GIVING_PATH } from "@/lib/sponsorCampaigns.mjs";
 import { carnegieLettersAccess, confirmedNotesCents } from "@/lib/carnegieLettersServer";
-import { EMPLOYER_MATCH_LINE, NOTES_GOAL_CENTS, carnegieLinkPreview } from "@/lib/carnegieLetters.mjs";
+import { EMPLOYER_MATCH_LINE, NOTES_GOAL_CENTS, NOTES_NET_LINE, carnegieLinkPreview, notesDollars } from "@/lib/carnegieLetters.mjs";
 import GiveClient from "@/app/sponsors/give/GiveClient";
 import NotesChart from "@/components/NotesChart";
 import CarnegieBandProgress from "@/components/CarnegieBandProgress";
@@ -71,8 +71,9 @@ export default async function CarnegieStudentSupportLinkPage({ params }) {
       </header>
       <div className={styles.body}>
         <section className={styles.card} aria-label={`${name}'s music notes`}>
-          <div className={styles.row}><strong>{name}&apos;s music notes</strong><span>{dollars(notesCents)} of {dollars(NOTES_GOAL_CENTS)}</span></div>
+          <div className={styles.row}><strong>{name}&apos;s music notes</strong><span>{notesDollars(notesCents)} of {dollars(NOTES_GOAL_CENTS)}</span></div>
           <NotesChart className={styles.chart} confirmedCents={notesCents} />
+          <p className={styles.netNote}>{NOTES_NET_LINE}</p>
           <CarnegieBandProgress />
         </section>
         <section id="make-a-gift" className={styles.give} aria-label="Make a Carnegie campaign gift">

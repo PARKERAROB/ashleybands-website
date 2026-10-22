@@ -3,7 +3,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { amountToCents, extractCapture, getOrder, hasPaypalTransmissionHeaders, verifyWebhookSignature } from "@/lib/paypal";
 import { logAuditRequired } from "@/lib/auditLog";
 import { confirmGift } from "@/lib/sponsorRecognition";
-import { paypalCaptureMatchesGift, webhookSettlementPlan } from "@/lib/sponsorGiftPolicy.mjs";
+import { paypalCaptureMatchesGift, webhookSettlementPlan, captureFeeCents } from "@/lib/sponsorGiftPolicy.mjs";
 import { isAllCountyInvoiceId } from "@/lib/allCountyMeals.mjs";
 import { PAYMENTS as ALLCOUNTY_PAYMENTS, captureMatchesPayment, settlePayment } from "@/lib/allCountyMealsServer";
 
@@ -69,7 +69,8 @@ async function settleSponsorCapture(resource, request) {
       paypal_order_id: orderId,
       paypal_capture_id: resource.id || capture.captureId,
       payer_email: verifiedEmail,
-      payer_name: verifiedName
+      payer_name: verifiedName,
+      ...(captureFeeCents(capture) != null ? { paypal_fee_cents: captureFeeCents(capture) } : {})
     })
     .eq("id", gift.id);
   if (updateError) throw new Error(updateError.message);
