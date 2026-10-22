@@ -8,10 +8,10 @@ export const metadata = {
 
 const programs = [
   {
-    title: "Fall Concert 2026",
+    title: "Variations on America",
     date: "October 22, 2026",
     href: "/programs/fall-concert-2026",
-    description: "Digital program for the 2026 Fall Concert."
+    description: "Digital program for the 2026 Fall Concert, Variations on America."
   },
   {
     title: "Spring Concert 2026",
