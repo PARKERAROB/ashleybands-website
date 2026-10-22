@@ -105,6 +105,65 @@
       .slide::before, .slide::after, .slide.active * { animation: none !important; }
     }
 
+    /* How families pay toward the trip (#228): a phone walks through the music notes form on a loop,
+       and the matching step lights up beside it. Check or cash sits underneath. */
+    .slide.pay { flex-direction: row; gap: 4vw; padding: 3vh 5vw; }
+    .pay .phone { flex: none; width: 27vh; height: 54vh; border-radius: 3.6vh; background: var(--ink); padding: 1.2vh; box-shadow: 0 2vh 5vh rgba(25,23,22,0.25); }
+    .pay .screen { position: relative; width: 100%; height: 100%; border-radius: 2.6vh; background: #fff; overflow: hidden; text-align: left; }
+    .pay .scr { position: absolute; inset: 0; padding: 2.4vh 1.8vh; display: flex; flex-direction: column; gap: 1.3vh; opacity: 0; transform: translateX(6%); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .pay[data-step="1"] .s1, .pay[data-step="2"] .s2, .pay[data-step="3"] .s3, .pay[data-step="4"] .s4 { opacity: 1; transform: none; }
+    .pay .bar { background: var(--garnet); color: var(--paper-strong); margin: -2.4vh -1.8vh 0.6vh; padding: 2vh 1.8vh 1.4vh; font-family: var(--font-display); font-size: 2.2vh; line-height: 1.1; }
+    .pay .bar small { display: block; font-family: var(--font-body); font-size: 1.1vh; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.6vh; }
+    .pay .card { border: 0.2vh solid #e4dccb; border-radius: 1.2vh; padding: 1.3vh; font-size: 1.5vh; color: var(--ink); }
+    .pay .card b { display: block; font-size: 1.7vh; color: var(--garnet); margin-bottom: 0.4vh; }
+    .pay .notes { height: 1.1vh; border-radius: 1vh; background: #eee6d3; overflow: hidden; margin-top: 0.8vh; }
+    .pay .notes i { display: block; width: 34%; height: 100%; background: var(--gold); }
+    .pay .lbl { font-size: 1.35vh; font-weight: 600; color: var(--gold-text); letter-spacing: 0.08em; text-transform: uppercase; }
+    .pay .opt { display: flex; align-items: center; gap: 1vh; font-size: 1.5vh; padding: 1.1vh; border: 0.2vh solid #e4dccb; border-radius: 1vh; }
+    .pay .opt::before { content: ""; flex: none; width: 1.6vh; height: 1.6vh; border-radius: 50%; border: 0.25vh solid #b9ad94; }
+    .pay .opt.pick { transition: border-color 0.3s 1.4s, background 0.3s 1.4s; }
+    .pay .opt.pick::before { transition: background 0.3s 1.4s, border-color 0.3s 1.4s; }
+    .pay[data-step="2"] .opt.pick { border-color: var(--garnet); background: #f8ecee; font-weight: 600; }
+    .pay[data-step="2"] .opt.pick::before { background: var(--garnet); border-color: var(--garnet); box-shadow: inset 0 0 0 0.3vh #fff; }
+    .pay .chips { display: flex; flex-wrap: wrap; gap: 0.7vh; }
+    .pay .chips span { font-size: 1.4vh; font-weight: 600; padding: 0.7vh 1.1vh; border-radius: 0.8vh; border: 0.2vh solid #e4dccb; }
+    .pay .chips .pick { transition: all 0.3s 1.2s; }
+    .pay[data-step="3"] .chips .pick { background: var(--garnet); color: #fff; border-color: var(--garnet); }
+    .pay .field { border: 0.2vh solid #e4dccb; border-radius: 0.8vh; padding: 1vh; font-size: 1.5vh; min-height: 3.6vh; color: var(--ink); }
+    .pay .typed { display: inline-block; overflow: hidden; white-space: nowrap; vertical-align: bottom; width: 0; }
+    .pay[data-step="3"] .typed { animation: type 1.4s steps(16) 1.8s forwards; }
+    @keyframes type { to { width: 16ch; } }
+    .pay .tabs { display: flex; gap: 0.8vh; }
+    .pay .tabs span { flex: 1; text-align: center; font-size: 1.45vh; font-weight: 600; padding: 1.1vh 0; border-radius: 0.9vh; border: 0.2vh solid var(--garnet); color: var(--garnet); }
+    .pay .tabs .on { background: var(--garnet); color: #fff; }
+    .pay .paypal { text-align: center; font-weight: 700; font-size: 1.8vh; padding: 1.3vh 0; border-radius: 3vh; background: #ffc439; color: #003087; font-style: italic; }
+    .pay .fine { font-size: 1.25vh; color: #6f675a; line-height: 1.4; }
+    .pay .tap { position: absolute; width: 4.2vh; height: 4.2vh; margin: -2.1vh 0 0 -2.1vh; border-radius: 50%; background: rgba(197,160,40,0.45); border: 0.3vh solid var(--gold); opacity: 0; z-index: 5; pointer-events: none; transition: left 0.9s ease, top 0.9s ease; }
+    .pay[data-step] .tap { animation: tap 3.6s ease-in-out infinite; }
+    @keyframes tap { 0%, 25% { opacity: 0; transform: scale(1.4); } 35% { opacity: 1; transform: scale(1); } 42% { transform: scale(0.75); } 50% { transform: scale(1); } 70% { opacity: 1; } 85%, 100% { opacity: 0; } }
+    .pay[data-step="1"] .tap { left: 55%; top: 27%; }
+    .pay[data-step="2"] .tap { left: 55%; top: 64%; }
+    .pay[data-step="3"] .tap { left: 50%; top: 28%; }
+    .pay[data-step="4"] .tap { left: 55%; top: 34%; }
+
+    .pay .how { flex: 1; text-align: left; max-width: 60vw; }
+    .pay .how .eyebrow { margin-bottom: 1vh; }
+    .pay .how h1 { font-family: var(--font-display); font-weight: normal; color: var(--garnet); font-size: 3vw; line-height: 1.05; margin-bottom: 1.6vh; }
+    .pay .steps { list-style: none; counter-reset: s; display: flex; flex-direction: column; gap: 0.9vh; }
+    .pay .steps li { counter-increment: s; display: flex; align-items: baseline; gap: 1.2vw; font-size: 1.5vw; line-height: 1.3; color: rgba(25,23,22,0.45); transition: color 0.5s, transform 0.5s; }
+    .pay .steps li::before { content: counter(s); flex: none; width: 2.2vw; height: 2.2vw; border-radius: 50%; display: inline-grid; place-items: center; font-weight: 600; font-size: 1.2vw; color: #fff; background: rgba(123,24,41,0.35); transition: background 0.5s; transform: translateY(0.3vw); }
+    .pay[data-step="1"] .steps li:nth-child(1), .pay[data-step="2"] .steps li:nth-child(2),
+    .pay[data-step="3"] .steps li:nth-child(3), .pay[data-step="4"] .steps li:nth-child(4) { color: var(--ink); transform: translateX(0.6vw); }
+    .pay[data-step="1"] .steps li:nth-child(1)::before, .pay[data-step="2"] .steps li:nth-child(2)::before,
+    .pay[data-step="3"] .steps li:nth-child(3)::before, .pay[data-step="4"] .steps li:nth-child(4)::before { background: var(--garnet); }
+    .pay .steps em { font-style: normal; font-weight: 600; color: var(--garnet); }
+    .pay .cash { margin-top: 1.8vh; display: flex; align-items: center; gap: 2vw; border-top: 0.3vh solid var(--gold); padding-top: 1.4vh; }
+    .pay .cash div { flex: 1; font-size: 1.3vw; line-height: 1.4; color: var(--ink); }
+    .pay .cash b { display: block; font-size: 1.1vw; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold-text); margin-bottom: 0.4vh; }
+    .pay .cash .qr { gap: 0.8vh; } .pay .cash .qr svg { width: 8vw; max-width: 14vh; border-width: 0.15vw; }
+    .pay .cash .qr span { font-size: 0.9vw; }
+    @media (prefers-reduced-motion: reduce) { .pay .scr { transition: none; } .pay .tap { display: none; } .pay .typed { width: 16ch; } }
+
     #counter { position: fixed; top: 63vh; right: 1.5vw; font-family: var(--font-body); font-size: 1vw; color: rgba(25,23,22,0.25); }
   </style>
 </head>
@@ -169,6 +228,53 @@
     </div>
   </div>
   <div class="qr"><svg role="img" aria-label="QR code" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 33 33" shape-rendering="crispEdges"><path fill="#ffffff" d="M0 0h33v33H0z"/><path stroke="#000000" d="M2 2.5h7m2 0h1m6 0h5m1 0h7M2 3.5h1m5 0h1m2 0h1m1 0h1m2 0h2m4 0h1m1 0h1m5 0h1M2 4.5h1m1 0h3m1 0h1m1 0h1m5 0h1m1 0h1m2 0h2m1 0h1m1 0h3m1 0h1M2 5.5h1m1 0h3m1 0h1m1 0h7m2 0h3m2 0h1m1 0h3m1 0h1M2 6.5h1m1 0h3m1 0h1m1 0h4m4 0h5m1 0h1m1 0h3m1 0h1M2 7.5h1m5 0h1m1 0h2m2 0h4m1 0h1m2 0h1m1 0h1m5 0h1M2 8.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M10 9.5h1m3 0h1m1 0h1m4 0h1M2 10.5h1m1 0h5m2 0h1m1 0h1m1 0h5m4 0h5M4 11.5h1m1 0h1m2 0h2m2 0h1m1 0h1m2 0h1m2 0h6m3 0h1M2 12.5h1m1 0h5m2 0h2m1 0h1m2 0h4m5 0h1M4 13.5h1m2 0h1m2 0h3m1 0h1m1 0h2m3 0h2m2 0h1m1 0h1m1 0h1M4 14.5h1m3 0h1m2 0h2m1 0h4m1 0h1m1 0h1m5 0h2M2 15.5h1m1 0h1m1 0h1m3 0h1m1 0h3m3 0h1m2 0h1m2 0h3m3 0h1M2 16.5h3m1 0h1m1 0h1m1 0h3m3 0h3m3 0h3m1 0h3M2 17.5h1m2 0h1m7 0h1m2 0h1m4 0h1m7 0h1M2 18.5h2m2 0h1m1 0h3m1 0h1m4 0h1m1 0h1m2 0h1m4 0h2M2 19.5h1m1 0h1m2 0h1m1 0h1m1 0h3m1 0h1m2 0h1m2 0h6m1 0h1m1 0h1M2 20.5h1m3 0h4m1 0h2m1 0h5m1 0h1m2 0h1m1 0h1m2 0h1M2 21.5h1m1 0h2m1 0h1m2 0h1m4 0h1m1 0h2m1 0h1m1 0h3m1 0h1m2 0h1M2 22.5h1m1 0h1m1 0h1m1 0h2m1 0h1m1 0h1m2 0h1m2 0h1m2 0h5m1 0h3M10 23.5h1m1 0h2m8 0h1m3 0h5M2 24.5h7m2 0h4m2 0h1m2 0h3m1 0h1m1 0h3M2 25.5h1m5 0h1m1 0h1m1 0h1m1 0h1m1 0h3m1 0h3m3 0h1m2 0h1M2 26.5h1m1 0h3m1 0h1m1 0h2m1 0h2m2 0h3m2 0h5m1 0h3M2 27.5h1m1 0h3m1 0h1m1 0h2m3 0h2m1 0h3m1 0h1m2 0h1m1 0h4M2 28.5h1m1 0h3m1 0h1m1 0h1m1 0h1m2 0h1m1 0h1m1 0h1m1 0h9M2 29.5h1m5 0h1m5 0h2m6 0h2m1 0h3m1 0h1M2 30.5h7m1 0h1m1 0h3m1 0h4m1 0h1m4 0h1m1 0h1"/></svg><span>Give to the trip</span><small>ashleybands.com/support-carnegie</small></div>
+</section>
+
+<!-- How families pay toward the trip (#228). Steps cycle on their own while the slide is up. -->
+<section class="slide pay" data-step="1">
+  <div class="phone" aria-hidden="true"><div class="screen">
+    <div class="scr s1">
+      <div class="bar"><small>Family Portal</small>Ashley Bands</div>
+      <div class="card"><b>My Carnegie Notes</b>Alex&rsquo;s music notes<div class="notes"><i></i></div></div>
+      <div class="card"><b>Share my link</b>Text it, post it, or show the QR card.</div>
+      <div class="card">Calendar &middot; Forms &middot; Updates</div>
+    </div>
+    <div class="scr s2">
+      <div class="bar"><small>Carnegie Hall 2027</small>Help get Alex to Carnegie Hall</div>
+      <p class="lbl">How would you like to help?</p>
+      <div class="opt">Personal donation</div>
+      <div class="opt">Business sponsorship</div>
+      <div class="opt pick">Our family&rsquo;s payment toward Alex&rsquo;s trip</div>
+    </div>
+    <div class="scr s3">
+      <div class="bar"><small>Family payment</small>Toward Alex&rsquo;s trip</div>
+      <p class="lbl">Amount</p>
+      <div class="chips"><span>$100</span><span class="pick">$250</span><span>$500</span><span>$1,000</span><span>$2,000</span></div>
+      <p class="lbl">Your name</p>
+      <div class="field"><span class="typed">The Rivera family</span></div>
+    </div>
+    <div class="scr s4">
+      <div class="bar"><small>Family payment</small>Toward Alex&rsquo;s trip</div>
+      <div class="tabs"><span class="on">Pay online</span><span>Pay by check</span></div>
+      <div class="paypal">PayPal</div>
+      <p class="fine">Your receipt comes by email. It shows in Alex&rsquo;s music notes after any PayPal fee. Family payments are not tax-deductible.</p>
+    </div>
+    <span class="tap"></span>
+  </div></div>
+  <div class="how">
+    <p class="eyebrow">Carnegie Hall 2027 &middot; Families</p>
+    <h1>Paying toward your student&rsquo;s trip</h1>
+    <ol class="steps">
+      <li><span>Open your student&rsquo;s <em>music notes</em> link, in the Family Portal or on their QR card.</span></li>
+      <li><span>Choose <em>&ldquo;Our family&rsquo;s payment toward your student&rsquo;s trip.&rdquo;</em></span></li>
+      <li><span>Pick an amount and add your name.</span></li>
+      <li><span>Pay online, or choose <em>Pay by check</em>.</span></li>
+    </ol>
+    <div class="cash">
+      <div><b>Check or cash &middot; no fee</b>Payable to <strong>Ashley Band Boosters</strong>. Put your student&rsquo;s name and &ldquo;Carnegie family payment&rdquo; on the memo or envelope. Bring it to the band room.</div>
+      <div class="qr"><svg role="img" aria-label="QR code" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 33 33" shape-rendering="crispEdges"><path fill="#ffffff" d="M0 0h33v33H0z"/><path stroke="#000000" d="M2 2.5h7m1 0h3m2 0h3m1 0h4m1 0h7M2 3.5h1m5 0h1m1 0h1m4 0h1m2 0h3m3 0h1m5 0h1M2 4.5h1m1 0h3m1 0h1m2 0h1m1 0h1m4 0h1m1 0h1m1 0h1m1 0h1m1 0h3m1 0h1M2 5.5h1m1 0h3m1 0h1m1 0h2m2 0h1m1 0h2m1 0h3m2 0h1m1 0h3m1 0h1M2 6.5h1m1 0h3m1 0h1m2 0h1m1 0h2m1 0h1m1 0h1m2 0h1m2 0h1m1 0h3m1 0h1M2 7.5h1m5 0h1m2 0h2m1 0h2m1 0h6m1 0h1m5 0h1M2 8.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M10 9.5h1m1 0h3m2 0h6M2 10.5h1m1 0h2m1 0h3m1 0h1m2 0h2m1 0h1m1 0h3m2 0h1m2 0h1m1 0h2M2 11.5h2m2 0h1m6 0h5m3 0h6m3 0h1M2 12.5h2m2 0h1m1 0h1m4 0h1m1 0h1m2 0h2m2 0h2m1 0h1m2 0h2M2 13.5h1m1 0h1m2 0h1m2 0h1m2 0h1m4 0h1m3 0h5m3 0h1M4 14.5h2m2 0h1m4 0h1m2 0h2m1 0h1m1 0h1m5 0h2M5 15.5h1m1 0h1m1 0h3m4 0h1m1 0h1m2 0h4m3 0h3M3 16.5h1m3 0h2m1 0h1m1 0h1m2 0h1m1 0h6m5 0h3M3 17.5h1m2 0h1m2 0h1m1 0h1m2 0h1m1 0h1m1 0h1m2 0h1m7 0h1M2 18.5h2m2 0h3m1 0h2m4 0h3m1 0h1m2 0h1m1 0h3m1 0h1M3 19.5h4m2 0h1m1 0h1m1 0h1m2 0h1m1 0h1m1 0h1m1 0h1m2 0h1m1 0h3M2 20.5h1m1 0h3m1 0h3m4 0h6m2 0h1m1 0h1m2 0h1M9 21.5h1m2 0h1m1 0h3m2 0h1m4 0h2m2 0h1M3 22.5h8m4 0h2m1 0h11M10 23.5h2m5 0h2m3 0h1m3 0h5M2 24.5h7m1 0h2m2 0h1m1 0h2m1 0h4m1 0h1m1 0h2m1 0h1M2 25.5h1m5 0h1m1 0h3m2 0h3m4 0h1m3 0h2M2 26.5h1m1 0h3m1 0h1m2 0h1m2 0h1m4 0h1m2 0h5m1 0h1m1 0h1M2 27.5h1m1 0h3m1 0h1m1 0h1m3 0h1m4 0h1m3 0h1m2 0h2m1 0h1M2 28.5h1m1 0h3m1 0h1m1 0h1m1 0h2m1 0h1m2 0h1m3 0h1m2 0h1m2 0h1m1 0h1M2 29.5h1m5 0h1m3 0h1m4 0h2m3 0h2m1 0h3m1 0h1M2 30.5h7m1 0h2m2 0h1m1 0h2m2 0h4m1 0h1m3 0h1"/></svg><span>Family Portal</span></div>
+    </div>
+  </div>
 </section>
 
 <section class="slide we">
@@ -247,6 +353,21 @@
     slides.forEach(function (s, i) { s.classList.toggle('active', i === current); });
     counter.textContent = (current + 1) + ' / ' + slides.length;
     if (slides[current].querySelector('#raised')) countUp();
+    if (slides[current].classList.contains('pay')) startWalkthrough(slides[current]);
+  }
+
+  // The payment walkthrough steps through its four screens on a loop while its slide is up.
+  var walkTimer = null;
+  function startWalkthrough(slide) {
+    clearInterval(walkTimer);
+    var step = 1;
+    slide.dataset.step = '1';
+    if (calm) return;
+    walkTimer = setInterval(function () {
+      if (!slide.classList.contains('active')) { clearInterval(walkTimer); return; }
+      step = step % 4 + 1;
+      slide.dataset.step = String(step);
+    }, 4200);
   }
 
   // The Carnegie total counts up from zero each time its slide appears.
