@@ -4219,6 +4219,13 @@ h2 {
   width: 100%;
   max-width: 220px;
 }
+/* Cancel inside a pay form keeps the outline-button look; the green .portal-field-edit button rule would win otherwise. */
+.portal-field-edit.portal-pay-form button.portal-action-link {
+  align-self: flex-start;
+  border: 1px solid #9ca8b8;
+  background: #fff;
+  color: var(--portal-ink);
+}
 .portal-pay-form {
   align-items: stretch;
   flex-direction: column;
