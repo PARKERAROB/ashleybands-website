@@ -896,20 +896,23 @@ function CarnegieTripAccount({ account, studentId, studentName, paymentsEnabled,
   );
 }
 
-const ADULT_OPTION_LABELS = { with_band: "With the band, own travel to New York", own_way: "On our own (no cost through the band)" };
-
 function adultSummary(adult) {
-  if (adult.travelOption !== "with_band") return ADULT_OPTION_LABELS.own_way;
-  const role = adult.officialChaperone ? "Official chaperone (on the bus)" : ADULT_OPTION_LABELS.with_band;
+  if (adult.travelOption !== "with_band") return "Option 3: fully on our own";
+  const role = adult.officialChaperone
+    ? "Option 1: official chaperone, confirmed by Mr. Parker"
+    : adult.chaperoneInterest
+      ? "Option 1 requested (not yet confirmed; plan your own travel for now)"
+      : "Option 2: with the band, own travel";
   const room = adult.roomType === "quad" ? "quad" : "double";
-  return `${role} · ${room} · ${formatUsd(adult.priceCents)}${adult.chaperoneInterest && !adult.officialChaperone ? " · asked to chaperone" : ""}`;
+  return `${role} · ${room} · ${formatUsd(adult.priceCents)}`;
 }
 
 // Adults coming to New York (#237): the family adds adults here; Mr. Parker names official chaperones.
 function CarnegieAdultsSection({ student, openView }) {
   const [account, setAccount] = useState(null);
   const [adding, setAdding] = useState(false);
-  const [form, setForm] = useState({ adultName: "", travelOption: "with_band", roomType: "double", roommates: "", chaperoneInterest: false, termsAccepted: false });
+  const blankAdult = { adultName: "", choice: "with_band", roomType: "double", roommates: "", termsAccepted: false };
+  const [form, setForm] = useState(blankAdult);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -936,7 +939,16 @@ function CarnegieAdultsSection({ student, openView }) {
       const res = await fetch("/api/portal/carnegie-adults", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, studentId: student.id }),
+        body: JSON.stringify({
+          studentId: student.id,
+          adultName: form.adultName,
+          // Option 1 is a request to chaperone; it is priced and planned as a double with the band.
+          travelOption: form.choice === "own_way" ? "own_way" : "with_band",
+          roomType: form.choice === "chaperone" ? "double" : form.roomType,
+          roommates: form.roommates,
+          chaperoneInterest: form.choice === "chaperone",
+          termsAccepted: form.termsAccepted,
+        }),
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -945,7 +957,7 @@ function CarnegieAdultsSection({ student, openView }) {
       }
       setAccount(json.account);
       setAdding(false);
-      setForm({ adultName: "", travelOption: "with_band", roomType: "double", roommates: "", chaperoneInterest: false, termsAccepted: false });
+      setForm(blankAdult);
     } catch {
       setError("The adult could not be saved.");
     } finally {
@@ -953,12 +965,17 @@ function CarnegieAdultsSection({ student, openView }) {
     }
   }
 
-  const withBand = form.travelOption === "with_band";
+  const withBand = form.choice !== "own_way";
   return (
     <section className="portal-workspace-section" aria-labelledby="portal-adults-heading">
       <div className="portal-section-heading-copy">
         <h2 id="portal-adults-heading">Adults coming to New York</h2>
-        <p>Parents and family can come with the band (hotel, meals on the itinerary, activities, and the Carnegie Hall performance) and get themselves to and from New York. Or come entirely on your own. Mr. Parker chooses the official chaperones who ride the bus; anyone can ask.</p>
+        <p>There are three ways for an adult to come to New York, March 23–26, 2027.</p>
+        <ol className="portal-adult-options">
+          <li><strong>Ask to be an official chaperone: $2,500</strong> (double room). Chaperones travel with the band on the bus and get everything the students get, and they supervise students the whole trip. <strong>This is a request, not a guarantee.</strong> Mr. Parker decides based on a number of factors, including how many men and women are needed. Until he confirms you, plan to get to New York on your own (option 2).</li>
+          <li><strong>With the band, own travel: $2,500</strong> in a double, or <strong>$2,000</strong> in a quad when all four beds are filled. You get the hotel, meals on the itinerary, the group&apos;s activities, and the Carnegie Hall performance. You get yourself to and from New York.</li>
+          <li><strong>Fully on your own: no cost through the band.</strong> You plan everything, including your Carnegie Hall ticket. Just let us know you&apos;re coming.</li>
+        </ol>
       </div>
 
       {account?.adults?.length ? (
@@ -978,21 +995,25 @@ function CarnegieAdultsSection({ student, openView }) {
           <input id="adult-name" value={form.adultName} onChange={set("adultName")} required />
 
           <fieldset>
-            <legend className="portal-field-label">How is this adult coming?</legend>
-            <label><input type="radio" name="travelOption" value="with_band" checked={withBand} onChange={set("travelOption")} /> With the band, getting to New York on our own</label>
-            <label><input type="radio" name="travelOption" value="own_way" checked={!withBand} onChange={set("travelOption")} /> Entirely on our own (no cost through the band, Carnegie ticket not included)</label>
+            <legend className="portal-field-label">Which option?</legend>
+            <label><input type="radio" name="choice" value="chaperone" checked={form.choice === "chaperone"} onChange={set("choice")} /> Option 1: ask to be an official chaperone (not guaranteed)</label>
+            <label><input type="radio" name="choice" value="with_band" checked={form.choice === "with_band"} onChange={set("choice")} /> Option 2: with the band, own travel to New York</label>
+            <label><input type="radio" name="choice" value="own_way" checked={form.choice === "own_way"} onChange={set("choice")} /> Option 3: fully on our own</label>
           </fieldset>
 
           {withBand ? (
             <>
+              {form.choice === "chaperone" ? (
+                <p className="portal-field-note">Chaperones stay in a double room: $2,500 per person.</p>
+              ) : (
               <fieldset>
                 <legend className="portal-field-label">Room</legend>
                 <label><input type="radio" name="roomType" value="double" checked={form.roomType === "double"} onChange={set("roomType")} /> Double (two adults): $2,500 per person</label>
                 <label><input type="radio" name="roomType" value="quad" checked={form.roomType === "quad"} onChange={set("roomType")} /> Quad (four adults): $2,000 per person, only if all four beds are filled. Otherwise it becomes a double at $2,500.</label>
               </fieldset>
+              )}
               <label className="portal-field-label" htmlFor="adult-roommates">Who would share the room?</label>
               <input id="adult-roommates" value={form.roommates} onChange={set("roommates")} placeholder="Names of the other adults" />
-              <label><input type="checkbox" checked={form.chaperoneInterest} onChange={set("chaperoneInterest")} /> I&apos;d like to be considered as an official chaperone. Mr. Parker decides. Until he tells you otherwise, plan your own travel to and from New York.</label>
               <div className="portal-terms">
                 <strong>Payment terms</strong>
                 <ul>

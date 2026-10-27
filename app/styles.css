@@ -3939,6 +3939,13 @@ h2 {
   border: 1px solid #b9c5b7;
   border-radius: 6px;
 }
+.portal-adult-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-space-2);
+  margin: var(--portal-space-3) 0;
+  padding-left: var(--portal-space-6);
+}
 .portal-hub-actions {
   display: flex;
   flex-wrap: wrap;
