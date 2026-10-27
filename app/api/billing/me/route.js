@@ -40,6 +40,13 @@ export async function GET(request) {
       .eq("campaign_code", MARCHING_STUDENT_CREDIT_CAMPAIGN)
       .eq("status", "confirmed"),
   ]);
+  // Every confirmed gift credited to the student, with its PayPal fee, so the family
+  // can reconcile the goal line by line (#237). Donor contact details stay server-side.
+  const { data: creditedGiftRows, error: creditedGiftError } = await supabaseAdmin.from("sponsor_gifts")
+    .select("id,portal_student_id,business_name,amount_cents,paypal_fee_cents,method,received_at,confirmed_at,share_with_family")
+    .in("portal_student_id", studentIds)
+    .eq("status", "confirmed");
+  if (creditedGiftError) return NextResponse.json({ error: "Could not load current campaign records." }, { status: 500, headers: { "Cache-Control": "private, no-store" } });
   if (campaignError || giftError) return NextResponse.json({ error: "Could not load current campaign records." }, { status: 500, headers: { "Cache-Control": "private, no-store" } });
   const campaignByStudent = new Map((campaignRows || []).map((row) => [row.student_id, row]));
 
@@ -83,6 +90,18 @@ export async function GET(request) {
         raisedCents,
         remainingCents: Math.max(goalCents - raisedCents, 0),
       },
+      gifts: (creditedGiftRows || [])
+        .filter((gift) => gift.portal_student_id === s.id)
+        .map((gift) => ({
+          id: gift.id,
+          from: gift.share_with_family === false ? "A supporter" : gift.business_name || "A supporter",
+          amountCents: Number(gift.amount_cents) || 0,
+          paypalFeeCents: gift.paypal_fee_cents == null ? null : Number(gift.paypal_fee_cents),
+          online: gift.method === "online",
+          method: gift.method,
+          receivedAt: gift.received_at || gift.confirmed_at,
+        }))
+        .sort((a, b) => String(a.receivedAt).localeCompare(String(b.receivedAt))),
       charges: (charges[s.id] || []).map((c) => ({
         id: c.id,
         category: c.category,

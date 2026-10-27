@@ -3855,6 +3855,32 @@ h2 {
   font-weight: 700;
   border-bottom: 0;
 }
+.portal-gift-ledger {
+  width: 100%;
+  margin: var(--portal-space-2) 0;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+.portal-gift-ledger th,
+.portal-gift-ledger td {
+  padding: var(--portal-space-2);
+  border-bottom: 1px solid var(--portal-line);
+  text-align: right;
+}
+.portal-gift-ledger th:nth-child(-n+2),
+.portal-gift-ledger td:nth-child(-n+2) {
+  text-align: left;
+}
+.portal-gift-ledger small {
+  display: block;
+  color: #667085;
+}
+.portal-gift-ledger tfoot th,
+.portal-gift-ledger tfoot td {
+  font-weight: 700;
+  border-bottom: 0;
+}
 .portal-hub-actions {
   display: flex;
   flex-wrap: wrap;

@@ -631,11 +631,13 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
         )}
       </div>
 
-      {student.payments.length ? (
+      <GiftLedger gifts={student.gifts || []} />
+
+      {student.payments.some((p) => !p.isSponsorship) ? (
         <div className="portal-field">
-          <span className="portal-field-label">Paid and credited so far</span>
+          <span className="portal-field-label">Family payments</span>
           <ul className="portal-fee-list">
-            {student.payments.map((p) => (
+            {student.payments.filter((p) => !p.isSponsorship).map((p) => (
               <li key={p.id}>
                 {new Date(p.receivedAt).toLocaleDateString()}: {formatUsd(p.amountCents)}{" "}
                 {p.isSponsorship ? `gift${p.payerName ? ` from ${p.payerName}` : ""}` : p.category === "carnegie_2027_conditional_deposit" ? `Carnegie deposit, ${paymentMethodLabel(p.method)}` : `payment, ${paymentMethodLabel(p.method)}`}
@@ -794,6 +796,38 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
         </div>
       ) : null}
     </article>
+  );
+}
+
+function GiftLedger({ gifts }) {
+  if (!gifts.length) return null;
+  const gross = gifts.reduce((t, g) => t + g.amountCents, 0);
+  const fees = gifts.reduce((t, g) => t + (g.paypalFeeCents || 0), 0);
+  const missingFee = gifts.some((g) => g.online && g.paypalFeeCents == null);
+  return (
+    <div className="portal-field">
+      <span className="portal-field-label">Gifts credited to this student</span>
+      <table className="portal-gift-ledger">
+        <thead>
+          <tr><th scope="col">Date</th><th scope="col">From</th><th scope="col">Gift</th><th scope="col">PayPal fee</th><th scope="col">Received</th></tr>
+        </thead>
+        <tbody>
+          {gifts.map((g) => (
+            <tr key={g.id}>
+              <td>{g.receivedAt ? new Date(g.receivedAt).toLocaleDateString() : "—"}</td>
+              <td>{g.from}<small>{g.online ? "Online" : g.method === "check" ? "Check" : g.method}</small></td>
+              <td>{formatUsd(g.amountCents)}</td>
+              <td>{g.online ? (g.paypalFeeCents == null ? "Not recorded" : `−${formatUsd(g.paypalFeeCents)}`) : "None"}</td>
+              <td>{g.online && g.paypalFeeCents == null ? "—" : formatUsd(g.amountCents - (g.paypalFeeCents || 0))}</td>
+            </tr>
+          ))}
+        </tbody>
+        <tfoot>
+          <tr><th scope="row" colSpan={2}>Total</th><td>{formatUsd(gross)}</td><td>{fees ? `−${formatUsd(fees)}` : "—"}</td><td>{missingFee ? "—" : formatUsd(gross - fees)}</td></tr>
+        </tfoot>
+      </table>
+      <span className="portal-field-note">The goal counts the full gift. &ldquo;Received&rdquo; is what reached the Boosters after PayPal&apos;s fee.{missingFee ? " A fee not yet recorded shows as “Not recorded.”" : ""}</span>
+    </div>
   );
 }
 
