@@ -336,6 +336,7 @@ function CarnegieCommitmentSection({ student, notesOpen, openView }) {
       <button type="button" className="portal-action-link" onClick={() => openView("payments")}>See what is owed and pay</button>
       <Link className="portal-action-link" href={`/portal/carnegie-2027?studentId=${encodeURIComponent(student.id)}`}>Family commitment</Link>
       {notesOpen ? <button type="button" className="portal-action-link" onClick={() => openView("notes")}>Music Notes for supporters</button> : null}
+      {notesOpen ? <Link className="portal-action-link" href="/portal/carnegie-notes">My Carnegie Notes and letters</Link> : null}
       <Link className="portal-action-link" href="/info/carnegie-questions">Carnegie questions and answers</Link>
       </div>
     </section>
