@@ -407,6 +407,20 @@ function StudentManage({ studentId, session, onChanged }) {
     }
   };
 
+  // Family-reported checks and cash (#237): marking one deposited emails the family's final receipt.
+  const markDeposited = async (id) => {
+    if (!window.confirm("Mark this payment deposited? The family gets a final receipt email.")) return;
+    const res = await fetch("/api/admin/billing/payments", {
+      method: "PATCH",
+      headers: authHeaders(session),
+      body: JSON.stringify({ id, status: "completed" })
+    });
+    if (res.ok) {
+      load();
+      onChanged();
+    }
+  };
+
   return (
     <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
       <div style={{ minWidth: 280 }}>
@@ -432,6 +446,9 @@ function StudentManage({ studentId, session, onChanged }) {
             <li key={p.id} style={{ opacity: p.status === "completed" ? 1 : 0.5 }}>
               {usd(p.amount_cents)} — {p.method}{p.check_number ? ` #${p.check_number}` : ""}{p.is_sponsorship ? " · sponsorship" : ""} ({p.status})
               {p.payer_name ? ` · from ${p.payer_name}` : ""}{p.notes ? ` · ${p.notes}` : ""}
+              {p.status === "pending" && String(p.recorded_by || "").startsWith("family:") ? (
+                <button onClick={() => markDeposited(p.id)} style={{ ...linkBtnStyle, marginLeft: 6 }}>mark deposited</button>
+              ) : null}
             </li>
           ))}
           {(detail.payments || []).length === 0 && <li style={{ color: "#999" }}>None</li>}

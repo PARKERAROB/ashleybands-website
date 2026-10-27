@@ -3919,6 +3919,26 @@ h2 {
 .portal-pay-options p {
   margin: 0;
 }
+.portal-report-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--portal-space-3);
+}
+.portal-report-form .portal-field-label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-space-1);
+}
+.portal-report-form input[type="number"],
+.portal-report-form input:not([type]),
+.portal-report-form input[type="date"] {
+  width: 150px;
+  min-height: 40px;
+  padding: 6px 10px;
+  border: 1px solid #b9c5b7;
+  border-radius: 6px;
+}
 .portal-hub-actions {
   display: flex;
   flex-wrap: wrap;

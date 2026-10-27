@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { sendDepositedReceipt } from "@/lib/carnegieReportedPayments";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { authorizeStaffRequest, STAFF_CAPABILITIES } from "@/lib/staffAuthorization";
 import { generateInvoiceId } from "@/lib/billing";
@@ -111,6 +112,15 @@ export async function PATCH(req) {
     p_route: "/api/admin/billing/payments",
   });
   if (error) return NextResponse.json({ error: "Could not update the payment." }, { status: 500 });
+
+  // A family-reported Carnegie check or cash now deposited: send the final receipt (#237).
+  if (status === "completed") {
+    try {
+      await sendDepositedReceipt(id);
+    } catch (mailError) {
+      console.error("[billing-payments] deposited receipt failed:", mailError?.message);
+    }
+  }
 
   return NextResponse.json({ ok: true });
 }

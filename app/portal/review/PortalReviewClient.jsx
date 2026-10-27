@@ -859,6 +859,7 @@ function CarnegieTripAccount({ account, studentId, studentName, paymentsEnabled,
         <CarnegiePayOptions
           studentId={studentId}
           category="carnegie_2027_trip"
+          reported={account.reported || []}
           suggestedCents={suggested}
           maxCents={account.owedCents}
           memo={`${studentName}, Carnegie`}
@@ -1037,6 +1038,7 @@ function CarnegieAdultAccount({ account, studentId, paymentsEnabled, onPaid }) {
         <CarnegiePayOptions
           studentId={studentId}
           category="carnegie_2027_adult"
+          reported={account.reported || []}
           suggestedCents={account.owedCents}
           maxCents={account.owedCents}
           memo="Carnegie adult travel, and the adult's name"
@@ -1049,9 +1051,79 @@ function CarnegieAdultAccount({ account, studentId, paymentsEnabled, onPaid }) {
   );
 }
 
+// The family records a check or cash they handed in (#237): a note-received email now, and a
+// final receipt when the Boosters deposit it. Nothing is credited until then.
+function ReportCheckOrCash({ studentId, category, onSaved }) {
+  const [open, setOpen] = useState(false);
+  const today = new Date().toISOString().slice(0, 10);
+  const [form, setForm] = useState({ method: "check", amount: "", checkNumber: "", handedInOn: today });
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const set = (key) => (event) => setForm((current) => ({ ...current, [key]: event.target.value }));
+
+  async function save(event) {
+    event.preventDefault();
+    setBusy(true);
+    setError("");
+    try {
+      const res = await fetch("/api/portal/carnegie-payment-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          studentId,
+          category,
+          method: form.method,
+          amountCents: Math.round((Number(form.amount) || 0) * 100),
+          checkNumber: form.checkNumber,
+          handedInOn: form.handedInOn,
+        }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(portalErrorText(res, json, "The payment note could not be saved."));
+        return;
+      }
+      setMessage("Recorded. Check your email for a note; you'll get a final receipt once it's deposited.");
+      setOpen(false);
+      setForm({ method: "check", amount: "", checkNumber: "", handedInOn: today });
+      if (onSaved) onSaved();
+    } catch {
+      setError("The payment note could not be saved.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (!open) {
+    return (
+      <>
+        {message ? <span className="portal-field-note">{message}</span> : null}
+        <button type="button" className="portal-action-link" onClick={() => { setMessage(""); setOpen(true); }}>Record a check or cash I turned in</button>
+      </>
+    );
+  }
+  return (
+    <form className="portal-report-form" onSubmit={save}>
+      <label><input type="radio" name={`method-${category}`} value="check" checked={form.method === "check"} onChange={set("method")} /> Check</label>
+      <label><input type="radio" name={`method-${category}`} value="cash" checked={form.method === "cash"} onChange={set("method")} /> Cash</label>
+      <label className="portal-field-label">Amount<input type="number" min="1" step="0.01" value={form.amount} onChange={set("amount")} required /></label>
+      {form.method === "check" ? (
+        <label className="portal-field-label">Check number<input value={form.checkNumber} onChange={set("checkNumber")} required /></label>
+      ) : null}
+      <label className="portal-field-label">Date turned in<input type="date" value={form.handedInOn} onChange={set("handedInOn")} required /></label>
+      <PortalErrorMessage as="p" message={error} />
+      <div className="portal-hub-actions">
+        <button type="submit" className="portal-primary-action" disabled={busy}>{busy ? "Saving…" : "Record it"}</button>
+        <button type="button" className="portal-action-link" onClick={() => setOpen(false)}>Cancel</button>
+      </div>
+    </form>
+  );
+}
+
 // How to pay toward a Carnegie account (#237). Rob, 2026-10-27: check or cash first; online
 // payers can cover PayPal's fee, and if they don't, a small amount still shows as owed.
-function CarnegiePayOptions({ studentId, category, suggestedCents, maxCents, memo, nonRefundable = false, paymentsEnabled, onPaid }) {
+function CarnegiePayOptions({ studentId, category, reported = [], suggestedCents, maxCents, memo, nonRefundable = false, paymentsEnabled, onPaid }) {
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
   const canPayOnline = paymentsEnabled && Boolean(clientId);
   const [showPay, setShowPay] = useState(false);
@@ -1067,7 +1139,15 @@ function CarnegiePayOptions({ studentId, category, suggestedCents, maxCents, mem
 
   return (
     <div className="portal-pay-options">
-      <p><strong>Best: pay by check or cash.</strong> No fees, so every dollar counts. Checks payable to Ashley Band Boosters, with {memo} in the memo line. Turn it in to Mr. Parker.</p>
+      <p><strong>Best: pay by check or cash.</strong> No fees, so every dollar counts. Checks payable to Ashley Band Boosters, with {memo} in the memo line. Turn it in to Mr. Parker, then record it below for a receipt.</p>
+      {reported.length ? (
+        <ul className="portal-fee-list">
+          {reported.map((r) => (
+            <li key={r.id}>{formatUsd(r.amountCents)} {r.method === "check" ? `check #${r.checkNumber}` : "cash"}: recorded {new Date(r.reportedAt).toLocaleDateString()}, waiting for deposit</li>
+          ))}
+        </ul>
+      ) : null}
+      <ReportCheckOrCash studentId={studentId} category={category} onSaved={onPaid} />
       {canPayOnline ? (
         showPay ? (
           <div className="portal-field-edit portal-pay-form">
