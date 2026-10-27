@@ -3775,7 +3775,10 @@ h2 {
 /* Family portal home screen of choices (#237). */
 .portal-home-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  /* Every tile the same size, across rows too (Rob, 2026-10-27). */
+  grid-auto-rows: 1fr;
+  align-items: stretch;
   gap: var(--portal-space-4);
   margin-top: var(--portal-space-6);
 }
@@ -3785,6 +3788,7 @@ h2 {
   justify-content: flex-start;
   align-items: flex-start;
   gap: var(--space-2);
+  height: 100%;
   min-height: 132px;
   padding: var(--space-5);
   border: 1px solid var(--border);
