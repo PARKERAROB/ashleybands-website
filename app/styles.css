@@ -4186,6 +4186,12 @@ h2 {
   color: #9d2433 !important;
   font-weight: 700;
 }
+/* In the column layout, flex-basis would set the input's height to 200px (#237). */
+.portal-pay-form input[type="number"] {
+  flex: none;
+  width: 100%;
+  max-width: 220px;
+}
 .portal-pay-form {
   align-items: stretch;
   flex-direction: column;
