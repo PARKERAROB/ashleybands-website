@@ -240,7 +240,6 @@ export default function PortalReviewClient({ carnegieNotesOpen = false }) {
             {view === "payments" ? (
               <div className="portal-workspace-main">
                 <BillingSection studentId={selectedStudent.id} studentName={selectedStudent.displayName} />
-                <PayByCheckNote student={selectedStudent} />
               </div>
             ) : null}
 
@@ -349,17 +348,6 @@ function GiftsNotPaymentsNote({ openView }) {
         <p>Music Notes is for supporters: family, friends, and businesses who want to give. Their gifts are credited to your student and lower what your family owes. To pay your family&apos;s own amount, use Payments.</p>
       </div>
       <button type="button" className="portal-action-link" onClick={() => openView("payments")}>Go to Payments</button>
-    </section>
-  );
-}
-
-function PayByCheckNote({ student }) {
-  return (
-    <section className="portal-workspace-section" aria-labelledby="portal-check-heading">
-      <div className="portal-section-heading-copy">
-        <h2 id="portal-check-heading">Paying by check</h2>
-        <p>Make checks payable to Ashley Band Boosters. Write {student.displayName}&apos;s name and what it is for (for example, &ldquo;Carnegie&rdquo;) in the memo line, and turn it in to Mr. Parker.</p>
-      </div>
     </section>
   );
 }
@@ -489,14 +477,14 @@ function BillingSection({ studentId, studentName }) {
       <div className="portal-section-heading">
         <PortalSectionIcon type="funding" />
         <div className="portal-section-heading-copy">
-          <h2 id="portal-funding-heading">Funding and payments</h2>
-          <p>Fees, fundraising credit, and payment history for {studentName}.</p>
+          <h2 id="portal-funding-heading">Payments</h2>
+          <p>What is due for {studentName}, and what has been paid.</p>
         </div>
       </div>
       <PortalErrorMessage as="p" message={error} />
       {!data && !error ? <p className="portal-muted-status">Loading financial record…</p> : null}
       {data && !hasActivity ? (
-        <p className="portal-muted-status">No fees, payments, or funding activity is listed.</p>
+        <p className="portal-muted-status">Nothing is due, and no payments are listed yet.</p>
       ) : null}
       {hasActivity ? (
         <StudentFeeCard
@@ -586,20 +574,80 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
 
   return (
     <article className="portal-finance-record">
-      <div className="portal-finance-summary">
-        <strong>Current summary</strong>
-        <span className="portal-status-pill">
-          {fee.remaining > 0
-            ? `Balance ${formatUsd(fee.remaining)}`
-            : goal.remaining > 0
-              ? `${formatUsd(goal.remaining)} to raise`
-              : "All set"}
-        </span>
+      {/* What is due comes first, then what has been paid, then goals (#237). */}
+      <div className={`portal-due-panel${owes ? " portal-due-panel-owes" : ""}`}>
+        <span className="portal-field-label">Due now</span>
+        {owes ? (
+          <>
+            <strong className="portal-due-amount">{formatUsd(balanceCents)}</strong>
+            <ul className="portal-fee-list">
+              {fee.charges.map((c) => (
+                <li key={c.id}>{c.label}: {formatUsd(c.amountCents)}</li>
+              ))}
+            </ul>
+            {fee.paid > 0 ? <span className="portal-field-note">{formatUsd(fee.paid)} already paid toward these.</span> : null}
+            {canPayOnline ? (
+        showPay ? (
+          <div className="portal-field-edit portal-pay-form">
+            <label className="portal-field-label" htmlFor={`pay-${student.id}`}>
+              Amount to pay (you can pay any amount toward the balance)
+            </label>
+            <input
+              id={`pay-${student.id}`}
+              type="number"
+              min="1"
+              step="0.01"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
+            <PayPalButton
+              clientId={clientId}
+              studentId={student.id}
+              category={feeCategories[0]}
+              amountRef={amountRef}
+              onPaid={() => {
+                setShowPay(false);
+                if (onPaid) onPaid();
+              }}
+            />
+          </div>
+        ) : (
+          <button type="button" className="portal-primary-action" onClick={() => setShowPay(true)}>
+            Pay online
+          </button>
+        )
+      ) : owes && !paymentsEnabled ? (
+        <p className="portal-field-note">Online payment is coming soon. You can still pay by check.</p>
+      ) : owes ? (
+        <p className="portal-field-note">To pay this balance, mail a check payable to Ashley High School Band Boosters, or email Mr. Parker for an online payment link.</p>
+      ) : null}
+
+            <span className="portal-field-note">
+              Or pay by check to Ashley Band Boosters, with {student.name}&rsquo;s name and what it is for in the memo line.
+            </span>
+          </>
+        ) : (
+          <strong className="portal-due-amount">Nothing is due right now</strong>
+        )}
       </div>
+
+      {student.payments.length ? (
+        <div className="portal-field">
+          <span className="portal-field-label">Paid and credited so far</span>
+          <ul className="portal-fee-list">
+            {student.payments.map((p) => (
+              <li key={p.id}>
+                {new Date(p.receivedAt).toLocaleDateString()}: {formatUsd(p.amountCents)}{" "}
+                {p.isSponsorship ? `gift${p.payerName ? ` from ${p.payerName}` : ""}` : p.category === "carnegie_2027_conditional_deposit" ? `Carnegie deposit, ${paymentMethodLabel(p.method)}` : `payment, ${paymentMethodLabel(p.method)}`}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       {hasGoal ? (
         <div className="portal-field">
-          <span className="portal-field-label">Marching Band season funding</span>
+          <span className="portal-field-label">Marching Band season goal</span>
           <span className="portal-field-value">
             Goal {formatUsd(goal.charged)} · Raised {formatUsd(goal.paid)} · Remaining{" "}
             {formatUsd(goal.remaining)}
@@ -646,36 +694,6 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
               </span>
             </>
           ) : null}
-        </div>
-      ) : null}
-
-      {hasFee ? (
-        <div className="portal-field">
-          <span className="portal-field-label">Fees</span>
-          <ul className="portal-fee-list">
-            {fee.charges.map((c) => (
-              <li key={c.id}>
-                {c.label} — {formatUsd(c.amountCents)}
-              </li>
-            ))}
-          </ul>
-          <span className="portal-field-value">
-            Charged {formatUsd(fee.charged)} · Paid {formatUsd(fee.paid)} · Balance {formatUsd(fee.remaining)}
-          </span>
-        </div>
-      ) : null}
-
-      {student.payments.length ? (
-        <div className="portal-field">
-          <span className="portal-field-label">Payments</span>
-          <ul className="portal-fee-list">
-            {student.payments.map((p) => (
-              <li key={p.id}>
-                {new Date(p.receivedAt).toLocaleDateString()} — {formatUsd(p.amountCents)}{" "}
-                ({p.isSponsorship ? `sponsorship${p.payerName ? ` — ${p.payerName}` : ""}` : p.category === "carnegie_2027_conditional_deposit" ? `Carnegie Hall conditional deposit · ${paymentMethodLabel(p.method)}` : paymentMethodLabel(p.method)})
-              </li>
-            ))}
-          </ul>
         </div>
       ) : null}
 
@@ -730,42 +748,6 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
             </>
           )}
         </div>
-      ) : null}
-
-      {canPayOnline ? (
-        showPay ? (
-          <div className="portal-field-edit portal-pay-form">
-            <label className="portal-field-label" htmlFor={`pay-${student.id}`}>
-              Amount to pay (you can pay any amount toward the balance)
-            </label>
-            <input
-              id={`pay-${student.id}`}
-              type="number"
-              min="1"
-              step="0.01"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-            />
-            <PayPalButton
-              clientId={clientId}
-              studentId={student.id}
-              category={feeCategories[0]}
-              amountRef={amountRef}
-              onPaid={() => {
-                setShowPay(false);
-                if (onPaid) onPaid();
-              }}
-            />
-          </div>
-        ) : (
-          <button type="button" className="portal-primary-action" onClick={() => setShowPay(true)}>
-            Pay online
-          </button>
-        )
-      ) : owes && !paymentsEnabled ? (
-        <p className="portal-field-note">Online payment is coming soon. You can still pay by check.</p>
-      ) : owes ? (
-        <p className="portal-field-note">To pay this balance, mail a check payable to Ashley High School Band Boosters, or email Mr. Parker for an online payment link.</p>
       ) : null}
 
       {confirmOpen && refund ? (

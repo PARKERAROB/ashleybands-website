@@ -3816,6 +3816,27 @@ h2 {
   font-weight: 700;
   cursor: pointer;
 }
+.portal-due-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-space-2);
+  margin-bottom: var(--portal-space-6);
+  padding: var(--portal-space-6);
+  border: 1px solid var(--portal-line);
+  border-radius: 10px;
+  background: #f7fbf8;
+}
+.portal-due-panel-owes {
+  border-color: var(--garnet);
+  background: #fff;
+}
+.portal-due-amount {
+  color: var(--portal-ink);
+  font-size: 1.75rem;
+}
+.portal-due-panel .portal-primary-action {
+  align-self: flex-start;
+}
 .portal-hub-actions {
   display: flex;
   flex-wrap: wrap;
