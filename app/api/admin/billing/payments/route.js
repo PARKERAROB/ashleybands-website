@@ -96,16 +96,18 @@ export async function PATCH(req) {
   });
   if (!capabilityAuthorization.ok) return NextResponse.json({ error: capabilityAuthorization.error }, { status: capabilityAuthorization.status, headers: { "Cache-Control": "private, no-store" } });
 
-  const { data: payment } = await supabaseAdmin.from("fee_payments").select("student_id,status,recorded_by").eq("id", id).maybeSingle();
+  const { data: payment } = await supabaseAdmin.from("fee_payments").select("student_id").eq("id", id).maybeSingle();
   if (!payment) return NextResponse.json({ error: "Payment not found" }, { status: 404 });
-  if (status === "completed" && payment.status !== "pending") {
-    return NextResponse.json({ error: `This payment is already ${payment.status}.` }, { status: 409 });
-  }
   const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.BILLING_WRITE, {
     scope: { type: "student", ref: payment.student_id },
   });
   if (!authorization.ok) return NextResponse.json({ error: authorization.error }, { status: authorization.status, headers: { "Cache-Control": "private, no-store" } });
   const staff = authorization.staff;
+  // Read the current state only after the scoped check (#237): completing is pending -> completed only.
+  const { data: current } = await supabaseAdmin.from("fee_payments").select("status,recorded_by").eq("id", id).maybeSingle();
+  if (status === "completed" && current?.status !== "pending") {
+    return NextResponse.json({ error: `This payment is already ${current?.status || "settled"}.` }, { status: 409 });
+  }
 
   const { error } = await supabaseAdmin.rpc("update_fee_payment_with_audit", {
     p_payment_id: id,
@@ -118,7 +120,7 @@ export async function PATCH(req) {
 
   // A family-reported Carnegie check or cash now deposited (#237): date it and send the final
   // receipt once, only on the pending -> completed step.
-  if (status === "completed" && payment.status === "pending" && String(payment.recorded_by || "").startsWith("family:")) {
+  if (status === "completed" && String(current?.recorded_by || "").startsWith("family:")) {
     const { error: dateError } = await supabaseAdmin.from("fee_payments")
       .update({ received_at: new Date().toISOString() }).eq("id", id).is("received_at", null);
     if (dateError) console.error("[billing-payments] deposit date not saved:", dateError.message);
