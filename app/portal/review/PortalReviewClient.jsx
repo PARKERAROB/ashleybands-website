@@ -174,7 +174,6 @@ export default function PortalReviewClient({ carnegieNotesOpen = false }) {
       <section className="portal-family-page">
         <header className="portal-family-header">
           <div>
-            <p className="eyebrow">Ashley Bands</p>
             <h1>Family Portal</h1>
             <p>
               Choose what you need below.
@@ -293,7 +292,6 @@ export default function PortalReviewClient({ carnegieNotesOpen = false }) {
 function MusicNotesSection({ student }) {
   return (
     <section className="portal-music-notes" aria-labelledby="portal-music-notes-heading">
-      <p className="eyebrow">Carnegie Hall 2027</p>
       <h2 id="portal-music-notes-heading">{student.firstName}&apos;s Music Notes</h2>
       <NotesHomeCard student={student} />
     </section>
@@ -328,7 +326,6 @@ function CarnegieCommitmentSection({ student, notesOpen, openView }) {
   return (
     <section className="portal-workspace-section portal-carnegie-hub" aria-labelledby="portal-carnegie-heading">
       <div className="portal-section-heading-copy">
-        <p className="eyebrow">Carnegie Hall 2027</p>
         <h2 id="portal-carnegie-heading">Carnegie Hall 2027</h2>
         <p>New York, March 23–26, 2027. Performance March 25. Family payments for {student.displayName} are made in Payments. Gifts from supporters come in through Music Notes and lower what the family owes.</p>
       </div>
@@ -365,7 +362,6 @@ function OnboardingSection({ student }) {
   return (
     <section className="portal-workspace-section" aria-labelledby="portal-onboarding-heading">
       <div className="portal-section-heading-copy">
-        <p className="eyebrow">Student record</p>
         <h2 id="portal-onboarding-heading">Career onboarding</h2>
         <p>{complete ? "The connected student record is complete. Update only what changed." : "Complete the student information Ashley Bands keeps throughout the student’s career."}</p>
       </div>
@@ -839,7 +835,7 @@ function CarnegieTripAccount({ account, studentId, studentName, paymentsEnabled,
   return (
     <>
     <div className={`portal-due-panel${account.owedCents > 0 ? " portal-due-panel-owes" : ""}`}>
-      <span className="portal-field-label">Carnegie Hall 2027 trip</span>
+      <h3 className="portal-due-title">Carnegie Hall 2027 trip</h3>
       {account.firstPaymentOwedCents > 0 ? (
         <>
           <strong className="portal-due-amount">{formatUsd(account.firstPaymentOwedCents)} due by {formatDueDate(account.firstPaymentDue)}</strong>
@@ -1043,7 +1039,7 @@ function CarnegieAdultAccount({ account, studentId, paymentsEnabled, onPaid }) {
 
   return (
     <div className={`portal-due-panel${account.owedCents > 0 ? " portal-due-panel-owes" : ""}`}>
-      <span className="portal-field-label">Carnegie Hall 2027: adult travel</span>
+      <h3 className="portal-due-title">Carnegie Hall 2027 adult travel</h3>
       <strong className="portal-due-amount">{account.owedCents > 0 ? `${formatUsd(account.owedCents)} still owed` : "Paid in full"}</strong>
       {account.owedCents > 0 ? <span className="portal-field-note">Please pay in full by {formatDueDate(account.preferredDue)}. Final deadline {formatDueDate(account.cutoff)}. Every payment is non-refundable.</span> : null}
       <dl className="portal-ledger">
