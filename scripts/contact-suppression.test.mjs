@@ -134,7 +134,8 @@ test("requestedByRecipient appears only in the sign-in code and receipt sends", 
   const email = read("lib/portalEmail.js");
   const fnOf = (index) => [...email.slice(0, index).matchAll(/function (\w+)\(/g)].pop()[1];
   const uses = [...email.matchAll(/requestedByRecipient: true/g)].map((m) => fnOf(m.index));
-  assert.deepEqual(uses.sort(), ["sendFeePaymentReceiptEmail", "sendPortalCodeEmail"]);
+  // #237: Carnegie online and check/cash receipts are the family's own payment receipts too.
+  assert.deepEqual(uses.sort(), ["sendCarnegieOnlineReceiptEmail", "sendCarnegieReportedPaymentEmail", "sendFeePaymentReceiptEmail", "sendPortalCodeEmail"]);
   assert.match(email, /requestedByRecipient = false/, "the default stays filtered");
   assert.match(email, /requestedByRecipient === true \?/, "only an explicit true bypasses");
 });
