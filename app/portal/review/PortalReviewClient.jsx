@@ -92,6 +92,28 @@ export default function PortalReviewClient({ carnegieNotesOpen = false }) {
   const [profile, setProfile] = useState(null);
   const [selectedStudentId, setSelectedStudentId] = useState("");
   const [notesStudents, setNotesStudents] = useState([]);
+  const [view, setView] = useState("home");
+
+  // ?view= keeps each choice linkable and the browser Back button working (#237).
+  useEffect(() => {
+    const readView = () => {
+      const requested = new URLSearchParams(window.location.search).get("view") || "home";
+      setView(PORTAL_VIEWS.includes(requested) ? requested : "home");
+    };
+    readView();
+    window.addEventListener("popstate", readView);
+    return () => window.removeEventListener("popstate", readView);
+  }, []);
+
+  function openView(next) {
+    const params = new URLSearchParams(window.location.search);
+    if (next === "home") params.delete("view");
+    else params.set("view", next);
+    const query = params.toString();
+    window.history.pushState({}, "", `/portal/review${query ? `?${query}` : ""}`);
+    setView(next);
+    window.scrollTo(0, 0);
+  }
 
   async function loadProfile() {
     let res;
@@ -154,7 +176,7 @@ export default function PortalReviewClient({ carnegieNotesOpen = false }) {
             <p className="eyebrow">Ashley Bands</p>
             <h1>Family Portal</h1>
             <p>
-              Review your student&apos;s information, band participation, uniforms, and payments in one place.
+              Choose what you need below.
             </p>
           </div>
           {profile ? (
@@ -200,26 +222,60 @@ export default function PortalReviewClient({ carnegieNotesOpen = false }) {
               </div>
             ) : null}
 
-            {notesStudent ? <MusicNotesSection student={notesStudent} /> : null}
+            {/* Home screen of choices; each opens one focused view (#237). */}
+            {view === "home" ? (
+              <PortalHome student={selectedStudent} showNotes={Boolean(notesStudent)} openView={openView} />
+            ) : (
+              <button type="button" className="portal-back-link" onClick={() => openView("home")}>
+                ← All choices
+              </button>
+            )}
 
-            <div className="portal-family-workspace">
-              <StudentRail
-                key={selectedStudent.id}
-                student={selectedStudent}
-                onChanged={loadProfile}
-              />
+            {view === "carnegie" ? (
               <div className="portal-workspace-main">
-                <BandReadySection student={selectedStudent} />
-                <CarnegieCommitmentSection student={selectedStudent} notesOpen={carnegieNotesOpen} />
-                <OnboardingSection student={selectedStudent} />
-                <ParticipationSection student={selectedStudent} onChanged={loadProfile} />
+                <CarnegieCommitmentSection student={selectedStudent} notesOpen={carnegieNotesOpen} openView={openView} />
+              </div>
+            ) : null}
+
+            {view === "payments" ? (
+              <div className="portal-workspace-main">
+                <BillingSection studentId={selectedStudent.id} studentName={selectedStudent.displayName} />
+                <PayByCheckNote student={selectedStudent} />
+              </div>
+            ) : null}
+
+            {view === "notes" ? (
+              <div className="portal-workspace-main">
+                {notesStudent ? <MusicNotesSection student={notesStudent} /> : <p className="portal-muted-status">Music Notes is not open for this student.</p>}
+                <GiftsNotPaymentsNote openView={openView} />
+              </div>
+            ) : null}
+
+            {view === "info" ? (
+              <div className="portal-family-workspace">
+                <StudentRail
+                  key={selectedStudent.id}
+                  student={selectedStudent}
+                  onChanged={loadProfile}
+                />
+                <div className="portal-workspace-main">
+                  <ParticipationSection student={selectedStudent} onChanged={loadProfile} />
+                  <UniformSection student={selectedStudent} />
+                  <OnboardingSection student={selectedStudent} />
+                </div>
+              </div>
+            ) : null}
+
+            {view === "class" ? (
+              <div className="portal-workspace-main">
                 <StudentResourcesSection student={selectedStudent} />
                 <InstrumentRequestSection student={selectedStudent} />
-                <UniformSection student={selectedStudent} />
-                <BillingSection studentId={selectedStudent.id} studentName={selectedStudent.displayName} />
-                <FamilyResources studentId={selectedStudent.id} notesOpen={carnegieNotesOpen} senior={selectedStudent.grade === "12th Grade"} />
               </div>
-            </div>
+            ) : null}
+
+            {view === "more" ? (
+              <FamilyResources studentId={selectedStudent.id} notesOpen={carnegieNotesOpen} senior={selectedStudent.grade === "12th Grade"} />
+            ) : null}
           </>
         ) : profile ? (
           <div className="portal-empty-state">
@@ -243,30 +299,67 @@ function MusicNotesSection({ student }) {
   );
 }
 
-function BandReadySection({ student }) {
+const PORTAL_VIEWS = ["home", "carnegie", "payments", "notes", "info", "class", "more"];
+
+function PortalHome({ student, showNotes, openView }) {
+  const name = student.preferredFirst || student.displayName;
+  const tiles = [
+    { view: "carnegie", title: "Carnegie Hall 2027", body: "Trip details, the family commitment, and what to pay." },
+    { view: "payments", title: "Payments", body: `What is owed and paid for ${name}. Pay online or by check.` },
+    showNotes ? { view: "notes", title: "Music Notes", body: `${name}'s link for supporters to give.` } : null,
+    { view: "info", title: "Forms and info", body: "Contacts, participation, uniforms, and the student record." },
+    { view: "class", title: "Class", body: "Locker, lock, tuner, and instrument requests." },
+    { view: "more", title: "More", body: "Calendar, clothing, sponsorship, and other links." }
+  ].filter(Boolean);
   return (
-    <section className="portal-workspace-section portal-band-ready-callout" aria-labelledby="portal-band-ready-heading">
-      <div>
-        <p className="eyebrow">Getting started</p>
-        <h2 id="portal-band-ready-heading">Get {student.displayName} Band Ready</h2>
-        <p>Complete the student&apos;s calendar, Day One supplies, forms, band expectations, clothing, Booster volunteer check-in, and Mr. Parker greeting in one saved path.</p>
+    <nav className="portal-home-grid" aria-label="Family portal choices">
+      {tiles.map((tile) => (
+        <button key={tile.view} type="button" className="portal-home-tile" onClick={() => openView(tile.view)}>
+          <strong>{tile.title}</strong>
+          <span>{tile.body}</span>
+        </button>
+      ))}
+    </nav>
+  );
+}
+
+function CarnegieCommitmentSection({ student, notesOpen, openView }) {
+  return (
+    <section className="portal-workspace-section portal-carnegie-hub" aria-labelledby="portal-carnegie-heading">
+      <div className="portal-section-heading-copy">
+        <p className="eyebrow">Carnegie Hall 2027</p>
+        <h2 id="portal-carnegie-heading">Carnegie Hall 2027</h2>
+        <p>New York, March 23–26, 2027. Performance March 25. Family payments for {student.displayName} are made in Payments. Gifts from supporters come in through Music Notes and lower what the family owes.</p>
       </div>
-      <Link className="portal-action-link" href={`/portal/band-ready?studentId=${encodeURIComponent(student.id)}`}>Open Band Ready</Link>
+      <div className="portal-hub-actions">
+      <button type="button" className="portal-action-link" onClick={() => openView("payments")}>See what is owed and pay</button>
+      <Link className="portal-action-link" href={`/portal/carnegie-2027?studentId=${encodeURIComponent(student.id)}`}>Family commitment</Link>
+      {notesOpen ? <button type="button" className="portal-action-link" onClick={() => openView("notes")}>Music Notes for supporters</button> : null}
+      <Link className="portal-action-link" href="/info/carnegie-questions">Carnegie questions and answers</Link>
+      </div>
     </section>
   );
 }
 
-function CarnegieCommitmentSection({ student, notesOpen }) {
+function GiftsNotPaymentsNote({ openView }) {
   return (
-    <section className="portal-workspace-section portal-band-ready-callout" aria-labelledby="portal-carnegie-heading">
-      <div>
-        <p className="eyebrow">Carnegie Hall 2027</p>
-        <h2 id="portal-carnegie-heading">Family commitment and $50 deposit</h2>
-        <p>Submit the family intent for {student.displayName}, then pay the connected conditional deposit. The charge and payment appear in Funding and payments below.</p>
+    <section className="portal-workspace-section" aria-labelledby="portal-gifts-heading">
+      <div className="portal-section-heading-copy">
+        <h2 id="portal-gifts-heading">Gifts, not family payments</h2>
+        <p>Music Notes is for supporters: family, friends, and businesses who want to give. Their gifts are credited to your student and lower what your family owes. To pay your family&apos;s own amount, use Payments.</p>
       </div>
-      <Link className="portal-action-link" href={`/portal/carnegie-2027?studentId=${encodeURIComponent(student.id)}`}>Open Carnegie commitment</Link>
-      {notesOpen ? <Link className="portal-action-link" href="/portal/carnegie-notes">My Carnegie Notes and letters</Link> : null}
-      <Link className="portal-action-link" href="/info/carnegie-questions">Carnegie questions and answers</Link>
+      <button type="button" className="portal-action-link" onClick={() => openView("payments")}>Go to Payments</button>
+    </section>
+  );
+}
+
+function PayByCheckNote({ student }) {
+  return (
+    <section className="portal-workspace-section" aria-labelledby="portal-check-heading">
+      <div className="portal-section-heading-copy">
+        <h2 id="portal-check-heading">Paying by check</h2>
+        <p>Make checks payable to Ashley Band Boosters. Write {student.displayName}&apos;s name and what it is for (for example, &ldquo;Carnegie&rdquo;) in the memo line, and turn it in to Mr. Parker.</p>
+      </div>
     </section>
   );
 }
@@ -294,7 +387,6 @@ function FamilyResources({ studentId, notesOpen, senior }) {
   return (
     <nav className="portal-family-resources" aria-label="Family resources">
       <strong>Family resources</strong>
-      <Link href={`/portal/band-ready?studentId=${encodeURIComponent(studentId)}`}>Band Ready checklist</Link>
       <Link href={`/portal/carnegie-2027?studentId=${encodeURIComponent(studentId)}`}>Carnegie Hall commitment</Link>
       <Link href="/info/carnegie-questions">Carnegie questions and answers</Link>
       {notesOpen ? <Link href="/portal/carnegie-notes">My Carnegie Notes and letters</Link> : null}

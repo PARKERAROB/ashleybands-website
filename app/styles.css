@@ -3771,6 +3771,57 @@ h2 {
 .portal-action-link:hover {
   background: var(--portal-soft);
 }
+/* Family portal home screen of choices (#237). */
+.portal-home-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--portal-space-4);
+  margin-top: var(--portal-space-6);
+}
+.portal-home-tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-space-2);
+  min-height: 120px;
+  padding: var(--portal-space-6);
+  border: 1px solid var(--portal-line);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--portal-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.portal-home-tile:hover {
+  border-color: var(--garnet);
+  background: var(--portal-soft);
+}
+.portal-home-tile strong {
+  color: var(--garnet);
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 400;
+}
+.portal-home-tile span {
+  color: #475467;
+  font-size: 0.95rem;
+}
+.portal-back-link {
+  margin: var(--portal-space-4) 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--portal-blue);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.portal-hub-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--portal-space-3);
+  margin-top: var(--portal-space-4);
+}
 .portal-program-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
