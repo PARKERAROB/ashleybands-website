@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { loadCarnegieTripAccounts } from "@/lib/carnegieTripAccount";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { readPortalSession } from "@/lib/portalTokens";
 import {
@@ -45,6 +46,7 @@ export async function GET(request) {
   const { data: creditedGiftRows, error: creditedGiftError } = await supabaseAdmin.from("sponsor_gifts")
     .select("id,portal_student_id,business_name,amount_cents,paypal_fee_cents,method,received_at,confirmed_at,share_with_family")
     .in("portal_student_id", studentIds)
+    .neq("campaign_code", "carnegie-2027")
     .eq("status", "confirmed");
   if (creditedGiftError) return NextResponse.json({ error: "Could not load current campaign records." }, { status: 500, headers: { "Cache-Control": "private, no-store" } });
   if (campaignError || giftError) return NextResponse.json({ error: "Could not load current campaign records." }, { status: 500, headers: { "Cache-Control": "private, no-store" } });
@@ -53,6 +55,9 @@ export async function GET(request) {
   // Spring-Trip forgo offer — DARK by default. Only attach when the flag is live,
   // so families see nothing until go-live (the data never reaches the client otherwise).
   const refundCredits = forgoRefundLive() ? await loadRefundCredits(studentIds) : {};
+
+  const carnegieAccounts = await loadCarnegieTripAccounts(studentIds);
+  if (!carnegieAccounts) return NextResponse.json({ error: "Could not load current campaign records." }, { status: 500, headers: { "Cache-Control": "private, no-store" } });
 
   const students = (studentRows || []).map((s) => {
     const bal = balances[s.id] || { charged_cents: 0, paid_cents: 0, balance_cents: 0 };
@@ -90,6 +95,7 @@ export async function GET(request) {
         raisedCents,
         remainingCents: Math.max(goalCents - raisedCents, 0),
       },
+      carnegieTrip: carnegieAccounts[s.id] || null,
       gifts: (creditedGiftRows || [])
         .filter((gift) => gift.portal_student_id === s.id)
         .map((gift) => ({

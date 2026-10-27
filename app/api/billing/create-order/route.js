@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { readPortalSession } from "@/lib/portalTokens";
 import { feeBalanceCents, isTrustedGuardian, generateInvoiceId } from "@/lib/billing";
 import { createOrder, isPaypalConfigured } from "@/lib/paypal";
+import { CARNEGIE_TRIP_CATEGORY } from "@/lib/carnegieTripAccountMath.mjs";
 
 export const runtime = "nodejs";
 
@@ -46,9 +47,12 @@ export async function POST(request) {
     .eq("id", studentId)
     .maybeSingle();
 
+  const requestedCategory = String(body.category || "").trim();
   const target = body.kind === "funding_goal"
     ? await fundingGoalTarget(studentId)
-    : await feeTarget(studentId, String(body.category || "").trim());
+    : requestedCategory === CARNEGIE_TRIP_CATEGORY
+      ? await carnegieTripTarget(studentId)
+      : await feeTarget(studentId, requestedCategory);
   if (target.error) return NextResponse.json({ error: target.error }, { status: target.status });
   const { paymentKind, paymentCategory, remainingCents } = target;
   if (!remainingCents || amountCents > remainingCents) {
@@ -86,7 +90,7 @@ export async function POST(request) {
       amountCents,
       studentId,
       invoiceId,
-      description: `${paymentKind === "funding_goal" ? "Ashley Bands marching band contribution" : "Ashley Bands program fee"} — ${student?.display_name || "student"}`,
+      description: `${paymentKind === "funding_goal" ? "Ashley Bands marching band contribution" : paymentCategory === CARNEGIE_TRIP_CATEGORY ? "Carnegie Hall 2027 trip payment" : "Ashley Bands program fee"} — ${student?.display_name || "student"}`,
       requestId: invoiceId,
     });
 
@@ -103,6 +107,13 @@ export async function POST(request) {
       .eq("id", payment.id);
     return NextResponse.json({ error: "Could not start PayPal payment." }, { status: 502 });
   }
+}
+
+// Carnegie trip share (#237): any amount up to what is still owed on the $2,000 share.
+async function carnegieTripTarget(studentId) {
+  const remainingCents = await feeBalanceCents(studentId, CARNEGIE_TRIP_CATEGORY);
+  if (remainingCents === null) return { status: 503, error: "Could not verify the current trip balance." };
+  return { paymentKind: "fee", paymentCategory: CARNEGIE_TRIP_CATEGORY, remainingCents };
 }
 
 async function feeTarget(studentId, requestedCategory) {

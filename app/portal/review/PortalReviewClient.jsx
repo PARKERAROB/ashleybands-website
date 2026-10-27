@@ -66,7 +66,7 @@ function paymentMethodLabel(method) {
 }
 
 function formatUsd(cents) {
-  return `$${((Number(cents) || 0) / 100).toFixed(2)}`;
+  return `$${((Number(cents) || 0) / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 let paypalSdkPromise = null;
@@ -498,10 +498,9 @@ function BillingSection({ studentId, studentName }) {
 }
 
 function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
-  const balanceCents = Number(student.balanceCents) || 0;
-  const owes = balanceCents > 0;
-  const activeCharges = (student.charges || []).filter((c) => c.status === "active");
-  const allPayments = student.payments || [];
+  // Carnegie charges and payments live in the trip account below, not in Due now (#237).
+  const activeCharges = (student.charges || []).filter((c) => c.status === "active" && !isCarnegieCategory(c.category));
+  const allPayments = (student.payments || []).filter((p) => !isCarnegieCategory(p.category));
   const kindTotals = (kind) => {
     const charges = activeCharges.filter((c) => (c.kind || "fee") === kind);
     const charged = charges.reduce((s, c) => s + (Number(c.amountCents) || 0), 0);
@@ -521,6 +520,8 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
     remaining: Number(student.campaign.remainingCents) || 0,
   } : calculatedGoal;
   const fee = kindTotals("fee");
+  const balanceCents = fee.remaining;
+  const owes = balanceCents > 0;
   const hasGoal = goal.charges.length > 0 || goal.charged > 0 || goal.paid > 0;
   const hasFee = fee.charges.length > 0 || fee.paid > 0;
   const feeCategories = [...new Set(fee.charges.map((charge) => charge.category).filter(Boolean))];
@@ -574,9 +575,20 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
 
   return (
     <article className="portal-finance-record">
+      {student.carnegieTrip ? (
+        <CarnegieTripAccount
+          account={student.carnegieTrip}
+          studentId={student.id}
+          studentName={student.name}
+          paymentsEnabled={paymentsEnabled}
+          onPaid={onPaid}
+        />
+      ) : null}
+
       {/* What is due comes first, then what has been paid, then goals (#237). */}
+      {owes || !student.carnegieTrip ? (
       <div className={`portal-due-panel${owes ? " portal-due-panel-owes" : ""}`}>
-        <span className="portal-field-label">Due now</span>
+        <span className="portal-field-label">{student.carnegieTrip ? "Other band fees due" : "Due now"}</span>
         {owes ? (
           <>
             <strong className="portal-due-amount">{formatUsd(balanceCents)}</strong>
@@ -630,14 +642,15 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
           <strong className="portal-due-amount">Nothing is due right now</strong>
         )}
       </div>
+      ) : null}
 
       <GiftLedger gifts={student.gifts || []} />
 
-      {student.payments.some((p) => !p.isSponsorship) ? (
+      {allPayments.some((p) => !p.isSponsorship) ? (
         <div className="portal-field">
           <span className="portal-field-label">Family payments</span>
           <ul className="portal-fee-list">
-            {student.payments.filter((p) => !p.isSponsorship).map((p) => (
+            {allPayments.filter((p) => !p.isSponsorship).map((p) => (
               <li key={p.id}>
                 {new Date(p.receivedAt).toLocaleDateString()}: {formatUsd(p.amountCents)}{" "}
                 {p.isSponsorship ? `gift${p.payerName ? ` from ${p.payerName}` : ""}` : p.category === "carnegie_2027_conditional_deposit" ? `Carnegie deposit, ${paymentMethodLabel(p.method)}` : `payment, ${paymentMethodLabel(p.method)}`}
@@ -799,35 +812,143 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
   );
 }
 
+function isCarnegieCategory(category) {
+  return String(category || "").startsWith("carnegie_2027");
+}
+
+function formatDueDate(isoDate) {
+  return new Date(`${isoDate}T12:00:00`).toLocaleDateString("en-US", { month: "long", day: "numeric" });
+}
+
+// Carnegie trip account (#237): the $2,000 share, what counts against it, and pay-any-amount.
+function CarnegieTripAccount({ account, studentId, studentName, paymentsEnabled, onPaid }) {
+  const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
+  const canPay = account.owedCents > 0 && paymentsEnabled && Boolean(clientId);
+  const suggested = account.firstPaymentOwedCents || account.owedCents;
+  const [showPay, setShowPay] = useState(false);
+  const [amount, setAmount] = useState((suggested / 100).toFixed(2));
+  const amountRef = useRef(amount);
+  useEffect(() => {
+    amountRef.current = amount;
+  }, [amount]);
+
+  return (
+    <div className={`portal-due-panel${account.owedCents > 0 ? " portal-due-panel-owes" : ""}`}>
+      <span className="portal-field-label">Carnegie Hall 2027 trip</span>
+      {account.firstPaymentOwedCents > 0 ? (
+        <>
+          <strong className="portal-due-amount">{formatUsd(account.firstPaymentOwedCents)} due by {formatDueDate(account.firstPaymentDue)}</strong>
+          <span className="portal-field-note">First payment: {formatUsd(account.firstPaymentCents)}, the $50 deposit included. Gifts given for {studentName} count toward it.</span>
+        </>
+      ) : (
+        <strong className="portal-due-amount">{account.owedCents > 0 ? "First payment met" : "Trip share paid in full"}</strong>
+      )}
+
+      <dl className="portal-ledger">
+        <div><dt>Trip share</dt><dd>{formatUsd(account.shareCents)}</dd></div>
+        <div><dt>Gifts given for {studentName}</dt><dd>−{formatUsd(account.giftCents)}</dd></div>
+        <div><dt>Family payments</dt><dd>−{formatUsd(account.familyCents)}</dd></div>
+        <div className="portal-ledger-total"><dt>Still owed</dt><dd>{formatUsd(account.owedCents)}</dd></div>
+      </dl>
+
+      {canPay ? (
+        showPay ? (
+          <div className="portal-field-edit portal-pay-form">
+            <label className="portal-field-label" htmlFor={`carnegie-pay-${studentId}`}>
+              Amount to pay (any amount up to {formatUsd(account.owedCents)})
+            </label>
+            <input
+              id={`carnegie-pay-${studentId}`}
+              type="number"
+              min="1"
+              step="0.01"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
+            <PayPalButton
+              clientId={clientId}
+              studentId={studentId}
+              category="carnegie_2027_trip"
+              amountRef={amountRef}
+              onPaid={() => {
+                setShowPay(false);
+                if (onPaid) onPaid();
+              }}
+            />
+          </div>
+        ) : (
+          <button type="button" className="portal-primary-action" onClick={() => setShowPay(true)}>
+            Pay toward the trip
+          </button>
+        )
+      ) : null}
+      {account.owedCents > 0 ? (
+        <span className="portal-field-note">
+          Pay any amount, any time. Checks work too: payable to Ashley Band Boosters, with {studentName}&rsquo;s name and &ldquo;Carnegie&rdquo; in the memo line.
+        </span>
+      ) : null}
+
+      {account.gifts.length ? (
+        <>
+          <span className="portal-field-label">Gifts given for {studentName}</span>
+          <GiftTable gifts={account.gifts} />
+        </>
+      ) : null}
+      {account.familyPayments.length ? (
+        <>
+          <span className="portal-field-label">Family payments</span>
+          <ul className="portal-fee-list">
+            {account.familyPayments.map((p) => (
+              <li key={p.id}>
+                {p.receivedAt ? new Date(p.receivedAt).toLocaleDateString() : "—"}: {formatUsd(p.amountCents)} {p.label.toLowerCase()}, {paymentMethodLabel(p.method)}
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
+      <span className="portal-field-note">
+        Gifts to the whole trip, such as business sponsors, lower the cost for every student. They are applied to everyone later and don&apos;t appear here.
+      </span>
+    </div>
+  );
+}
+
 function GiftLedger({ gifts }) {
   if (!gifts.length) return null;
+  const missingFee = gifts.some((g) => g.online && g.paypalFeeCents == null);
+  return (
+    <div className="portal-field">
+      <span className="portal-field-label">Marching Band gifts credited to this student</span>
+      <GiftTable gifts={gifts} />
+      <span className="portal-field-note">The goal counts the full gift. &ldquo;Received&rdquo; is what reached the Boosters after PayPal&apos;s fee.{missingFee ? " A fee not yet recorded shows as “Not recorded.”" : ""}</span>
+    </div>
+  );
+}
+
+function GiftTable({ gifts }) {
   const gross = gifts.reduce((t, g) => t + g.amountCents, 0);
   const fees = gifts.reduce((t, g) => t + (g.paypalFeeCents || 0), 0);
   const missingFee = gifts.some((g) => g.online && g.paypalFeeCents == null);
   return (
-    <div className="portal-field">
-      <span className="portal-field-label">Gifts credited to this student</span>
-      <table className="portal-gift-ledger">
-        <thead>
-          <tr><th scope="col">Date</th><th scope="col">From</th><th scope="col">Gift</th><th scope="col">PayPal fee</th><th scope="col">Received</th></tr>
-        </thead>
-        <tbody>
-          {gifts.map((g) => (
-            <tr key={g.id}>
-              <td>{g.receivedAt ? new Date(g.receivedAt).toLocaleDateString() : "—"}</td>
-              <td>{g.from}<small>{g.online ? "Online" : g.method === "check" ? "Check" : g.method}</small></td>
-              <td>{formatUsd(g.amountCents)}</td>
-              <td>{g.online ? (g.paypalFeeCents == null ? "Not recorded" : `−${formatUsd(g.paypalFeeCents)}`) : "None"}</td>
-              <td>{g.online && g.paypalFeeCents == null ? "—" : formatUsd(g.amountCents - (g.paypalFeeCents || 0))}</td>
-            </tr>
-          ))}
-        </tbody>
-        <tfoot>
-          <tr><th scope="row" colSpan={2}>Total</th><td>{formatUsd(gross)}</td><td>{fees ? `−${formatUsd(fees)}` : "—"}</td><td>{missingFee ? "—" : formatUsd(gross - fees)}</td></tr>
-        </tfoot>
-      </table>
-      <span className="portal-field-note">The goal counts the full gift. &ldquo;Received&rdquo; is what reached the Boosters after PayPal&apos;s fee.{missingFee ? " A fee not yet recorded shows as “Not recorded.”" : ""}</span>
-    </div>
+    <table className="portal-gift-ledger">
+      <thead>
+        <tr><th scope="col">Date</th><th scope="col">From</th><th scope="col">Gift</th><th scope="col">PayPal fee</th><th scope="col">Received</th></tr>
+      </thead>
+      <tbody>
+        {gifts.map((g) => (
+          <tr key={g.id}>
+            <td>{g.receivedAt ? new Date(g.receivedAt).toLocaleDateString() : "—"}</td>
+            <td>{g.from}<small>{g.online ? "Online" : g.method === "check" ? "Check" : g.method}</small></td>
+            <td>{formatUsd(g.amountCents)}</td>
+            <td>{g.online ? (g.paypalFeeCents == null ? "Not recorded" : `−${formatUsd(g.paypalFeeCents)}`) : "None"}</td>
+            <td>{g.online && g.paypalFeeCents == null ? "—" : formatUsd(g.amountCents - (g.paypalFeeCents || 0))}</td>
+          </tr>
+        ))}
+      </tbody>
+      <tfoot>
+        <tr><th scope="row" colSpan={2}>Total</th><td>{formatUsd(gross)}</td><td>{fees ? `−${formatUsd(fees)}` : "—"}</td><td>{missingFee ? "—" : formatUsd(gross - fees)}</td></tr>
+      </tfoot>
+    </table>
   );
 }
 
