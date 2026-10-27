@@ -3820,11 +3820,18 @@ h2 {
   display: flex;
   flex-direction: column;
   gap: var(--portal-space-2);
-  margin-bottom: var(--portal-space-6);
-  padding: var(--portal-space-6);
+  max-width: 560px;
+  margin-bottom: var(--portal-space-4);
+  padding: var(--portal-space-4);
   border: 1px solid var(--portal-line);
   border-radius: 10px;
   background: #f7fbf8;
+}
+.portal-trip-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-space-2);
+  margin-bottom: var(--portal-space-6);
 }
 .portal-due-panel-owes {
   border-color: var(--garnet);
@@ -3832,7 +3839,7 @@ h2 {
 }
 .portal-due-amount {
   color: var(--portal-ink);
-  font-size: 1.75rem;
+  font-size: 1.25rem;
 }
 .portal-due-panel .portal-primary-action {
   align-self: flex-start;
@@ -3905,10 +3912,9 @@ h2 {
 .portal-pay-options {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: var(--portal-space-2);
-  padding: var(--portal-space-4);
-  border-radius: 10px;
-  background: var(--portal-soft);
+  font-size: 0.9rem;
 }
 .portal-pay-options p {
   margin: 0;

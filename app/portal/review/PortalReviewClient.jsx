@@ -836,12 +836,13 @@ function CarnegieTripAccount({ account, studentId, studentName, paymentsEnabled,
   const suggested = account.firstPaymentOwedCents || account.owedCents;
 
   return (
+    <>
     <div className={`portal-due-panel${account.owedCents > 0 ? " portal-due-panel-owes" : ""}`}>
       <span className="portal-field-label">Carnegie Hall 2027 trip</span>
       {account.firstPaymentOwedCents > 0 ? (
         <>
           <strong className="portal-due-amount">{formatUsd(account.firstPaymentOwedCents)} due by {formatDueDate(account.firstPaymentDue)}</strong>
-          <span className="portal-field-note">First payment: {formatUsd(account.firstPaymentCents)}, the $50 deposit included. Gifts given for {studentName} count toward it.</span>
+          <span className="portal-field-note">First payment of {formatUsd(account.firstPaymentCents)}, $50 deposit included. Gifts for {studentName} count toward it.</span>
         </>
       ) : (
         <strong className="portal-due-amount">{account.owedCents > 0 ? "First payment met" : "Trip share paid in full"}</strong>
@@ -866,6 +867,8 @@ function CarnegieTripAccount({ account, studentId, studentName, paymentsEnabled,
         />
       ) : null}
 
+    </div>
+    <div className="portal-trip-details">
       {account.gifts.length ? (
         <>
           <span className="portal-field-label">Gifts given for {studentName}</span>
@@ -888,6 +891,7 @@ function CarnegieTripAccount({ account, studentId, studentName, paymentsEnabled,
         Gifts to the whole trip, such as business sponsors, lower the cost for every student. They are applied to everyone later and don&apos;t appear here.
       </span>
     </div>
+    </>
   );
 }
 
