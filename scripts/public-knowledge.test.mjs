@@ -19,9 +19,12 @@ test("historical payment and campaign instructions cannot become current assista
   }
 });
 
-test("Carnegie answers preserve conditional funding and distinct deposit choices", () => {
-  for (const required of ["planning around $2,500", "not a final price", "below $2,000", "cannot be paid at this time creates no new charge", "does not change the yes response", "do not submit again or pay another $50", "not the final trip contract", "current commitment form contains the updated response and deposit choices"]) {
+test("Carnegie answers state current cost, payment and refund terms (Rob, 2026-10-27)", () => {
+  for (const required of ["Each student's share is **$2,000**", "$650, our goal by Friday, October 30", "it is not required", "no refund protection", "Every adult payment is non-refundable", "/info/carnegie-chaperone-agreement"]) {
     assert(knowledge.includes(required), `Missing family boundary: ${required}`);
+  }
+  for (const stale of ["planning around $2,500", "Chaperones pay the same as students", "No family has been asked to pay yet"]) {
+    assert(!knowledge.includes(stale), `Stale Carnegie copy: ${stale}`);
   }
   assert(knowledge.includes("/carnegie-2027/commit"));
   assert(!knowledge.includes("PERRY'S POPCORN FUNDRAISER"), "ended fundraisers leave the assistant (#113)");

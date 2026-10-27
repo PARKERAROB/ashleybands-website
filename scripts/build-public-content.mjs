@@ -19,6 +19,7 @@ const sources = {
   facts: "facts/bandsofahs-facts.md",
   carnegie: "content/sources/carnegie-2027.md",
   carnegieQuestions: "content/sources/carnegie-questions.md",
+  carnegieChaperones: "content/sources/carnegie-chaperone-agreement.md",
   boosters: "content/sources/boosters.md",
   assistantOverview: "content/sources/assistant-overview.md",
   requiredItems: "knowledge/student-required-items.md",
@@ -87,7 +88,7 @@ const pages = [
   {
     slug: "carnegie-2027",
     title: "Carnegie Hall 2027",
-    summary: "Family response, conditional deposit, and current trip-planning information.",
+    summary: "Cost, the first payment, refunds, and current trip information.",
     audience: "Families",
     source: sources.carnegie,
     category: "Current information",
@@ -101,6 +102,15 @@ const pages = [
     source: sources.carnegieQuestions,
     category: "Current information",
     body: readRepoSource(sources.carnegieQuestions).trim()
+  },
+  {
+    slug: "carnegie-chaperone-agreement",
+    title: "Carnegie Hall 2027: Chaperone Agreement",
+    summary: "What official chaperones agree to: Level 2 approval, supervising a student group, cost and payment terms.",
+    audience: "Families",
+    source: sources.carnegieChaperones,
+    category: "Current information",
+    body: readRepoSource(sources.carnegieChaperones).trim()
   },
   {
     slug: "2026-2027-band-information",
