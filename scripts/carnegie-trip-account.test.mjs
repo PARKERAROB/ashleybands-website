@@ -26,3 +26,18 @@ test("a not-yet gift stays off the student's account", () => {
   assert.equal(a.giftCents, 0);
   assert.equal(a.owedCents, 200000);
 });
+
+import { paypalFeeCents, paypalGrossUpCents } from "../lib/carnegieTripAccountMath.mjs";
+
+test("PayPal fee matches the band's captures", () => {
+  assert.equal(paypalFeeCents(10000), 348);
+  assert.equal(paypalFeeCents(50000), 1544);
+});
+
+test("covering the fee credits the full amount", () => {
+  for (const net of [5000, 60000, 65000, 250000]) {
+    const gross = paypalGrossUpCents(net);
+    assert.ok(gross - paypalFeeCents(gross) >= net);
+    assert.ok(gross - 1 - paypalFeeCents(gross - 1) < net);
+  }
+});

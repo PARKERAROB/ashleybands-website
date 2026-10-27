@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { paypalGrossUpCents } from "@/lib/carnegieTripAccountMath.mjs";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { readPortalSession } from "@/lib/portalTokens";
 import { feeBalanceCents, isTrustedGuardian } from "@/lib/billing";
@@ -52,7 +53,9 @@ export async function POST(request) {
     if (remainingCents === null) {
       return NextResponse.json({ error: "Could not verify the current fee balance. Try again in a minute." }, { status: 503 });
     }
-    if (Number(payment.amount_cents) > remainingCents) {
+    // Carnegie payments may include PayPal's fee on top of what is owed (#237).
+    const capCents = String(payment.category || "").startsWith("carnegie_2027_") ? paypalGrossUpCents(remainingCents) : remainingCents;
+    if (Number(payment.amount_cents) > capCents) {
       await supabaseAdmin
         .from("fee_payments")
         .update({ status: "failed", notes: "Not captured: the fee balance was already paid." })
@@ -97,6 +100,10 @@ export async function POST(request) {
   });
   if (settleError) {
     return NextResponse.json({ error: "The payment was captured but could not be reconciled automatically." }, { status: 503 });
+  }
+  // Keep PayPal's fee with the payment so Carnegie accounts credit what reached the Boosters (#237).
+  if (detail.feeValue && detail.feeCurrencyCode === "USD") {
+    await supabaseAdmin.from("fee_payments").update({ paypal_fee_cents: amountToCents(detail.feeValue) }).eq("id", payment.id);
   }
 
   // Receipt (best effort — never fail the payment on email error).

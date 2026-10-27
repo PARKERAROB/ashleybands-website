@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { loadCarnegieTripAccounts } from "@/lib/carnegieTripAccount";
+import { loadCarnegieAdultAccounts } from "@/lib/carnegieAdults";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { readPortalSession } from "@/lib/portalTokens";
 import {
@@ -56,8 +57,11 @@ export async function GET(request) {
   // so families see nothing until go-live (the data never reaches the client otherwise).
   const refundCredits = forgoRefundLive() ? await loadRefundCredits(studentIds) : {};
 
-  const carnegieAccounts = await loadCarnegieTripAccounts(studentIds);
-  if (!carnegieAccounts) return NextResponse.json({ error: "Could not load current campaign records." }, { status: 500, headers: { "Cache-Control": "private, no-store" } });
+  const [carnegieAccounts, adultAccounts] = await Promise.all([
+    loadCarnegieTripAccounts(studentIds),
+    loadCarnegieAdultAccounts(studentIds),
+  ]);
+  if (!carnegieAccounts || !adultAccounts) return NextResponse.json({ error: "Could not load current campaign records." }, { status: 500, headers: { "Cache-Control": "private, no-store" } });
 
   const students = (studentRows || []).map((s) => {
     const bal = balances[s.id] || { charged_cents: 0, paid_cents: 0, balance_cents: 0 };
@@ -96,6 +100,7 @@ export async function GET(request) {
         remainingCents: Math.max(goalCents - raisedCents, 0),
       },
       carnegieTrip: carnegieAccounts[s.id] || null,
+      carnegieAdults: adultAccounts[s.id] || null,
       gifts: (creditedGiftRows || [])
         .filter((gift) => gift.portal_student_id === s.id)
         .map((gift) => ({

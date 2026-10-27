@@ -3881,6 +3881,38 @@ h2 {
   font-weight: 700;
   border-bottom: 0;
 }
+.portal-adult-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-space-3);
+  max-width: 640px;
+  margin-top: var(--portal-space-4);
+}
+.portal-adult-form fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-space-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.portal-terms {
+  padding: var(--portal-space-4);
+  border: 1px solid var(--garnet);
+  border-radius: 10px;
+  background: #fff;
+}
+.portal-pay-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--portal-space-2);
+  padding: var(--portal-space-4);
+  border-radius: 10px;
+  background: var(--portal-soft);
+}
+.portal-pay-options p {
+  margin: 0;
+}
 .portal-hub-actions {
   display: flex;
   flex-wrap: wrap;

@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import InstrumentRequestSection from "./InstrumentRequestSection";
 import PortalSectionIcon from "./PortalSectionIcon";
 import PortalErrorMessage from "../PortalErrorMessage";
+import { paypalGrossUpCents } from "@/lib/carnegieTripAccountMath.mjs";
 import { NotesHomeCard } from "../carnegie-notes/CarnegieNotesClient";
 import { PORTAL_SIGNED_OUT_MESSAGE, PORTAL_TROUBLE_MESSAGE, portalErrorText } from "@/lib/portalFamilyMessages";
 import {
@@ -234,6 +235,7 @@ export default function PortalReviewClient({ carnegieNotesOpen = false }) {
             {view === "carnegie" ? (
               <div className="portal-workspace-main">
                 <CarnegieCommitmentSection student={selectedStudent} notesOpen={carnegieNotesOpen} openView={openView} />
+                <CarnegieAdultsSection student={selectedStudent} openView={openView} />
               </div>
             ) : null}
 
@@ -585,6 +587,15 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
         />
       ) : null}
 
+      {student.carnegieAdults ? (
+        <CarnegieAdultAccount
+          account={student.carnegieAdults}
+          studentId={student.id}
+          paymentsEnabled={paymentsEnabled}
+          onPaid={onPaid}
+        />
+      ) : null}
+
       {/* What is due comes first, then what has been paid, then goals (#237). */}
       {owes || !student.carnegieTrip ? (
       <div className={`portal-due-panel${owes ? " portal-due-panel-owes" : ""}`}>
@@ -822,15 +833,7 @@ function formatDueDate(isoDate) {
 
 // Carnegie trip account (#237): the $2,000 share, what counts against it, and pay-any-amount.
 function CarnegieTripAccount({ account, studentId, studentName, paymentsEnabled, onPaid }) {
-  const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
-  const canPay = account.owedCents > 0 && paymentsEnabled && Boolean(clientId);
   const suggested = account.firstPaymentOwedCents || account.owedCents;
-  const [showPay, setShowPay] = useState(false);
-  const [amount, setAmount] = useState((suggested / 100).toFixed(2));
-  const amountRef = useRef(amount);
-  useEffect(() => {
-    amountRef.current = amount;
-  }, [amount]);
 
   return (
     <div className={`portal-due-panel${account.owedCents > 0 ? " portal-due-panel-owes" : ""}`}>
@@ -851,41 +854,16 @@ function CarnegieTripAccount({ account, studentId, studentName, paymentsEnabled,
         <div className="portal-ledger-total"><dt>Still owed</dt><dd>{formatUsd(account.owedCents)}</dd></div>
       </dl>
 
-      {canPay ? (
-        showPay ? (
-          <div className="portal-field-edit portal-pay-form">
-            <label className="portal-field-label" htmlFor={`carnegie-pay-${studentId}`}>
-              Amount to pay (any amount up to {formatUsd(account.owedCents)})
-            </label>
-            <input
-              id={`carnegie-pay-${studentId}`}
-              type="number"
-              min="1"
-              step="0.01"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-            />
-            <PayPalButton
-              clientId={clientId}
-              studentId={studentId}
-              category="carnegie_2027_trip"
-              amountRef={amountRef}
-              onPaid={() => {
-                setShowPay(false);
-                if (onPaid) onPaid();
-              }}
-            />
-          </div>
-        ) : (
-          <button type="button" className="portal-primary-action" onClick={() => setShowPay(true)}>
-            Pay toward the trip
-          </button>
-        )
-      ) : null}
       {account.owedCents > 0 ? (
-        <span className="portal-field-note">
-          Pay any amount, any time. Checks work too: payable to Ashley Band Boosters, with {studentName}&rsquo;s name and &ldquo;Carnegie&rdquo; in the memo line.
-        </span>
+        <CarnegiePayOptions
+          studentId={studentId}
+          category="carnegie_2027_trip"
+          suggestedCents={suggested}
+          maxCents={account.owedCents}
+          memo={`${studentName}, Carnegie`}
+          paymentsEnabled={paymentsEnabled}
+          onPaid={onPaid}
+        />
       ) : null}
 
       {account.gifts.length ? (
@@ -909,6 +887,214 @@ function CarnegieTripAccount({ account, studentId, studentName, paymentsEnabled,
       <span className="portal-field-note">
         Gifts to the whole trip, such as business sponsors, lower the cost for every student. They are applied to everyone later and don&apos;t appear here.
       </span>
+    </div>
+  );
+}
+
+const ADULT_OPTION_LABELS = { with_band: "With the band, own travel to New York", own_way: "On our own (no cost through the band)" };
+
+function adultSummary(adult) {
+  if (adult.travelOption !== "with_band") return ADULT_OPTION_LABELS.own_way;
+  const role = adult.officialChaperone ? "Official chaperone (on the bus)" : ADULT_OPTION_LABELS.with_band;
+  const room = adult.roomType === "quad" ? "quad" : "double";
+  return `${role} · ${room} · ${formatUsd(adult.priceCents)}${adult.chaperoneInterest && !adult.officialChaperone ? " · asked to chaperone" : ""}`;
+}
+
+// Adults coming to New York (#237): the family adds adults here; Mr. Parker names official chaperones.
+function CarnegieAdultsSection({ student, openView }) {
+  const [account, setAccount] = useState(null);
+  const [adding, setAdding] = useState(false);
+  const [form, setForm] = useState({ adultName: "", travelOption: "with_band", roomType: "double", roommates: "", chaperoneInterest: false, termsAccepted: false });
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/billing/me", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : {}))
+      .then((json) => {
+        if (cancelled) return;
+        const row = (json.students || []).find((item) => item.id === student.id);
+        setAccount(row?.carnegieAdults || null);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [student.id]);
+
+  const set = (key) => (event) => setForm((current) => ({ ...current, [key]: event.target.type === "checkbox" ? event.target.checked : event.target.value }));
+
+  async function save(event) {
+    event.preventDefault();
+    setBusy(true);
+    setError("");
+    try {
+      const res = await fetch("/api/portal/carnegie-adults", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, studentId: student.id }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(portalErrorText(res, json, "The adult could not be saved."));
+        return;
+      }
+      setAccount(json.account);
+      setAdding(false);
+      setForm({ adultName: "", travelOption: "with_band", roomType: "double", roommates: "", chaperoneInterest: false, termsAccepted: false });
+    } catch {
+      setError("The adult could not be saved.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const withBand = form.travelOption === "with_band";
+  return (
+    <section className="portal-workspace-section" aria-labelledby="portal-adults-heading">
+      <div className="portal-section-heading-copy">
+        <h2 id="portal-adults-heading">Adults coming to New York</h2>
+        <p>Parents and family can come with the band (hotel, meals on the itinerary, activities, and the Carnegie Hall performance) and get themselves to and from New York. Or come entirely on your own. Mr. Parker chooses the official chaperones who ride the bus; anyone can ask.</p>
+      </div>
+
+      {account?.adults?.length ? (
+        <ul className="portal-fee-list">
+          {account.adults.map((adult) => (
+            <li key={adult.id}><strong>{adult.name}</strong>: {adultSummary(adult)}</li>
+          ))}
+        </ul>
+      ) : null}
+      {account?.owedCents > 0 ? (
+        <button type="button" className="portal-action-link" onClick={() => openView("payments")}>Pay for adult travel</button>
+      ) : null}
+
+      {adding ? (
+        <form className="portal-adult-form" onSubmit={save}>
+          <label className="portal-field-label" htmlFor="adult-name">Adult&apos;s full name</label>
+          <input id="adult-name" value={form.adultName} onChange={set("adultName")} required />
+
+          <fieldset>
+            <legend className="portal-field-label">How is this adult coming?</legend>
+            <label><input type="radio" name="travelOption" value="with_band" checked={withBand} onChange={set("travelOption")} /> With the band, getting to New York on our own</label>
+            <label><input type="radio" name="travelOption" value="own_way" checked={!withBand} onChange={set("travelOption")} /> Entirely on our own (no cost through the band, Carnegie ticket not included)</label>
+          </fieldset>
+
+          {withBand ? (
+            <>
+              <fieldset>
+                <legend className="portal-field-label">Room</legend>
+                <label><input type="radio" name="roomType" value="double" checked={form.roomType === "double"} onChange={set("roomType")} /> Double (two adults): $2,500 per person</label>
+                <label><input type="radio" name="roomType" value="quad" checked={form.roomType === "quad"} onChange={set("roomType")} /> Quad (four adults): $2,000 per person, only if all four beds are filled. Otherwise it becomes a double at $2,500.</label>
+              </fieldset>
+              <label className="portal-field-label" htmlFor="adult-roommates">Who would share the room?</label>
+              <input id="adult-roommates" value={form.roommates} onChange={set("roommates")} placeholder="Names of the other adults" />
+              <label><input type="checkbox" checked={form.chaperoneInterest} onChange={set("chaperoneInterest")} /> I&apos;d like to be considered as an official chaperone. Mr. Parker decides. Until he tells you otherwise, plan your own travel to and from New York.</label>
+              <div className="portal-terms">
+                <strong>Payment terms</strong>
+                <ul>
+                  <li>Pay in any amounts. <strong>Every payment is non-refundable.</strong> The band commits money to WorldStrides on your behalf.</li>
+                  <li>Please pay in full by <strong>Monday, November 23</strong>. The final deadline is <strong>Thursday, December 10</strong>. No one can be added after that.</li>
+                  <li>You go on the travel company&apos;s list only once you have paid in full.</li>
+                  <li>If you don&apos;t travel, what you paid stays with the Ashley Band Boosters until Mr. Parker talks with you.</li>
+                </ul>
+                <label><input type="checkbox" checked={form.termsAccepted} onChange={set("termsAccepted")} /> I understand and accept these terms.</label>
+              </div>
+            </>
+          ) : null}
+          <PortalErrorMessage as="p" message={error} />
+          <div className="portal-hub-actions">
+            <button type="submit" className="portal-primary-action" disabled={busy}>{busy ? "Saving…" : "Add this adult"}</button>
+            <button type="button" className="portal-action-link" onClick={() => setAdding(false)}>Cancel</button>
+          </div>
+        </form>
+      ) : (
+        <button type="button" className="portal-primary-action" onClick={() => setAdding(true)}>Add an adult</button>
+      )}
+    </section>
+  );
+}
+
+// Adult travel account (#237): separate from the student's trip share.
+function CarnegieAdultAccount({ account, studentId, paymentsEnabled, onPaid }) {
+  if (!account.totalCents && !account.paidCents) return null;
+
+  return (
+    <div className={`portal-due-panel${account.owedCents > 0 ? " portal-due-panel-owes" : ""}`}>
+      <span className="portal-field-label">Carnegie Hall 2027: adult travel</span>
+      <strong className="portal-due-amount">{account.owedCents > 0 ? `${formatUsd(account.owedCents)} still owed` : "Paid in full"}</strong>
+      {account.owedCents > 0 ? <span className="portal-field-note">Please pay in full by {formatDueDate(account.preferredDue)}. Final deadline {formatDueDate(account.cutoff)}. Every payment is non-refundable.</span> : null}
+      <dl className="portal-ledger">
+        {account.adults.filter((adult) => adult.priceCents > 0).map((adult) => (
+          <div key={adult.id}><dt>{adult.name} ({adult.roomType})</dt><dd>{formatUsd(adult.priceCents)}</dd></div>
+        ))}
+        <div><dt>Paid</dt><dd>−{formatUsd(account.paidCents)}</dd></div>
+        <div className="portal-ledger-total"><dt>Still owed</dt><dd>{formatUsd(account.owedCents)}</dd></div>
+      </dl>
+      {account.owedCents > 0 ? (
+        <CarnegiePayOptions
+          studentId={studentId}
+          category="carnegie_2027_adult"
+          suggestedCents={account.owedCents}
+          maxCents={account.owedCents}
+          memo="Carnegie adult travel, and the adult's name"
+          nonRefundable
+          paymentsEnabled={paymentsEnabled}
+          onPaid={onPaid}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+// How to pay toward a Carnegie account (#237). Rob, 2026-10-27: check or cash first; online
+// payers can cover PayPal's fee, and if they don't, a small amount still shows as owed.
+function CarnegiePayOptions({ studentId, category, suggestedCents, maxCents, memo, nonRefundable = false, paymentsEnabled, onPaid }) {
+  const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
+  const canPayOnline = paymentsEnabled && Boolean(clientId);
+  const [showPay, setShowPay] = useState(false);
+  const [amount, setAmount] = useState((suggestedCents / 100).toFixed(2));
+  const [coverFee, setCoverFee] = useState(true);
+  const netCents = Math.min(Math.round((Number(amount) || 0) * 100), maxCents);
+  const feeCents = coverFee && netCents > 0 ? paypalGrossUpCents(netCents) - netCents : 0;
+  const totalCents = netCents + feeCents;
+  const amountRef = useRef((totalCents / 100).toFixed(2));
+  useEffect(() => {
+    amountRef.current = (totalCents / 100).toFixed(2);
+  }, [totalCents]);
+
+  return (
+    <div className="portal-pay-options">
+      <p><strong>Best: pay by check or cash.</strong> No fees, so every dollar counts. Checks payable to Ashley Band Boosters, with {memo} in the memo line. Turn it in to Mr. Parker.</p>
+      {canPayOnline ? (
+        showPay ? (
+          <div className="portal-field-edit portal-pay-form">
+            <label className="portal-field-label" htmlFor={`pay-${category}-${studentId}`}>
+              Amount toward the balance (any amount up to {formatUsd(maxCents)})
+            </label>
+            <input id={`pay-${category}-${studentId}`} type="number" min="1" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} />
+            <label>
+              <input type="checkbox" checked={coverFee} onChange={(e) => setCoverFee(e.target.checked)} /> Add PayPal&apos;s fee ({formatUsd(feeCents || (netCents > 0 ? paypalGrossUpCents(netCents) - netCents : 0))}) so the full amount counts
+            </label>
+            <span className="portal-field-note">
+              {coverFee
+                ? `You pay ${formatUsd(totalCents)}; ${formatUsd(netCents)} is credited.`
+                : `PayPal keeps about 3% plus $0.49, so about ${formatUsd(Math.max(netCents - (paypalGrossUpCents(netCents) - netCents), 0))} is credited and a small amount will still show as owed.`}
+              {nonRefundable ? " Non-refundable." : ""}
+            </span>
+            <PayPalButton
+              clientId={clientId}
+              studentId={studentId}
+              category={category}
+              amountRef={amountRef}
+              onPaid={() => {
+                setShowPay(false);
+                if (onPaid) onPaid();
+              }}
+            />
+          </div>
+        ) : (
+          <button type="button" className="portal-action-link" onClick={() => setShowPay(true)}>Pay online instead</button>
+        )
+      ) : null}
     </div>
   );
 }
