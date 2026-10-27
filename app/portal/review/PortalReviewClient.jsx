@@ -911,7 +911,7 @@ function adultSummary(adult) {
 function CarnegieAdultsSection({ student, openView }) {
   const [account, setAccount] = useState(null);
   const [adding, setAdding] = useState(false);
-  const blankAdult = { adultName: "", choice: "with_band", roomType: "double", roommates: "", termsAccepted: false };
+  const blankAdult = { adultName: "", choice: "with_band", roomType: "double", termsAccepted: false };
   const [form, setForm] = useState(blankAdult);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -945,7 +945,6 @@ function CarnegieAdultsSection({ student, openView }) {
           // Option 1 is a request to chaperone; it is priced and planned as a double with the band.
           travelOption: form.choice === "own_way" ? "own_way" : "with_band",
           roomType: form.choice === "chaperone" ? "double" : form.roomType,
-          roommates: form.roommates,
           chaperoneInterest: form.choice === "chaperone",
           termsAccepted: form.termsAccepted,
         }),
@@ -1012,8 +1011,6 @@ function CarnegieAdultsSection({ student, openView }) {
                 <label><input type="radio" name="roomType" value="quad" checked={form.roomType === "quad"} onChange={set("roomType")} /> Quad (four adults): $2,000 per person, only if all four beds are filled. Otherwise it becomes a double at $2,500.</label>
               </fieldset>
               )}
-              <label className="portal-field-label" htmlFor="adult-roommates">Who would share the room?</label>
-              <input id="adult-roommates" value={form.roommates} onChange={set("roommates")} placeholder="Names of the other adults" />
               <div className="portal-terms">
                 <strong>Payment terms</strong>
                 <ul>
