@@ -1071,8 +1071,7 @@ function CarnegieAdultAccount({ account, studentId, paymentsEnabled, onPaid }) {
 
 // The family records a check or cash they handed in (#237): a note-received email now, and a
 // final receipt when the Boosters deposit it. Nothing is credited until then.
-function ReportCheckOrCash({ studentId, category, onSaved }) {
-  const [open, setOpen] = useState(false);
+function ReportCheckOrCash({ studentId, category, open, onOpen, onClose, onSaved }) {
   const today = new Date().toISOString().slice(0, 10);
   const [form, setForm] = useState({ method: "check", amount: "", checkNumber: "", handedInOn: today });
   const [busy, setBusy] = useState(false);
@@ -1103,7 +1102,7 @@ function ReportCheckOrCash({ studentId, category, onSaved }) {
         return;
       }
       setMessage("Recorded. Check your email for a note; you'll get a final receipt once it's deposited.");
-      setOpen(false);
+      onClose();
       setForm({ method: "check", amount: "", checkNumber: "", handedInOn: today });
       if (onSaved) onSaved();
     } catch {
@@ -1117,7 +1116,7 @@ function ReportCheckOrCash({ studentId, category, onSaved }) {
     return (
       <>
         {message ? <span className="portal-field-note">{message}</span> : null}
-        <button type="button" className="portal-action-link" onClick={() => { setMessage(""); setOpen(true); }}>Record a check or cash I turned in</button>
+        <button type="button" className="portal-action-link" onClick={() => { setMessage(""); onOpen(); }}>Record a check or cash I turned in</button>
       </>
     );
   }
@@ -1133,7 +1132,7 @@ function ReportCheckOrCash({ studentId, category, onSaved }) {
       <PortalErrorMessage as="p" message={error} />
       <div className="portal-hub-actions">
         <button type="submit" className="portal-primary-action" disabled={busy}>{busy ? "Saving…" : "Record it"}</button>
-        <button type="button" className="portal-action-link" onClick={() => setOpen(false)}>Cancel</button>
+        <button type="button" className="portal-action-link" onClick={onClose}>Cancel</button>
       </div>
     </form>
   );
@@ -1144,7 +1143,9 @@ function ReportCheckOrCash({ studentId, category, onSaved }) {
 function CarnegiePayOptions({ studentId, category, reported = [], suggestedCents, maxCents, memo, nonRefundable = false, paymentsEnabled, onPaid }) {
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
   const canPayOnline = paymentsEnabled && Boolean(clientId);
-  const [showPay, setShowPay] = useState(false);
+  // One choice open at a time: recording a check/cash, or paying online (#237).
+  const [mode, setMode] = useState("");
+  const showPay = mode === "online";
   const [amount, setAmount] = useState((suggestedCents / 100).toFixed(2));
   const [coverFee, setCoverFee] = useState(true);
   const netCents = Math.min(Math.round((Number(amount) || 0) * 100), maxCents);
@@ -1165,7 +1166,16 @@ function CarnegiePayOptions({ studentId, category, reported = [], suggestedCents
           ))}
         </ul>
       ) : null}
-      <ReportCheckOrCash studentId={studentId} category={category} onSaved={onPaid} />
+      {mode !== "online" ? (
+        <ReportCheckOrCash
+          studentId={studentId}
+          category={category}
+          open={mode === "record"}
+          onOpen={() => setMode("record")}
+          onClose={() => setMode("")}
+          onSaved={onPaid}
+        />
+      ) : null}
       {canPayOnline ? (
         showPay ? (
           <div className="portal-field-edit portal-pay-form">
@@ -1188,14 +1198,15 @@ function CarnegiePayOptions({ studentId, category, reported = [], suggestedCents
               category={category}
               amountRef={amountRef}
               onPaid={() => {
-                setShowPay(false);
+                setMode("");
                 if (onPaid) onPaid();
               }}
             />
+            <button type="button" className="portal-action-link" onClick={() => setMode("")}>Cancel</button>
           </div>
-        ) : (
-          <button type="button" className="portal-action-link" onClick={() => setShowPay(true)}>Pay online instead</button>
-        )
+        ) : mode === "" ? (
+          <button type="button" className="portal-action-link" onClick={() => setMode("online")}>Pay online instead</button>
+        ) : null
       ) : null}
     </div>
   );
