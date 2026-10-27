@@ -187,6 +187,16 @@ export async function POST(request) {
         });
         if (error) throw new Error(error.message);
       }
+      // Carnegie accounts credit what reached the Boosters, so keep PayPal's fee (#237).
+      const feeCents = captureFeeCents({
+        feeValue: resource.seller_receivable_breakdown?.paypal_fee?.value,
+        feeCurrencyCode: resource.seller_receivable_breakdown?.paypal_fee?.currency_code,
+      });
+      if (feeCents !== null) {
+        const { error: feeError } = await supabaseAdmin.from("fee_payments")
+          .update({ paypal_fee_cents: feeCents }).eq("id", payment.id).is("paypal_fee_cents", null);
+        if (feeError) throw new Error(feeError.message);
+      }
     } else if (plan?.ledger === "family" && plan.status === "refunded") {
       if (!invoiceId && await refundSponsorGift(resource)) {
         return NextResponse.json({ ok: true });

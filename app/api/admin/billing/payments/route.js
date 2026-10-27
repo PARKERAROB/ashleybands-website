@@ -96,8 +96,11 @@ export async function PATCH(req) {
   });
   if (!capabilityAuthorization.ok) return NextResponse.json({ error: capabilityAuthorization.error }, { status: capabilityAuthorization.status, headers: { "Cache-Control": "private, no-store" } });
 
-  const { data: payment } = await supabaseAdmin.from("fee_payments").select("student_id").eq("id", id).maybeSingle();
+  const { data: payment } = await supabaseAdmin.from("fee_payments").select("student_id,status,recorded_by").eq("id", id).maybeSingle();
   if (!payment) return NextResponse.json({ error: "Payment not found" }, { status: 404 });
+  if (status === "completed" && payment.status !== "pending") {
+    return NextResponse.json({ error: `This payment is already ${payment.status}.` }, { status: 409 });
+  }
   const authorization = await authorizeStaffRequest(req, STAFF_CAPABILITIES.BILLING_WRITE, {
     scope: { type: "student", ref: payment.student_id },
   });
@@ -113,8 +116,12 @@ export async function PATCH(req) {
   });
   if (error) return NextResponse.json({ error: "Could not update the payment." }, { status: 500 });
 
-  // A family-reported Carnegie check or cash now deposited: send the final receipt (#237).
-  if (status === "completed") {
+  // A family-reported Carnegie check or cash now deposited (#237): date it and send the final
+  // receipt once, only on the pending -> completed step.
+  if (status === "completed" && payment.status === "pending" && String(payment.recorded_by || "").startsWith("family:")) {
+    const { error: dateError } = await supabaseAdmin.from("fee_payments")
+      .update({ received_at: new Date().toISOString() }).eq("id", id).is("received_at", null);
+    if (dateError) console.error("[billing-payments] deposit date not saved:", dateError.message);
     try {
       await sendDepositedReceipt(id);
     } catch (mailError) {

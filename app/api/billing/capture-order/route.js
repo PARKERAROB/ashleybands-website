@@ -4,7 +4,12 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { readPortalSession } from "@/lib/portalTokens";
 import { feeBalanceCents, isTrustedGuardian } from "@/lib/billing";
 import { amountToCents, captureOrder, extractCapture, centsToAmount, paypalCaptureCompleted } from "@/lib/paypal";
-import { sendFeePaymentReceiptEmail } from "@/lib/portalEmail";
+import { sendCarnegieOnlineReceiptEmail, sendFeePaymentReceiptEmail } from "@/lib/portalEmail";
+
+const CARNEGIE_RECEIPT_PURPOSES = {
+  carnegie_2027_trip: "Carnegie Hall 2027 trip",
+  carnegie_2027_adult: "Carnegie Hall 2027 adult travel",
+};
 
 export const runtime = "nodejs";
 
@@ -103,7 +108,37 @@ export async function POST(request) {
   }
   // Keep PayPal's fee with the payment so Carnegie accounts credit what reached the Boosters (#237).
   if (detail.feeValue && detail.feeCurrencyCode === "USD") {
-    await supabaseAdmin.from("fee_payments").update({ paypal_fee_cents: amountToCents(detail.feeValue) }).eq("id", payment.id);
+    const { error: feeError } = await supabaseAdmin.from("fee_payments")
+      .update({ paypal_fee_cents: amountToCents(detail.feeValue) }).eq("id", payment.id);
+    // The money is taken; a missing fee only over-credits slightly, so log it for follow-up.
+    if (feeError) console.error("[capture-order] PayPal fee not recorded:", payment.id, feeError.message);
+  }
+
+  // Carnegie trip and adult-travel payments get their own receipt (#237).
+  const carnegiePurpose = CARNEGIE_RECEIPT_PURPOSES[payment.category];
+  if (carnegiePurpose) {
+    try {
+      const { data: student } = await supabaseAdmin.from("portal_students")
+        .select("display_name").eq("id", payment.student_id).maybeSingle();
+      const owedCents = await feeBalanceCents(payment.student_id, payment.category);
+      const feeCents = detail.feeValue ? amountToCents(detail.feeValue) : 0;
+      if (session.email) {
+        await sendCarnegieOnlineReceiptEmail({
+          to: session.email,
+          studentName: student?.display_name || "your student",
+          purpose: carnegiePurpose,
+          amount: `$${centsToAmount(payment.amount_cents)}`,
+          credited: `$${centsToAmount(Number(payment.amount_cents) - feeCents)}`,
+          fee: feeCents ? `$${centsToAmount(feeCents)}` : "",
+          stillOwed: owedCents === null ? "" : `$${centsToAmount(owedCents)}`,
+          invoiceId: payment.invoice_id,
+          nonRefundable: payment.category === "carnegie_2027_adult",
+        });
+      }
+    } catch {
+      // ignore receipt failures
+    }
+    return NextResponse.json({ status: "completed", invoiceId: payment.invoice_id });
   }
 
   // Receipt (best effort — never fail the payment on email error).
