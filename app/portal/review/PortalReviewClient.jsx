@@ -648,13 +648,14 @@ function StudentFeeCard({ student, paymentsEnabled, onPaid }) {
       {hasGoal ? (
         <div className="portal-field">
           <span className="portal-field-label">Marching Band season goal</span>
-          <span className="portal-field-value">
-            Goal {formatUsd(goal.charged)} · Raised {formatUsd(goal.paid)} · Remaining{" "}
-            {formatUsd(goal.remaining)}
-            {goal.sponsorship > 0 ? ` (includes ${formatUsd(goal.sponsorship)} from sponsorships)` : ""}
-          </span>
+          <dl className="portal-ledger">
+            <div><dt>Season goal</dt><dd>{formatUsd(goal.charged)}</dd></div>
+            {goal.sponsorship > 0 ? <div><dt>Gifts from sponsors</dt><dd>{formatUsd(goal.sponsorship)}</dd></div> : null}
+            {goal.paid - goal.sponsorship > 0 ? <div><dt>Family payments and fundraising</dt><dd>{formatUsd(goal.paid - goal.sponsorship)}</dd></div> : null}
+            <div className="portal-ledger-total"><dt>Still to raise</dt><dd>{formatUsd(goal.remaining)}</dd></div>
+          </dl>
           <span className="portal-field-note">
-            This is the 2026 Marching Band goal, not a bill. Sponsorships and fundraising count toward it.
+            A goal, not a bill.{goal.paid > goal.charged ? ` ${formatUsd(goal.paid - goal.charged)} was raised beyond the goal.` : ""}
           </span>
           {goal.remaining > 0 ? (
             <>

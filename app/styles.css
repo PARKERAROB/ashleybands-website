@@ -3837,6 +3837,24 @@ h2 {
 .portal-due-panel .portal-primary-action {
   align-self: flex-start;
 }
+.portal-ledger {
+  max-width: 420px;
+  margin: var(--portal-space-2) 0;
+}
+.portal-ledger div {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--portal-space-1) 0;
+  border-bottom: 1px solid var(--portal-line);
+}
+.portal-ledger dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+.portal-ledger-total {
+  font-weight: 700;
+  border-bottom: 0;
+}
 .portal-hub-actions {
   display: flex;
   flex-wrap: wrap;
