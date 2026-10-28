@@ -233,3 +233,10 @@ test("the offline gift routes are staff-only, audited and never auto-publish", (
   assert.match(lookup, /logAudit\(/);
   assert.match(lookup, /replace\(\/\[\^\\p\{L\}\\p\{M\}' -\]\/gu, ""\)/, "filter syntax characters cannot reach PostgREST");
 });
+
+test("Payments shows the trip account for a trip student with no other band fees (#239)", () => {
+  const client = read("app/portal/review/PortalReviewClient.jsx");
+  const gate = client.match(/const hasActivity = Boolean\(([\s\S]*?)\);/)?.[1] || "";
+  assert.match(gate, /student\.carnegieTrip/, "a trip account alone is activity");
+  assert.match(gate, /student\.carnegieAdults/, "an adult travel account alone is activity");
+});

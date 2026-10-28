@@ -467,8 +467,10 @@ function BillingSection({ studentId, studentName }) {
   }, []);
 
   const student = (data?.students || []).find((item) => item.id === studentId);
+  // A trip student with no other band fees still has a Carnegie account to show (#239).
   const hasActivity = Boolean(
-    student && (student.charges.length || student.payments.length || student.springTripRefund)
+    student && (student.charges.length || student.payments.length || student.springTripRefund
+      || student.carnegieTrip || student.carnegieAdults)
   );
 
   return (
