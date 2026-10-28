@@ -18,7 +18,7 @@ test("actual fees, received cash and campaign gifts; no pending, credit, general
   ], reader());
   assert.equal(result.netCents, 29602);
   assert.equal(result.goalCents, 25000000);
-  assert.equal(result.milestoneCents, 2500000);
+  assert.equal(result.milestoneCents, 6800000);
   assert.deepEqual(Object.keys(result).sort(), ["checkedAt", "goalCents", "milestoneCents", "netCents"]);
 });
 
