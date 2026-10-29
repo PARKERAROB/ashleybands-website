@@ -750,6 +750,16 @@
   "description": null
  },
  {
+  "id": "evt-0129",
+  "title": "All-District sign-up + pay deadline",
+  "start": "2026-12-11",
+  "end": null,
+  "all_day": true,
+  "category": "AllDistrict",
+  "location": "AHS Band Room",
+  "description": "All-District auditions: sign up with Mr. Parker and pay the $10 fee (cash or check in the band room lockbox) by today. Not registered until paid."
+ },
+ {
   "id": "evt-0034",
   "title": "Teacher-made Exam Window",
   "start": "2027-01-07",
