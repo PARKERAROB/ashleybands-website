@@ -484,7 +484,11 @@ function BillingSection({ studentId, studentName }) {
       </div>
       <PortalErrorMessage as="p" message={error} />
       {!data && !error ? <p className="portal-muted-status">Loading financial record…</p> : null}
-      {data && !hasActivity ? (
+      {/* Never "Nothing is due" for a connection billing can't see (#241). */}
+      {data && !student ? (
+        <p className="portal-muted-status">Payments for {studentName} are not connected to your account yet. Email Mr. Parker and he will fix it.</p>
+      ) : null}
+      {data && student && !hasActivity ? (
         <p className="portal-muted-status">Nothing is due, and no payments are listed yet.</p>
       ) : null}
       {hasActivity ? (

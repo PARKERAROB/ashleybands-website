@@ -29,3 +29,21 @@ test("the choice appears only on a student's link", () => {
   assert.match(form, /\{studentFirst \? <label><input type="radio" name="gift-kind" value=\{FAMILY_PAYMENT\}/);
   assert.match(form, /familyPayment \? FAMILY_PAYMENT_TAX_LINE : BOOSTER_NONPROFIT_COPY/);
 });
+
+test("a guardian the portal shows a student to can see and pay that student's account (#241)", async () => {
+  // Shape of the reported case: a trusted guardian link imported at legacy assurance.
+  const { familyEligibleLink, FAMILY_GUARDIAN_ASSURANCE } = await import("../lib/familyAccess.mjs");
+  const link = (person_type, assurance_level) => ({ student_id: "s", assurance_level, portal_people: { person_type } });
+  assert.equal(familyEligibleLink(link("guardian", "legacy")), true, "legacy guardian sees Payments");
+  assert.equal(familyEligibleLink(link("student", "legacy")), false, "a student's own record still needs high");
+  assert.deepEqual([...FAMILY_GUARDIAN_ASSURANCE], ["legacy", "medium", "high"]);
+
+  const billing = readFileSync("lib/billing.js", "utf8");
+  assert.match(billing, /\.filter\(familyEligibleLink\)/, "trustedStudentIds uses the family rule");
+  assert.match(billing, /\.in\("assurance_level", FAMILY_GUARDIAN_ASSURANCE\)/, "isTrustedGuardian uses the family rule");
+  assert.doesNotMatch(billing, /\["medium", "high"\]/, "billing has no stricter guardian rule of its own");
+
+  const client = readFileSync("app/portal/review/PortalReviewClient.jsx", "utf8");
+  const section = client.slice(client.indexOf("function BillingSection"), client.indexOf("function StudentFeeCard"));
+  assert.match(section, /data && !student \?/, "a connection with no billing record is told so, not 'Nothing is due'");
+});
