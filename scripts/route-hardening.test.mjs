@@ -317,7 +317,11 @@ test("Carnegie commitments validate before the roster and only for eligible ense
   const text = source("app/api/carnegie-2027/commitment/route.js");
   assertBefore(text, "validateCarnegieSubmission(body)", "findCarnegieStudentFromPublicIdentity(");
   assertBefore(text, "submissionKey.length > 200", "findCarnegieStudentFromPublicIdentity(");
-  assert.match(text, /!isEligibleEnsemble\(data\.ensemble_2026\)/);
+  // Ensemble students, or students staff put on the trip list (#243).
+  assert.match(text, /!await isCarnegieStudent\(data\)/);
+  const trip = source("lib/carnegieTrip.js");
+  assert.match(trip, /isEligibleEnsemble\(student\.ensemble_2026\)\) return true;\s+return \(await carnegieRosterIdSet\(\[student\.id\]\)\)\.has\(student\.id\);/);
+  assert.match(trip, /\.eq\("carnegie_roster", true\)/);
   assert.equal((text.match(/failOpen: false/g) || []).length, 2);
 });
 

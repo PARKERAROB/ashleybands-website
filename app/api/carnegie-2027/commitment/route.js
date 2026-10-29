@@ -6,11 +6,11 @@ import { checkRateLimit, clientIp } from "@/lib/rateLimit";
 import {
   carnegieSubmissionStatus,
   findCarnegieStudentFromPublicIdentity,
+  isCarnegieStudent,
   isPortalGuardianForStudent,
   recordCarnegieSubmission,
   validateCarnegieSubmission,
 } from "@/lib/carnegieTrip";
-import { isEligibleEnsemble } from "@/lib/carnegieTripConstants";
 
 export const runtime = "nodejs";
 
@@ -41,7 +41,7 @@ export async function POST(request) {
     }
     const { data, error } = await supabaseAdmin.from("portal_students")
       .select("id,display_name,ensemble_2026,status").eq("id", requestedStudentId).eq("status", "active").maybeSingle();
-    if (error || !data || !isEligibleEnsemble(data.ensemble_2026)) return privateJson({ error: "That student is not available for this form." }, 404);
+    if (error || !data || !await isCarnegieStudent(data)) return privateJson({ error: "That student is not available for this form." }, 404);
     student = data;
     source = "portal";
     personId = session.personId;
