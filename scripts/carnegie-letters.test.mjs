@@ -87,13 +87,13 @@ test("pending reported gifts never fill a square and change no confirmed figure"
 
 // ---- Wording rules ---------------------------------------------------------------------------
 test("student wording follows the director's rules", () => {
-  assert.equal(letters.TRIP_ESTIMATE_LINE, "Your share of the trip is $2,000. Gifts through your music notes go toward it.");
+  assert.equal(letters.TRIP_ESTIMATE_LINE, "Your goal is $2,000. Every gift through your link counts toward your music notes.");
   assert.equal(letters.notesStatusLine(200_000), "You filled your notes! Keep going: every extra note helps a bandmate get there.");
   assert.equal(letters.notesStatusLine(300_000), letters.NOTES_FILLED_LINE);
   assert.notEqual(letters.notesStatusLine(199_900), letters.NOTES_FILLED_LINE);
   assert.equal(letters.CAMPAIGN_GIFT_LINE, "Every gift goes to the band's Carnegie campaign and lowers the trip cost for every student who goes.");
   const composed = letters.composeCarnegieLetter({ recipientType: "someone_i_know", recipientName: "Aunt Lee", meaningText: "m", helpText: "h", firstName: "Alex Sample", code: "abcDEF123456" });
-  assert.equal(composed.ask, "Would you help me fill my music notes? My share of the trip is $2,000, and every $25 or $50 note brings me closer. Anything above my share helps the whole band go.");
+  assert.equal(composed.ask, "Would you help me fill my music notes? My goal is $2,000, and every $25 or $50 note brings me closer. Every gift goes to the Ashley High School Band Boosters for our Carnegie trip.");
   assert.equal(composed.signature, "Alex", "first name only");
     assert.match(composed.payLine, /Carnegie · Alex/);
   assert.equal(letters.CARNEGIE_CHECK_PAYEE, "Ashley High School Band Boosters", "director's payee wording");

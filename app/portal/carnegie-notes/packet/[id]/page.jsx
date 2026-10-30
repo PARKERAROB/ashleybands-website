@@ -117,7 +117,7 @@ export default async function CarnegieLetterPacketPage({ params }) {
           <p className={styles.ownText}>{text.meaning}</p>
           <p className={styles.ownText}>{text.help}</p>
         </div>
-        <p className={styles.body}>Would you help me fill my music notes? My share of the trip is <strong>$2,000</strong>, and every $25 or $50 note brings me closer. Anything above my share helps the whole band go.</p>
+        <p className={styles.body}>Would you help me fill my music notes? My goal is <strong>$2,000</strong>, and every $25 or $50 note brings me closer. Every gift goes to the Ashley High School Band Boosters for our Carnegie trip.</p>
         <p className={styles.body}>{text.closing}</p>
         <p className={styles.body}>{text.signoff}<br /><span className={styles.signature}>{name}</span></p>
         <footer className={styles.frontFoot}>

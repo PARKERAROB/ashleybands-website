@@ -327,7 +327,7 @@ function CarnegieCommitmentSection({ student, notesOpen, openView }) {
     <section className="portal-workspace-section portal-carnegie-hub" aria-labelledby="portal-carnegie-heading">
       <div className="portal-section-heading-copy">
         <h2 id="portal-carnegie-heading">Carnegie Hall 2027</h2>
-        <p>New York, March 23–26, 2027. Performance March 25. Family payments for {student.displayName} are made in Payments. Gifts from supporters come in through Music Notes and lower what the family owes.</p>
+        <p>New York, March 23–26, 2027. Performance March 25. Family payments for {student.displayName} are made in Payments. Gifts from supporters come in through Music Notes. The Boosters apply them toward the trip.</p>
       </div>
       <div className="portal-hub-actions">
       <button type="button" className="portal-action-link" onClick={() => openView("payments")}>See what is owed and pay</button>
@@ -345,7 +345,7 @@ function GiftsNotPaymentsNote({ openView }) {
     <section className="portal-workspace-section" aria-labelledby="portal-gifts-heading">
       <div className="portal-section-heading-copy">
         <h2 id="portal-gifts-heading">Gifts, not family payments</h2>
-        <p>Music Notes is for supporters: family, friends, and businesses who want to give. Their gifts are credited to your student and lower what your family owes. To pay your family&apos;s own amount, use Payments.</p>
+        <p>Music Notes is for supporters: family, friends, and businesses who want to give. Their gifts count toward your student&apos;s music notes, and the Boosters apply them toward the trip. To pay your family&apos;s own amount, use Payments.</p>
       </div>
       <button type="button" className="portal-action-link" onClick={() => openView("payments")}>Go to Payments</button>
     </section>
