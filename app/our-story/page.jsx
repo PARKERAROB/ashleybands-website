@@ -33,7 +33,7 @@ export default function OurStoryPage() {
           <Link href="/" className={styles.back}>← Ashley Bands</Link>
           <p className={styles.kicker}>Our story · Wilmington, North Carolina</p>
           <h1>How we<br />got <em>here.</em></h1>
-          <p className={styles.lede}>Ashley Bands has been invited to play Carnegie Hall in March 2027. Six years ago the program was down to about 52 students and rehearsing outside in masks.</p>
+          <p className={styles.lede}>Ashley Bands has been invited to perform at Carnegie Hall in March 2027. Six years ago the program was down to about 52 students and rehearsing outside in masks.</p>
           <p>This page is how one turned into the other.</p>
           <a href="#beginnings" className={styles.read}>Start at 2006 ↓</a>
         </div>

@@ -10,7 +10,7 @@ import { ButtonLink } from "@/components/ui/Button";
 import "./giving.css";
 
 const PREVIEW_TITLE = "Help Ashley students take the stage";
-const PREVIEW_DESCRIPTION = "Both Ashley concert bands will play Carnegie Hall on March 25, 2027. Every gift lowers the cost for every student who goes.";
+const PREVIEW_DESCRIPTION = "Both Ashley concert bands will perform at Carnegie Hall on March 25, 2027. Every gift lowers the cost for every student who goes.";
 
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_ORIGIN || "https://ashleybands.com"),
@@ -35,7 +35,7 @@ export default function CarnegieGivingPage() {
         className="carnegie-giving-intro"
         eyebrow="Ashley High School Bands · Wilmington, NC"
         title={<>Help Ashley students<br />take the stage.</>}
-        lede="Six years after COVID nearly ended the program, both Ashley concert bands will play Carnegie Hall on March 25, 2027."
+        lede="Six years after COVID nearly ended the program, both Ashley concert bands will perform at Carnegie Hall on March 25, 2027."
         actions={
           <>
             <ButtonLink href="#make-a-gift">Make a gift</ButtonLink>
