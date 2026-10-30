@@ -53,6 +53,13 @@ export async function POST(request) {
     p_route: "/api/carnegie-2027/payment/capture",
   });
   if (settleError) return NextResponse.json({ error: "The payment was captured but needs staff reconciliation." }, { status: 503 });
+  // Keep PayPal's fee with the deposit so Carnegie accounts credit what reached the Boosters (#237).
+  if (detail.feeValue && detail.feeCurrencyCode === "USD") {
+    const { error: feeError } = await supabaseAdmin.from("fee_payments")
+      .update({ paypal_fee_cents: amountToCents(detail.feeValue) }).eq("id", payment.id);
+    // The money is taken; a missing fee only over-credits slightly, so log it for follow-up.
+    if (feeError) console.error("[carnegie-deposit-capture] PayPal fee not recorded:", payment.id, feeError.message);
+  }
 
   try {
     const { data: student } = await supabaseAdmin.from("portal_students").select("display_name").eq("id", payment.student_id).maybeSingle();
