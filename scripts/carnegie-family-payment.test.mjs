@@ -47,3 +47,10 @@ test("a guardian the portal shows a student to can see and pay that student's ac
   const section = client.slice(client.indexOf("function BillingSection"), client.indexOf("function StudentFeeCard"));
   assert.match(section, /data && !student \?/, "a connection with no billing record is told so, not 'Nothing is due'");
 });
+
+test("a family can report cash: check_number is never null (#244)", () => {
+  // fee_payments.check_number is NOT NULL, so a null for cash failed the insert.
+  const source = readFileSync("lib/carnegieReportedPayments.js", "utf8");
+  assert.match(source, /check_number: fields\.method === "check" \? fields\.checkNumber : "",/);
+  assert.doesNotMatch(source, /check_number:[^\n]*: null/);
+});
