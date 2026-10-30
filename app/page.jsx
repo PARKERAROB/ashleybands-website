@@ -74,8 +74,8 @@ export default function HomePage() {
           <p className="home-campaign-kicker">Ashley High School Bands · North Carolina</p>
           <h1 id="home-hero-title">From Wilmington<br />to <em>Carnegie Hall.</em></h1>
           <p className="home-campaign-lede">
-            Six years ago, Ashley Bands was down to about 52 students, rehearsing outside in masks. In March, both
-            concert bands play Carnegie Hall.
+            Six years ago, Ashley Bands was down to about 52 students, rehearsing outside in masks. This March, the
+            bands perform at Carnegie Hall.
           </p>
           <p className="home-campaign-date">New York City <span aria-hidden="true">/</span> March 25, 2027</p>
           <div className="home-campaign-actions">
