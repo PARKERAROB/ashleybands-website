@@ -41,10 +41,10 @@ test("a Carnegie student credit is one amount shown two ways", () => {
   assert.equal(campaigns.carnegieStudentCreditTotals([{ ...gifts[1], campaign_code: "general" }]).length, 0);
 });
 
-test("the donor line uses the first name only and keeps the group framing", () => {
+test("the donor line uses the first name only and names the student's share", () => {
   assert.equal(
     campaigns.carnegieStudentGiftLine("Sam Example"),
-    "Every gift lowers the trip cost for every student. Yours counts toward Sam’s music notes and the band’s Carnegie total."
+    "Your gift goes toward Sam’s share of the Carnegie trip. Anything above that share helps the whole band go."
   );
   assert.equal(campaigns.carnegieStudentGiftLine(""), null);
   assert.doesNotMatch(campaigns.carnegieStudentGiftLine("Sam"), /—|balance|account|funded/i);

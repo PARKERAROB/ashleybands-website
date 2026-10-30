@@ -15,7 +15,7 @@ import {
   studentLinkCode
 } from "@/lib/carnegieLettersServer";
 import {
-  CAMPAIGN_GIFT_LINE,
+  STUDENT_GIFT_LINE,
   CARNEGIE_CHECK_PAYEE,
   EMPLOYER_MATCH_LINE,
   GIFT_SLIP_LINE,
@@ -117,7 +117,7 @@ export default async function CarnegieLetterPacketPage({ params }) {
           <p className={styles.ownText}>{text.meaning}</p>
           <p className={styles.ownText}>{text.help}</p>
         </div>
-        <p className={styles.body}>Would you help me fill my music notes? My part of the team goal is <strong>$2,500</strong>, and every $25 or $50 note makes a difference. Every gift goes to the band&apos;s Carnegie campaign and lowers the trip cost for all of us.</p>
+        <p className={styles.body}>Would you help me fill my music notes? My share of the trip is <strong>$2,000</strong>, and every $25 or $50 note brings me closer. Anything above my share helps the whole band go.</p>
         <p className={styles.body}>{text.closing}</p>
         <p className={styles.body}>{text.signoff}<br /><span className={styles.signature}>{name}</span></p>
         <footer className={styles.frontFoot}>
@@ -147,12 +147,12 @@ export default async function CarnegieLetterPacketPage({ params }) {
         <div className={styles.backMain}>
           <div className={styles.backLeft}>
             <p className={styles.backLede}>Our bands were selected to perform at Carnegie Hall! Support us by joining our <strong>“Fill my Music Notes”</strong> fundraiser.</p>
-            <p className={styles.backCampaign}>{CAMPAIGN_GIFT_LINE}</p>
+            <p className={styles.backCampaign}>{STUDENT_GIFT_LINE}</p>
             <p className={styles.sticky}>Every Note Makes a Difference!</p>
             <p className={styles.studentLabel}>Student:<br /><span className={styles.studentName}>{name}</span></p>
           </div>
           <div className={styles.backRight}>
-            <p className={styles.goal}>Goal: <span>$2,500</span></p>
+            <p className={styles.goal}>Goal: <span>$2,000</span></p>
             <NotesChart blank className={styles.chart} />
           </div>
         </div>

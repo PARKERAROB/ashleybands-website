@@ -146,7 +146,7 @@ export default function HomePage() {
           <div>
             <p className="eyebrow">How to help</p>
             <h2 id="home-give-title">Help get the band<br />to New York.</h2>
-            <p>Gifts go to the group trip, not to one student&apos;s account. Every dollar lowers the cost for everyone.</p>
+            <p>Give through a student&apos;s Music Notes link to help with that student&apos;s share of the trip. Give here to help the whole band.</p>
           </div>
           <div className="home-give-panel">
             <div className="home-give-kinds" role="group" aria-label="Type of gift">

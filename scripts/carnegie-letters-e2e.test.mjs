@@ -234,7 +234,7 @@ test("the donor landing shows the chart only through the gate, with first-name p
   const page = { ...response, data: response.data.replace(/<!-- -->/g, "") };
   assert.equal(page.status, 200);
   assert.match(page.data, /Riley invited you to help fill their music notes/);
-  assert.match(page.data, /of \$2,500 in music notes/);
+  assert.match(page.data, /of \$2,000 in music notes/);
   assert.match(page.data, /property="og:title" content="Help Riley get to Carnegie Hall"/);
   assert.doesNotMatch(page.data.match(/<head>[\s\S]*<\/head>/)?.[0] || "", /Fixture|\$\d/, "no last name or amounts in metadata");
   const image = await call("/api/carnegie-notes/og", { cookie: DIRECTOR });
