@@ -90,6 +90,7 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
   const [copyStatus, setCopyStatus] = useState("");
   const [businessName, setBusinessName] = useState("");
   const [studentName, setStudentName] = useState("");
+  const [supporterName, setSupporterName] = useState("");
   const [amount, setAmount] = useState(prefill.amount);
   const [payerName, setPayerName] = useState("");
   const [payerEmail, setPayerEmail] = useState("");
@@ -128,6 +129,7 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
         if (carnegie && out.j?.online_available === false) { setOnlineAvailable(false); setMethod("check"); }
         if (out.j?.name) setBusinessName(out.j.name);
         if (out.j?.student_name) setStudentName(out.j.student_name);
+        if (out.j?.supporter_name) setSupporterName(out.j.supporter_name);
       })
       .catch(() => !cancelled && setOpen("closed"));
     return () => {
@@ -327,7 +329,7 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
                 value={businessName}
                 onChange={(e) => setBusinessName(e.target.value)}
                 placeholder="Individual, family, or business"
-                readOnly={Boolean(attributionToken) && !studentName}
+                readOnly={Boolean(attributionToken) && !studentName && !supporterName}
               />
             </label>
             {familyPayment ? <p className="give-muted">This counts toward {studentFirst}&apos;s share of the trip and shows in {studentFirst}&apos;s music notes after any PayPal fee. Check or cash has no fee.</p> : null}

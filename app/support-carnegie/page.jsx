@@ -4,13 +4,28 @@ import GiveClient from "@/app/sponsors/give/GiveClient";
 import CarnegieFunding from "@/components/CarnegieFunding";
 import { CARNEGIE_CAMPAIGN, CARNEGIE_PURPOSE } from "@/lib/sponsorCampaigns.mjs";
 import { SPONSOR_CONTACT } from "@/lib/sponsorshipContent";
+import { CARNEGIE_PREVIEW_IMAGE } from "@/lib/carnegieLetters.mjs";
 import PageHeader from "@/components/ui/PageHeader";
 import { ButtonLink } from "@/components/ui/Button";
 import "./giving.css";
 
+const PREVIEW_TITLE = "Help Ashley students take the stage";
+const PREVIEW_DESCRIPTION = "Both Ashley concert bands will play Carnegie Hall on March 25, 2027. Every gift lowers the cost for every student who goes.";
+
 export const metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_ORIGIN || "https://ashleybands.com"),
   title: "Support Ashley’s Carnegie Trip | Ashley Bands",
-  description: "Donate or become a business sponsor for Ashley Bands’ 2027 Carnegie Hall performance trip through the Ashley High School Band Boosters, a 501(c)(3) nonprofit."
+  description: "Donate or become a business sponsor for Ashley Bands’ 2027 Carnegie Hall performance trip through the Ashley High School Band Boosters, a 501(c)(3) nonprofit.",
+  // Link preview (#247): a shared link looks like a real ask on Facebook and in texts.
+  openGraph: {
+    type: "website",
+    siteName: "Ashley Bands",
+    url: "/support-carnegie",
+    title: PREVIEW_TITLE,
+    description: PREVIEW_DESCRIPTION,
+    images: [{ url: CARNEGIE_PREVIEW_IMAGE, width: 1200, height: 630, alt: "Help Ashley students take the stage: Carnegie Hall, March 25, 2027" }]
+  },
+  twitter: { card: "summary_large_image", title: PREVIEW_TITLE, description: PREVIEW_DESCRIPTION, images: [CARNEGIE_PREVIEW_IMAGE] }
 };
 
 export default function CarnegieGivingPage() {
