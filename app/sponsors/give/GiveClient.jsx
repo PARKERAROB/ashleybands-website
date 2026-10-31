@@ -294,6 +294,25 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
               <label><input type="radio" name="gift-kind" value="sponsorship" checked={giftKind === "sponsorship"} onChange={() => setGiftKind("sponsorship")} /> Business sponsorship</label>
               {studentFirst ? <label><input type="radio" name="gift-kind" value={FAMILY_PAYMENT} checked={giftKind === FAMILY_PAYMENT} onChange={() => setGiftKind(FAMILY_PAYMENT)} /> Our family&apos;s payment toward {studentFirst}&apos;s trip</label> : null}
             </fieldset> : null}
+            <div className="give-methods">
+              <button
+                type="button"
+                className={`give-tab ${method === "online" ? "on" : ""}`}
+                disabled={!onlineAvailable}
+                aria-pressed={method === "online"}
+                onClick={chooseOnline}
+              >
+                Give online
+              </button>
+              <button
+                type="button"
+                className={`give-tab ${method === "check" ? "on" : ""}`}
+                aria-pressed={method === "check"}
+                onClick={() => setMethod("check")}
+              >
+                Pay by check
+              </button>
+            </div>
             {carnegie ? (
               <div className="give-amounts" role="group" aria-label="Suggested gift amounts">
                 {CARNEGIE_SUGGESTED_AMOUNTS[giftKind].map((dollars) => (
@@ -355,32 +374,11 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
               <p className="give-muted">Your online receipt goes to the verified email on the PayPal account.</p>
             )}
 
-            <div className="give-methods">
-              <button
-                type="button"
-                className={`give-tab ${method === "online" ? "on" : ""}`}
-                disabled={!onlineAvailable}
-                aria-pressed={method === "online"}
-                onClick={chooseOnline}
-              >
-                Give online
-              </button>
-              <button
-                type="button"
-                className={`give-tab ${method === "check" ? "on" : ""}`}
-                aria-pressed={method === "check"}
-                onClick={() => setMethod("check")}
-              >
-                Pay by check
-              </button>
-            </div>
             {method === "online" && onlineNudge && !onlineReady ? (
               <p className="give-error" role="alert">{amountValid ? "Enter your name" : "Choose an amount of at least $5"}, then the PayPal buttons appear below.</p>
             ) : null}
 
             {!onlineAvailable ? <p className="give-muted">Online trip giving is temporarily unavailable. You can give by check or contact Mr. Parker.</p> : null}
-            {carnegie && !familyPayment ? <p className="give-muted">{CARNEGIE_CHANGE_TERMS} <a href="#about-your-gift">What your gift supports</a>.</p> : null}
-            {carnegie ? <p className="give-muted">{familyPayment ? FAMILY_PAYMENT_TAX_LINE : BOOSTER_NONPROFIT_COPY}</p> : null}
             {error ? <p className="give-error" role="alert">{error}</p> : null}
 
             {method === "check" ? (
@@ -405,6 +403,8 @@ export default function GiveClient({ campaignCode = "general", embedded = false,
             ) : (
               <p className="give-muted">Enter your name and an amount of at least $5 to give online, or choose Pay by check.</p>
             )}
+            {carnegie && !familyPayment ? <p className="give-muted">{CARNEGIE_CHANGE_TERMS} <a href="#about-your-gift">What your gift supports</a>.</p> : null}
+            {carnegie ? <p className="give-muted">{familyPayment ? FAMILY_PAYMENT_TAX_LINE : BOOSTER_NONPROFIT_COPY}</p> : null}
           </>
         )}
       </div>
