@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CARNEGIE_NEXT_GOAL_BY, CARNEGIE_NEXT_GOAL_CENTS } from "@/lib/carnegieFunding.mjs";
+import { CARNEGIE_NEXT_GOAL_CENTS } from "@/lib/carnegieFunding.mjs";
 import styles from "./CarnegieFunding.module.css";
 
 const dollars = cents => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: cents % 100 ? 2 : 0 }).format(cents / 100);
@@ -35,17 +35,17 @@ export default function CarnegieFunding() {
       <p className={styles.kicker}>Get the kids to Carnegie</p>
       <div className={styles.headline} aria-live="polite">
         <strong>{net == null ? (unavailable ? "Total temporarily unavailable" : "Checking funds received…") : dollars(net)}</strong>
-        <span>{net == null ? `Next goal: ${dollars(target)} by ${CARNEGIE_NEXT_GOAL_BY}` : `raised for the trip so far. Next goal: ${dollars(target)} by ${CARNEGIE_NEXT_GOAL_BY}.`}</span>
+        <span>{net == null ? `Next goal: ${dollars(target)}` : `raised for the trip so far. Next goal: ${dollars(target)}.`}</span>
       </div>
       <div className={styles.track} role="progressbar" aria-label="Carnegie funding toward the next goal" aria-valuemin={0} aria-valuemax={target}
         {...(net != null ? { "aria-valuenow": Math.min(target, Math.max(0, net)), "aria-valuetext": `${dollars(net)} raised toward ${dollars(target)}` } : {})}>
         {net != null && <div className={styles.fill} style={{ width: `${Math.min(100, Math.max(0, net / target * 100))}%` }} />}
       </div>
       <p className={styles.milestone}>
-        {net != null && <strong>{reached ? `${dollars(target)} goal reached. Thank you.` : `${dollars(Math.max(0, target - net))} to go by ${CARNEGIE_NEXT_GOAL_BY}`}</strong>}
+        {net != null && <strong>{reached ? `${dollars(target)} goal reached. Thank you.` : `${dollars(Math.max(0, target - net))} to go`}</strong>}
         <span>Every gift lowers the cost for every student who goes.</span>
       </p>
-      <p className={styles.note}>This is the total raised for the trip so far: family payments, donations and sponsorships for Carnegie, all together, after payment fees and refunds. {dollars(target)} is what our {CARNEGIE_NEXT_GOAL_BY} trip payment needs. Our goal is to raise the full cost of the trip.</p>
+      <p className={styles.note}>This is the total raised for the trip so far: family payments, donations and sponsorships for Carnegie, all together, after payment fees and refunds. Our goal is to raise the full cost of the trip.</p>
       {funding && <p className={styles.updated}>Automatically updated · Checked {new Date(funding.checkedAt).toLocaleString("en-US", { timeZone: "America/New_York", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" })}</p>}
     </section>
   );

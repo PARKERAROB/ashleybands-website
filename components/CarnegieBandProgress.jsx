@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CARNEGIE_NEXT_GOAL_BY, CARNEGIE_NEXT_GOAL_CENTS } from "@/lib/carnegieFunding.mjs";
+import { CARNEGIE_NEXT_GOAL_CENTS } from "@/lib/carnegieFunding.mjs";
 import styles from "./CarnegieBandProgress.module.css";
 
 const dollars = (cents) => `$${Math.round((Number(cents) || 0) / 100).toLocaleString("en-US")}`;
@@ -26,7 +26,7 @@ export default function CarnegieBandProgress({ children = null }) {
     <section className={styles.band} aria-label="The whole band's Carnegie progress">
       <div className={styles.head}>
         <strong>The whole band</strong>
-        <span>{net == null ? (unavailable ? "Total temporarily unavailable" : "Checking…") : `${dollars(net)} raised for the trip so far. Next goal: ${dollars(target)} by ${CARNEGIE_NEXT_GOAL_BY}`}</span>
+        <span>{net == null ? (unavailable ? "Total temporarily unavailable" : "Checking…") : `${dollars(net)} raised for the trip so far. Next goal: ${dollars(target)}`}</span>
       </div>
       <div className={styles.track} role="progressbar" aria-valuemin={0} aria-valuemax={target} {...(net != null ? { "aria-valuenow": Math.min(target, Math.max(0, net)) } : {})}>
         {net != null ? <div className={styles.fill} style={{ width: `${pct}%` }} /> : null}
