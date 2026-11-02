@@ -42,6 +42,26 @@ test("fails closed for missing fees, duplicate captures, mismatched identity, mi
   await assert.rejects(reconcileCarnegieFunding([payment()], [], { capture: async () => { throw new Error("Unavailable"); } }));
 });
 
+test("a gift split between students counts once against its capture", async () => {
+  const half = payment({ amount_cents: 5000 });
+  const other = payment({ amount_cents: 5000, invoice_id: "synthetic-invoice-D", paypal_capture_id: "", paypal_order_id: "" });
+  assert.equal((await reconcileCarnegieFunding([half, other], [], reader())).netCents, 9602);
+  const refundedReader = reader(capture({ status: "REFUNDED" }), [refund("100.00", "0.00", "100.00")]);
+  assert.equal((await reconcileCarnegieFunding([{ ...half, status: "refunded" }, { ...other, status: "refunded" }], [], refundedReader)).netCents, -398);
+});
+
+test("split rows fail closed unless they match the original and the capture", async () => {
+  const half = payment({ amount_cents: 5000 });
+  const other = payment({ amount_cents: 5000, invoice_id: "synthetic-invoice-D", paypal_capture_id: "", paypal_order_id: "" });
+  await assert.rejects(reconcileCarnegieFunding([half], [], reader()), /Capture identity mismatch/);
+  await assert.rejects(reconcileCarnegieFunding([half, { ...other, amount_cents: 4000 }], [], reader()), /Capture identity mismatch/);
+  await assert.rejects(reconcileCarnegieFunding([other], [], reader()), /Missing or duplicate capture/);
+  await assert.rejects(reconcileCarnegieFunding([payment(), { ...other, invoice_id: "unrelated-D" }], [], reader()), /Missing or duplicate capture/);
+  await assert.rejects(reconcileCarnegieFunding([payment(), { ...other, invoice_id: "synthetic-invoice" }], [], reader()), /Missing or duplicate capture/);
+  await assert.rejects(reconcileCarnegieFunding([half, { ...other, status: "refunded" }], [], reader()), /Refund status mismatch/);
+  await assert.rejects(reconcileCarnegieFunding([half, { ...other, amount_cents: 0 }], [], reader()), /Invalid ledger amount/);
+});
+
 test("zero is valid only for a successfully read empty ledger; currency is strict", async () => {
   assert.equal((await reconcileCarnegieFunding([], [], reader())).netCents, 0);
   for (const money of [null, usd(""), usd("NaN"), { currency_code: "EUR", value: "10.00" }]) assert.throws(() => usdCents(money));
