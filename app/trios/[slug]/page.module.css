@@ -1,0 +1,372 @@
+/* Holiday trio picker (#255). Phone first: students open it from a QR code in class. */
+.shell {
+  min-height: 100vh;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: var(--garnet-dark);
+  color: var(--paper-strong);
+}
+
+.barTitle {
+  font-family: var(--font-display);
+  font-size: var(--step-1);
+}
+
+.barChange {
+  margin-left: auto;
+  min-height: var(--tap-target);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--paper-strong);
+  font: inherit;
+  font-size: var(--step--1);
+  cursor: pointer;
+}
+
+.main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--space-5) var(--space-4) var(--space-8);
+}
+
+.title {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--step-3);
+  font-weight: 400;
+  color: var(--garnet);
+  line-height: 1.1;
+}
+
+.lede {
+  margin: 0 0 var(--space-5);
+  color: var(--text-muted);
+}
+
+.instrumentGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--space-3);
+}
+
+.instrument,
+.piece,
+.secondary,
+.primary,
+.back,
+.tab,
+.tabOn {
+  min-height: var(--tap-target);
+  font: inherit;
+  cursor: pointer;
+}
+
+.instrument {
+  padding: var(--space-4) var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  color: var(--text);
+  font-weight: 700;
+}
+
+.instrument:hover,
+.piece:hover {
+  border-color: var(--garnet);
+}
+
+.secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--garnet);
+  border-radius: var(--radius-pill);
+  background: var(--surface-raised);
+  color: var(--garnet);
+  font-weight: 700;
+}
+
+.pieceList {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.piece {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+  color: var(--text);
+  text-align: left;
+}
+
+.pieceTitle {
+  font-weight: 700;
+}
+
+.pieceMeta {
+  font-size: var(--step--1);
+  color: var(--text-muted);
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--garnet);
+  font-weight: 700;
+}
+
+.pages {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.pageFigure {
+  margin: 0;
+}
+
+.pageImage {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--paper-strong);
+}
+
+.pagePlaceholder {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 8.5 / 11;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+}
+
+.caption {
+  margin-top: var(--space-1);
+  font-size: var(--step--1);
+  color: var(--text-muted);
+}
+
+.form {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+  padding: var(--space-5) var(--space-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+}
+
+.formTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--step-2);
+  font-weight: 400;
+  color: var(--garnet);
+}
+
+.hint {
+  margin: 0 0 var(--space-3);
+  font-size: var(--step--1);
+  color: var(--text-muted);
+}
+
+.choiceSet {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.choiceSet legend,
+.nameField span {
+  margin-bottom: var(--space-2);
+  font-weight: 700;
+}
+
+.choiceRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.choice {
+  position: relative;
+  cursor: pointer;
+}
+
+.choice input {
+  position: absolute;
+  opacity: 0;
+}
+
+.choice span {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: var(--tap-target);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  font-weight: 700;
+}
+
+.choice small {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.choice input:checked + span {
+  border-color: var(--garnet);
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 1px var(--garnet);
+}
+
+.choice input:focus-visible + span {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.nameField {
+  display: grid;
+}
+
+.nameField input {
+  min-height: var(--tap-target);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: max(16px, var(--step-0));
+}
+
+.primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--garnet);
+  color: var(--text-on-accent);
+  font-weight: 700;
+}
+
+.primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.error {
+  margin: 0;
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.saved {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--success-soft);
+  color: var(--success);
+  font-weight: 700;
+}
+
+.tab,
+.tabOn {
+  padding: 0 var(--space-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface-raised);
+  color: var(--text);
+  font-weight: 700;
+}
+
+.tabOn {
+  border-color: var(--garnet);
+  background: var(--garnet);
+  color: var(--text-on-accent);
+}
+
+.board {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.boardCard {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-raised);
+}
+
+.boardTitle {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  font-weight: 700;
+}
+
+.partGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+}
+
+.partCol ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.partCol li small {
+  display: block;
+  color: var(--text-muted);
+}
+
+.partHead {
+  display: block;
+  margin-bottom: var(--space-1);
+  font-size: var(--step--1);
+  font-weight: 700;
+  color: var(--garnet);
+}
+
+.open {
+  color: var(--text-muted);
+  font-style: italic;
+}
