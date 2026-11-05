@@ -12,11 +12,18 @@ export default function CarnegieBandProgress({ children = null }) {
   const [unavailable, setUnavailable] = useState(false);
   useEffect(() => {
     const controller = new AbortController();
-    fetch("/api/carnegie-2027/funding", { cache: "no-store", signal: controller.signal })
+    let retry;
+    // A failed load retries every 30 seconds until the total arrives (#257).
+    const load = () => fetch("/api/carnegie-2027/funding", { cache: "no-store", signal: controller.signal })
       .then((response) => (response.ok ? response.json() : Promise.reject(new Error("unavailable"))))
-      .then((data) => setFunding(data))
-      .catch(() => setUnavailable(true));
-    return () => controller.abort();
+      .then((data) => { setFunding(data); setUnavailable(false); })
+      .catch(() => {
+        if (controller.signal.aborted) return;
+        setUnavailable(true);
+        retry = setTimeout(load, 30000);
+      });
+    load();
+    return () => { controller.abort(); clearTimeout(retry); };
   }, []);
   const net = funding?.netCents;
   // Measured against the next goal, not the full-trip estimate (#240).

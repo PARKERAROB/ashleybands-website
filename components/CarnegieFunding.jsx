@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { CARNEGIE_NEXT_GOAL_CENTS } from "@/lib/carnegieFunding.mjs";
+import { keepShownFunding } from "@/lib/carnegieFundingFreshness.mjs";
 import styles from "./CarnegieFunding.module.css";
 
 const dollars = cents => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: cents % 100 ? 2 : 0 }).format(cents / 100);
@@ -19,7 +20,8 @@ export default function CarnegieFunding() {
         const data = await response.json();
         if (active) { setFunding(data); setUnavailable(false); }
       } catch {
-        if (active) { setFunding(null); setUnavailable(true); }
+        // One failed refresh keeps the total already shown (#257).
+        if (active) { setFunding(shown => keepShownFunding(shown)); setUnavailable(true); }
       }
     }
     refresh();
